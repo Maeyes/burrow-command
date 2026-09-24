@@ -3,6 +3,23 @@
 ## Goal
 Generate sprites + animations for all new-map monsters with PixelLab, matching the style of existing Bunny World monsters (e.g. Cactling Bandit, Mossblob, Duneling).
 
+## Scope
+- **In scope:** every normal and elite monster, 24x24.
+- **Out of scope:** all bosses (rows marked Boss in the tables). The user generates bosses separately at 64x64 — skip them. Boss rows stay in the tables only as design reference.
+- Frost Giant Junior is the Snow 2 elite (24x24); Frost Giant is the Snow 2 boss (skip).
+
+## Level plan (10 levels per map)
+| Map | Levels | Gear tier |
+|---|---|---|
+| Forest 1 / 2 | 1–10 / 11–20 | T1 |
+| Desert 1 / 2 | 21–30 / 31–40 | T2 |
+| Mine (single map) | 41–50 | T3 |
+| Magma 1 / 2 | 51–60 / 61–70 | T3 |
+| Sea 1 / 2 | 71–80 / 81–90 | T4 |
+| Snow 1 / 2 | 91–100 / 101–110 | T5 |
+| Asgard 1 | 111–120 | T6 |
+| Asgard 2 | 120 endgame (cap) | T6 |
+
 ## Workflow per monster
 1. Generate the 24x24 sprite with PixelLab using the prompt template below (PixelLab returns 64 variants).
 2. Pick **3 variants per monster** that best match the style rules (readable silhouette, compact, sparse crisp pixel clusters, fits beside existing monsters).
@@ -29,6 +46,16 @@ Default `{EXTRA}` = `No human clothing or weapons.` unless the table gives somet
 Rank hints: **Elite** = slightly bulkier and more ornate than its normal cousin. **Boss** = the most imposing silhouette that still fits 24x24 with a strong signature feature.
 
 ---
+
+## ➕ Extra monsters added to existing maps (1 per map)
+| Map | Name | Rank | Status |
+|---|---|---|---|
+| Forest | Bark Beetle | Normal | animation ordered |
+| Forest | Thorn Boar | Normal | animation ordered — variant 3 missing attack clip, redo |
+| Desert | Sand Scorpion | Normal | animation ordered (only 2 variants) |
+| Desert | Mirage Jackal | Normal | animation ordered |
+| Mine | Ore Mole | Normal | animation ordered (5 variants — trim to 3) |
+| Snow 2 | Frost Giant Junior | Elite | 1 variant only — generate 2 more |
 
 ## 🔥 Magma 1 (volcano)
 | Name | Rank | BODY | PALETTE | MOOD |
@@ -112,6 +139,6 @@ Rank hints: **Elite** = slightly bulkier and more ornate than its normal cousin.
 ---
 
 ## Deliverable checklist
-- [ ] 42 monsters × 3 picked variants
+- [ ] All normal + elite monsters × 3 picked variants (bosses excluded)
 - [ ] Each variant: walk (or swim/hover) loop + attack animation, facing right
 - [ ] Report file names + chosen variant numbers per monster

@@ -54,6 +54,18 @@ export function getRoster(rosterId, mapId = '') {
   };
 }
 
+// Look up art for a monster id across every roster source (used by the Monster Index,
+// which lists monsters from all maps, not just the active one).
+export function presentationForMonsterId(monsterType) {
+  for (const source of Object.values(SOURCES)) {
+    if (!source.monsters?.[monsterType] && !source.bosses?.[monsterType]) continue;
+    const displayName = id => source.monsters?.[id]?.name || source.bosses?.[id]?.name || id;
+    const view = monsterPresentation({ id: source.id, source, displayName }, monsterType);
+    if (view) return view;
+  }
+  return null;
+}
+
 export function monsterPresentation(roster, monsterType) {
   const source = roster.source;
   const normal = source.monsters?.[monsterType];

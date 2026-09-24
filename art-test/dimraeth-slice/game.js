@@ -5,6 +5,7 @@ import { sceneFromMap } from './scenes/custom.js';
 import valleyScene from './scenes/valley.js';
 import defaultForest2Map from './maps/forest2.json';
 import { chooseRosterId, getRoster, monsterPresentation } from './combat/rosters.js';
+import { renderMonsterIndex } from './combat/monsterIndex.js';
 import { combatSFX } from './combat/sfx.js';
 import { combatFX } from './combat/fx.js';
 import { loadBlessedHero, directionForIndex } from './combat/hero.js';
@@ -288,7 +289,7 @@ function openBasicWindow(name){
   if(name==='Inventory'){renderEquipmentUi();return;}
   if(name==='Skills'){renderSkillsHub();return;}
   if(name==='Craft'){renderCraftWindow();return;}
-  if(name==='Monster Index'){const names=roster.pool.map(id=>roster.displayName(id));const boss=roster.bossType?roster.displayName(roster.bossType):null;body.innerHTML=`<p><b>${roster.title} · ${roster.id.toUpperCase()} ROSTER</b></p><p>${names.join(' · ')}</p>${boss?`<p><b>Boss:</b> ${boss}</p>`:''}`;return;}
+  if(name==='Monster Index'){renderMonsterIndex({win,title,body,character:c,currentMapId:gameplayMapId,itemInfo,prettyItem});return;}
 }
 function openCharacterWindow(){
   const win=document.getElementById('game-window'),title=document.getElementById('game-window-title'),body=document.getElementById('game-window-body');if(!win||!title||!body)return;

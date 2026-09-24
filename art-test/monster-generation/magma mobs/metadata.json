@@ -1,0 +1,1260 @@
+{
+  "objects": [
+    {
+      "id": "325bc544-27c8-4a4e-8be8-e69589bb84ef",
+      "name": "base",
+      "prompt": "ORIGINAL THE GREATEST DRAGON KNIGHT enemy for Bunny World. DARK Knight ride DRAGON WITH full armor suit sheild and helm. Come up with a blue aura fire around  Dragon standing with 4 legs Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal branch detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_THE_GREATEST_DRAGON_K.png"
+      },
+      "animations": {
+        "The_creature_moves_with_a_rhythmic_heavy_gait_it": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_000.png",
+                "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_001.png",
+                "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_002.png",
+                "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_003.png",
+                "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_004.png",
+                "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_005.png",
+                "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_006.png",
+                "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_007.png",
+                "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "Pixel_art_boss_combo_animation_for_the_existing_ar": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_000.png",
+                "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_001.png",
+                "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_002.png",
+                "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_003.png",
+                "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_004.png",
+                "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_005.png",
+                "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_006.png",
+                "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_007.png",
+                "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "Pixel_art_boss_dash_attack_for_the_existing_armore": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_000.png",
+                "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_001.png",
+                "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_002.png",
+                "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_003.png",
+                "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_004.png",
+                "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_005.png",
+                "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_006.png",
+                "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_007.png",
+                "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "Pixel_art_boss_attack_animation_for_the_existing_a": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_000.png",
+                "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_001.png",
+                "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_002.png",
+                "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_003.png",
+                "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_004.png",
+                "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_005.png",
+                "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_006.png",
+                "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_007.png",
+                "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "7e36ffdd-9448-4529-af58-44850f5eb68d",
+      "name": "base",
+      "prompt": "ORIGINAL fire Horse enemy for Bunny World. Compact cute inspired by ponyta proportions with crimson flame RED tail and orange body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_fire_Horse_enemy_for.png"
+      },
+      "animations": {
+        "The_creature_surges_forward_with_a_powerful_rhyth": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_000.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_001.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_002.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_003.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_004.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_005.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_006.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_007.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "7314d523-18b2-4f79-9983-dcc30689700b",
+      "name": "base",
+      "prompt": "ORIGINAL fire Horse enemy for Bunny World. Compact cute inspired by ponyta proportions with crimson flame RED tail and orange body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_fire_Horse_enemy_for_2.png"
+      },
+      "animations": {
+        "The_creature_surges_forward_with_a_powerful_rhyth": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_000.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_001.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_002.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_003.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_004.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_005.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_006.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_007.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "44d0bd56-0fef-4add-a338-8448c4eba806",
+      "name": "base",
+      "prompt": "ORIGINAL fire Horse enemy for Bunny World. Compact cute inspired by ponyta proportions with crimson flame RED tail and orange body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_fire_Horse_enemy_for_3.png"
+      },
+      "animations": {
+        "The_creature_surges_forward_with_a_powerful_rhyth": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_000.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_001.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_002.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_003.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_004.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_005.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_006.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_007.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "618e0eae-aa3c-4ac1-a46b-d5025d5b33a3",
+      "name": "base",
+      "prompt": "ORIGINAL GREAT MYTHICAL RED FIRE DRAGON enemy for Bunny World. RED-ORANGE DRAGON WITH A tribal from the last billion years ago. Come up with a FIRE red aura around standing with 4 legs and expanded wings Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal branch detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 64,
+        "height": 64
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_GREAT_MYTHICAL_RED_FI.png"
+      },
+      "animations": {
+        "The_dragon_shifts_its_weight_forward_with_a_delibe": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_000.png",
+                "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_001.png",
+                "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_002.png",
+                "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_003.png",
+                "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_004.png",
+                "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_005.png",
+                "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_006.png",
+                "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_007.png",
+                "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "Meteor_Roar_Pixel_art_boss_skill_animation_for_t": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_000.png",
+                "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_001.png",
+                "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_002.png",
+                "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_003.png",
+                "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_004.png",
+                "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_005.png",
+                "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_006.png",
+                "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_007.png",
+                "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "Inferno_Breath_Pixel_art_boss_attack_animation_fo": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_000.png",
+                "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_001.png",
+                "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_002.png",
+                "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_003.png",
+                "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_004.png",
+                "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_005.png",
+                "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_006.png",
+                "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_007.png",
+                "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "Pixel_art_boss_melee_animation_for_the_existing_dr": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_000.png",
+                "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_001.png",
+                "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_002.png",
+                "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_003.png",
+                "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_004.png",
+                "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_005.png",
+                "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_006.png",
+                "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_007.png",
+                "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "a4289a12-50bb-4b9f-8829-faf93b45972d",
+      "name": "base",
+      "prompt": "ORIGINAL Fire Golems enemy for Bunny World. Compact cute Fire rock proportions with crimson flame RED body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_Fire_Golems_enemy_for.png"
+      },
+      "animations": {
+        "The_creature_surges_forward_with_a_powerful_rhyth": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_000.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_001.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_002.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_003.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_004.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_005.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_006.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_007.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "356ed780-cedc-47ef-bd8f-b119fda65908",
+      "name": "base",
+      "prompt": "ORIGINAL Fire Golems enemy for Bunny World. Compact cute Fire rock proportions with crimson flame RED body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_Fire_Golems_enemy_for_2.png"
+      },
+      "animations": {
+        "The_creature_surges_forward_with_a_powerful_rhyth": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_000.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_001.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_002.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_003.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_004.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_005.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_006.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_007.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "33ab31c5-1efe-4bcd-aa93-e5ba46aee080",
+      "name": "base",
+      "prompt": "ORIGINAL Fire Golems enemy for Bunny World. Compact cute Fire rock proportions with crimson flame RED body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_Fire_Golems_enemy_for_3.png"
+      },
+      "animations": {
+        "The_creature_surges_forward_with_a_powerful_rhyth": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_000.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_001.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_002.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_003.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_004.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_005.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_006.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_007.png",
+                "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "f7634c00-4348-4928-ae92-f762d9ed31c9",
+      "name": "base",
+      "prompt": "ORIGINAL Fire imp enemy for Bunny World. Compact cute  proportions with crimson flame aura RED to Yellow body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_Fire_imp_enemy_for_Bu.png"
+      },
+      "animations": {
+        "The_character_drifts_forward_with_an_eerie_weight": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_000.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_001.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_002.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_003.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_004.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_005.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_006.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_007.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "b43ebdf3-c4bb-4959-94ed-37728a17b989",
+      "name": "base",
+      "prompt": "ORIGINAL Fire imp enemy for Bunny World. Compact cute  proportions with crimson flame aura RED to Yellow body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_Fire_imp_enemy_for_Bu_2.png"
+      },
+      "animations": {
+        "The_character_drifts_forward_with_an_eerie_weight": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_000.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_001.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_002.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_003.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_004.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_005.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_006.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_007.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "0b4dd119-1f9e-424a-aa6b-db806e6480be",
+      "name": "base",
+      "prompt": "ORIGINAL Fire imp enemy for Bunny World. Compact cute  proportions with crimson flame aura RED to Yellow body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_Fire_imp_enemy_for_Bu_3.png"
+      },
+      "animations": {
+        "The_character_drifts_forward_with_an_eerie_weight": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_000.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_001.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_002.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_003.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_004.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_005.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_006.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_007.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "f0f769ae-0cc0-4963-a110-584c86e56e28",
+      "name": "base",
+      "prompt": "ORIGINAL Dragon fire enemy for Bunny World. Compact cute Mythic dragon proportions with crimson flame RED body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal  detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_Dragon_fire_enemy_for.png"
+      },
+      "animations": {
+        "The_character_drifts_forward_with_an_eerie_weight": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_000.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_001.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_002.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_003.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_004.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_005.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_006.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_007.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "4ff8ae01-03dc-433f-8dee-b5b96d90bfd9",
+      "name": "base",
+      "prompt": "ORIGINAL Dragon fire enemy for Bunny World. Compact cute Mythic dragon proportions with crimson flame RED body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal  detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_Dragon_fire_enemy_for_2.png"
+      },
+      "animations": {
+        "The_character_drifts_forward_with_an_eerie_weight": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_000.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_001.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_002.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_003.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_004.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_005.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_006.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_007.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "3a5cbac1-ec0d-459d-bc95-3642ff283e57",
+      "name": "base",
+      "prompt": "ORIGINAL Dragon fire enemy for Bunny World. Compact cute Mythic dragon proportions with crimson flame RED body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal  detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_Dragon_fire_enemy_for_3.png"
+      },
+      "animations": {
+        "The_character_drifts_forward_with_an_eerie_weight": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_000.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_001.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_002.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_003.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_004.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_005.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_006.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_007.png",
+                "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "group_id": "96122ee2-aa76-41e5-81ef-ea52820e58a6",
+      "folder": "objects/ORIGINAL_THE_GREATEST_DRAGON_K",
+      "objects": [
+        {
+          "id": "325bc544-27c8-4a4e-8be8-e69589bb84ef",
+          "name": "base",
+          "prompt": "ORIGINAL THE GREATEST DRAGON KNIGHT enemy for Bunny World. DARK Knight ride DRAGON WITH full armor suit sheild and helm. Come up with a blue aura fire around  Dragon standing with 4 legs Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal branch detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_THE_GREATEST_DRAGON_K.png"
+          },
+          "animations": {
+            "The_creature_moves_with_a_rhythmic_heavy_gait_it": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_000.png",
+                    "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_001.png",
+                    "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_002.png",
+                    "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_003.png",
+                    "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_004.png",
+                    "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_005.png",
+                    "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_006.png",
+                    "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_007.png",
+                    "animations/The_creature_moves_with_a_rhythmic_heavy_gait_it/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "Pixel_art_boss_combo_animation_for_the_existing_ar": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_000.png",
+                    "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_001.png",
+                    "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_002.png",
+                    "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_003.png",
+                    "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_004.png",
+                    "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_005.png",
+                    "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_006.png",
+                    "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_007.png",
+                    "animations/Pixel_art_boss_combo_animation_for_the_existing_ar/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "Pixel_art_boss_dash_attack_for_the_existing_armore": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_000.png",
+                    "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_001.png",
+                    "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_002.png",
+                    "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_003.png",
+                    "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_004.png",
+                    "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_005.png",
+                    "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_006.png",
+                    "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_007.png",
+                    "animations/Pixel_art_boss_dash_attack_for_the_existing_armore/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "Pixel_art_boss_attack_animation_for_the_existing_a": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_000.png",
+                    "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_001.png",
+                    "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_002.png",
+                    "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_003.png",
+                    "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_004.png",
+                    "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_005.png",
+                    "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_006.png",
+                    "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_007.png",
+                    "animations/Pixel_art_boss_attack_animation_for_the_existing_a/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "a915ada8-a4ef-4b29-8d5c-fdaa455cb67a",
+      "folder": "objects/ORIGINAL_fire_Horse_enemy_for",
+      "objects": [
+        {
+          "id": "7e36ffdd-9448-4529-af58-44850f5eb68d",
+          "name": "base",
+          "prompt": "ORIGINAL fire Horse enemy for Bunny World. Compact cute inspired by ponyta proportions with crimson flame RED tail and orange body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_fire_Horse_enemy_for.png"
+          },
+          "animations": {
+            "The_creature_surges_forward_with_a_powerful_rhyth": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_000.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_001.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_002.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_003.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_004.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_005.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_006.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_007.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "613a61f9-af35-4284-9da4-c3e3f5953017",
+      "folder": "objects/ORIGINAL_fire_Horse_enemy_for_2",
+      "objects": [
+        {
+          "id": "7314d523-18b2-4f79-9983-dcc30689700b",
+          "name": "base",
+          "prompt": "ORIGINAL fire Horse enemy for Bunny World. Compact cute inspired by ponyta proportions with crimson flame RED tail and orange body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_fire_Horse_enemy_for_2.png"
+          },
+          "animations": {
+            "The_creature_surges_forward_with_a_powerful_rhyth": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_000.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_001.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_002.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_003.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_004.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_005.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_006.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_007.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "b44f5b3f-b1f1-4a23-84ff-e64308df5c02",
+      "folder": "objects/ORIGINAL_fire_Horse_enemy_for_3",
+      "objects": [
+        {
+          "id": "44d0bd56-0fef-4add-a338-8448c4eba806",
+          "name": "base",
+          "prompt": "ORIGINAL fire Horse enemy for Bunny World. Compact cute inspired by ponyta proportions with crimson flame RED tail and orange body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_fire_Horse_enemy_for_3.png"
+          },
+          "animations": {
+            "The_creature_surges_forward_with_a_powerful_rhyth": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_000.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_001.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_002.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_003.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_004.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_005.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_006.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_007.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "1ea168d5-b5cf-4cd2-b34c-7ac00f92ba4c",
+      "folder": "objects/ORIGINAL_GREAT_MYTHICAL_RED_FI",
+      "objects": [
+        {
+          "id": "618e0eae-aa3c-4ac1-a46b-d5025d5b33a3",
+          "name": "base",
+          "prompt": "ORIGINAL GREAT MYTHICAL RED FIRE DRAGON enemy for Bunny World. RED-ORANGE DRAGON WITH A tribal from the last billion years ago. Come up with a FIRE red aura around standing with 4 legs and expanded wings Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal branch detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 64,
+            "height": 64
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_GREAT_MYTHICAL_RED_FI.png"
+          },
+          "animations": {
+            "The_dragon_shifts_its_weight_forward_with_a_delibe": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_000.png",
+                    "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_001.png",
+                    "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_002.png",
+                    "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_003.png",
+                    "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_004.png",
+                    "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_005.png",
+                    "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_006.png",
+                    "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_007.png",
+                    "animations/The_dragon_shifts_its_weight_forward_with_a_delibe/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "Meteor_Roar_Pixel_art_boss_skill_animation_for_t": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_000.png",
+                    "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_001.png",
+                    "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_002.png",
+                    "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_003.png",
+                    "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_004.png",
+                    "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_005.png",
+                    "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_006.png",
+                    "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_007.png",
+                    "animations/Meteor_Roar_Pixel_art_boss_skill_animation_for_t/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "Inferno_Breath_Pixel_art_boss_attack_animation_fo": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_000.png",
+                    "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_001.png",
+                    "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_002.png",
+                    "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_003.png",
+                    "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_004.png",
+                    "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_005.png",
+                    "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_006.png",
+                    "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_007.png",
+                    "animations/Inferno_Breath_Pixel_art_boss_attack_animation_fo/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "Pixel_art_boss_melee_animation_for_the_existing_dr": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_000.png",
+                    "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_001.png",
+                    "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_002.png",
+                    "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_003.png",
+                    "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_004.png",
+                    "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_005.png",
+                    "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_006.png",
+                    "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_007.png",
+                    "animations/Pixel_art_boss_melee_animation_for_the_existing_dr/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "e8eb46bd-b782-4af2-a57b-de400601e824",
+      "folder": "objects/ORIGINAL_Fire_Golems_enemy_for",
+      "objects": [
+        {
+          "id": "a4289a12-50bb-4b9f-8829-faf93b45972d",
+          "name": "base",
+          "prompt": "ORIGINAL Fire Golems enemy for Bunny World. Compact cute Fire rock proportions with crimson flame RED body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_Fire_Golems_enemy_for.png"
+          },
+          "animations": {
+            "The_creature_surges_forward_with_a_powerful_rhyth": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_000.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_001.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_002.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_003.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_004.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_005.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_006.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_007.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "640dc47e-1bbd-490f-8ad8-562ce9224d4c",
+      "folder": "objects/ORIGINAL_Fire_Golems_enemy_for_2",
+      "objects": [
+        {
+          "id": "356ed780-cedc-47ef-bd8f-b119fda65908",
+          "name": "base",
+          "prompt": "ORIGINAL Fire Golems enemy for Bunny World. Compact cute Fire rock proportions with crimson flame RED body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_Fire_Golems_enemy_for_2.png"
+          },
+          "animations": {
+            "The_creature_surges_forward_with_a_powerful_rhyth": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_000.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_001.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_002.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_003.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_004.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_005.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_006.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_007.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "cbf38d71-8dd2-481e-9f6f-a10e87fcd45a",
+      "folder": "objects/ORIGINAL_Fire_Golems_enemy_for_3",
+      "objects": [
+        {
+          "id": "33ab31c5-1efe-4bcd-aa93-e5ba46aee080",
+          "name": "base",
+          "prompt": "ORIGINAL Fire Golems enemy for Bunny World. Compact cute Fire rock proportions with crimson flame RED body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_Fire_Golems_enemy_for_3.png"
+          },
+          "animations": {
+            "The_creature_surges_forward_with_a_powerful_rhyth": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_000.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_001.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_002.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_003.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_004.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_005.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_006.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_007.png",
+                    "animations/The_creature_surges_forward_with_a_powerful_rhyth/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "e228de17-fd27-4f55-ab49-17fd4d528163",
+      "folder": "objects/ORIGINAL_Fire_imp_enemy_for_Bu",
+      "objects": [
+        {
+          "id": "f7634c00-4348-4928-ae92-f762d9ed31c9",
+          "name": "base",
+          "prompt": "ORIGINAL Fire imp enemy for Bunny World. Compact cute  proportions with crimson flame aura RED to Yellow body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_Fire_imp_enemy_for_Bu.png"
+          },
+          "animations": {
+            "The_character_drifts_forward_with_an_eerie_weight": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_000.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_001.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_002.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_003.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_004.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_005.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_006.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_007.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "55281947-11f0-4bed-88e7-1376ffb0af57",
+      "folder": "objects/ORIGINAL_Fire_imp_enemy_for_Bu_2",
+      "objects": [
+        {
+          "id": "b43ebdf3-c4bb-4959-94ed-37728a17b989",
+          "name": "base",
+          "prompt": "ORIGINAL Fire imp enemy for Bunny World. Compact cute  proportions with crimson flame aura RED to Yellow body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_Fire_imp_enemy_for_Bu_2.png"
+          },
+          "animations": {
+            "The_character_drifts_forward_with_an_eerie_weight": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_000.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_001.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_002.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_003.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_004.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_005.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_006.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_007.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "fea1c015-32d7-49af-b0e4-40809e5a2e67",
+      "folder": "objects/ORIGINAL_Fire_imp_enemy_for_Bu_3",
+      "objects": [
+        {
+          "id": "0b4dd119-1f9e-424a-aa6b-db806e6480be",
+          "name": "base",
+          "prompt": "ORIGINAL Fire imp enemy for Bunny World. Compact cute  proportions with crimson flame aura RED to Yellow body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_Fire_imp_enemy_for_Bu_3.png"
+          },
+          "animations": {
+            "The_character_drifts_forward_with_an_eerie_weight": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_000.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_001.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_002.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_003.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_004.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_005.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_006.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_007.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "62055dc2-ba19-4e4d-86de-550c0b10e156",
+      "folder": "objects/ORIGINAL_Dragon_fire_enemy_for",
+      "objects": [
+        {
+          "id": "f0f769ae-0cc0-4963-a110-584c86e56e28",
+          "name": "base",
+          "prompt": "ORIGINAL Dragon fire enemy for Bunny World. Compact cute Mythic dragon proportions with crimson flame RED body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal  detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_Dragon_fire_enemy_for.png"
+          },
+          "animations": {
+            "The_character_drifts_forward_with_an_eerie_weight": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_000.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_001.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_002.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_003.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_004.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_005.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_006.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_007.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "738acfb2-972f-4450-8204-a4add5c66a0a",
+      "folder": "objects/ORIGINAL_Dragon_fire_enemy_for_2",
+      "objects": [
+        {
+          "id": "4ff8ae01-03dc-433f-8dee-b5b96d90bfd9",
+          "name": "base",
+          "prompt": "ORIGINAL Dragon fire enemy for Bunny World. Compact cute Mythic dragon proportions with crimson flame RED body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal  detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_Dragon_fire_enemy_for_2.png"
+          },
+          "animations": {
+            "The_character_drifts_forward_with_an_eerie_weight": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_000.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_001.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_002.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_003.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_004.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_005.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_006.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_007.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "a25e5fa6-7dd7-4bac-8ef0-509b406ffece",
+      "folder": "objects/ORIGINAL_Dragon_fire_enemy_for_3",
+      "objects": [
+        {
+          "id": "3a5cbac1-ec0d-459d-bc95-3642ff283e57",
+          "name": "base",
+          "prompt": "ORIGINAL Dragon fire enemy for Bunny World. Compact cute Mythic dragon proportions with crimson flame RED body ; . Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal  detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_Dragon_fire_enemy_for_3.png"
+          },
+          "animations": {
+            "The_character_drifts_forward_with_an_eerie_weight": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_000.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_001.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_002.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_003.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_004.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_005.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_006.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_007.png",
+                    "animations/The_character_drifts_forward_with_an_eerie_weight/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-09-24T09:42:04.585177"
+}
