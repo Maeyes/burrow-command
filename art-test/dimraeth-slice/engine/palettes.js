@@ -66,3 +66,6 @@ export const SILVERLEAF = pal(['#4a5a6a', '#6a7a8a', '#8e9cac', '#b2bec8', '#d4d
 export const WHITEBARK = pal(['#6a6470', '#908a96', '#b8b2bc', '#dcd8e0']);
 export const MARBLE = pal(['#7a7486', '#9a94a6', '#bab6c4', '#d8d4e0', '#f2f0f6']);
 export const PALEGRASS = pal(['#7a8a4a', '#94a45a', '#aebe6c', '#c6d282', '#dae4a0', '#eef2c4']);
+// undersea palace (mother-of-pearl walls, teal glow)
+export const PEARL = pal(['#3e4a6a', '#5a6a8e', '#7e92b2', '#a6bcd4', '#cfe0ee', '#f2f8fc']);
+export const SEAGLOW = pal(['#0e4a52', '#127a7a', '#20a8a0', '#48d4c4', '#9af4e4', '#e0fff8']);

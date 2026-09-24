@@ -64,7 +64,7 @@ export const BIOMES = {
     trees: { a: 'deadTree', b: 'obsidianSpire', accent: ['emberTree'] }, bush: 'charBush', flowerBush: 'emberBush', rock: 'basalt', tuft: 'ashTuft', tuftDark: 'ashTuft', reed: 'ashTuft',
     flowers: ['#ff8a30', '#ffcc50'], glowFlowers: true, cliffStyle: 'lavaVein',
     light: { day: 'rgb(170,120,110)', dusk: 'rgb(90,54,60)', grade: 'rgba(255,100,40,.22)', vignette: .72, alwaysLights: true },
-    particles: 'ember',
+    particles: 'ember', bridgeStyle: 'basalt',
   },
   underwater: {
     cliffStyle: 'natural',
@@ -89,7 +89,7 @@ export const BIOMES = {
     trees: { a: 'goldTree', b: 'whiteTree', accent: ['goldTree'] }, bush: 'goldBush', flowerBush: 'goldBush', rock: 'marbleRock', tuft: 'paleTuft', tuftDark: 'paleTuft', reed: 'paleTuft',
     flowers: ['#fff4bc', '#ffffff', '#bcd8ff'], cliffStyle: 'marble',
     light: { day: 'rgb(255,248,232)', dusk: 'rgb(150,120,180)', grade: 'rgba(255,220,150,.3)', vignette: .45 },
-    particles: 'mote',
+    particles: 'mote', bridgeStyle: 'marble',
   },
 };
 BIOMES.city = { ...BIOMES.forest, stairStyle: 'stone', cliffStyle: 'blocks', light: { ...BIOMES.forest.light, vignette: .58 } };

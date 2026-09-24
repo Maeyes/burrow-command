@@ -187,3 +187,10 @@ terrain level 0–3 (44 px per level), water, road, spawn. The engine derives ev
 - Organic edges: `sceneFromMap` samples level/water through a small noise warp (`organic: false` in the map turns it off), so straight strokes give meandering banks and cliffs. There is no warp near stairs or bridges.
 - Cliff and bank look follow the biome: forest/snow/mine/underwater use `natural` (earth, boulders, roots); city uses `blocks`. Natural riverbanks have a ragged turf lip, soil with roots and waterline stones.
 - Planned (phase 3): PixelLab/PNG asset upload (palette-quantised to the biome ramps + outline + feet anchor) as new object types.
+
+## 12. Landmarks and bridge styles (2026-09-24)
+
+- Bridge look follows the biome: `kit.bridgeStyle` = `wood` (default), `basalt` (magma: flagstones, cooled lava seams, arched side walls) or `marble` (asgard: marble deck, gold-capped balustrade). A bridge may set `style` to override it. Stone styles draw their parapets inside the deck sprite and add edge colliders instead of fence runs.
+- `templeSprite()`: Asgard marble peristyle (3-step base, fluted columns, gold frieze, pediment with a sun disc). Editor object `temple` (4.5 × 3 tiles).
+- `palaceSprite()`: an original undersea palace (pearl hall, glowing arched windows, spiral-shell towers, scallop dome). Editor object `palace` (4 × 3.25 tiles). It is built with `composeSprites()`, which stacks cylinder and face sprites back to front.
+- Editor object `palm`: the desert palm, which can be placed in any biome.

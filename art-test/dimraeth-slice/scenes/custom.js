@@ -31,6 +31,8 @@ export const OBJECT_TYPES = {
   barrel: { label: 'ถังไม้', r: .3, color: '#8c5c34' },
   altar: { label: 'แท่นบูชา', r: .8, color: '#8fe6ff' },
   pillar: { label: 'เสาหิน', r: .4, color: '#bcb09c' },
+  temple: { label: 'วิหาร (หินอ่อน)', r: 2.6, color: '#f2f0f6' },
+  palace: { label: 'วังใต้ทะเล', r: 2.4, color: '#e05a7c' },
   portal: { label: 'Portal', r: .8, color: '#78c8ff' },
   monster: { label: 'จุดเกิดมอน', r: .5, color: '#ff5a5a' },
 };
@@ -217,6 +219,7 @@ export function sceneFromMap(data, opts = {}) {
     const p = P(o);
     switch (o.type) {
       case 'tree': scene.trees.push({ ...p, kind: o.kind || biomeOf(scene).trees.a }); break;
+      case 'temple': case 'palace': scene.props.push({ type: o.type, ...p, r: 150 }); break;
       case 'palm': scene.trees.push({ ...p, kind: 'palm' }); break;
       case 'bush': case 'rock': case 'altar': scene.props.push({ type: o.type, ...p, seed: Math.round(o.x * 7 + o.y * 13), r: 30 }); break;
       case 'pillar': scene.props.push({ type: 'pillar', ...p, h: o.h || 64, broken: !!o.broken, seed: Math.round(o.x * 7 + o.y), r: 30 }); break;

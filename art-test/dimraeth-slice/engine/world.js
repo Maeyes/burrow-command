@@ -201,6 +201,17 @@ export function placeStructures() {
       if (p.type === 'rock' && spr.img.width / K > 26) WS.colliders.push({ type: 'c', x: p.x, y: p.y, r: spr.img.width / K * .45 });
       continue;
     }
+    else if (p.type === 'temple' || p.type === 'palace') {
+      const W = p.type === 'temple' ? 288 : 256, D = p.type === 'temple' ? 192 : 208, x0 = p.x - W / 2, y0 = p.y - D / 2;
+      s = LIB[p.type] ||= (p.type === 'temple' ? SP.templeSprite(W, D) : SP.palaceSprite(W, D));
+      const pad = p.type === 'temple' ? 26 : 24;
+      addBoxed(s, x0, y0, z + (p.type === 'temple' ? 18 : 0), { x0: x0 - pad, x1: x0 + W + pad, y0: y0 - pad, y1: y0 + D + pad });
+      WS.colliders.push({ type: 'b', x0: x0 - pad + 6, x1: x0 + W + pad - 6, y0: y0 - pad + 6, y1: y0 + D + pad - 6 });
+      WS.shadows.push({ x: x0 + W / 2, y: y0 + D, z, dx: 26, dy: 8, rx: W * .62, ry: 18 });
+      const col = p.type === 'temple' ? [255, 214, 140] : [110, 240, 220];
+      for (const [lx, ly] of [[x0 + W / 2, y0 + D + 20], [x0 + W + 20, y0 + D / 2]]) WS.lights.push({ x: lx, y: ly, z: z + 30, r: 150, col, a: .55, flick: false });
+      continue;
+    }
     else if (p.type === 'rubble') { const spr = LIB.rock[(p.seed || 0) % LIB.rock.length]; addSprite(spr, p.x, p.y, z, { box: 8 }); continue; }
     addBoxed(s, p.x, p.y, z, box);
     WS.shadows.push({ x: (box.x0 + box.x1) / 2, y: (box.y0 + box.y1) / 2, z, dx: 14, dy: 4, rx: (box.x1 - box.x0) * .6, ry: 8 });
@@ -250,9 +261,13 @@ export function placeStructures() {
     let waterZ = bankZ;
     if (alongY) for (let y = b.y0; y < b.y1; y += 8) waterZ = Math.min(waterZ, H(mx, y));
     else for (let x = b.x0; x < b.x1; x += 8) waterZ = Math.min(waterZ, H(x, my));
-    const s = SP.bridgeSprite(b.x1 - b.x0, b.y1 - b.y0, deck.z, waterZ, alongY);
+    const style = b.style || biomeOf(SC).bridgeStyle || 'wood';
+    const s = SP.bridgeSprite(b.x1 - b.x0, b.y1 - b.y0, deck.z, waterZ, alongY, style);
     addBoxed(s, b.x0, b.y0, 0, { x0: b.x0, x1: b.x1, y0: b.y0, y1: b.y1 }, { flat: true, deck: true });
-    if (alongY) { fenceRun(b.x0 + 3, b.y0, b.x0 + 3, b.y1, null, deck.z, false); fenceRun(b.x1 - 3, b.y0, b.x1 - 3, b.y1, null, deck.z, false); }
+    if (style !== 'wood') { // parapets are drawn in the deck sprite; keep only their colliders
+      if (alongY) WS.colliders.push({ type: 'b', x0: b.x0, x1: b.x0 + 5, y0: b.y0, y1: b.y1 }, { type: 'b', x0: b.x1 - 5, x1: b.x1, y0: b.y0, y1: b.y1 });
+      else WS.colliders.push({ type: 'b', x0: b.x0, x1: b.x1, y0: b.y0, y1: b.y0 + 5 }, { type: 'b', x0: b.x0, x1: b.x1, y0: b.y1 - 5, y1: b.y1 });
+    } else if (alongY) { fenceRun(b.x0 + 3, b.y0, b.x0 + 3, b.y1, null, deck.z, false); fenceRun(b.x1 - 3, b.y0, b.x1 - 3, b.y1, null, deck.z, false); }
     else { fenceRun(b.x0, b.y0 + 3, b.x1, b.y0 + 3, null, deck.z, false); fenceRun(b.x0, b.y1 - 3, b.x1, b.y1 - 3, null, deck.z, false); }
     WS.shadows.push({ x: mx, y: b.y1, z: waterZ, dx: 10, dy: 6, rx: Math.max(b.x1 - b.x0, b.y1 - b.y0) * .4, ry: 10 });
   }

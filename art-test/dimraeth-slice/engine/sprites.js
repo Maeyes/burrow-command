@@ -292,7 +292,8 @@ export function benchSprite(w, d, h) {
 }
 
 // Wooden bridge deck spanning along world x (w) with width d. Posts go down into the water.
-export function bridgeSprite(w, d, deckZ, waterZ, alongY = false) {
+export function bridgeSprite(w, d, deckZ, waterZ, alongY = false, style = 'wood') {
+  if (style === 'basalt' || style === 'marble') return stoneBridgeSprite(w, d, deckZ, waterZ, alongY, style);
   // planks run across the walking direction; posts line both long edges
   const plank = (k) => (u, v, lu, lv, px, py) => {
     const a = alongY ? v : u, b = alongY ? u : v, lb = alongY ? lu : lv;
@@ -845,4 +846,230 @@ export function buildLibraries(kit = null) {
     paleTuft: () => n(8, i => tuftSprite(2800 + i, i & 1, P.PALEGRASS)),
   };
   for (const key of want) if (!LIB[key] && make[key]) LIB[key] = make[key]();
+}
+
+// ---------- stone bridges (magma: basalt, asgard: marble) ----------
+// Deck of flagstones, arched side walls down to the liquid, low parapets on both long edges.
+// The parapets are part of the sprite (the deck is drawn flat, before actors), so they stay low.
+export function stoneBridgeSprite(w, d, deckZ, waterZ, alongY, style) {
+  const marble = style === 'marble';
+  const ramp = marble ? P.MARBLE : P.BASALT, trim = marble ? P.GOLDLEAF : P.OBSIDIAN, glow = P.EMBERGLOW;
+  const L = alongY ? d : w, span = L / Math.max(1, Math.round(L / 56));
+  const flag = k => (u, v, lu, lv, px, py) => {
+    const a = alongY ? v : u, b = alongY ? u : v;
+    const row = Math.floor(a / 10), off = (row & 1) * 7, col = Math.floor((b + off) / 14);
+    if (a % 10 < 1 || (b + off) % 14 < 1) return shadeCol(ramp[0], k);
+    if (!marble && hash2(col * 3, row * 5) > .9 && (b + off) % 14 < 3) return glow[2]; // cooled lava seam
+    const l = 2 + Math.round(hash2(col, row) * 1.4 + bayer(px, py) * .6);
+    return shadeCol(ramp[clamp(l, 0, ramp.length - 1)], k);
+  };
+  // side wall with arches between piers; the holes show the liquid behind
+  const side = k => (u, v, lu, lv, px, py) => {
+    const t = (u % span) / span;
+    const archTop = (lv - 10) * Math.sqrt(Math.max(0, 1 - Math.pow((t - .5) / .36, 2)));
+    if (t > .14 && t < .86 && v < archTop) return null;
+    if (v > lv - 4) return shadeCol(trim[marble ? 3 : 2], k);      // cornice band
+    const row = Math.floor(v / 6), off = (row & 1) * 6;
+    if (v % 6 < 1 || (u + off) % 12 < 1) return shadeCol(ramp[0], k);
+    let l = 2 + Math.round(hash2(Math.floor((u + off) / 12), row) * 1.3 + bayer(px, py) * .6);
+    if (!marble && v < 8) l--;                                      // scorched footing
+    return shadeCol(ramp[clamp(l, 0, ramp.length - 1)], k);
+  };
+  const parapet = k => (u, v, lu, lv, px, py) => {
+    if (marble) {                                                   // balustrade: gold cap, marble balusters
+      if (v > lv - 2.2) return shadeCol(trim[4], k);
+      if (v < 2) return shadeCol(ramp[2], k);
+      return u % 7 < 3.2 ? shadeCol(ramp[3 + (hash2(px, py) > .8 ? 1 : 0)], k) : null;
+    }
+    if (v > lv - 2) return shadeCol(ramp[4], k);
+    if (u % 9 < 1) return shadeCol(ramp[0], k);
+    return shadeCol(ramp[clamp(2 + Math.round(hash2(Math.floor(u / 9), 3) + bayer(px, py) * .5), 0, 4)], k);
+  };
+  const cap = () => marble ? trim[4] : ramp[3];
+  const H = Math.max(8, deckZ - waterZ + 4), PH = marble ? 9 : 7, T = 5;
+  const faces = [];
+  if (alongY) {   // long edges are x = 0 and x = w
+    faces.push({ O: [T, 0, deckZ], A: [0, d, 0], B: [0, 0, PH], color: parapet(.74) });
+    faces.push({ O: [0, 0, deckZ + PH], A: [T, 0, 0], B: [0, d, 0], color: cap });
+    faces.push({ O: [0, 0, deckZ], A: [w, 0, 0], B: [0, d, 0], color: flag(1.12) });
+    faces.push({ O: [0, d, deckZ - H], A: [w, 0, 0], B: [0, 0, H], color: side(1) });
+    faces.push({ O: [w, 0, deckZ - H], A: [0, d, 0], B: [0, 0, H], color: side(.74) });
+    faces.push({ O: [w, 0, deckZ], A: [0, d, 0], B: [0, 0, PH], color: parapet(.74) });
+    faces.push({ O: [w - T, 0, deckZ + PH], A: [T, 0, 0], B: [0, d, 0], color: cap });
+  } else {        // long edges are y = 0 and y = d
+    faces.push({ O: [0, T, deckZ], A: [w, 0, 0], B: [0, 0, PH], color: parapet(1) });
+    faces.push({ O: [0, 0, deckZ + PH], A: [w, 0, 0], B: [0, T, 0], color: cap });
+    faces.push({ O: [0, 0, deckZ], A: [w, 0, 0], B: [0, d, 0], color: flag(1.12) });
+    faces.push({ O: [w, 0, deckZ - H], A: [0, d, 0], B: [0, 0, H], color: side(.74) });
+    faces.push({ O: [0, d, deckZ - H], A: [w, 0, 0], B: [0, 0, H], color: side(1) });
+    faces.push({ O: [0, d, deckZ], A: [w, 0, 0], B: [0, 0, PH], color: parapet(1) });
+    faces.push({ O: [0, d - T, deckZ + PH], A: [w, 0, 0], B: [0, T, 0], color: cap });
+  }
+  return rasterFaces(faces);
+}
+
+// several sprites anchored at local world points, drawn in the given (back-to-front) order
+function composeSprites(parts) {
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  const at = parts.map(p => {
+    const sx = isoX(p.x, p.y) - p.spr.ox, sy = isoY(p.x, p.y, p.z || 0) - p.spr.oy;
+    x0 = Math.min(x0, sx); y0 = Math.min(y0, sy); x1 = Math.max(x1, sx + p.spr.img.width); y1 = Math.max(y1, sy + p.spr.img.height);
+    return [sx, sy];
+  });
+  x0 = Math.floor(x0); y0 = Math.floor(y0);
+  const c = makeCanvas(Math.ceil(x1 - x0) + 1, Math.ceil(y1 - y0) + 1), g = c.getContext('2d');
+  parts.forEach((p, i) => g.drawImage(p.spr.img, Math.round(at[i][0] - x0), Math.round(at[i][1] - y0)));
+  return { img: c, ox: -x0, oy: -y0 };
+}
+const dith = (ramp, l, k) => (u, v, lu, lv, px, py) => shadeCol(ramp[clamp(l + (bayer(px, py) > .75 ? 1 : 0), 0, ramp.length - 1)], k);
+
+// ---------- Asgard temple: marble peristyle on a stepped base, gold-trimmed pediment ----------
+// Local origin = back corner of the stylobate top. W along x (ridge), D along y.
+export function templeSprite(W = 288, D = 192) {
+  const M = P.MARBLE, G = P.GOLDLEAF;
+  const step = k => (u, v, lu, lv, px, py) => {
+    if (v > lv - 1.2) return shadeCol(M[4], k);
+    if (u % 16 < 1) return shadeCol(M[1], k);
+    return shadeCol(M[clamp(2 + Math.round(hash2(Math.floor(u / 16), 1) * 1.2 + bayer(px, py) * .6), 0, 4)], k);
+  };
+  const paving = (u, v, lu, lv, px, py) => {
+    const r = Math.floor(v / 16), off = (r & 1) * 12;
+    if (v % 16 < 1 || (u + off) % 24 < 1) return M[2];
+    return shadeCol(M[3 + (hash2(Math.floor((u + off) / 24), r) > .7 ? 1 : 0)], bayer(px, py) > .85 ? .97 : 1.1);
+  };
+  const cella = k => (u, v, lu, lv, px, py) => {
+    if (v % 10 < 1) return shadeCol(M[1], k * .86);
+    return shadeCol(M[clamp(1 + Math.round(hash2(Math.floor(u / 20) + Math.floor(v / 10) * 7, 7) + bayer(px, py) * .6), 0, 4)], k * .86);
+  };
+  const door = k => (u, v, lu, lv, px, py) => {
+    const c = lu / 2, dw = 26, dh = 44;
+    if (Math.abs(u - c) < dw / 2 + 3 && v < dh + 3) {
+      if (Math.abs(u - c) < dw / 2 && v < dh) return v > dh - 8 ? shadeCol(G[2], k) : P.SLATE[0];
+      return shadeCol(G[3], k);
+    }
+    return cella(k)(u, v, lu, lv, px, py);
+  };
+  const shaft = k => (u, v, lu, lv, px, py) => {        // fluted column
+    const f = u % 4; let l = f < 1 ? 1 : f < 2.5 ? 3 : 4;
+    if (hash2(px, py * 3) > .95) l--;
+    return shadeCol(M[clamp(l, 0, 4)], k);
+  };
+  const capital = k => (u, v, lu, lv) => shadeCol(v > lv - 2 ? G[4] : M[4], k);
+  const frieze = k => (u, v, lu, lv, px, py) => {
+    if (v < 2.2) return shadeCol(G[3], k);              // gold band above the columns
+    if (v > lv - 2) return shadeCol(M[4], k);
+    const t = u % 24;
+    if (t < 6) return shadeCol(t % 2 < 1 ? M[1] : M[2], k);                  // triglyphs
+    if (t > 11 && t < 17 && v > 4 && v < lv - 4) return shadeCol(G[2 + (bayer(px, py) > .5 ? 1 : 0)], k); // gold rosettes
+    return shadeCol(M[3], k);
+  };
+  const faces = [];
+  faces.push(...boxFaces(-26, -26, -18, W + 52, D + 52, 6, step(1), step(.74), () => M[3]));
+  faces.push(...boxFaces(-17, -17, -12, W + 34, D + 34, 6, step(1), step(.74), () => M[3]));
+  faces.push(...boxFaces(-8, -8, -6, W + 16, D + 16, 6, step(1), step(.74), paving));
+  const CH = 66;
+  const cols = [], nx = Math.round(W / 36), ny = Math.round(D / 36);
+  for (let i = 0; i <= nx; i++) { cols.push([i * (W - 14) / nx, 0]); cols.push([i * (W - 14) / nx, D - 14]); }
+  for (let j = 1; j < ny; j++) { cols.push([0, j * (D - 14) / ny]); cols.push([W - 14, j * (D - 14) / ny]); }
+  const column = ([x, y]) => [
+    ...boxFaces(x - 2, y - 2, 0, 18, 18, 3, dith(M, 2, 1), dith(M, 2, .74), () => M[3]),
+    ...boxFaces(x, y, 3, 14, 14, CH - 8, shaft(1), shaft(.74), () => M[3]),
+    ...boxFaces(x - 3, y - 3, CH - 5, 20, 20, 5, capital(1), capital(.74), () => M[4]),
+  ];
+  const byDepth = (a, b) => a[0] + a[1] - b[0] - b[1];
+  cols.filter(([x, y]) => y === 0 || x === 0).sort(byDepth).forEach(c => faces.push(...column(c)));
+  faces.push(...boxFaces(34, 30, 0, W - 68, D - 60, CH, door(1), cella(.74), () => M[2]));
+  cols.filter(([x, y]) => !(y === 0 || x === 0)).sort(byDepth).forEach(c => faces.push(...column(c)));
+  faces.push(...boxFaces(-6, -6, CH, W + 12, D + 12, 14, frieze(1), frieze(.74), () => M[3]));
+  const RH = 44, ez = CH + 14;
+  faces.push({ O: [-10, D + 10, ez], A: [W + 20, 0, 0], B: [0, -(D / 2 + 10), RH], color: (u, v, lu, lv, px, py) => {
+    if (v > lv - 2.5) return shadeCol(G[4], 1.05);      // gold ridge
+    if (v < 2.5) return M[4];
+    if (v % 7 < 1) return M[1];
+    return shadeCol(M[clamp(2 + ((Math.floor(u / 9) + Math.floor(v / 7)) & 1) + (bayer(px, py) > .8 ? 1 : 0), 0, 4)], 1.04);
+  } });
+  faces.push({ O: [W + 10, D + 10, ez], A: [0, -(D + 20), 0], B: [0, 0, RH], clip: (u, v) => v <= 1 - Math.abs(2 * u - 1), color: (u, v, lu, lv, px, py) => {
+    const edge = 1 - Math.abs(2 * u / lu - 1) - v / lv;
+    if (edge < .06 || v < 2.5) return shadeCol(G[3], .8);          // gold raking cornice
+    if (Math.hypot(u - lu / 2, (v - lv * .36) * 2) < 9) return shadeCol(G[Math.hypot(u - lu / 2, (v - lv * .36) * 2) < 5 ? 5 : 3], .9); // sun disc
+    return shadeCol(M[2 + (bayer(px, py) > .7 ? 1 : 0)], .76);
+  } });
+  return rasterFaces(faces);
+}
+
+// ---------- undersea palace (original design): pearl hall, shell-spiral towers, scallop dome ----------
+export function palaceSprite(W = 256, D = 208) {
+  const Pr = P.PEARL, Gl = P.SEAGLOW, Au = P.GOLDLEAF, Co = P.CORAL_PINK, Rf = P.REEF;
+  const wall = k => (u, v, lu, lv, px, py) => {
+    // two storeys of arched windows, one per 32-unit bay
+    const bay = u % 32, up = v > lv * .5, wy = up ? lv * .62 : lv * .16, wh = up ? lv * .22 : lv * .24, cx = 16, hw = 6, ay = wy + wh;
+    const inA = (r) => Math.abs(bay - cx) < r && v > wy - (r - hw) && (v < ay || Math.hypot(bay - cx, (v - ay) * 1.2) < r);
+    if (inA(hw)) return v < wy + 2 ? shadeCol(Au[3], k) : Gl[3 + (bayer(px, py) > .6 ? 1 : 0)];
+    if (inA(hw + 2)) return shadeCol(Au[2], k);
+    if (Math.abs(v - lv * .52) < 1.5) return shadeCol(Co[3], k);   // coral string course
+    const sheen = vnoise(u * .08 + v * .05, v * .12) * 1.6;        // mother-of-pearl
+    return shadeCol(Pr[clamp(2 + Math.round(sheen + bayer(px, py) * .7), 0, 5)], k);
+  };
+  const gate = k => (u, v, lu, lv, px, py) => {
+    const c = lu / 2, gw = 22, gh = lv * .42, r = Math.hypot(u - c, (v - gh) * 1.1);
+    if (Math.abs(u - c) < gw && (v < gh || r < gw)) {
+      if (Math.abs(u - c) > gw - 3 || (v > gh && r > gw - 3)) return shadeCol(Au[4], k);
+      return Gl[1 + (Math.floor(v / 5) & 1)];
+    }
+    return wall(k)(u, v, lu, lv, px, py);
+  };
+  const base = k => (u, v, lu, lv, px, py) => v > lv - 2 ? shadeCol(Co[3], k) : shadeCol(Rf[clamp(1 + Math.round(vnoise(u * .1, v * .3) * 2 + bayer(px, py) * .6), 0, 4)], k);
+  const hallH = 64;
+  const hall = rasterFaces([
+    ...boxFaces(-24, -24, 0, W + 48, D + 48, 10, base(1), base(.74), (u, v, lu, lv, px, py) => shadeCol(Rf[3 + (bayer(px, py) > .7 ? 1 : 0)], 1.1)),
+    ...boxFaces(0, 0, 10, W, D, hallH, gate(1), wall(.74), (u, v, lu, lv, px, py) => shadeCol(Pr[3 + (bayer(px, py) > .6 ? 1 : 0)], 1.1)),
+    ...boxFaces(-4, -4, 10 + hallH, W + 8, D + 8, 5, (u, v) => shadeCol(Au[v > 3 ? 4 : 2], 1), (u, v) => shadeCol(Au[v > 3 ? 3 : 1], .8), (u, v, lu, lv, px, py) => {
+      if (u < 5 || v < 5 || u > lu - 5 || v > lv - 5) return Au[4];              // gold rim
+      const r = Math.floor(v / 8), off = (r & 1) * 6;                            // pearl scale tiles
+      if (v % 8 < 1 || (u + off) % 12 < 1) return Pr[1];
+      return shadeCol(Pr[clamp(3 + Math.round(vnoise(u * .05, v * .05) + bayer(px, py) * .6) - ((v % 8) < 3 ? 1 : 0), 0, 5)], 1.05);
+    }),
+  ]);
+  // spiral-shell tower: pearl drum + coiled cone striped coral/gold
+  const tower = (R, H, coneH) => {
+    const prims = [{ r: R, z0: 0, z1: H, wall: (lit, arc, hz, px, py) => {
+      const slit = Math.abs(((arc % 24) + 24) % 24 - 12) < 3 && ((hz > H * .55 && hz < H * .7) || (hz > H * .25 && hz < H * .38));
+      if (slit) return Gl[4];
+      if (hz > H - 4) return Au[clamp(3 + Math.round(lit), 0, 5)];
+      return Pr[clamp(2 + Math.round(lit * 1.6 + vnoise(arc * .1, hz * .1) + bayer(px, py) * .6), 0, 5)];
+    } }];
+    const n = 16;
+    for (let i = 0; i < n; i++) {
+      const z0 = H + i * coneH / n, r = R * (1 - i / n) + 1.5;
+      prims.push({ r, z0, z1: z0 + coneH / n + .5, wall: (lit, arc, hz, px, py) => {
+        const coil = ((arc / (2 * Math.PI * r) + (z0 + hz) / (coneH * .28)) % 1 + 1) % 1;
+        return (coil < .5 ? Co : Au)[clamp(2 + Math.round(lit * 1.5 + bayer(px, py) * .6) - (coil % .5 < .08 ? 2 : 0), 0, 5)];
+      } });
+    }
+    prims.push({ r: 2, z0: H + coneH, z1: H + coneH + 10, wall: lit => Au[clamp(4 + Math.round(lit), 0, 5)], top: () => Pr[5] });
+    return cylinderSprite(prims, R);
+  };
+  // scallop dome: stacked rings shaped as a hemisphere, 16 ribs
+  const dome = R => {
+    const prims = [{ r: R + 4, z0: 0, z1: 8, wall: lit => Au[clamp(3 + Math.round(lit), 0, 5)] }];
+    const n = 18;
+    for (let i = 0; i < n; i++) {
+      const a0 = i / n * Math.PI / 2, a1 = (i + 1) / n * Math.PI / 2, r = R * Math.cos(a0) + .5;
+      prims.push({ r, z0: 8 + R * Math.sin(a0), z1: 8 + R * Math.sin(a1) + .6, wall: (lit, arc, hz, px, py) => {
+        const rib = ((arc / r) * 8 / Math.PI % 1 + 1) % 1;
+        return (rib < .12 ? Au : Co)[clamp(2 + Math.round(lit * 1.7 + (rib > .5 ? .5 : 0) + bayer(px, py) * .6), 0, 5)];
+      }, top: i === n - 1 ? () => Au[5] : undefined });
+    }
+    prims.push({ r: 2.5, z0: 8 + R, z1: 8 + R + 26, wall: lit => Au[clamp(4 + Math.round(lit), 0, 5)], top: () => Gl[5] });
+    return cylinderSprite(prims, R + 4);
+  };
+  const tBack = tower(20, 118, 56), tSide = tower(18, 104, 50), tFront = tower(22, 96, 52), dm = dome(46);
+  return composeSprites([
+    { spr: tBack, x: 0, y: 0, z: 10 },
+    { spr: hall, x: 0, y: 0, z: 0 },
+    { spr: tSide, x: W, y: 0, z: 10 },
+    { spr: tSide, x: 0, y: D, z: 10 },
+    { spr: dm, x: W / 2, y: D / 2, z: 10 + hallH + 5 },
+    { spr: tFront, x: W, y: D, z: 10 },
+  ]);
 }
