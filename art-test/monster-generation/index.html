@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bunny World — Greenfield Monster Audition</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">Bunny World / isolated art test</p>
+      <h1>Greenfield Monster Walk Audition</h1>
+      <p>Canonical Sunnyside references and PixelLab originals share one synchronized eight-frame clock. This page does not modify or integrate with the live arena.</p>
+      <div class="controls">
+        <label>Preview scale
+          <select id="scale">
+            <option value="1">1× gameplay</option>
+            <option value="2" selected>2× review</option>
+            <option value="4">4× pixel inspection</option>
+          </select>
+        </label>
+        <label>Frame time
+          <input id="speed" type="range" min="70" max="180" value="110" step="5">
+          <output id="speed-value">110 ms</output>
+        </label>
+        <button id="pause" type="button">Pause</button>
+        <span id="frame-readout">Frame 1 / 8</span>
+      </div>
+    </header>
+    <section>
+      <h2>Canonical scale references</h2>
+      <div class="grid" id="canonical"></div>
+    </section>
+    <section>
+      <h2>New Bunny World monsters</h2>
+      <div class="grid" id="new-monsters"></div>
+    </section>
+    <p class="footnote">All canvases use nearest-neighbor rendering. The baseline is calculated from non-transparent pixels in each frame; source sheets remain untouched.</p>
+  </main>
+  <script type="module" src="./audition.js"></script>
+</body>
+</html>

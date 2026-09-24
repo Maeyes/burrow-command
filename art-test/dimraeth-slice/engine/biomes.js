@@ -1,0 +1,96 @@
+// Biome kits. A scene picks one with `biome: '<id>'`. A kit swaps the material ramps used by the
+// ground bake, the foliage/prop libraries used by scatter, and the lighting/particles.
+// Rules from ENGINE.md still apply: ramps dark -> light, darks lean cool, lights lean warm.
+import { pal } from './util.js';
+import * as P from './palettes.js';
+
+const R = pal;
+export const BIOMES = {
+  forest: {
+    cliffStyle: 'natural',
+    stairStyle: 'ramp',
+    treeDensity: 1,
+    ground: P.GRASS, dirt: P.DIRT, cliff: P.CLIFF, moss: P.BUSH, liquid: P.RIVER, foam: P.FOAM,
+    trees: { a: 'broad', b: 'pine', accent: ['autumn', 'blossom'] }, bush: 'bush', flowerBush: 'flowerBush', rock: 'rock', tuft: 'tuft', tuftDark: 'tuftDark', reed: 'reed',
+    flowers: ['#f4efe0', '#f6d25a', '#e89ab8', '#b9a4f0'],
+    light: { day: 'rgb(246,234,214)', dusk: 'rgb(78,86,132)', grade: 'rgba(255,196,120,.28)', vignette: .62 },
+    particles: 'leaf',
+  },
+  desert: {
+    stairStyle: 'ramp',
+    ground: R(['#8a5a32', '#a8703e', '#c28a4e', '#d6a563', '#e6bd7c', '#f2d49a']),
+    dirt: R(['#6e4a2c', '#8c5e36', '#a87444', '#c08a52', '#d8a66a']),
+    cliff: R(['#5a3422', '#74442a', '#8e5634', '#a86a40', '#c2824e', '#d89c62']),
+    moss: R(['#4a5a2a', '#5e6e32', '#74843c', '#8a9a48', '#a2b058', '#bcc86c']),
+    liquid: R(['#1a4a5a', '#226070', '#2e7a84', '#46949a', '#6cb2ae', '#a8d8c8']), foam: P.FOAM,
+    trees: { a: 'cactus', b: 'dryBushBig', accent: ['cactusFlower'] }, treeDensity: .45, bush: 'dryBush', flowerBush: 'dryBush', rock: 'sandRock', tuft: 'dryTuft', tuftDark: 'dryTuft', reed: 'reed',
+    flowers: ['#f2c4d8', '#f6e08a'], cliffStyle: 'strata',
+    light: { day: 'rgb(255,238,214)', dusk: 'rgb(118,86,122)', grade: 'rgba(255,170,90,.32)', vignette: .55 },
+    particles: 'sand',
+  },
+  snow: {
+    cliffStyle: 'natural',
+    stairStyle: 'ramp',
+    ground: R(['#8a9eb4', '#a4b8cc', '#bccee0', '#d2e0ee', '#e6f0f8', '#f8fcff']),
+    dirt: R(['#5c6878', '#74808e', '#8c98a6', '#a6b0bc', '#c0c8d2']),
+    cliff: R(['#2c3444', '#3c4658', '#4e5a6e', '#647286', '#7e8ca0', '#9aa8ba']),
+    moss: R(['#c8d8e8', '#d8e4f0', '#e4eef6', '#eef4fa', '#f6fafe', '#ffffff']),
+    liquid: R(['#4a7aa4', '#6494bc', '#80aed2', '#9cc6e2', '#bcdcf0', '#e2f2fc']), foam: R(['#d8ecf8', '#eaf6fc', '#ffffff']), frozen: true,
+    trees: { a: 'snowPine', b: 'snowPine', accent: ['frostTree'] }, bush: 'snowBush', flowerBush: 'snowBush', rock: 'iceRock', tuft: 'frostTuft', tuftDark: 'frostTuft', reed: 'frostTuft',
+    flowers: ['#e8f4ff', '#bcd8f8'],
+    light: { day: 'rgb(232,240,255)', dusk: 'rgb(70,84,140)', grade: 'rgba(170,200,255,.22)', vignette: .55 },
+    particles: 'snow',
+  },
+  mine: {
+    cliffStyle: 'natural',
+    stairStyle: 'wood',
+    ground: R(['#2a221c', '#3a2e24', '#4a3a2c', '#5c4a38', '#6e5a44', '#826c52']),
+    dirt: R(['#1e1814', '#2c241c', '#3c3026', '#4e3e30', '#62503e']),
+    cliff: R(['#141218', '#201c24', '#2e2832', '#3e3642', '#504652', '#645866']),
+    moss: R(['#1e3a3a', '#285050', '#34686a', '#44848a', '#5ca2a8', '#84c4c8']),
+    liquid: R(['#0e2430', '#143444', '#1c4658', '#285c70', '#3c7a8c', '#6aa4b0']), foam: R(['#5a8a96', '#7eacb4', '#a8ccd0']),
+    trees: { a: 'stalagmite', b: 'crystal', accent: ['crystalBig'] }, bush: 'rubble', flowerBush: 'crystalSmall', rock: 'caveRock', tuft: 'pebbles', tuftDark: 'pebbles', reed: 'pebbles',
+    flowers: ['#6ae0ff', '#b48cff'], glowFlowers: true,
+    light: { day: 'rgb(70,64,86)', dusk: 'rgb(40,36,58)', grade: 'rgba(120,150,200,.12)', vignette: .78, alwaysLights: true },
+    particles: 'dust', edgeTrees: 'stalagmite',
+  },
+  magma: {
+    stairStyle: 'ramp',
+    ground: R(['#141216', '#1f1b20', '#2a2429', '#372e33', '#463a3e', '#584a4a']),
+    dirt: R(['#3a1a12', '#5a2414', '#7a3418', '#9a4a20', '#b8642c']),
+    cliff: R(['#100c10', '#1c1418', '#2a1c20', '#3a262a', '#4c3034', '#603c3e']),
+    moss: R(['#6a1a0a', '#9a2c0c', '#c84410', '#f06a1a', '#ff9a30', '#ffd070']),
+    liquid: R(['#8a1c08', '#b83010', '#e04e14', '#ff7a20', '#ffaa40', '#ffe08a']), foam: R(['#ffb040', '#ffd070', '#fff0b8']), glowLiquid: true,
+    trees: { a: 'deadTree', b: 'obsidianSpire', accent: ['emberTree'] }, bush: 'charBush', flowerBush: 'emberBush', rock: 'basalt', tuft: 'ashTuft', tuftDark: 'ashTuft', reed: 'ashTuft',
+    flowers: ['#ff8a30', '#ffcc50'], glowFlowers: true, cliffStyle: 'lavaVein',
+    light: { day: 'rgb(170,120,110)', dusk: 'rgb(90,54,60)', grade: 'rgba(255,100,40,.22)', vignette: .72, alwaysLights: true },
+    particles: 'ember',
+  },
+  underwater: {
+    cliffStyle: 'natural',
+    stairStyle: 'ramp',
+    ground: R(['#3c5a6a', '#4e7078', '#62868a', '#7a9c98', '#94b2a6', '#b0c8b4']),
+    dirt: R(['#34485a', '#445a6a', '#56707c', '#6c868e', '#869ea2']),
+    cliff: R(['#18283a', '#22384c', '#2e4a60', '#3c5e74', '#4e7488', '#648c9e']),
+    moss: R(['#1e4a3a', '#28624a', '#347c5a', '#48986c', '#62b280', '#86cc98']),
+    liquid: R(['#081a30', '#0c2640', '#123452', '#1a4666', '#26587a', '#3a6e90']), foam: R(['#5ab4c8', '#8ad0dc', '#c0eaf0']),
+    trees: { a: 'kelp', b: 'coral', accent: ['coralFan'] }, bush: 'seaBush', flowerBush: 'coral', rock: 'reefRock', tuft: 'seagrass', tuftDark: 'seagrass', reed: 'seagrass',
+    flowers: ['#ff8a9a', '#ffd08a', '#c8a0ff'],
+    light: { day: 'rgb(150,200,220)', dusk: 'rgb(60,90,140)', grade: 'rgba(60,180,210,.25)', vignette: .7, caustics: true },
+    particles: 'bubble',
+  },
+  asgard: {
+    stairStyle: 'stone',
+    ground: R(['#6a7a3a', '#86964a', '#a2b05a', '#bcc86e', '#d4dc88', '#eaeea8']),
+    dirt: R(['#8a7a5a', '#a89670', '#c4b288', '#dccca4', '#f0e4c4']),
+    cliff: R(['#6a6478', '#847e92', '#a09aac', '#bcb6c6', '#d6d2de', '#eeeaf4']),
+    moss: R(['#c89a2a', '#dcb03a', '#ecc650', '#f6d86c', '#fce68e', '#fff4bc']),
+    liquid: R(['#b4c4e0', '#c8d4ec', '#d8e2f4', '#e6ecf8', '#f0f4fc', '#ffffff']), foam: R(['#e8eef8', '#f4f8fc', '#ffffff']), cloudLiquid: true,
+    trees: { a: 'goldTree', b: 'whiteTree', accent: ['goldTree'] }, bush: 'goldBush', flowerBush: 'goldBush', rock: 'marbleRock', tuft: 'paleTuft', tuftDark: 'paleTuft', reed: 'paleTuft',
+    flowers: ['#fff4bc', '#ffffff', '#bcd8ff'], cliffStyle: 'marble',
+    light: { day: 'rgb(255,248,232)', dusk: 'rgb(150,120,180)', grade: 'rgba(255,220,150,.3)', vignette: .45 },
+    particles: 'mote',
+  },
+};
+BIOMES.city = { ...BIOMES.forest, stairStyle: 'stone', cliffStyle: 'blocks', light: { ...BIOMES.forest.light, vignette: .58 } };
+export const biomeOf = scene => BIOMES[scene?.biome] || BIOMES.forest;

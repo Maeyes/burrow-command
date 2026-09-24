@@ -1,0 +1,46 @@
+{
+  "object": {
+    "id": "c56bcbf1-11ff-462f-b2c5-7b19de4f41a7",
+    "name": "base",
+    "prompt": "Create an 8-frame spinning MELEE SLASH animation for a 64x64 pixel RPG hero. Transparent background, true handcrafted pixel art, crisp hard pixels, no blur, no text, no character. 96x96 fixed canvas and center pivot. This is a PHYSICAL WEAPON ATTACK, NOT a vortex. Show 2-3 separate curved blade trails rotating around the hero, with LARGE EMPTY TRANSPARENT SPACE in the center so the hero remains visible. Frames: 1 short blade trail begins, 2 second curved slash appears, 3 arcs rotate around hero, 4 multiple fast weapon trails, 5 peak impact with 3 separated crescent slashes surrounding hero, 6 trails break into small sharp fragments, 7 fragments fade, 8 disappear. White blade edges with small cyan highlights. Thin sharp crescents, strong directional motion. NEVER draw a filled circle, spiral, whirlpool, tornado, portal, disc, magic ring, water, or solid center. NOT HERO JUST FX",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 1,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "Create_an_8-frame_spinning_MEL.png",
+    "cell_size": {
+      "width": 64,
+      "height": 64
+    },
+    "sheet_size": {
+      "width": 576,
+      "height": 128
+    },
+    "columns": 9,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 1,
+        "directions": [
+          "unknown"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "Frames: 1 short blade trail begins, 2 second curve",
+        "animation_group_id": "40cdd3a3-c2e3-48c6-907d-20652f6f37cc",
+        "direction": "unknown"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-09-22T15:42:24.542472+00:00"
+}

@@ -1,0 +1,7 @@
+[
+  {"id":"anatomy-proportion","score":0.89,"visible":true,"notes":"The 1.0 m model preserves the oversized rounded head, compact pear torso, short limbs, and rounded feet. The torso is slightly slimmer than the painted front view."},
+  {"id":"face-landmark-placement","score":0.90,"visible":true,"notes":"Large warm reddish-brown eyes, tiny pink nose, muzzle, brow marks, and restrained neutral mouth remain legible at gameplay distance."},
+  {"id":"pose-silhouette","score":0.90,"visible":true,"notes":"Neutral upright stance, short arms, short legs, and broad feet read clearly in front and gameplay cameras."},
+  {"id":"outfit-and-palette","score":0.94,"visible":true,"notes":"No clothing or equipment was introduced; cream, pink, brown, dark eye, and pink nose regions follow the locked palette."},
+  {"id":"floppy-ear-identity","score":0.90,"visible":true,"notes":"Long thick ears attach high, bow outward, hang beside the body, and remain the dominant rabbit silhouette feature in all orbit views."}
+]

@@ -1,0 +1,104 @@
+{
+  "training-straw-dummy": {
+    "load": "pass",
+    "bytes": 150348,
+    "meshCount": 14,
+    "triangles": 2708,
+    "dimensionsBlenderXYZ": [
+      1.43,
+      0.6309,
+      1.69
+    ],
+    "groundMinZ": 0.0,
+    "roots": [
+      "monster_training_straw_dummy"
+    ],
+    "materials": [
+      "Living marks",
+      "Straw",
+      "Training cloth",
+      "Wood warm",
+      "Wood worn"
+    ],
+    "cameras": 0,
+    "lights": 0,
+    "animations": 0
+  },
+  "training-rat": {
+    "load": "pass",
+    "bytes": 97708,
+    "meshCount": 15,
+    "triangles": 2596,
+    "dimensionsBlenderXYZ": [
+      1.3274,
+      1.6384,
+      1.0
+    ],
+    "groundMinZ": 0.01,
+    "roots": [
+      "monster_training_rat"
+    ],
+    "materials": [
+      "Rat eyes",
+      "Rat fur",
+      "Rat muzzle",
+      "Rat pink",
+      "Rat teeth"
+    ],
+    "cameras": 0,
+    "lights": 0,
+    "animations": 0
+  },
+  "old-wooden-instructor": {
+    "load": "pass",
+    "bytes": 218340,
+    "meshCount": 23,
+    "triangles": 4048,
+    "dimensionsBlenderXYZ": [
+      1.26,
+      0.78,
+      1.6
+    ],
+    "groundMinZ": 0.0,
+    "roots": [
+      "monster_old_wooden_instructor"
+    ],
+    "materials": [
+      "Aged wood",
+      "Cut wood",
+      "Instructor eye sockets",
+      "Instructor magic",
+      "Moss",
+      "Rope"
+    ],
+    "cameras": 0,
+    "lights": 0,
+    "animations": 0
+  },
+  "training-yard-guardian": {
+    "load": "pass",
+    "bytes": 265504,
+    "meshCount": 26,
+    "triangles": 4948,
+    "dimensionsBlenderXYZ": [
+      1.82,
+      1.13,
+      1.995
+    ],
+    "groundMinZ": 0.0,
+    "roots": [
+      "monster_training_yard_guardian"
+    ],
+    "materials": [
+      "Guardian brass",
+      "Guardian dark wood",
+      "Guardian eye sockets",
+      "Guardian iron",
+      "Guardian magic",
+      "Guardian wood"
+    ],
+    "cameras": 0,
+    "lights": 0,
+    "animations": 0
+  }
+}

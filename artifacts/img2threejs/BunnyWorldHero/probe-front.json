@@ -1,0 +1,13 @@
+{
+  "path": "C:\\bunny-world\\artifacts\\img2threejs\\BunnyWorldHero\\reference-front-neutral.png",
+  "type": "png",
+  "bytes": 214320,
+  "width": 385,
+  "height": 365,
+  "aspectRatio": 1.0547945205479452,
+  "technicalSuitability": "conditional",
+  "warnings": [
+    "low resolution; small geometry/material details may be unreliable"
+  ],
+  "note": "This is only technical image probing. Semantic object suitability still requires visual inspection."
+}

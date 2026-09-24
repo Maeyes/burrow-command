@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.log
+.env.local
+.DS_Store
+_snapshots/
+_tmp-*/
+_tmp-*
+.tmp-*
+.vite-dimraeth-check/
+.serena/
+.serena-test.log
+.test.txt
+test-out.txt
+test-result.txt
+*.zip

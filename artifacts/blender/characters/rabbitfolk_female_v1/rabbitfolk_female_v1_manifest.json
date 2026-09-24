@@ -1,0 +1,34 @@
+{
+  "asset": "Rabbitfolk Female V1",
+  "blend": "C:\\bunny-world\\artifacts\\blender\\characters\\rabbitfolk_female_v1\\rabbitfolk_female_v1.blend",
+  "glb": "C:\\bunny-world\\artifacts\\blender\\characters\\rabbitfolk_female_v1\\rabbitfolk_female_v1.glb",
+  "glbBytes": 718388,
+  "root": "Rabbitfolk_Female",
+  "pose": "A-pose",
+  "forwardBlender": "-Y",
+  "groundMinZ": -0.1492,
+  "dimensionsBlenderXYZ": [
+    1.258,
+    1.089,
+    2.3013
+  ],
+  "triangles": 21396,
+  "meshObjects": 80,
+  "materials": [
+    "BootDark",
+    "DaggerGrip",
+    "DaggerMetal",
+    "EyeBlueDark",
+    "EyeWhite",
+    "HairSilver",
+    "InnerEar",
+    "OutfitAccent",
+    "OutfitBlue",
+    "OutfitLight",
+    "Skin"
+  ],
+  "armatures": 1,
+  "animationClips": 5,
+  "cameras": 0,
+  "lights": 0
+}

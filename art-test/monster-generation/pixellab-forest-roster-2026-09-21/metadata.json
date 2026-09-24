@@ -1,0 +1,1302 @@
+{
+  "objects": [
+    {
+      "id": "d61934de-6470-49e9-bb0a-d8f01d0cf4e2",
+      "name": "base",
+      "prompt": "A large cute ancient forest guardian boss for a fantasy pixel-art RPG, a massive squat living tree creature called Thornroot Warden. 64x64 pixel art character sprite, low top-down isometric-friendly view.\nThick ancient stump-like body, oversized twisted branch arms, several large roots forming short sturdy legs, moss and small green leaves growing naturally across the bark, one small broken branch on the crown, and a glowing emerald nature core embedded in the center of its trunk.\nThe creature should feel ancient, heavy and powerful while still charming and readable in the cute Bunny World monster style. Large broad silhouette, approximately 2\u20132.5 times the visual mass of a normal monster. Short and wide rather than tall and humanoid.\nDark warm brown bark, muted forest greens, small bright emerald accents from the nature core. Strong clean pixel clusters, limited palette, crisp intentional pixels, readable facial expression and silhouette at gameplay scale.\nSame visual language and pixel density as cute compact fantasy RPG monsters, but genuinely larger and more detailed because this is a MAP BOSS.\nNo weapon, no armor, no scenery, no ground, no shadow, no particles, no UI, transparent background.\nIMPORTANT: Do not make it look like a generic tall humanoid Ent. It must be a squat, chunky, root-legged ancient tree beast with an oversized boss silhouette.",
+      "size": {
+        "width": 64,
+        "height": 64
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/A_large_cute_ancient_forest_gu.png"
+      },
+      "animations": {
+        "Animate_this_exact_character_with_a_slow_heavy_8-": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_000.png",
+                "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_001.png",
+                "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_002.png",
+                "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_003.png",
+                "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_004.png",
+                "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_005.png",
+                "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_006.png",
+                "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_007.png",
+                "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "Create_an_8-frame_ATTACK_animation_for_this_exact": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_000.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_001.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_002.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_003.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_004.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_005.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_006.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_007.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "de9ea3b2-0d27-4d6c-a9a1-b484d924e9b5",
+      "name": "base",
+      "prompt": "ORIGINAL Mushroom Brute elite enemy for Bunny World, a larger and heavier relative of the supplied Sporekin reference. Oversized broad mushroom cap, chunky compact woodland body, short powerful arms and legs, visibly heavier elite silhouette while retaining the exact same restrained tiny pixel-art family. Cute but sturdy and hostile, simple readable face, sparse crisp pixel clusters, no armor, no weapon, no clutter, no excessive spots or detail. Side-facing right, walk-ready contact pose, stable feet. Use the supplied ACTUAL Goblin and Skeleton pixels for pixel density and gameplay readability and the supplied Sporekin for family identity. Fill more of the 32x32 canvas than the normal monsters. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 64,
+        "height": 64
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_Mushroom_Brute_elite_enemy_for_Bunny_Worl.png"
+      },
+      "animations": {
+        "Walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk/unknown/frame_000.png",
+                "animations/Walk/unknown/frame_001.png",
+                "animations/Walk/unknown/frame_002.png",
+                "animations/Walk/unknown/frame_003.png",
+                "animations/Walk/unknown/frame_004.png",
+                "animations/Walk/unknown/frame_005.png",
+                "animations/Walk/unknown/frame_006.png",
+                "animations/Walk/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        },
+        "Attack": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Attack/unknown/frame_000.png",
+                "animations/Attack/unknown/frame_001.png",
+                "animations/Attack/unknown/frame_002.png",
+                "animations/Attack/unknown/frame_003.png",
+                "animations/Attack/unknown/frame_004.png",
+                "animations/Attack/unknown/frame_005.png",
+                "animations/Attack/unknown/frame_006.png",
+                "animations/Attack/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        },
+        "The_character_shifts_weight_into_a_low_grounded_c": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_000.png",
+                "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_001.png",
+                "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_002.png",
+                "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_003.png",
+                "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_004.png",
+                "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_005.png",
+                "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_006.png",
+                "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_007.png",
+                "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "d6faa070-d52f-4980-954e-f519194755c6",
+      "name": "base",
+      "prompt": "ORIGINAL tiny stout Acorn Guard enemy for Bunny World. Strong acorn silhouette with a large textured acorn-cap head, compact sturdy body, short legs, and one tiny simple leaf-shaped shield held at the side. Miniature woodland guardian, cute but sturdy and hostile. Shield must remain small and readable; no weapon, armor clutter or excessive texture. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_stout_Acorn_Guar.png"
+      },
+      "animations": {
+        "Walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk/unknown/frame_000.png",
+                "animations/Walk/unknown/frame_001.png",
+                "animations/Walk/unknown/frame_002.png",
+                "animations/Walk/unknown/frame_003.png",
+                "animations/Walk/unknown/frame_004.png",
+                "animations/Walk/unknown/frame_005.png",
+                "animations/Walk/unknown/frame_006.png",
+                "animations/Walk/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        },
+        "Walk_Grounded": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk_Grounded/unknown/frame_000.png",
+                "animations/Walk_Grounded/unknown/frame_001.png",
+                "animations/Walk_Grounded/unknown/frame_002.png",
+                "animations/Walk_Grounded/unknown/frame_003.png",
+                "animations/Walk_Grounded/unknown/frame_004.png",
+                "animations/Walk_Grounded/unknown/frame_005.png",
+                "animations/Walk_Grounded/unknown/frame_006.png",
+                "animations/Walk_Grounded/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "170cd394-3827-4e75-9ae0-e6f673101164",
+      "name": "base",
+      "prompt": "ORIGINAL tiny stout Acorn Guard enemy for Bunny World. Strong acorn silhouette with a large textured acorn-cap head, compact sturdy body, short legs, and one tiny simple leaf-shaped shield held at the side. Miniature woodland guardian, cute but sturdy and hostile. Shield must remain small and readable; no weapon, armor clutter or excessive texture. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_stout_Acorn_Guar_2.png"
+      },
+      "animations": {
+        "Walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk/unknown/frame_000.png",
+                "animations/Walk/unknown/frame_001.png",
+                "animations/Walk/unknown/frame_002.png",
+                "animations/Walk/unknown/frame_003.png",
+                "animations/Walk/unknown/frame_004.png",
+                "animations/Walk/unknown/frame_005.png",
+                "animations/Walk/unknown/frame_006.png",
+                "animations/Walk/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        },
+        "Walk_Grounded": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk_Grounded/unknown/frame_000.png",
+                "animations/Walk_Grounded/unknown/frame_001.png",
+                "animations/Walk_Grounded/unknown/frame_002.png",
+                "animations/Walk_Grounded/unknown/frame_003.png",
+                "animations/Walk_Grounded/unknown/frame_004.png",
+                "animations/Walk_Grounded/unknown/frame_005.png",
+                "animations/Walk_Grounded/unknown/frame_006.png",
+                "animations/Walk_Grounded/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "e1458e4a-51db-4d86-a654-00e314524066",
+      "name": "base",
+      "prompt": "ORIGINAL tiny hostile woodland Mossblob for Bunny World. Small round soft chunky moss body, two distinct tiny short feet, two bright expressive eyes, only two or three small leaves on top. Cute charming fantasy enemy, simple readable silhouette, not a slime, not humanoid. Extremely restrained detail and crisp native pixel clusters. Match the supplied ACTUAL Goblin/Skeleton pixel references only for exact tiny gameplay visual scale, pixel density, compact proportions, and feet contact. Side-facing right, walk-ready contact pose. No ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_hostile_woodland.png"
+      },
+      "animations": {
+        "Walk_Grounded": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk_Grounded/unknown/frame_000.png",
+                "animations/Walk_Grounded/unknown/frame_001.png",
+                "animations/Walk_Grounded/unknown/frame_002.png",
+                "animations/Walk_Grounded/unknown/frame_003.png",
+                "animations/Walk_Grounded/unknown/frame_004.png",
+                "animations/Walk_Grounded/unknown/frame_005.png",
+                "animations/Walk_Grounded/unknown/frame_006.png",
+                "animations/Walk_Grounded/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        },
+        "seamless_cute_bouncy_eight-frame_walk_cycle_in_pla": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_000.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_001.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_002.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_003.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_004.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_005.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_006.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_007.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "ad4ab65d-6e54-4659-a009-f4bbaba98c96",
+      "name": "base",
+      "prompt": "ORIGINAL tiny hostile woodland Mossblob for Bunny World. Small round soft chunky moss body, two distinct tiny short feet, two bright expressive eyes, only two or three small leaves on top. Cute charming fantasy enemy, simple readable silhouette, not a slime, not humanoid. Extremely restrained detail and crisp native pixel clusters. Match the supplied ACTUAL Goblin/Skeleton pixel references only for exact tiny gameplay visual scale, pixel density, compact proportions, and feet contact. Side-facing right, walk-ready contact pose. No ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_hostile_woodland_2.png"
+      },
+      "animations": {
+        "Walk_Grounded": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk_Grounded/unknown/frame_000.png",
+                "animations/Walk_Grounded/unknown/frame_001.png",
+                "animations/Walk_Grounded/unknown/frame_002.png",
+                "animations/Walk_Grounded/unknown/frame_003.png",
+                "animations/Walk_Grounded/unknown/frame_004.png",
+                "animations/Walk_Grounded/unknown/frame_005.png",
+                "animations/Walk_Grounded/unknown/frame_006.png",
+                "animations/Walk_Grounded/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        },
+        "seamless_cute_bouncy_eight-frame_walk_cycle_in_pla": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_000.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_001.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_002.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_003.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_004.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_005.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_006.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_007.png",
+                "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "7e218d15-463f-4aee-ac04-cbbbc1ad13ce",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mushroom forest enemy named Sporekin for Bunny World. Very short legs, compact little body underneath an oversized but simple mushroom cap, two small bright eyes and a slightly mischievous expression. Cute rather than horrifying. Strong instantly readable mushroom silhouette at tiny gameplay scale; restrained detail, no spots overload, no clothing or weapon. Match the supplied ACTUAL Goblin/Skeleton pixel references only for exact tiny gameplay visual scale, compact proportions, sparse crisp pixel clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mushroom_forest.png"
+      },
+      "animations": {
+        "Walk_Grounded": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk_Grounded/unknown/frame_000.png",
+                "animations/Walk_Grounded/unknown/frame_001.png",
+                "animations/Walk_Grounded/unknown/frame_002.png",
+                "animations/Walk_Grounded/unknown/frame_003.png",
+                "animations/Walk_Grounded/unknown/frame_004.png",
+                "animations/Walk_Grounded/unknown/frame_005.png",
+                "animations/Walk_Grounded/unknown/frame_006.png",
+                "animations/Walk_Grounded/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        },
+        "Walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk/unknown/frame_000.png",
+                "animations/Walk/unknown/frame_001.png",
+                "animations/Walk/unknown/frame_002.png",
+                "animations/Walk/unknown/frame_003.png",
+                "animations/Walk/unknown/frame_004.png",
+                "animations/Walk/unknown/frame_005.png",
+                "animations/Walk/unknown/frame_006.png",
+                "animations/Walk/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "27889cea-0c6c-4173-8ae5-79bec44d6c23",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mushroom forest enemy named Sporekin for Bunny World. Very short legs, compact little body underneath an oversized but simple mushroom cap, two small bright eyes and a slightly mischievous expression. Cute rather than horrifying. Strong instantly readable mushroom silhouette at tiny gameplay scale; restrained detail, no spots overload, no clothing or weapon. Match the supplied ACTUAL Goblin/Skeleton pixel references only for exact tiny gameplay visual scale, compact proportions, sparse crisp pixel clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mushroom_forest_2.png"
+      },
+      "animations": {
+        "Walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk/unknown/frame_000.png",
+                "animations/Walk/unknown/frame_001.png",
+                "animations/Walk/unknown/frame_002.png",
+                "animations/Walk/unknown/frame_003.png",
+                "animations/Walk/unknown/frame_004.png",
+                "animations/Walk/unknown/frame_005.png",
+                "animations/Walk/unknown/frame_006.png",
+                "animations/Walk/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "f574e1e4-26d4-4a44-8cd9-3d1a3ffbbb64",
+      "name": "base",
+      "prompt": "ORIGINAL tiny stout Acorn Guard enemy for Bunny World. Strong acorn silhouette with a large textured acorn-cap head, compact sturdy body, short legs, and one tiny simple leaf-shaped shield held at the side. Miniature woodland guardian, cute but sturdy and hostile. Shield must remain small and readable; no weapon, armor clutter or excessive texture. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_stout_Acorn_Guar_3.png"
+      },
+      "animations": {
+        "Seamless_sturdy_eight-frame_walk_cycle_in_place_fa": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_000.png",
+                "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_001.png",
+                "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_002.png",
+                "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_003.png",
+                "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_004.png",
+                "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_005.png",
+                "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_006.png",
+                "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_007.png",
+                "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "d0663ef3-8ed7-40d5-b8e8-151757d641ec",
+      "name": "base",
+      "prompt": "ORIGINAL tiny woodland Twig Imp enemy for Bunny World. Compact cute humanoid proportions with short limbs; head silhouette formed by only three or four small crooked twigs and a few restrained leaf pixels; two bright eyes visible beneath a dark wooden leafy face. Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal branch detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_woodland_Twig_Im.png"
+      },
+      "animations": {
+        "Walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk/unknown/frame_000.png",
+                "animations/Walk/unknown/frame_001.png",
+                "animations/Walk/unknown/frame_002.png",
+                "animations/Walk/unknown/frame_003.png",
+                "animations/Walk/unknown/frame_004.png",
+                "animations/Walk/unknown/frame_005.png",
+                "animations/Walk/unknown/frame_006.png",
+                "animations/Walk/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "3532df1f-9eb2-43f0-b2c5-01e457a0240f",
+      "name": "base",
+      "prompt": "ORIGINAL tiny woodland Twig Imp enemy for Bunny World. Compact cute humanoid proportions with short limbs; head silhouette formed by only three or four small crooked twigs and a few restrained leaf pixels; two bright eyes visible beneath a dark wooden leafy face. Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal branch detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_woodland_Twig_Im_2.png"
+      },
+      "animations": {
+        "Walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk/unknown/frame_000.png",
+                "animations/Walk/unknown/frame_001.png",
+                "animations/Walk/unknown/frame_002.png",
+                "animations/Walk/unknown/frame_003.png",
+                "animations/Walk/unknown/frame_004.png",
+                "animations/Walk/unknown/frame_005.png",
+                "animations/Walk/unknown/frame_006.png",
+                "animations/Walk/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "f5165878-f570-47cd-b7f9-e658f6092842",
+      "name": "base",
+      "prompt": "ORIGINAL tiny woodland Twig Imp enemy for Bunny World. Compact cute humanoid proportions with short limbs; head silhouette formed by only three or four small crooked twigs and a few restrained leaf pixels; two bright eyes visible beneath a dark wooden leafy face. Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal branch detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_woodland_Twig_Im_3.png"
+      },
+      "animations": {
+        "Seamless_playful_eight-frame_walk_cycle_in_place_f": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_000.png",
+                "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_001.png",
+                "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_002.png",
+                "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_003.png",
+                "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_004.png",
+                "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_005.png",
+                "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_006.png",
+                "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_007.png",
+                "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "b8807c1b-845f-40a7-a1f0-05e7b8dd3f94",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mushroom forest enemy named Sporekin for Bunny World. Very short legs, compact little body underneath an oversized but simple mushroom cap, two small bright eyes and a slightly mischievous expression. Cute rather than horrifying. Strong instantly readable mushroom silhouette at tiny gameplay scale; restrained detail, no spots overload, no clothing or weapon. Match the supplied ACTUAL Goblin/Skeleton pixel references only for exact tiny gameplay visual scale, compact proportions, sparse crisp pixel clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mushroom_forest_3.png"
+      },
+      "animations": {
+        "Walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk/unknown/frame_000.png",
+                "animations/Walk/unknown/frame_001.png",
+                "animations/Walk/unknown/frame_002.png",
+                "animations/Walk/unknown/frame_003.png",
+                "animations/Walk/unknown/frame_004.png",
+                "animations/Walk/unknown/frame_005.png",
+                "animations/Walk/unknown/frame_006.png",
+                "animations/Walk/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "d8b52994-74ed-4850-a177-e744ee469460",
+      "name": "base",
+      "prompt": "ORIGINAL tiny hostile woodland Mossblob for Bunny World. Small round soft chunky moss body, two distinct tiny short feet, two bright expressive eyes, only two or three small leaves on top. Cute charming fantasy enemy, simple readable silhouette, not a slime, not humanoid. Extremely restrained detail and crisp native pixel clusters. Match the supplied ACTUAL Goblin/Skeleton pixel references only for exact tiny gameplay visual scale, pixel density, compact proportions, and feet contact. Side-facing right, walk-ready contact pose. No ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_hostile_woodland_3.png"
+      },
+      "animations": {
+        "Walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk/unknown/frame_000.png",
+                "animations/Walk/unknown/frame_001.png",
+                "animations/Walk/unknown/frame_002.png",
+                "animations/Walk/unknown/frame_003.png",
+                "animations/Walk/unknown/frame_004.png",
+                "animations/Walk/unknown/frame_005.png",
+                "animations/Walk/unknown/frame_006.png",
+                "animations/Walk/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "group_id": "b87c9fff-7867-47c1-b5af-e2a6551a56b6",
+      "folder": "objects/A_large_cute_ancient_forest_gu",
+      "objects": [
+        {
+          "id": "d61934de-6470-49e9-bb0a-d8f01d0cf4e2",
+          "name": "base",
+          "prompt": "A large cute ancient forest guardian boss for a fantasy pixel-art RPG, a massive squat living tree creature called Thornroot Warden. 64x64 pixel art character sprite, low top-down isometric-friendly view.\nThick ancient stump-like body, oversized twisted branch arms, several large roots forming short sturdy legs, moss and small green leaves growing naturally across the bark, one small broken branch on the crown, and a glowing emerald nature core embedded in the center of its trunk.\nThe creature should feel ancient, heavy and powerful while still charming and readable in the cute Bunny World monster style. Large broad silhouette, approximately 2\u20132.5 times the visual mass of a normal monster. Short and wide rather than tall and humanoid.\nDark warm brown bark, muted forest greens, small bright emerald accents from the nature core. Strong clean pixel clusters, limited palette, crisp intentional pixels, readable facial expression and silhouette at gameplay scale.\nSame visual language and pixel density as cute compact fantasy RPG monsters, but genuinely larger and more detailed because this is a MAP BOSS.\nNo weapon, no armor, no scenery, no ground, no shadow, no particles, no UI, transparent background.\nIMPORTANT: Do not make it look like a generic tall humanoid Ent. It must be a squat, chunky, root-legged ancient tree beast with an oversized boss silhouette.",
+          "size": {
+            "width": 64,
+            "height": 64
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/A_large_cute_ancient_forest_gu.png"
+          },
+          "animations": {
+            "Animate_this_exact_character_with_a_slow_heavy_8-": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_000.png",
+                    "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_001.png",
+                    "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_002.png",
+                    "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_003.png",
+                    "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_004.png",
+                    "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_005.png",
+                    "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_006.png",
+                    "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_007.png",
+                    "animations/Animate_this_exact_character_with_a_slow_heavy_8-/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "Create_an_8-frame_ATTACK_animation_for_this_exact": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_000.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_001.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_002.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_003.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_004.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_005.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_006.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_007.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "a093904a-685e-484f-9752-72c90ed0a19e",
+      "folder": "objects/ORIGINAL_Mushroom_Brute_elite_enemy_for_Bunny_Worl",
+      "objects": [
+        {
+          "id": "de9ea3b2-0d27-4d6c-a9a1-b484d924e9b5",
+          "name": "base",
+          "prompt": "ORIGINAL Mushroom Brute elite enemy for Bunny World, a larger and heavier relative of the supplied Sporekin reference. Oversized broad mushroom cap, chunky compact woodland body, short powerful arms and legs, visibly heavier elite silhouette while retaining the exact same restrained tiny pixel-art family. Cute but sturdy and hostile, simple readable face, sparse crisp pixel clusters, no armor, no weapon, no clutter, no excessive spots or detail. Side-facing right, walk-ready contact pose, stable feet. Use the supplied ACTUAL Goblin and Skeleton pixels for pixel density and gameplay readability and the supplied Sporekin for family identity. Fill more of the 32x32 canvas than the normal monsters. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 64,
+            "height": 64
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_Mushroom_Brute_elite_enemy_for_Bunny_Worl.png"
+          },
+          "animations": {
+            "Walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk/unknown/frame_000.png",
+                    "animations/Walk/unknown/frame_001.png",
+                    "animations/Walk/unknown/frame_002.png",
+                    "animations/Walk/unknown/frame_003.png",
+                    "animations/Walk/unknown/frame_004.png",
+                    "animations/Walk/unknown/frame_005.png",
+                    "animations/Walk/unknown/frame_006.png",
+                    "animations/Walk/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            },
+            "Attack": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Attack/unknown/frame_000.png",
+                    "animations/Attack/unknown/frame_001.png",
+                    "animations/Attack/unknown/frame_002.png",
+                    "animations/Attack/unknown/frame_003.png",
+                    "animations/Attack/unknown/frame_004.png",
+                    "animations/Attack/unknown/frame_005.png",
+                    "animations/Attack/unknown/frame_006.png",
+                    "animations/Attack/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            },
+            "The_character_shifts_weight_into_a_low_grounded_c": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_000.png",
+                    "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_001.png",
+                    "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_002.png",
+                    "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_003.png",
+                    "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_004.png",
+                    "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_005.png",
+                    "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_006.png",
+                    "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_007.png",
+                    "animations/The_character_shifts_weight_into_a_low_grounded_c/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "6bdf863a-19b0-426e-bce3-943c72e3bb7a",
+      "folder": "objects/ORIGINAL_tiny_stout_Acorn_Guar",
+      "objects": [
+        {
+          "id": "d6faa070-d52f-4980-954e-f519194755c6",
+          "name": "base",
+          "prompt": "ORIGINAL tiny stout Acorn Guard enemy for Bunny World. Strong acorn silhouette with a large textured acorn-cap head, compact sturdy body, short legs, and one tiny simple leaf-shaped shield held at the side. Miniature woodland guardian, cute but sturdy and hostile. Shield must remain small and readable; no weapon, armor clutter or excessive texture. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_stout_Acorn_Guar.png"
+          },
+          "animations": {
+            "Walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk/unknown/frame_000.png",
+                    "animations/Walk/unknown/frame_001.png",
+                    "animations/Walk/unknown/frame_002.png",
+                    "animations/Walk/unknown/frame_003.png",
+                    "animations/Walk/unknown/frame_004.png",
+                    "animations/Walk/unknown/frame_005.png",
+                    "animations/Walk/unknown/frame_006.png",
+                    "animations/Walk/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            },
+            "Walk_Grounded": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk_Grounded/unknown/frame_000.png",
+                    "animations/Walk_Grounded/unknown/frame_001.png",
+                    "animations/Walk_Grounded/unknown/frame_002.png",
+                    "animations/Walk_Grounded/unknown/frame_003.png",
+                    "animations/Walk_Grounded/unknown/frame_004.png",
+                    "animations/Walk_Grounded/unknown/frame_005.png",
+                    "animations/Walk_Grounded/unknown/frame_006.png",
+                    "animations/Walk_Grounded/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "55d1d2df-1ea9-4fa5-a794-9edc6a54f5af",
+      "folder": "objects/ORIGINAL_tiny_stout_Acorn_Guar_2",
+      "objects": [
+        {
+          "id": "170cd394-3827-4e75-9ae0-e6f673101164",
+          "name": "base",
+          "prompt": "ORIGINAL tiny stout Acorn Guard enemy for Bunny World. Strong acorn silhouette with a large textured acorn-cap head, compact sturdy body, short legs, and one tiny simple leaf-shaped shield held at the side. Miniature woodland guardian, cute but sturdy and hostile. Shield must remain small and readable; no weapon, armor clutter or excessive texture. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_stout_Acorn_Guar_2.png"
+          },
+          "animations": {
+            "Walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk/unknown/frame_000.png",
+                    "animations/Walk/unknown/frame_001.png",
+                    "animations/Walk/unknown/frame_002.png",
+                    "animations/Walk/unknown/frame_003.png",
+                    "animations/Walk/unknown/frame_004.png",
+                    "animations/Walk/unknown/frame_005.png",
+                    "animations/Walk/unknown/frame_006.png",
+                    "animations/Walk/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            },
+            "Walk_Grounded": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk_Grounded/unknown/frame_000.png",
+                    "animations/Walk_Grounded/unknown/frame_001.png",
+                    "animations/Walk_Grounded/unknown/frame_002.png",
+                    "animations/Walk_Grounded/unknown/frame_003.png",
+                    "animations/Walk_Grounded/unknown/frame_004.png",
+                    "animations/Walk_Grounded/unknown/frame_005.png",
+                    "animations/Walk_Grounded/unknown/frame_006.png",
+                    "animations/Walk_Grounded/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "470a4e9a-073d-4af8-bd8e-288a16269adc",
+      "folder": "objects/ORIGINAL_tiny_hostile_woodland",
+      "objects": [
+        {
+          "id": "e1458e4a-51db-4d86-a654-00e314524066",
+          "name": "base",
+          "prompt": "ORIGINAL tiny hostile woodland Mossblob for Bunny World. Small round soft chunky moss body, two distinct tiny short feet, two bright expressive eyes, only two or three small leaves on top. Cute charming fantasy enemy, simple readable silhouette, not a slime, not humanoid. Extremely restrained detail and crisp native pixel clusters. Match the supplied ACTUAL Goblin/Skeleton pixel references only for exact tiny gameplay visual scale, pixel density, compact proportions, and feet contact. Side-facing right, walk-ready contact pose. No ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_hostile_woodland.png"
+          },
+          "animations": {
+            "Walk_Grounded": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk_Grounded/unknown/frame_000.png",
+                    "animations/Walk_Grounded/unknown/frame_001.png",
+                    "animations/Walk_Grounded/unknown/frame_002.png",
+                    "animations/Walk_Grounded/unknown/frame_003.png",
+                    "animations/Walk_Grounded/unknown/frame_004.png",
+                    "animations/Walk_Grounded/unknown/frame_005.png",
+                    "animations/Walk_Grounded/unknown/frame_006.png",
+                    "animations/Walk_Grounded/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            },
+            "seamless_cute_bouncy_eight-frame_walk_cycle_in_pla": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_000.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_001.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_002.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_003.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_004.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_005.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_006.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_007.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "2f90b070-28bb-43a7-886e-e171bef31c13",
+      "folder": "objects/ORIGINAL_tiny_hostile_woodland_2",
+      "objects": [
+        {
+          "id": "ad4ab65d-6e54-4659-a009-f4bbaba98c96",
+          "name": "base",
+          "prompt": "ORIGINAL tiny hostile woodland Mossblob for Bunny World. Small round soft chunky moss body, two distinct tiny short feet, two bright expressive eyes, only two or three small leaves on top. Cute charming fantasy enemy, simple readable silhouette, not a slime, not humanoid. Extremely restrained detail and crisp native pixel clusters. Match the supplied ACTUAL Goblin/Skeleton pixel references only for exact tiny gameplay visual scale, pixel density, compact proportions, and feet contact. Side-facing right, walk-ready contact pose. No ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_hostile_woodland_2.png"
+          },
+          "animations": {
+            "Walk_Grounded": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk_Grounded/unknown/frame_000.png",
+                    "animations/Walk_Grounded/unknown/frame_001.png",
+                    "animations/Walk_Grounded/unknown/frame_002.png",
+                    "animations/Walk_Grounded/unknown/frame_003.png",
+                    "animations/Walk_Grounded/unknown/frame_004.png",
+                    "animations/Walk_Grounded/unknown/frame_005.png",
+                    "animations/Walk_Grounded/unknown/frame_006.png",
+                    "animations/Walk_Grounded/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            },
+            "seamless_cute_bouncy_eight-frame_walk_cycle_in_pla": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_000.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_001.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_002.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_003.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_004.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_005.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_006.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_007.png",
+                    "animations/seamless_cute_bouncy_eight-frame_walk_cycle_in_pla/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "05a72c2c-d7ef-43cc-ba36-b01db70680b6",
+      "folder": "objects/ORIGINAL_tiny_mushroom_forest",
+      "objects": [
+        {
+          "id": "7e218d15-463f-4aee-ac04-cbbbc1ad13ce",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mushroom forest enemy named Sporekin for Bunny World. Very short legs, compact little body underneath an oversized but simple mushroom cap, two small bright eyes and a slightly mischievous expression. Cute rather than horrifying. Strong instantly readable mushroom silhouette at tiny gameplay scale; restrained detail, no spots overload, no clothing or weapon. Match the supplied ACTUAL Goblin/Skeleton pixel references only for exact tiny gameplay visual scale, compact proportions, sparse crisp pixel clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mushroom_forest.png"
+          },
+          "animations": {
+            "Walk_Grounded": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk_Grounded/unknown/frame_000.png",
+                    "animations/Walk_Grounded/unknown/frame_001.png",
+                    "animations/Walk_Grounded/unknown/frame_002.png",
+                    "animations/Walk_Grounded/unknown/frame_003.png",
+                    "animations/Walk_Grounded/unknown/frame_004.png",
+                    "animations/Walk_Grounded/unknown/frame_005.png",
+                    "animations/Walk_Grounded/unknown/frame_006.png",
+                    "animations/Walk_Grounded/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            },
+            "Walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk/unknown/frame_000.png",
+                    "animations/Walk/unknown/frame_001.png",
+                    "animations/Walk/unknown/frame_002.png",
+                    "animations/Walk/unknown/frame_003.png",
+                    "animations/Walk/unknown/frame_004.png",
+                    "animations/Walk/unknown/frame_005.png",
+                    "animations/Walk/unknown/frame_006.png",
+                    "animations/Walk/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "d1ed7fa0-4cf7-4fc4-8f14-78197ff2ced4",
+      "folder": "objects/ORIGINAL_tiny_mushroom_forest_2",
+      "objects": [
+        {
+          "id": "27889cea-0c6c-4173-8ae5-79bec44d6c23",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mushroom forest enemy named Sporekin for Bunny World. Very short legs, compact little body underneath an oversized but simple mushroom cap, two small bright eyes and a slightly mischievous expression. Cute rather than horrifying. Strong instantly readable mushroom silhouette at tiny gameplay scale; restrained detail, no spots overload, no clothing or weapon. Match the supplied ACTUAL Goblin/Skeleton pixel references only for exact tiny gameplay visual scale, compact proportions, sparse crisp pixel clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mushroom_forest_2.png"
+          },
+          "animations": {
+            "Walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk/unknown/frame_000.png",
+                    "animations/Walk/unknown/frame_001.png",
+                    "animations/Walk/unknown/frame_002.png",
+                    "animations/Walk/unknown/frame_003.png",
+                    "animations/Walk/unknown/frame_004.png",
+                    "animations/Walk/unknown/frame_005.png",
+                    "animations/Walk/unknown/frame_006.png",
+                    "animations/Walk/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "c1579e08-bb8a-406c-bc70-4158e6e579f2",
+      "folder": "objects/ORIGINAL_tiny_stout_Acorn_Guar_3",
+      "objects": [
+        {
+          "id": "f574e1e4-26d4-4a44-8cd9-3d1a3ffbbb64",
+          "name": "base",
+          "prompt": "ORIGINAL tiny stout Acorn Guard enemy for Bunny World. Strong acorn silhouette with a large textured acorn-cap head, compact sturdy body, short legs, and one tiny simple leaf-shaped shield held at the side. Miniature woodland guardian, cute but sturdy and hostile. Shield must remain small and readable; no weapon, armor clutter or excessive texture. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_stout_Acorn_Guar_3.png"
+          },
+          "animations": {
+            "Seamless_sturdy_eight-frame_walk_cycle_in_place_fa": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_000.png",
+                    "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_001.png",
+                    "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_002.png",
+                    "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_003.png",
+                    "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_004.png",
+                    "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_005.png",
+                    "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_006.png",
+                    "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_007.png",
+                    "animations/Seamless_sturdy_eight-frame_walk_cycle_in_place_fa/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "d39c45f6-f5c5-4d10-b7d7-871e4588268a",
+      "folder": "objects/ORIGINAL_tiny_woodland_Twig_Im",
+      "objects": [
+        {
+          "id": "d0663ef3-8ed7-40d5-b8e8-151757d641ec",
+          "name": "base",
+          "prompt": "ORIGINAL tiny woodland Twig Imp enemy for Bunny World. Compact cute humanoid proportions with short limbs; head silhouette formed by only three or four small crooked twigs and a few restrained leaf pixels; two bright eyes visible beneath a dark wooden leafy face. Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal branch detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_woodland_Twig_Im.png"
+          },
+          "animations": {
+            "Walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk/unknown/frame_000.png",
+                    "animations/Walk/unknown/frame_001.png",
+                    "animations/Walk/unknown/frame_002.png",
+                    "animations/Walk/unknown/frame_003.png",
+                    "animations/Walk/unknown/frame_004.png",
+                    "animations/Walk/unknown/frame_005.png",
+                    "animations/Walk/unknown/frame_006.png",
+                    "animations/Walk/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "a4906f81-92fc-4f72-860d-3e509c539bf3",
+      "folder": "objects/ORIGINAL_tiny_woodland_Twig_Im_2",
+      "objects": [
+        {
+          "id": "3532df1f-9eb2-43f0-b2c5-01e457a0240f",
+          "name": "base",
+          "prompt": "ORIGINAL tiny woodland Twig Imp enemy for Bunny World. Compact cute humanoid proportions with short limbs; head silhouette formed by only three or four small crooked twigs and a few restrained leaf pixels; two bright eyes visible beneath a dark wooden leafy face. Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal branch detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_woodland_Twig_Im_2.png"
+          },
+          "animations": {
+            "Walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk/unknown/frame_000.png",
+                    "animations/Walk/unknown/frame_001.png",
+                    "animations/Walk/unknown/frame_002.png",
+                    "animations/Walk/unknown/frame_003.png",
+                    "animations/Walk/unknown/frame_004.png",
+                    "animations/Walk/unknown/frame_005.png",
+                    "animations/Walk/unknown/frame_006.png",
+                    "animations/Walk/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "89dcdb36-00ad-4d35-a2ac-09b46f3be99d",
+      "folder": "objects/ORIGINAL_tiny_woodland_Twig_Im_3",
+      "objects": [
+        {
+          "id": "f5165878-f570-47cd-b7f9-e658f6092842",
+          "name": "base",
+          "prompt": "ORIGINAL tiny woodland Twig Imp enemy for Bunny World. Compact cute humanoid proportions with short limbs; head silhouette formed by only three or four small crooked twigs and a few restrained leaf pixels; two bright eyes visible beneath a dark wooden leafy face. Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal branch detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_woodland_Twig_Im_3.png"
+          },
+          "animations": {
+            "Seamless_playful_eight-frame_walk_cycle_in_place_f": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_000.png",
+                    "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_001.png",
+                    "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_002.png",
+                    "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_003.png",
+                    "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_004.png",
+                    "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_005.png",
+                    "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_006.png",
+                    "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_007.png",
+                    "animations/Seamless_playful_eight-frame_walk_cycle_in_place_f/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "63074851-d781-480a-aa55-a6fc3aa5cd43",
+      "folder": "objects/ORIGINAL_tiny_mushroom_forest_3",
+      "objects": [
+        {
+          "id": "b8807c1b-845f-40a7-a1f0-05e7b8dd3f94",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mushroom forest enemy named Sporekin for Bunny World. Very short legs, compact little body underneath an oversized but simple mushroom cap, two small bright eyes and a slightly mischievous expression. Cute rather than horrifying. Strong instantly readable mushroom silhouette at tiny gameplay scale; restrained detail, no spots overload, no clothing or weapon. Match the supplied ACTUAL Goblin/Skeleton pixel references only for exact tiny gameplay visual scale, compact proportions, sparse crisp pixel clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mushroom_forest_3.png"
+          },
+          "animations": {
+            "Walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk/unknown/frame_000.png",
+                    "animations/Walk/unknown/frame_001.png",
+                    "animations/Walk/unknown/frame_002.png",
+                    "animations/Walk/unknown/frame_003.png",
+                    "animations/Walk/unknown/frame_004.png",
+                    "animations/Walk/unknown/frame_005.png",
+                    "animations/Walk/unknown/frame_006.png",
+                    "animations/Walk/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "d3a8f8ca-9a64-4b9f-8a28-b99ad8396a7e",
+      "folder": "objects/ORIGINAL_tiny_hostile_woodland_3",
+      "objects": [
+        {
+          "id": "d8b52994-74ed-4850-a177-e744ee469460",
+          "name": "base",
+          "prompt": "ORIGINAL tiny hostile woodland Mossblob for Bunny World. Small round soft chunky moss body, two distinct tiny short feet, two bright expressive eyes, only two or three small leaves on top. Cute charming fantasy enemy, simple readable silhouette, not a slime, not humanoid. Extremely restrained detail and crisp native pixel clusters. Match the supplied ACTUAL Goblin/Skeleton pixel references only for exact tiny gameplay visual scale, pixel density, compact proportions, and feet contact. Side-facing right, walk-ready contact pose. No ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_hostile_woodland_3.png"
+          },
+          "animations": {
+            "Walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk/unknown/frame_000.png",
+                    "animations/Walk/unknown/frame_001.png",
+                    "animations/Walk/unknown/frame_002.png",
+                    "animations/Walk/unknown/frame_003.png",
+                    "animations/Walk/unknown/frame_004.png",
+                    "animations/Walk/unknown/frame_005.png",
+                    "animations/Walk/unknown/frame_006.png",
+                    "animations/Walk/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-09-21T06:00:40.815372"
+}

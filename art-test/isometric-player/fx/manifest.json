@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "provider": "PixelLab",
+  "integrationStatus": "generation-required",
+  "pixelPolicy": {
+    "background": "transparent-rgba",
+    "interpolation": "none",
+    "heroBakedIn": false,
+    "weaponBakedIn": false
+  },
+  "effects": [
+    {
+      "id": "sword-medium-slash-trail",
+      "category": "slash",
+      "status": "missing-pixellab-generation",
+      "path": "./slash/sword-medium-slash-trail/{direction}/",
+      "frameCount": 5,
+      "frameDimensions": { "width": 64, "height": 64 },
+      "anchor": "hero-feet-relative",
+      "directions": 8,
+      "mirror": false,
+      "playback": "one-shot"
+    },
+    {
+      "id": "sword-small-sharp-impact",
+      "category": "impact",
+      "status": "missing-pixellab-generation",
+      "path": "./impact/sword-small-sharp-impact/",
+      "frameCount": 5,
+      "frameDimensions": { "width": 32, "height": 32 },
+      "anchor": "center",
+      "directions": 1,
+      "playback": "one-shot"
+    }
+  ]
+}

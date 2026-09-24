@@ -1,0 +1,17 @@
+{
+ "t5DamageArmor": "35b28c20-f46e-4d86-91e8-f4c4204a8619",
+ "t5DamageCape": "9f235ace-163d-4060-a5f8-ea5065bfa02e",
+ "t5DamageShoes": "f15788dc-c0c8-4596-889f-41a5de26d9b9",
+ "t5DamageAccessoryLeft": "30ddbcbe-5b2c-4fbc-826b-cf0c137a6a2d",
+ "t5DamageAccessoryRight": "468115ac-9968-4107-a328-f8e5bb0eb830",
+ "t5TankArmor": "794d27b9-e076-4cb8-b596-6bd80b78955b",
+ "t5TankCape": "62615a7b-addb-4f0e-9b5b-5d675555cb52",
+ "t5TankShoes": "3b86cd5b-ca40-43fa-9c1e-5bfbea511b0c",
+ "t5TankAccessoryLeft": "814d5bfc-c9b1-4bf0-8101-77553bdbfed0",
+ "t5TankAccessoryRight": "db4883af-2861-4605-a221-8f759b5ac10b",
+ "t5SupportArmor": "123e22c6-c5e0-48c7-8a8a-47cba766a35a",
+ "t5SupportCape": "7edd8ebb-2ecb-4bbd-9609-70d569a9fde5",
+ "t5SupportShoes": "c41ceb48-962e-4ed0-88de-314182ab721b",
+ "t5SupportAccessoryLeft": "1f357252-7ce6-4dd1-acf9-ac0a19abfd1e",
+ "t5SupportAccessoryRight": "552d9fb4-3fe2-4a88-9500-c7022058eb2e"
+}

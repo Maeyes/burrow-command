@@ -1,0 +1,3 @@
+import { describe, expect, it } from 'vitest';
+import { SKILLS_V2 } from './skills';
+describe('Skill registry V2',()=>{ it('contains the locked 18 cores',()=>{ expect(Object.values(SKILLS_V2).filter(skill=>skill.kind!=='weapon')).toHaveLength(18); expect(SKILLS_V2.thunderStorm.scaling).toBe('magicalAttack'); expect(SKILLS_V2.piercingShot.compatibleWeaponFamilies).toEqual(['bow']); }); it('requires explicit auto policy for every registered core',()=>{ expect(Object.values(SKILLS_V2).every(skill=>skill.auto && typeof skill.auto.canAutoUse==='boolean')).toBe(true); }); });

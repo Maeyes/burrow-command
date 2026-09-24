@@ -1,0 +1,185 @@
+{
+  "ok": true,
+  "root": "art-test\\isometric-player\\combat\\dagger\\idle",
+  "errors": [],
+  "warnings": [
+    "Accidental text, character identity, weapon continuity, and impact readability require contact-sheet visual QA."
+  ],
+  "directions": {
+    "south": {
+      "frames": 4,
+      "bottomOpaqueY": [
+        61,
+        60,
+        60,
+        61
+      ],
+      "alphaBoxes": [
+        [
+          10,
+          1,
+          54,
+          62
+        ],
+        [
+          10,
+          2,
+          54,
+          61
+        ],
+        [
+          11,
+          4,
+          53,
+          61
+        ],
+        [
+          11,
+          2,
+          53,
+          62
+        ]
+      ]
+    },
+    "south-east": {
+      "frames": 4,
+      "bottomOpaqueY": [
+        61,
+        61,
+        61,
+        61
+      ],
+      "alphaBoxes": [
+        [
+          8,
+          1,
+          54,
+          62
+        ],
+        [
+          9,
+          2,
+          53,
+          62
+        ],
+        [
+          10,
+          3,
+          53,
+          62
+        ],
+        [
+          9,
+          2,
+          53,
+          62
+        ]
+      ]
+    },
+    "east": {
+      "frames": 4,
+      "bottomOpaqueY": [
+        62,
+        62,
+        62,
+        62
+      ],
+      "alphaBoxes": [
+        [
+          10,
+          1,
+          48,
+          63
+        ],
+        [
+          9,
+          2,
+          50,
+          63
+        ],
+        [
+          9,
+          2,
+          53,
+          63
+        ],
+        [
+          9,
+          2,
+          50,
+          63
+        ]
+      ]
+    },
+    "north-east": {
+      "frames": 4,
+      "bottomOpaqueY": [
+        62,
+        62,
+        62,
+        62
+      ],
+      "alphaBoxes": [
+        [
+          7,
+          1,
+          55,
+          63
+        ],
+        [
+          9,
+          1,
+          54,
+          63
+        ],
+        [
+          11,
+          1,
+          54,
+          63
+        ],
+        [
+          9,
+          1,
+          55,
+          63
+        ]
+      ]
+    },
+    "north": {
+      "frames": 4,
+      "bottomOpaqueY": [
+        62,
+        62,
+        62,
+        62
+      ],
+      "alphaBoxes": [
+        [
+          9,
+          1,
+          55,
+          63
+        ],
+        [
+          11,
+          2,
+          53,
+          63
+        ],
+        [
+          12,
+          4,
+          52,
+          63
+        ],
+        [
+          10,
+          3,
+          54,
+          63
+        ]
+      ]
+    }
+  }
+}

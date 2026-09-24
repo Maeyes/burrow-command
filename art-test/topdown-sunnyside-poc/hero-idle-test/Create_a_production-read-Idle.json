@@ -1,0 +1,77 @@
+{
+  "character": {
+    "id": "056bacf7-005c-4446-b882-5eb2ad8a4c06",
+    "name": "Idle",
+    "prompt": "Create a production-ready 8-frame pixel-art sword attack sprite sheet for a top-down 3/4 fantasy RPG.Character: small compact shadow rabbit warrior, black/near-black body, long upright ears, glowing white eyes, dark purple-gray scarf, short silver sword. Cute but deadly, simple readable silhouette, sized like a small classic RPG character.Perspective: full top-down / 3/4 top-down RPG view, NOT isometric, NOT side-view. Facing RIGHT in every frame. Show top of head and shoulders.Animation. Feet pivot fixed at exactly the same position. Smooth continuous animation. No overlap.Crisp pixel art, limited palette, strong silhouette, pale slash FX.TRUE TRANSPARENT BACKGROUND. No checkerboard, background, text, numbers, labels, borders, grid or UI. Only character and attack FX.",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 8,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "Create_a_production-read-Idle.png",
+    "cell_size": {
+      "width": 84,
+      "height": 84
+    },
+    "sheet_size": {
+      "width": 756,
+      "height": 420
+    },
+    "columns": 9,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 8,
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "The rabbit warrior executes a lightning-fast horizontal slash, swinging the sword with intense, weight-driven momentum that slices through the air in a sharp, elegant arc. A vivid, pale crescent-shaped energy blade manifests instantaneously upon the swing, trailing behind the steel edge before dissipating into shimmering particles. The rabbit\u2019s scarf flutters violently in the wake of the strike, reacting to the sudden displacement of air as the body pivots slightly to follow through. Static camera, completely locked-off shot. Maintain the crisp 2D pixel art aesthetic, thick outlines, flat colors, and the strict original perspective throughout the entire fluid animation.",
+        "animation_group_id": "07644330-f10b-4c4a-816e-e7efcd031aa5",
+        "direction": "south"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "The rabbit warrior executes a lightning-fast horizontal slash, swinging the sword with intense, weight-driven momentum that slices through the air in a sharp, elegant arc. A vivid, pale crescent-shaped energy blade manifests instantaneously upon the swing, trailing behind the steel edge before dissipating into shimmering particles. The rabbit\u2019s scarf flutters violently in the wake of the strike, reacting to the sudden displacement of air as the body pivots slightly to follow through. Static camera, completely locked-off shot. Maintain the crisp 2D pixel art aesthetic, thick outlines, flat colors, and the strict original perspective throughout the entire fluid animation.",
+        "animation_group_id": "07644330-f10b-4c4a-816e-e7efcd031aa5",
+        "direction": "south-east"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "The rabbit warrior executes a lightning-fast horizontal slash, swinging the sword with intense, weight-driven momentum that slices through the air in a sharp, elegant arc. A vivid, pale crescent-shaped energy blade manifests instantaneously upon the swing, trailing behind the steel edge before dissipating into shimmering particles. The rabbit\u2019s scarf flutters violently in the wake of the strike, reacting to the sudden displacement of air as the body pivots slightly to follow through. Static camera, completely locked-off shot. Maintain the crisp 2D pixel art aesthetic, thick outlines, flat colors, and the strict original perspective throughout the entire fluid animation.",
+        "animation_group_id": "07644330-f10b-4c4a-816e-e7efcd031aa5",
+        "direction": "east"
+      },
+      {
+        "row": 4,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "The rabbit warrior executes a lightning-fast horizontal slash, swinging the sword with intense, weight-driven momentum that slices through the air in a sharp, elegant arc. A vivid, pale crescent-shaped energy blade manifests instantaneously upon the swing, trailing behind the steel edge before dissipating into shimmering particles. The rabbit\u2019s scarf flutters violently in the wake of the strike, reacting to the sudden displacement of air as the body pivots slightly to follow through. Static camera, completely locked-off shot. Maintain the crisp 2D pixel art aesthetic, thick outlines, flat colors, and the strict original perspective throughout the entire fluid animation.",
+        "animation_group_id": "07644330-f10b-4c4a-816e-e7efcd031aa5",
+        "direction": "north"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-09-22T08:43:17.726159+00:00"
+}

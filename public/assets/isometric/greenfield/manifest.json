@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "biome": "greenfield",
+  "library": "terrain-foundation",
+  "projection": {
+    "type": "standard-2:1-isometric",
+    "worldX": "down-right",
+    "worldY": "down-left",
+    "axisAngleDegrees": 26.565,
+    "logicalTileWidth": 64,
+    "logicalTileHeight": 32
+  },
+  "source": {
+    "generator": "PixelLab",
+    "contract": "/art-test/isometric-terrain-lab/GENERATION_CONTRACT.md",
+    "masterSheet": null,
+    "generatedAt": "2026-09-21",
+    "validation": "failed-contract-dimensions",
+    "jobs": {
+      "baseVariants": "970e1e38-3a46-4eeb-a382-54a6d552052b",
+      "transitions": "399f0d6e-1835-4899-b01c-c687d5bb2d76"
+    },
+    "failure": {
+      "expectedTransitionCell": "64x64",
+      "actualTransitionCell": "64x28",
+      "action": "regenerate; no padding, cropping, resizing, or resampling permitted"
+    }
+  },
+  "assets": []
+}

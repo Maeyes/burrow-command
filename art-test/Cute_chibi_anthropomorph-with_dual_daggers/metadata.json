@@ -1,0 +1,126 @@
+{
+  "group_id": "58e5f705-55ba-47cf-aa7e-f9e1f3629a89",
+  "states": [
+    {
+      "character": {
+        "id": "4d9f9845-36ed-4c56-a34a-b76332f50331",
+        "name": "with dual daggers",
+        "prompt": "Cute chibi anthropomorphic black rabbit adventurer for a 2D side-scrolling action RPG.\n\nThe character has the same overall appeal and proportions as a cute fantasy anime rabbit mascot: a large round head, compact chubby body, very long floppy rabbit ears, small hands and feet, and an energetic charming personality.\n\nBlack rabbit fur with subtle dark charcoal highlights so the body shape remains clearly readable.\n\nLarge bright expressive eyes with a subtle warm amber-red glow.\n\nWearing an elegant all-black fantasy adventurer outfit:\na small black top hat, fitted black long coat with coat tails, black vest, black gloves, dark boots, black bow tie, and subtle antique-gold trim and accessories.\n\nThe outfit should feel like a mysterious fantasy magician / rogue / adventurer, stylish and cute rather than evil or scary.\n\nKeep the design simple enough for consistent sprite animation.\nClear separation between arms, legs, ears, torso and clothing.\nLong ears must remain highly recognizable during movement.\n\nNo weapon equipped.\nNeutral ready stance.\nFull body visible.\n\nSIDE VIEW, facing right.\nDesigned specifically for a 2D side-scrolling action RPG.\nClean high-quality pixel art.\nCrisp readable silhouette.\nConsistent pixel scale.\nTransparent background.\nNo ground.\nNo cast shadow.\nNo environment.\nNo text.\nSingle character only.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-09-19T01:27:45.026417+00:00"
+      },
+      "folder": "with_dual_daggers",
+      "frames": {
+        "rotations": {
+          "south": "with_dual_daggers/rotations/south.png",
+          "south-east": "with_dual_daggers/rotations/south-east.png",
+          "east": "with_dual_daggers/rotations/east.png",
+          "north-east": "with_dual_daggers/rotations/north-east.png",
+          "north": "with_dual_daggers/rotations/north.png",
+          "north-west": "with_dual_daggers/rotations/north-west.png",
+          "west": "with_dual_daggers/rotations/west.png",
+          "south-west": "with_dual_daggers/rotations/south-west.png"
+        },
+        "animations": {
+          "Use_the_existing_Bunny_World_hero_as_the_exact_cha": {
+            "north": [
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_000.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_001.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_002.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_003.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_004.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_005.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_006.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_007.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_008.png"
+            ],
+            "east": [
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_000.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_001.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_002.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_003.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_004.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_005.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_006.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_007.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_008.png"
+            ],
+            "south": [
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_000.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_001.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_002.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_003.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_004.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_005.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_006.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_007.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_008.png"
+            ],
+            "south-east": [
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_000.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_001.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_002.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_003.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_004.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_005.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_006.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_007.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_008.png"
+            ],
+            "north-east": [
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_000.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_001.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_002.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_003.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_004.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_005.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_006.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_007.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_008.png"
+            ]
+          },
+          "Breathing_Idle": {
+            "north": [
+              "with_dual_daggers/animations/Breathing_Idle/north/frame_000.png",
+              "with_dual_daggers/animations/Breathing_Idle/north/frame_001.png",
+              "with_dual_daggers/animations/Breathing_Idle/north/frame_002.png",
+              "with_dual_daggers/animations/Breathing_Idle/north/frame_003.png"
+            ],
+            "north-east": [
+              "with_dual_daggers/animations/Breathing_Idle/north-east/frame_000.png",
+              "with_dual_daggers/animations/Breathing_Idle/north-east/frame_001.png",
+              "with_dual_daggers/animations/Breathing_Idle/north-east/frame_002.png",
+              "with_dual_daggers/animations/Breathing_Idle/north-east/frame_003.png"
+            ],
+            "east": [
+              "with_dual_daggers/animations/Breathing_Idle/east/frame_000.png",
+              "with_dual_daggers/animations/Breathing_Idle/east/frame_001.png",
+              "with_dual_daggers/animations/Breathing_Idle/east/frame_002.png",
+              "with_dual_daggers/animations/Breathing_Idle/east/frame_003.png"
+            ],
+            "south": [
+              "with_dual_daggers/animations/Breathing_Idle/south/frame_000.png",
+              "with_dual_daggers/animations/Breathing_Idle/south/frame_001.png",
+              "with_dual_daggers/animations/Breathing_Idle/south/frame_002.png",
+              "with_dual_daggers/animations/Breathing_Idle/south/frame_003.png"
+            ],
+            "south-east": [
+              "with_dual_daggers/animations/Breathing_Idle/south-east/frame_000.png",
+              "with_dual_daggers/animations/Breathing_Idle/south-east/frame_001.png",
+              "with_dual_daggers/animations/Breathing_Idle/south-east/frame_002.png",
+              "with_dual_daggers/animations/Breathing_Idle/south-east/frame_003.png"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-21T10:17:44.538210"
+}

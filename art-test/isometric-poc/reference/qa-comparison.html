@@ -1,0 +1,16 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Whispering Forest QA Comparison</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#080c0a;color:#eee8d6;font:12px system-ui;padding:24px}h1{font:28px Georgia;margin:0 0 18px}.layout{display:grid;grid-template-columns:280px 1fr;gap:20px}.source,.render{border:1px solid #304238;background:#101713;padding:16px}.sprites{display:grid;grid-template-columns:1fr 1fr;gap:12px}.sprite{background:#1a2922;padding:10px;text-align:center}.sprite img{width:128px;height:128px;image-rendering:pixelated}.sprite span{display:block;margin-top:5px;color:#9eb4a5}.render img{display:block;width:100%;height:auto}small{color:#8e9a91}
+</style>
+<h1>Source rotations → vertical-slice render</h1>
+<div class="layout">
+  <section class="source"><h2>Native 64×64 assets</h2><div class="sprites">
+    <div class="sprite"><img src="../../isometric-player/north-east.png"><span>north-east</span></div>
+    <div class="sprite"><img src="../../isometric-player/south-east.png"><span>south-east</span></div>
+    <div class="sprite"><img src="../../isometric-player/south-west.png"><span>south-west</span></div>
+    <div class="sprite"><img src="../../isometric-player/north-west.png"><span>north-west</span></div>
+  </div><small>Displayed at 2× only for inspection; implementation uses native 1×.</small></section>
+  <section class="render"><h2>Whispering Forest review frame</h2><img src="../whispering-forest-review.png"></section>
+</div>

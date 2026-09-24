@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bunny World — Map Editor</title>
+<style>
+  :root{--bg:#0d0f0c;--panel:#17191400;--ink:#efe6cc;--dim:#a79f88;--gold:#f0c878;--line:#3a352b}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:13px/1.4 system-ui,sans-serif}
+  header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);background:#141611}
+  header b{color:var(--gold);letter-spacing:.08em;font-size:12px;margin-right:6px}
+  .group{display:flex;gap:4px;align-items:center;padding-right:10px;border-right:1px solid var(--line)}
+  .group:last-child{border-right:0}
+  button,select,input{background:#211f19;color:var(--ink);border:1px solid #4a4236;border-radius:5px;font:12px system-ui;padding:5px 9px}
+  button{cursor:pointer}
+  button:hover{border-color:var(--gold)}
+  button.on{background:var(--gold);color:#1a140a;border-color:var(--gold);font-weight:700}
+  button .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;border:1px solid #0006}
+  input[type=range]{width:110px;padding:0}
+  main{display:flex;gap:10px;padding:10px;height:calc(100% - 52px)}
+  #paneEdit{flex:1.1;min-width:0;display:flex;flex-direction:column;gap:6px}
+  #paneView{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+  #edit{width:100%;flex:1;min-height:0;background:#0a0b09;border:1px solid var(--line);border-radius:6px;cursor:crosshair;image-rendering:pixelated}
+  #view{width:100%;aspect-ratio:16/9;border:1px solid var(--line);border-radius:6px;background:#07090b}
+  .hint{color:var(--dim);font-size:12px}
+  .hint kbd{background:#2a2620;border:1px solid #4a4236;border-radius:3px;padding:0 4px;font-size:11px}
+  #status{color:var(--gold);font-size:12px;min-height:16px}
+</style>
+</head>
+<body>
+<header>
+  <b>MAP EDITOR</b>
+  <div class="group" id="tools"></div>
+  <div class="group" id="objBar" style="display:none">ของ <select id="objType"></select>
+    <span id="houseOpts" style="display:none;gap:4px;align-items:center">หลังคา <select id="roof"></select> ชั้น <select id="floors"><option>1</option><option>2</option><option>3</option></select> แนวหลังคา <select id="ridge"><option value="x">↘</option><option value="y">↙</option></select></span>
+    <span id="portalOpts" style="display:none;gap:4px;align-items:center">ID <input id="portalId" size="8" placeholder="gate-a"> ไปแมพ <select id="portalTo"><option value="">—</option></select> ไปประตู <input id="portalToPortal" size="8" placeholder="gate-b"></span>
+  </div>
+  <div class="group">ขนาดแปรง <input id="size" type="range" min="1" max="14" value="5"><span id="sizeV">5</span></div>
+  <div class="group">ธีม <select id="biome"></select></div>
+  <div class="group">Monsters <select id="roster"></select></div>
+  <div class="group">ทางขึ้นเนิน <select id="slope"></select></div>
+  <div class="group">ชื่อ <input id="name" value="my-map" size="12"></div>
+  <div class="group">
+    <button id="undo" title="Ctrl+Z">↶</button><button id="redo" title="Ctrl+Y">↷</button>
+    <button id="new">ใหม่</button><select id="load"><option value="">เปิดแมพ…</option></select><button id="save">💾 Save</button>
+  </div>
+</header>
+<main>
+  <div id="paneEdit">
+    <canvas id="edit"></canvas>
+    <div class="hint">ลากเพื่อวาด · คลิกขวา = ลบสิ่งที่แปรงนั้นวาด · <kbd>1</kbd>–<kbd>4</kbd> ระดับพื้น <kbd>W</kbd> น้ำ <kbd>V</kbd> ลาวา <kbd>R</kbd> ถนนหิน <kbd>T</kbd> ทางดิน <kbd>B</kbd> สะพาน (ระบายตรงไหนได้สะพานตรงนั้น) <kbd>F</kbd>/<kbd>G</kbd>/<kbd>C</kbd> ป่าทึบ/โปร่ง/โล่ง <kbd>O</kbd> วางของ (คลิกวาง · ลากย้าย · คลิกขวาลบ) <kbd>E</kbd> ยางลบ <kbd>S</kbd> จุดเกิด · <kbd>[</kbd> <kbd>]</kbd> ขนาดแปรง<br>น้ำ/ลาวาไหลข้ามเนินลงมาทาง<b>ด้านล่างของจอ</b> = <b>น้ำตกอัตโนมัติ</b> (ลายขาว; จุดแดง = น้ำตกจะถูกหน้าผาบังเพราะไหลไปด้านหลัง) · ถนนชนเนิน = <b>ทางขึ้นอัตโนมัติ</b> (ทางลาด/บันได ตามธีม)</div>
+  </div>
+  <div id="paneView">
+    <div class="group" style="border:0"><button id="preview">▶ ดูภาพ iso (เร็ว)</button><button id="previewFull">▶ ภาพเต็ม</button><button id="play">เปิดเล่นเต็มจอ ↗</button></div>
+    <iframe id="view" title="iso preview"></iframe>
+    <div id="status"></div>
+    <div class="hint">ขอบหน้าผา ตลิ่ง ฟองน้ำ น้ำตก ขอบถนน ระบบคำนวณให้เองตอนสร้างภาพ iso — วาดแค่ "ตรงไหนเป็นอะไร" พอ</div>
+  </div>
+</main>
+<script type="module" src="./editor.js"></script>
+</body>
+</html>

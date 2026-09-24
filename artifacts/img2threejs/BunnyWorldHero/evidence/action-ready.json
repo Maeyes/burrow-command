@@ -1,0 +1,29 @@
+{
+  "subject": "BunnyWorldHero",
+  "staticOnly": true,
+  "rigged": false,
+  "animated": false,
+  "runtimeHierarchy": [
+    "head",
+    "ear-l",
+    "ear-r",
+    "body",
+    "arm-l",
+    "arm-r",
+    "hand-l",
+    "hand-r",
+    "leg-l",
+    "leg-r",
+    "foot-l",
+    "foot-r",
+    "tail"
+  ],
+  "sockets": ["weapon-socket-l", "weapon-socket-r"],
+  "colliders": ["body", "head"],
+  "rootRuntimeProperty": "root.userData.sculptRuntime",
+  "heightMeters": 1.0,
+  "groundContactY": 0.0,
+  "triangles": 15522,
+  "namedRuntimeMeshes": 28,
+  "partCoverage": "pass"
+}

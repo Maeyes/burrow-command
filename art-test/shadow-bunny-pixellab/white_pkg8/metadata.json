@@ -1,0 +1,690 @@
+{
+  "group_id": "83d0d3ca-b0c9-43e4-9113-8be3ad47bcf2",
+  "states": [
+    {
+      "character": {
+        "id": "23f2747a-592a-4935-a1ca-d97a914b4752",
+        "name": "Idle",
+        "prompt": "cute chibi white bunny standing upright on two legs, soft white body with light lavender-gray shading so limbs are readable, bold bright pink outline, big long ears with pink inner ears, big glowing pink eyes, a short flowing pink scarf around the neck, tiny round paws, small round white tail, no weapon, cute and heroic, blessed by a god, game character sprite",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "low top-down",
+        "created_at": "2026-09-24T03:50:33.938581+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {
+          "walk": {
+            "east": [
+              "Idle/animations/walk/east/frame_000.png",
+              "Idle/animations/walk/east/frame_001.png",
+              "Idle/animations/walk/east/frame_002.png",
+              "Idle/animations/walk/east/frame_003.png",
+              "Idle/animations/walk/east/frame_004.png",
+              "Idle/animations/walk/east/frame_005.png",
+              "Idle/animations/walk/east/frame_006.png",
+              "Idle/animations/walk/east/frame_007.png"
+            ],
+            "south": [
+              "Idle/animations/walk/south/frame_000.png",
+              "Idle/animations/walk/south/frame_001.png",
+              "Idle/animations/walk/south/frame_002.png",
+              "Idle/animations/walk/south/frame_003.png",
+              "Idle/animations/walk/south/frame_004.png",
+              "Idle/animations/walk/south/frame_005.png",
+              "Idle/animations/walk/south/frame_006.png",
+              "Idle/animations/walk/south/frame_007.png"
+            ],
+            "south-east": [
+              "Idle/animations/walk/south-east/frame_000.png",
+              "Idle/animations/walk/south-east/frame_001.png",
+              "Idle/animations/walk/south-east/frame_002.png",
+              "Idle/animations/walk/south-east/frame_003.png",
+              "Idle/animations/walk/south-east/frame_004.png",
+              "Idle/animations/walk/south-east/frame_005.png",
+              "Idle/animations/walk/south-east/frame_006.png",
+              "Idle/animations/walk/south-east/frame_007.png"
+            ],
+            "north-east": [
+              "Idle/animations/walk/north-east/frame_000.png",
+              "Idle/animations/walk/north-east/frame_001.png",
+              "Idle/animations/walk/north-east/frame_002.png",
+              "Idle/animations/walk/north-east/frame_003.png",
+              "Idle/animations/walk/north-east/frame_004.png",
+              "Idle/animations/walk/north-east/frame_005.png",
+              "Idle/animations/walk/north-east/frame_006.png",
+              "Idle/animations/walk/north-east/frame_007.png"
+            ],
+            "north": [
+              "Idle/animations/walk/north/frame_000.png",
+              "Idle/animations/walk/north/frame_001.png",
+              "Idle/animations/walk/north/frame_002.png",
+              "Idle/animations/walk/north/frame_003.png",
+              "Idle/animations/walk/north/frame_004.png",
+              "Idle/animations/walk/north/frame_005.png",
+              "Idle/animations/walk/north/frame_006.png",
+              "Idle/animations/walk/north/frame_007.png"
+            ]
+          },
+          "Running": {
+            "south": [
+              "Idle/animations/Running/south/frame_000.png",
+              "Idle/animations/Running/south/frame_001.png",
+              "Idle/animations/Running/south/frame_002.png",
+              "Idle/animations/Running/south/frame_003.png",
+              "Idle/animations/Running/south/frame_004.png",
+              "Idle/animations/Running/south/frame_005.png",
+              "Idle/animations/Running/south/frame_006.png",
+              "Idle/animations/Running/south/frame_007.png"
+            ]
+          },
+          "atk_greatsword": {
+            "east": [
+              "Idle/animations/atk_greatsword/east/frame_000.png",
+              "Idle/animations/atk_greatsword/east/frame_001.png",
+              "Idle/animations/atk_greatsword/east/frame_002.png",
+              "Idle/animations/atk_greatsword/east/frame_003.png",
+              "Idle/animations/atk_greatsword/east/frame_004.png",
+              "Idle/animations/atk_greatsword/east/frame_005.png",
+              "Idle/animations/atk_greatsword/east/frame_006.png",
+              "Idle/animations/atk_greatsword/east/frame_007.png",
+              "Idle/animations/atk_greatsword/east/frame_008.png"
+            ]
+          },
+          "run": {
+            "north-east": [
+              "Idle/animations/run/north-east/frame_000.png",
+              "Idle/animations/run/north-east/frame_001.png",
+              "Idle/animations/run/north-east/frame_002.png",
+              "Idle/animations/run/north-east/frame_003.png",
+              "Idle/animations/run/north-east/frame_004.png",
+              "Idle/animations/run/north-east/frame_005.png",
+              "Idle/animations/run/north-east/frame_006.png",
+              "Idle/animations/run/north-east/frame_007.png"
+            ],
+            "east": [
+              "Idle/animations/run/east/frame_000.png",
+              "Idle/animations/run/east/frame_001.png",
+              "Idle/animations/run/east/frame_002.png",
+              "Idle/animations/run/east/frame_003.png",
+              "Idle/animations/run/east/frame_004.png",
+              "Idle/animations/run/east/frame_005.png",
+              "Idle/animations/run/east/frame_006.png",
+              "Idle/animations/run/east/frame_007.png"
+            ],
+            "north": [
+              "Idle/animations/run/north/frame_000.png",
+              "Idle/animations/run/north/frame_001.png",
+              "Idle/animations/run/north/frame_002.png",
+              "Idle/animations/run/north/frame_003.png",
+              "Idle/animations/run/north/frame_004.png",
+              "Idle/animations/run/north/frame_005.png",
+              "Idle/animations/run/north/frame_006.png",
+              "Idle/animations/run/north/frame_007.png"
+            ],
+            "south-east": [
+              "Idle/animations/run/south-east/frame_000.png",
+              "Idle/animations/run/south-east/frame_001.png",
+              "Idle/animations/run/south-east/frame_002.png",
+              "Idle/animations/run/south-east/frame_003.png",
+              "Idle/animations/run/south-east/frame_004.png",
+              "Idle/animations/run/south-east/frame_005.png",
+              "Idle/animations/run/south-east/frame_006.png",
+              "Idle/animations/run/south-east/frame_007.png"
+            ]
+          },
+          "atk_swordshield": {
+            "east": [
+              "Idle/animations/atk_swordshield/east/frame_000.png",
+              "Idle/animations/atk_swordshield/east/frame_001.png",
+              "Idle/animations/atk_swordshield/east/frame_002.png",
+              "Idle/animations/atk_swordshield/east/frame_003.png",
+              "Idle/animations/atk_swordshield/east/frame_004.png",
+              "Idle/animations/atk_swordshield/east/frame_005.png",
+              "Idle/animations/atk_swordshield/east/frame_006.png",
+              "Idle/animations/atk_swordshield/east/frame_007.png",
+              "Idle/animations/atk_swordshield/east/frame_008.png"
+            ]
+          },
+          "atk_hammer": {
+            "north": [
+              "Idle/animations/atk_hammer/north/frame_000.png",
+              "Idle/animations/atk_hammer/north/frame_001.png",
+              "Idle/animations/atk_hammer/north/frame_002.png",
+              "Idle/animations/atk_hammer/north/frame_003.png",
+              "Idle/animations/atk_hammer/north/frame_004.png",
+              "Idle/animations/atk_hammer/north/frame_005.png",
+              "Idle/animations/atk_hammer/north/frame_006.png",
+              "Idle/animations/atk_hammer/north/frame_007.png",
+              "Idle/animations/atk_hammer/north/frame_008.png"
+            ],
+            "south-east": [
+              "Idle/animations/atk_hammer/south-east/frame_000.png",
+              "Idle/animations/atk_hammer/south-east/frame_001.png",
+              "Idle/animations/atk_hammer/south-east/frame_002.png",
+              "Idle/animations/atk_hammer/south-east/frame_003.png",
+              "Idle/animations/atk_hammer/south-east/frame_004.png",
+              "Idle/animations/atk_hammer/south-east/frame_005.png",
+              "Idle/animations/atk_hammer/south-east/frame_006.png",
+              "Idle/animations/atk_hammer/south-east/frame_007.png",
+              "Idle/animations/atk_hammer/south-east/frame_008.png"
+            ],
+            "north-east": [
+              "Idle/animations/atk_hammer/north-east/frame_000.png",
+              "Idle/animations/atk_hammer/north-east/frame_001.png",
+              "Idle/animations/atk_hammer/north-east/frame_002.png",
+              "Idle/animations/atk_hammer/north-east/frame_003.png",
+              "Idle/animations/atk_hammer/north-east/frame_004.png",
+              "Idle/animations/atk_hammer/north-east/frame_005.png",
+              "Idle/animations/atk_hammer/north-east/frame_006.png",
+              "Idle/animations/atk_hammer/north-east/frame_007.png",
+              "Idle/animations/atk_hammer/north-east/frame_008.png"
+            ],
+            "east": [
+              "Idle/animations/atk_hammer/east/frame_000.png",
+              "Idle/animations/atk_hammer/east/frame_001.png",
+              "Idle/animations/atk_hammer/east/frame_002.png",
+              "Idle/animations/atk_hammer/east/frame_003.png",
+              "Idle/animations/atk_hammer/east/frame_004.png",
+              "Idle/animations/atk_hammer/east/frame_005.png",
+              "Idle/animations/atk_hammer/east/frame_006.png",
+              "Idle/animations/atk_hammer/east/frame_007.png",
+              "Idle/animations/atk_hammer/east/frame_008.png"
+            ],
+            "south": [
+              "Idle/animations/atk_hammer/south/frame_000.png",
+              "Idle/animations/atk_hammer/south/frame_001.png",
+              "Idle/animations/atk_hammer/south/frame_002.png",
+              "Idle/animations/atk_hammer/south/frame_003.png",
+              "Idle/animations/atk_hammer/south/frame_004.png",
+              "Idle/animations/atk_hammer/south/frame_005.png",
+              "Idle/animations/atk_hammer/south/frame_006.png",
+              "Idle/animations/atk_hammer/south/frame_007.png",
+              "Idle/animations/atk_hammer/south/frame_008.png"
+            ]
+          },
+          "atk_dagger_v2": {
+            "south-east": [
+              "Idle/animations/atk_dagger_v2/south-east/frame_000.png",
+              "Idle/animations/atk_dagger_v2/south-east/frame_001.png",
+              "Idle/animations/atk_dagger_v2/south-east/frame_002.png",
+              "Idle/animations/atk_dagger_v2/south-east/frame_003.png",
+              "Idle/animations/atk_dagger_v2/south-east/frame_004.png",
+              "Idle/animations/atk_dagger_v2/south-east/frame_005.png",
+              "Idle/animations/atk_dagger_v2/south-east/frame_006.png",
+              "Idle/animations/atk_dagger_v2/south-east/frame_007.png",
+              "Idle/animations/atk_dagger_v2/south-east/frame_008.png"
+            ],
+            "north-east": [
+              "Idle/animations/atk_dagger_v2/north-east/frame_000.png",
+              "Idle/animations/atk_dagger_v2/north-east/frame_001.png",
+              "Idle/animations/atk_dagger_v2/north-east/frame_002.png",
+              "Idle/animations/atk_dagger_v2/north-east/frame_003.png",
+              "Idle/animations/atk_dagger_v2/north-east/frame_004.png",
+              "Idle/animations/atk_dagger_v2/north-east/frame_005.png",
+              "Idle/animations/atk_dagger_v2/north-east/frame_006.png",
+              "Idle/animations/atk_dagger_v2/north-east/frame_007.png",
+              "Idle/animations/atk_dagger_v2/north-east/frame_008.png"
+            ],
+            "north": [
+              "Idle/animations/atk_dagger_v2/north/frame_000.png",
+              "Idle/animations/atk_dagger_v2/north/frame_001.png",
+              "Idle/animations/atk_dagger_v2/north/frame_002.png",
+              "Idle/animations/atk_dagger_v2/north/frame_003.png",
+              "Idle/animations/atk_dagger_v2/north/frame_004.png",
+              "Idle/animations/atk_dagger_v2/north/frame_005.png",
+              "Idle/animations/atk_dagger_v2/north/frame_006.png",
+              "Idle/animations/atk_dagger_v2/north/frame_007.png",
+              "Idle/animations/atk_dagger_v2/north/frame_008.png"
+            ],
+            "south": [
+              "Idle/animations/atk_dagger_v2/south/frame_000.png",
+              "Idle/animations/atk_dagger_v2/south/frame_001.png",
+              "Idle/animations/atk_dagger_v2/south/frame_002.png",
+              "Idle/animations/atk_dagger_v2/south/frame_003.png",
+              "Idle/animations/atk_dagger_v2/south/frame_004.png",
+              "Idle/animations/atk_dagger_v2/south/frame_005.png",
+              "Idle/animations/atk_dagger_v2/south/frame_006.png",
+              "Idle/animations/atk_dagger_v2/south/frame_007.png",
+              "Idle/animations/atk_dagger_v2/south/frame_008.png"
+            ],
+            "east": [
+              "Idle/animations/atk_dagger_v2/east/frame_000.png",
+              "Idle/animations/atk_dagger_v2/east/frame_001.png",
+              "Idle/animations/atk_dagger_v2/east/frame_002.png",
+              "Idle/animations/atk_dagger_v2/east/frame_003.png",
+              "Idle/animations/atk_dagger_v2/east/frame_004.png",
+              "Idle/animations/atk_dagger_v2/east/frame_005.png",
+              "Idle/animations/atk_dagger_v2/east/frame_006.png",
+              "Idle/animations/atk_dagger_v2/east/frame_007.png",
+              "Idle/animations/atk_dagger_v2/east/frame_008.png"
+            ]
+          },
+          "atk_dagger": {
+            "east": [
+              "Idle/animations/atk_dagger/east/frame_000.png",
+              "Idle/animations/atk_dagger/east/frame_001.png",
+              "Idle/animations/atk_dagger/east/frame_002.png",
+              "Idle/animations/atk_dagger/east/frame_003.png",
+              "Idle/animations/atk_dagger/east/frame_004.png",
+              "Idle/animations/atk_dagger/east/frame_005.png",
+              "Idle/animations/atk_dagger/east/frame_006.png",
+              "Idle/animations/atk_dagger/east/frame_007.png",
+              "Idle/animations/atk_dagger/east/frame_008.png"
+            ]
+          },
+          "atk_bow_fix": {
+            "south": [
+              "Idle/animations/atk_bow_fix/south/frame_000.png",
+              "Idle/animations/atk_bow_fix/south/frame_001.png",
+              "Idle/animations/atk_bow_fix/south/frame_002.png",
+              "Idle/animations/atk_bow_fix/south/frame_003.png",
+              "Idle/animations/atk_bow_fix/south/frame_004.png",
+              "Idle/animations/atk_bow_fix/south/frame_005.png",
+              "Idle/animations/atk_bow_fix/south/frame_006.png",
+              "Idle/animations/atk_bow_fix/south/frame_007.png",
+              "Idle/animations/atk_bow_fix/south/frame_008.png"
+            ]
+          },
+          "atk_axe": {
+            "south": [
+              "Idle/animations/atk_axe/south/frame_000.png",
+              "Idle/animations/atk_axe/south/frame_001.png",
+              "Idle/animations/atk_axe/south/frame_002.png",
+              "Idle/animations/atk_axe/south/frame_003.png",
+              "Idle/animations/atk_axe/south/frame_004.png",
+              "Idle/animations/atk_axe/south/frame_005.png",
+              "Idle/animations/atk_axe/south/frame_006.png",
+              "Idle/animations/atk_axe/south/frame_007.png",
+              "Idle/animations/atk_axe/south/frame_008.png"
+            ],
+            "north-east": [
+              "Idle/animations/atk_axe/north-east/frame_000.png",
+              "Idle/animations/atk_axe/north-east/frame_001.png",
+              "Idle/animations/atk_axe/north-east/frame_002.png",
+              "Idle/animations/atk_axe/north-east/frame_003.png",
+              "Idle/animations/atk_axe/north-east/frame_004.png",
+              "Idle/animations/atk_axe/north-east/frame_005.png",
+              "Idle/animations/atk_axe/north-east/frame_006.png",
+              "Idle/animations/atk_axe/north-east/frame_007.png",
+              "Idle/animations/atk_axe/north-east/frame_008.png"
+            ],
+            "east": [
+              "Idle/animations/atk_axe/east/frame_000.png",
+              "Idle/animations/atk_axe/east/frame_001.png",
+              "Idle/animations/atk_axe/east/frame_002.png",
+              "Idle/animations/atk_axe/east/frame_003.png",
+              "Idle/animations/atk_axe/east/frame_004.png",
+              "Idle/animations/atk_axe/east/frame_005.png",
+              "Idle/animations/atk_axe/east/frame_006.png",
+              "Idle/animations/atk_axe/east/frame_007.png",
+              "Idle/animations/atk_axe/east/frame_008.png"
+            ],
+            "south-east": [
+              "Idle/animations/atk_axe/south-east/frame_000.png",
+              "Idle/animations/atk_axe/south-east/frame_001.png",
+              "Idle/animations/atk_axe/south-east/frame_002.png",
+              "Idle/animations/atk_axe/south-east/frame_003.png",
+              "Idle/animations/atk_axe/south-east/frame_004.png",
+              "Idle/animations/atk_axe/south-east/frame_005.png",
+              "Idle/animations/atk_axe/south-east/frame_006.png",
+              "Idle/animations/atk_axe/south-east/frame_007.png",
+              "Idle/animations/atk_axe/south-east/frame_008.png"
+            ],
+            "north": [
+              "Idle/animations/atk_axe/north/frame_000.png",
+              "Idle/animations/atk_axe/north/frame_001.png",
+              "Idle/animations/atk_axe/north/frame_002.png",
+              "Idle/animations/atk_axe/north/frame_003.png",
+              "Idle/animations/atk_axe/north/frame_004.png",
+              "Idle/animations/atk_axe/north/frame_005.png",
+              "Idle/animations/atk_axe/north/frame_006.png",
+              "Idle/animations/atk_axe/north/frame_007.png",
+              "Idle/animations/atk_axe/north/frame_008.png"
+            ]
+          },
+          "idle": {
+            "north": [
+              "Idle/animations/idle/north/frame_000.png",
+              "Idle/animations/idle/north/frame_001.png",
+              "Idle/animations/idle/north/frame_002.png",
+              "Idle/animations/idle/north/frame_003.png"
+            ],
+            "south-east": [
+              "Idle/animations/idle/south-east/frame_000.png",
+              "Idle/animations/idle/south-east/frame_001.png",
+              "Idle/animations/idle/south-east/frame_002.png",
+              "Idle/animations/idle/south-east/frame_003.png"
+            ],
+            "north-east": [
+              "Idle/animations/idle/north-east/frame_000.png",
+              "Idle/animations/idle/north-east/frame_001.png",
+              "Idle/animations/idle/north-east/frame_002.png",
+              "Idle/animations/idle/north-east/frame_003.png"
+            ],
+            "east": [
+              "Idle/animations/idle/east/frame_000.png",
+              "Idle/animations/idle/east/frame_001.png",
+              "Idle/animations/idle/east/frame_002.png",
+              "Idle/animations/idle/east/frame_003.png"
+            ],
+            "south": [
+              "Idle/animations/idle/south/frame_000.png",
+              "Idle/animations/idle/south/frame_001.png",
+              "Idle/animations/idle/south/frame_002.png",
+              "Idle/animations/idle/south/frame_003.png"
+            ]
+          },
+          "atk_dagger_x2": {
+            "north-east": [
+              "Idle/animations/atk_dagger_x2/north-east/frame_000.png",
+              "Idle/animations/atk_dagger_x2/north-east/frame_001.png",
+              "Idle/animations/atk_dagger_x2/north-east/frame_002.png",
+              "Idle/animations/atk_dagger_x2/north-east/frame_003.png",
+              "Idle/animations/atk_dagger_x2/north-east/frame_004.png",
+              "Idle/animations/atk_dagger_x2/north-east/frame_005.png",
+              "Idle/animations/atk_dagger_x2/north-east/frame_006.png",
+              "Idle/animations/atk_dagger_x2/north-east/frame_007.png",
+              "Idle/animations/atk_dagger_x2/north-east/frame_008.png"
+            ],
+            "east": [
+              "Idle/animations/atk_dagger_x2/east/frame_000.png",
+              "Idle/animations/atk_dagger_x2/east/frame_001.png",
+              "Idle/animations/atk_dagger_x2/east/frame_002.png",
+              "Idle/animations/atk_dagger_x2/east/frame_003.png",
+              "Idle/animations/atk_dagger_x2/east/frame_004.png",
+              "Idle/animations/atk_dagger_x2/east/frame_005.png",
+              "Idle/animations/atk_dagger_x2/east/frame_006.png",
+              "Idle/animations/atk_dagger_x2/east/frame_007.png",
+              "Idle/animations/atk_dagger_x2/east/frame_008.png"
+            ]
+          },
+          "atk_swordshield_v2": {
+            "north-east": [
+              "Idle/animations/atk_swordshield_v2/north-east/frame_000.png",
+              "Idle/animations/atk_swordshield_v2/north-east/frame_001.png",
+              "Idle/animations/atk_swordshield_v2/north-east/frame_002.png",
+              "Idle/animations/atk_swordshield_v2/north-east/frame_003.png",
+              "Idle/animations/atk_swordshield_v2/north-east/frame_004.png",
+              "Idle/animations/atk_swordshield_v2/north-east/frame_005.png",
+              "Idle/animations/atk_swordshield_v2/north-east/frame_006.png",
+              "Idle/animations/atk_swordshield_v2/north-east/frame_007.png",
+              "Idle/animations/atk_swordshield_v2/north-east/frame_008.png"
+            ],
+            "south-east": [
+              "Idle/animations/atk_swordshield_v2/south-east/frame_000.png",
+              "Idle/animations/atk_swordshield_v2/south-east/frame_001.png",
+              "Idle/animations/atk_swordshield_v2/south-east/frame_002.png",
+              "Idle/animations/atk_swordshield_v2/south-east/frame_003.png",
+              "Idle/animations/atk_swordshield_v2/south-east/frame_004.png",
+              "Idle/animations/atk_swordshield_v2/south-east/frame_005.png",
+              "Idle/animations/atk_swordshield_v2/south-east/frame_006.png",
+              "Idle/animations/atk_swordshield_v2/south-east/frame_007.png",
+              "Idle/animations/atk_swordshield_v2/south-east/frame_008.png"
+            ],
+            "north": [
+              "Idle/animations/atk_swordshield_v2/north/frame_000.png",
+              "Idle/animations/atk_swordshield_v2/north/frame_001.png",
+              "Idle/animations/atk_swordshield_v2/north/frame_002.png",
+              "Idle/animations/atk_swordshield_v2/north/frame_003.png",
+              "Idle/animations/atk_swordshield_v2/north/frame_004.png",
+              "Idle/animations/atk_swordshield_v2/north/frame_005.png",
+              "Idle/animations/atk_swordshield_v2/north/frame_006.png",
+              "Idle/animations/atk_swordshield_v2/north/frame_007.png",
+              "Idle/animations/atk_swordshield_v2/north/frame_008.png"
+            ],
+            "east": [
+              "Idle/animations/atk_swordshield_v2/east/frame_000.png",
+              "Idle/animations/atk_swordshield_v2/east/frame_001.png",
+              "Idle/animations/atk_swordshield_v2/east/frame_002.png",
+              "Idle/animations/atk_swordshield_v2/east/frame_003.png",
+              "Idle/animations/atk_swordshield_v2/east/frame_004.png",
+              "Idle/animations/atk_swordshield_v2/east/frame_005.png",
+              "Idle/animations/atk_swordshield_v2/east/frame_006.png",
+              "Idle/animations/atk_swordshield_v2/east/frame_007.png",
+              "Idle/animations/atk_swordshield_v2/east/frame_008.png"
+            ],
+            "south": [
+              "Idle/animations/atk_swordshield_v2/south/frame_000.png",
+              "Idle/animations/atk_swordshield_v2/south/frame_001.png",
+              "Idle/animations/atk_swordshield_v2/south/frame_002.png",
+              "Idle/animations/atk_swordshield_v2/south/frame_003.png",
+              "Idle/animations/atk_swordshield_v2/south/frame_004.png",
+              "Idle/animations/atk_swordshield_v2/south/frame_005.png",
+              "Idle/animations/atk_swordshield_v2/south/frame_006.png",
+              "Idle/animations/atk_swordshield_v2/south/frame_007.png",
+              "Idle/animations/atk_swordshield_v2/south/frame_008.png"
+            ]
+          },
+          "atk_greatsword_v2": {
+            "south-east": [
+              "Idle/animations/atk_greatsword_v2/south-east/frame_000.png",
+              "Idle/animations/atk_greatsword_v2/south-east/frame_001.png",
+              "Idle/animations/atk_greatsword_v2/south-east/frame_002.png",
+              "Idle/animations/atk_greatsword_v2/south-east/frame_003.png",
+              "Idle/animations/atk_greatsword_v2/south-east/frame_004.png",
+              "Idle/animations/atk_greatsword_v2/south-east/frame_005.png",
+              "Idle/animations/atk_greatsword_v2/south-east/frame_006.png",
+              "Idle/animations/atk_greatsword_v2/south-east/frame_007.png",
+              "Idle/animations/atk_greatsword_v2/south-east/frame_008.png"
+            ],
+            "east": [
+              "Idle/animations/atk_greatsword_v2/east/frame_000.png",
+              "Idle/animations/atk_greatsword_v2/east/frame_001.png",
+              "Idle/animations/atk_greatsword_v2/east/frame_002.png",
+              "Idle/animations/atk_greatsword_v2/east/frame_003.png",
+              "Idle/animations/atk_greatsword_v2/east/frame_004.png",
+              "Idle/animations/atk_greatsword_v2/east/frame_005.png",
+              "Idle/animations/atk_greatsword_v2/east/frame_006.png",
+              "Idle/animations/atk_greatsword_v2/east/frame_007.png",
+              "Idle/animations/atk_greatsword_v2/east/frame_008.png"
+            ],
+            "north": [
+              "Idle/animations/atk_greatsword_v2/north/frame_000.png",
+              "Idle/animations/atk_greatsword_v2/north/frame_001.png",
+              "Idle/animations/atk_greatsword_v2/north/frame_002.png",
+              "Idle/animations/atk_greatsword_v2/north/frame_003.png",
+              "Idle/animations/atk_greatsword_v2/north/frame_004.png",
+              "Idle/animations/atk_greatsword_v2/north/frame_005.png",
+              "Idle/animations/atk_greatsword_v2/north/frame_006.png",
+              "Idle/animations/atk_greatsword_v2/north/frame_007.png",
+              "Idle/animations/atk_greatsword_v2/north/frame_008.png"
+            ],
+            "south": [
+              "Idle/animations/atk_greatsword_v2/south/frame_000.png",
+              "Idle/animations/atk_greatsword_v2/south/frame_001.png",
+              "Idle/animations/atk_greatsword_v2/south/frame_002.png",
+              "Idle/animations/atk_greatsword_v2/south/frame_003.png",
+              "Idle/animations/atk_greatsword_v2/south/frame_004.png",
+              "Idle/animations/atk_greatsword_v2/south/frame_005.png",
+              "Idle/animations/atk_greatsword_v2/south/frame_006.png",
+              "Idle/animations/atk_greatsword_v2/south/frame_007.png",
+              "Idle/animations/atk_greatsword_v2/south/frame_008.png"
+            ],
+            "north-east": [
+              "Idle/animations/atk_greatsword_v2/north-east/frame_000.png",
+              "Idle/animations/atk_greatsword_v2/north-east/frame_001.png",
+              "Idle/animations/atk_greatsword_v2/north-east/frame_002.png",
+              "Idle/animations/atk_greatsword_v2/north-east/frame_003.png",
+              "Idle/animations/atk_greatsword_v2/north-east/frame_004.png",
+              "Idle/animations/atk_greatsword_v2/north-east/frame_005.png",
+              "Idle/animations/atk_greatsword_v2/north-east/frame_006.png",
+              "Idle/animations/atk_greatsword_v2/north-east/frame_007.png",
+              "Idle/animations/atk_greatsword_v2/north-east/frame_008.png"
+            ]
+          },
+          "atk_axe_fix": {
+            "south-east": [
+              "Idle/animations/atk_axe_fix/south-east/frame_000.png",
+              "Idle/animations/atk_axe_fix/south-east/frame_001.png",
+              "Idle/animations/atk_axe_fix/south-east/frame_002.png",
+              "Idle/animations/atk_axe_fix/south-east/frame_003.png",
+              "Idle/animations/atk_axe_fix/south-east/frame_004.png",
+              "Idle/animations/atk_axe_fix/south-east/frame_005.png",
+              "Idle/animations/atk_axe_fix/south-east/frame_006.png",
+              "Idle/animations/atk_axe_fix/south-east/frame_007.png",
+              "Idle/animations/atk_axe_fix/south-east/frame_008.png"
+            ],
+            "north-east": [
+              "Idle/animations/atk_axe_fix/north-east/frame_000.png",
+              "Idle/animations/atk_axe_fix/north-east/frame_001.png",
+              "Idle/animations/atk_axe_fix/north-east/frame_002.png",
+              "Idle/animations/atk_axe_fix/north-east/frame_003.png",
+              "Idle/animations/atk_axe_fix/north-east/frame_004.png",
+              "Idle/animations/atk_axe_fix/north-east/frame_005.png",
+              "Idle/animations/atk_axe_fix/north-east/frame_006.png",
+              "Idle/animations/atk_axe_fix/north-east/frame_007.png",
+              "Idle/animations/atk_axe_fix/north-east/frame_008.png"
+            ]
+          },
+          "atk_hammer_fix": {
+            "south-east": [
+              "Idle/animations/atk_hammer_fix/south-east/frame_000.png",
+              "Idle/animations/atk_hammer_fix/south-east/frame_001.png",
+              "Idle/animations/atk_hammer_fix/south-east/frame_002.png",
+              "Idle/animations/atk_hammer_fix/south-east/frame_003.png",
+              "Idle/animations/atk_hammer_fix/south-east/frame_004.png",
+              "Idle/animations/atk_hammer_fix/south-east/frame_005.png",
+              "Idle/animations/atk_hammer_fix/south-east/frame_006.png",
+              "Idle/animations/atk_hammer_fix/south-east/frame_007.png",
+              "Idle/animations/atk_hammer_fix/south-east/frame_008.png"
+            ]
+          },
+          "atk_bow": {
+            "north-east": [
+              "Idle/animations/atk_bow/north-east/frame_000.png",
+              "Idle/animations/atk_bow/north-east/frame_001.png",
+              "Idle/animations/atk_bow/north-east/frame_002.png",
+              "Idle/animations/atk_bow/north-east/frame_003.png",
+              "Idle/animations/atk_bow/north-east/frame_004.png",
+              "Idle/animations/atk_bow/north-east/frame_005.png",
+              "Idle/animations/atk_bow/north-east/frame_006.png",
+              "Idle/animations/atk_bow/north-east/frame_007.png",
+              "Idle/animations/atk_bow/north-east/frame_008.png"
+            ],
+            "south-east": [
+              "Idle/animations/atk_bow/south-east/frame_000.png",
+              "Idle/animations/atk_bow/south-east/frame_001.png",
+              "Idle/animations/atk_bow/south-east/frame_002.png",
+              "Idle/animations/atk_bow/south-east/frame_003.png",
+              "Idle/animations/atk_bow/south-east/frame_004.png",
+              "Idle/animations/atk_bow/south-east/frame_005.png",
+              "Idle/animations/atk_bow/south-east/frame_006.png",
+              "Idle/animations/atk_bow/south-east/frame_007.png",
+              "Idle/animations/atk_bow/south-east/frame_008.png"
+            ],
+            "north": [
+              "Idle/animations/atk_bow/north/frame_000.png",
+              "Idle/animations/atk_bow/north/frame_001.png",
+              "Idle/animations/atk_bow/north/frame_002.png",
+              "Idle/animations/atk_bow/north/frame_003.png",
+              "Idle/animations/atk_bow/north/frame_004.png",
+              "Idle/animations/atk_bow/north/frame_005.png",
+              "Idle/animations/atk_bow/north/frame_006.png",
+              "Idle/animations/atk_bow/north/frame_007.png",
+              "Idle/animations/atk_bow/north/frame_008.png"
+            ],
+            "south": [
+              "Idle/animations/atk_bow/south/frame_000.png",
+              "Idle/animations/atk_bow/south/frame_001.png",
+              "Idle/animations/atk_bow/south/frame_002.png",
+              "Idle/animations/atk_bow/south/frame_003.png",
+              "Idle/animations/atk_bow/south/frame_004.png",
+              "Idle/animations/atk_bow/south/frame_005.png",
+              "Idle/animations/atk_bow/south/frame_006.png",
+              "Idle/animations/atk_bow/south/frame_007.png",
+              "Idle/animations/atk_bow/south/frame_008.png"
+            ],
+            "east": [
+              "Idle/animations/atk_bow/east/frame_000.png",
+              "Idle/animations/atk_bow/east/frame_001.png",
+              "Idle/animations/atk_bow/east/frame_002.png",
+              "Idle/animations/atk_bow/east/frame_003.png",
+              "Idle/animations/atk_bow/east/frame_004.png",
+              "Idle/animations/atk_bow/east/frame_005.png",
+              "Idle/animations/atk_bow/east/frame_006.png",
+              "Idle/animations/atk_bow/east/frame_007.png",
+              "Idle/animations/atk_bow/east/frame_008.png"
+            ]
+          },
+          "atk_dagger_x3": {
+            "north-east": [
+              "Idle/animations/atk_dagger_x3/north-east/frame_000.png",
+              "Idle/animations/atk_dagger_x3/north-east/frame_001.png",
+              "Idle/animations/atk_dagger_x3/north-east/frame_002.png",
+              "Idle/animations/atk_dagger_x3/north-east/frame_003.png",
+              "Idle/animations/atk_dagger_x3/north-east/frame_004.png",
+              "Idle/animations/atk_dagger_x3/north-east/frame_005.png",
+              "Idle/animations/atk_dagger_x3/north-east/frame_006.png",
+              "Idle/animations/atk_dagger_x3/north-east/frame_007.png",
+              "Idle/animations/atk_dagger_x3/north-east/frame_008.png"
+            ]
+          },
+          "atk_dagger_x1": {
+            "east": [
+              "Idle/animations/atk_dagger_x1/east/frame_000.png",
+              "Idle/animations/atk_dagger_x1/east/frame_001.png",
+              "Idle/animations/atk_dagger_x1/east/frame_002.png",
+              "Idle/animations/atk_dagger_x1/east/frame_003.png",
+              "Idle/animations/atk_dagger_x1/east/frame_004.png",
+              "Idle/animations/atk_dagger_x1/east/frame_005.png",
+              "Idle/animations/atk_dagger_x1/east/frame_006.png",
+              "Idle/animations/atk_dagger_x1/east/frame_007.png",
+              "Idle/animations/atk_dagger_x1/east/frame_008.png"
+            ],
+            "north-east": [
+              "Idle/animations/atk_dagger_x1/north-east/frame_000.png",
+              "Idle/animations/atk_dagger_x1/north-east/frame_001.png",
+              "Idle/animations/atk_dagger_x1/north-east/frame_002.png",
+              "Idle/animations/atk_dagger_x1/north-east/frame_003.png",
+              "Idle/animations/atk_dagger_x1/north-east/frame_004.png",
+              "Idle/animations/atk_dagger_x1/north-east/frame_005.png",
+              "Idle/animations/atk_dagger_x1/north-east/frame_006.png",
+              "Idle/animations/atk_dagger_x1/north-east/frame_007.png",
+              "Idle/animations/atk_dagger_x1/north-east/frame_008.png"
+            ]
+          },
+          "atk_greatsword_fix": {
+            "north": [
+              "Idle/animations/atk_greatsword_fix/north/frame_000.png",
+              "Idle/animations/atk_greatsword_fix/north/frame_001.png",
+              "Idle/animations/atk_greatsword_fix/north/frame_002.png",
+              "Idle/animations/atk_greatsword_fix/north/frame_003.png",
+              "Idle/animations/atk_greatsword_fix/north/frame_004.png",
+              "Idle/animations/atk_greatsword_fix/north/frame_005.png",
+              "Idle/animations/atk_greatsword_fix/north/frame_006.png",
+              "Idle/animations/atk_greatsword_fix/north/frame_007.png",
+              "Idle/animations/atk_greatsword_fix/north/frame_008.png"
+            ]
+          },
+          "strike_skel": {
+            "east": [
+              "Idle/animations/strike_skel/east/frame_000.png",
+              "Idle/animations/strike_skel/east/frame_001.png",
+              "Idle/animations/strike_skel/east/frame_002.png",
+              "Idle/animations/strike_skel/east/frame_003.png",
+              "Idle/animations/strike_skel/east/frame_004.png",
+              "Idle/animations/strike_skel/east/frame_005.png"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-24T12:49:01.980883"
+}

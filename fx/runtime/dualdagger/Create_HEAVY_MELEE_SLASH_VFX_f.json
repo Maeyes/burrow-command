@@ -1,0 +1,46 @@
+{
+  "object": {
+    "id": "1d380e2a-3169-4e5a-b3d7-a6a2c3ccc4be",
+    "name": "base",
+    "prompt": "Create HEAVY MELEE SLASH VFX for Bunny World, usable by Greatsword and Axe on a 64x64 pixel-art RPG hero. True handcrafted pixel art, transparent background, crisp hard pixel clusters, no anti-aliasing, no blur, no text, no character, VFX only. Identical 96x96 canvas and fixed center pivot. ONE continuous heavy swing. small motion streak,  thick curved slash begins,  arc gains width and momentum,  heavy arc reaches target,  peak impact with broad brutal crescent and impact burst,  arc tears into heavy fragments, fragments and sparks trail behind,  particles disappear. Ivory-white cutting edge, pale gold secondary pixels, muted orange impact sparks, dark debris accents. Thick, weighty and slower than dagger FX. Physical weapon force, not magic. NO laser, giant projectile, fire spell, or smooth anime glow.",
+    "size": {
+      "width": 48,
+      "height": 48
+    },
+    "directions": 1,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "Create_HEAVY_MELEE_SLASH_VFX_f.png",
+    "cell_size": {
+      "width": 48,
+      "height": 48
+    },
+    "sheet_size": {
+      "width": 432,
+      "height": 96
+    },
+    "columns": 9,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 1,
+        "directions": [
+          "unknown"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "appear \u2192 expand/swing \u2192 swab \u2192 fragment/fade \u2192 dis",
+        "animation_group_id": "10e4cc8e-75ae-4d05-bc6d-96a56c1380d1",
+        "direction": "unknown"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-09-22T16:14:06.766833+00:00"
+}

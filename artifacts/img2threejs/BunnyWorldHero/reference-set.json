@@ -1,0 +1,27 @@
+{
+  "subject": "BunnyWorldHero",
+  "profile": "character",
+  "views": [
+    {
+      "id": "locked-reference-sheet",
+      "path": "C:\\bunny-world\\references\\bunny-hero-reference.png",
+      "sha256": "B8B02358FAD41EC9385F4BB5705B3C0FC4F0A9A522CE0443147FA8B2D9406DEE",
+      "dimensions": [1536, 1024],
+      "role": "authoritative multi-view turnaround and palette",
+      "hiddenRegionConfidence": 0.94
+    },
+    {
+      "id": "front-neutral-panel",
+      "path": "C:\\bunny-world\\artifacts\\img2threejs\\BunnyWorldHero\\reference-front-tight.png",
+      "sha256": "C11A31584FC453D6CC85511CF0FCB9F1D6F802F12F12E53FD9F5A1C965884F52",
+      "dimensions": [370, 315],
+      "role": "front-view comparison crop",
+      "hiddenRegionConfidence": 0.65
+    }
+  ],
+  "admission": {
+    "semanticVerdict": "pass",
+    "automatedMaskVerdict": "false-negative",
+    "note": "The deterministic admission mask rejects the sheet and crop because the stylized ears and feet form separated foreground islands. The sheet is visually unambiguous and supplies front, three-quarter, side, rear, detail, action, and gameplay views."
+  }
+}

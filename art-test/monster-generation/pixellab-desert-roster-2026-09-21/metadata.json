@@ -1,0 +1,1116 @@
+{
+  "objects": [
+    {
+      "id": "dee566d2-cd30-42b9-8486-273c4bc8d406",
+      "name": "base",
+      "prompt": "ORIGINAL desert MAP BOSS named Sunforge Colossus for Bunny World. A huge ancient living desert construct shaped like a squat walking furnace, not a humanoid golem. Broad heavy black-stone body, enormous asymmetric stone arms, short pillar-like legs and a bright sun-core embedded deep in a cracked circular cavity in its chest. Dark volcanic stone contrasts with sandstone plates and restrained molten gold cracks. Tiny glowing eyes, ancient, powerful and mysterious but still charming. Wide heavyweight boss silhouette, roughly 2.5 times normal monster mass. 64x64 crisp pixel art, low top-down isometric-friendly view, side-facing right. Transparent background. No ground, shadow, scenery, weapon, text, symbols, particles, excessive glow, antialiasing, painting or 3D. NO TEXT IN THIS ART",
+      "size": {
+        "width": 64,
+        "height": 64
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_desert_MAP_BOSS_named.png"
+      },
+      "animations": {
+        "Create_an_8-frame_ATTACK_animation_for_this_exact": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_000.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_001.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_002.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_003.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_004.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_005.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_006.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_007.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "Animate_this_exact_Sunforge_Colossus_boss_with_a_s": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_000.png",
+                "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_001.png",
+                "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_002.png",
+                "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_003.png",
+                "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_004.png",
+                "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_005.png",
+                "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_006.png",
+                "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_007.png",
+                "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "9cdc63da-926d-4a44-9837-0ba411836bb6",
+      "name": "base",
+      "prompt": "ORIGINAL desert MAP BOSS named Dune Maw for Bunny World. A massive cute but dangerous subterranean sand beast with a broad armored head, huge rounded mouth, short heavy tusks and two large side fins used to swim through sand. Only a compact powerful upper body is visible, designed to burst from beneath the desert. Warm sandstone armor plates with dark brown gaps and amber eyes. Ancient animal, not a worm or dragon. Huge distinctive silhouette, heavy but charming. 64x64 crisp pixel art, low top-down isometric-friendly view, side-facing right. Match Bunny World boss pixel language. Transparent background. No ground, sand effects, shadow, scenery, text, armor, weapon, antialiasing, painting or 3D.",
+      "size": {
+        "width": 64,
+        "height": 64
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_desert_MAP_BOSS_named_2.png"
+      },
+      "animations": {
+        "Animate_this_exact_Dune_Maw_boss_with_a_seamless_8": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_000.png",
+                "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_001.png",
+                "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_002.png",
+                "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_003.png",
+                "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_004.png",
+                "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_005.png",
+                "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_006.png",
+                "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_007.png",
+                "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "Create_an_8-frame_ATTACK_animation_for_this_exact": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_000.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_001.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_002.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_003.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_004.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_005.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_006.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_007.png",
+                "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "ca13771e-850a-4e9b-8d6d-61619a4fd826",
+      "name": "base",
+      "prompt": "ORIGINAL tiny desert enemy named Dust Djinn for Bunny World. A cute mischievous desert spirit with a compact floating upper body and a lower body dissolving into one simple curling dust tail instead of legs. Two bright magical eyes, small swept-back ear-like wisps and tiny floating hands. Muted dusty brown, warm violet and restrained pale-gold accents. Magical but not human and not a traditional genie. Strong readable silhouette with minimal detail. Match established Bunny World monsters for tiny gameplay scale and crisp sparse pixel clusters. 24x24 pixel art, low top-down isometric-friendly view, side-facing right. Transparent background. No ground, shadow, lamp, clothing, weapon, scenery, text, excessive glow, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam.png"
+      },
+      "animations": {
+        "Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_000.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_001.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_002.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_003.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_004.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_005.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_006.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_007.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "64c9f810-bba2-44bb-b250-4bda5cf3435f",
+      "name": "base",
+      "prompt": "ORIGINAL tiny desert enemy named Dust Djinn for Bunny World. A cute mischievous desert spirit with a compact floating upper body and a lower body dissolving into one simple curling dust tail instead of legs. Two bright magical eyes, small swept-back ear-like wisps and tiny floating hands. Muted dusty brown, warm violet and restrained pale-gold accents. Magical but not human and not a traditional genie. Strong readable silhouette with minimal detail. Match established Bunny World monsters for tiny gameplay scale and crisp sparse pixel clusters. 24x24 pixel art, low top-down isometric-friendly view, side-facing right. Transparent background. No ground, shadow, lamp, clothing, weapon, scenery, text, excessive glow, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_2.png"
+      },
+      "animations": {
+        "Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_000.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_001.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_002.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_003.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_004.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_005.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_006.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_007.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "1c4ba1e5-34bd-4321-8fc4-3498bcf04b7b",
+      "name": "base",
+      "prompt": "ORIGINAL tiny desert enemy named Dust Djinn for Bunny World. A cute mischievous desert spirit with a compact floating upper body and a lower body dissolving into one simple curling dust tail instead of legs. Two bright magical eyes, small swept-back ear-like wisps and tiny floating hands. Muted dusty brown, warm violet and restrained pale-gold accents. Magical but not human and not a traditional genie. Strong readable silhouette with minimal detail. Match established Bunny World monsters for tiny gameplay scale and crisp sparse pixel clusters. 24x24 pixel art, low top-down isometric-friendly view, side-facing right. Transparent background. No ground, shadow, lamp, clothing, weapon, scenery, text, excessive glow, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_3.png"
+      },
+      "animations": {
+        "Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_000.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_001.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_002.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_003.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_004.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_005.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_006.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_007.png",
+                "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "fae92a30-2ad0-471a-b7f3-82aadb9cda79",
+      "name": "base",
+      "prompt": "ORIGINAL tiny desert enemy named Sunscarab for Bunny World. A chunky cute fantasy beetle carrying a small glowing sun-crystal naturally embedded in its armored back. Broad low body, six simple readable legs, tiny bright eyes and a strong beetle silhouette. Dark bronze shell, warm ochre highlights and restrained golden crystal accents. Ancient desert creature, sturdy and hostile, not Egyptian themed. Match established Bunny World monsters for tiny gameplay scale, compact proportions and sparse crisp pixel clusters. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, symbols, jewelry, armor, weapon, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_4.png"
+      },
+      "animations": {
+        "Animate_this_exact_Sunscarab_with_a_seamless_8-fra": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_000.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_001.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_002.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_003.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_004.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_005.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_006.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_007.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "368a363f-64b0-4d3a-880e-b1f4f6d22640",
+      "name": "base",
+      "prompt": "ORIGINAL tiny desert enemy named Sunscarab for Bunny World. A chunky cute fantasy beetle carrying a small glowing sun-crystal naturally embedded in its armored back. Broad low body, six simple readable legs, tiny bright eyes and a strong beetle silhouette. Dark bronze shell, warm ochre highlights and restrained golden crystal accents. Ancient desert creature, sturdy and hostile, not Egyptian themed. Match established Bunny World monsters for tiny gameplay scale, compact proportions and sparse crisp pixel clusters. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, symbols, jewelry, armor, weapon, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_5.png"
+      },
+      "animations": {
+        "Animate_this_exact_Sunscarab_with_a_seamless_8-fra": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_000.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_001.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_002.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_003.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_004.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_005.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_006.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_007.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "10d104d0-0fc0-4fba-ab7c-2bbfd2b15ed2",
+      "name": "base",
+      "prompt": "ORIGINAL tiny desert enemy named Sunscarab for Bunny World. A chunky cute fantasy beetle carrying a small glowing sun-crystal naturally embedded in its armored back. Broad low body, six simple readable legs, tiny bright eyes and a strong beetle silhouette. Dark bronze shell, warm ochre highlights and restrained golden crystal accents. Ancient desert creature, sturdy and hostile, not Egyptian themed. Match established Bunny World monsters for tiny gameplay scale, compact proportions and sparse crisp pixel clusters. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, symbols, jewelry, armor, weapon, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_6.png"
+      },
+      "animations": {
+        "Animate_this_exact_Sunscarab_with_a_seamless_8-fra": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_000.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_001.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_002.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_003.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_004.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_005.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_006.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_007.png",
+                "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "eec3167e-ec56-45b0-902c-0f5e42767129",
+      "name": "base",
+      "prompt": "ORIGINAL tiny desert enemy named Cactling Bandit for Bunny World. A cute hostile living cactus creature with a compact round cactus body, two short legs, two small thorny arms and a crooked cactus crown that gives it a playful bandit-like silhouette. No human clothing or weapons. Muted cactus green with dry tan and tiny warm flower accents. Tough, cheeky and aggressive. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, armor, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_7.png"
+      },
+      "animations": {
+        "Animate_this_exact_Cactling_Bandit_with_a_seamless": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_000.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_001.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_002.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_003.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_004.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_005.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_006.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_007.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "a5bc30cc-c119-4297-bb31-90521b926c8b",
+      "name": "base",
+      "prompt": "ORIGINAL tiny desert enemy named Cactling Bandit for Bunny World. A cute hostile living cactus creature with a compact round cactus body, two short legs, two small thorny arms and a crooked cactus crown that gives it a playful bandit-like silhouette. No human clothing or weapons. Muted cactus green with dry tan and tiny warm flower accents. Tough, cheeky and aggressive. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, armor, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_8.png"
+      },
+      "animations": {
+        "Animate_this_exact_Cactling_Bandit_with_a_seamless": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_000.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_001.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_002.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_003.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_004.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_005.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_006.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_007.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "74aea8be-c7cc-457d-ac6f-68cb32b84da4",
+      "name": "base",
+      "prompt": "ORIGINAL tiny desert enemy named Cactling Bandit for Bunny World. A cute hostile living cactus creature with a compact round cactus body, two short legs, two small thorny arms and a crooked cactus crown that gives it a playful bandit-like silhouette. No human clothing or weapons. Muted cactus green with dry tan and tiny warm flower accents. Tough, cheeky and aggressive. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, armor, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_9.png"
+      },
+      "animations": {
+        "Animate_this_exact_Cactling_Bandit_with_a_seamless": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_000.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_001.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_002.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_003.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_004.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_005.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_006.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_007.png",
+                "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "e9cd5887-ffd5-4341-a726-299f8b4f937b",
+      "name": "base",
+      "prompt": "ORIGINAL tiny desert enemy named Duneling for Bunny World. A cute compact fantasy creature adapted to swimming through sand, with a round sandy body, two bright eyes, two short feet and small fin-like ears. Warm sand and muted amber colors. Charming but hostile, quick and mischievous. Strong unique silhouette, clearly a living desert creature, not a slime and not humanoid. Match the established Bunny World forest monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable feet contact. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, weapon, clothing, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_10.png"
+      },
+      "animations": {
+        "Animate_this_exact_Duneling_character_with_a_seaml": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_000.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_001.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_002.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_003.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_004.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_005.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_006.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_007.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "b049ea96-3eed-4f19-ae76-07bef22abfde",
+      "name": "base",
+      "prompt": "ORIGINAL tiny desert enemy named Duneling for Bunny World. A cute compact fantasy creature adapted to swimming through sand, with a round sandy body, two bright eyes, two short feet and small fin-like ears. Warm sand and muted amber colors. Charming but hostile, quick and mischievous. Strong unique silhouette, clearly a living desert creature, not a slime and not humanoid. Match the established Bunny World forest monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable feet contact. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, weapon, clothing, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_11.png"
+      },
+      "animations": {
+        "Animate_this_exact_Duneling_character_with_a_seaml": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_000.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_001.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_002.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_003.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_004.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_005.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_006.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_007.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "9e3e3d81-f4cc-41fa-b65a-12a7b1a8ab6b",
+      "name": "base",
+      "prompt": "ORIGINAL tiny desert enemy named Duneling for Bunny World. A cute compact fantasy creature adapted to swimming through sand, with a round sandy body, two bright eyes, two short feet and small fin-like ears. Warm sand and muted amber colors. Charming but hostile, quick and mischievous. Strong unique silhouette, clearly a living desert creature, not a slime and not humanoid. Match the established Bunny World forest monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable feet contact. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, weapon, clothing, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_12.png"
+      },
+      "animations": {
+        "Animate_this_exact_Duneling_character_with_a_seaml": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_000.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_001.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_002.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_003.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_004.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_005.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_006.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_007.png",
+                "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "group_id": "a9cfef67-acb5-47c3-8110-f7c4fea7978c",
+      "folder": "objects/ORIGINAL_desert_MAP_BOSS_named",
+      "objects": [
+        {
+          "id": "dee566d2-cd30-42b9-8486-273c4bc8d406",
+          "name": "base",
+          "prompt": "ORIGINAL desert MAP BOSS named Sunforge Colossus for Bunny World. A huge ancient living desert construct shaped like a squat walking furnace, not a humanoid golem. Broad heavy black-stone body, enormous asymmetric stone arms, short pillar-like legs and a bright sun-core embedded deep in a cracked circular cavity in its chest. Dark volcanic stone contrasts with sandstone plates and restrained molten gold cracks. Tiny glowing eyes, ancient, powerful and mysterious but still charming. Wide heavyweight boss silhouette, roughly 2.5 times normal monster mass. 64x64 crisp pixel art, low top-down isometric-friendly view, side-facing right. Transparent background. No ground, shadow, scenery, weapon, text, symbols, particles, excessive glow, antialiasing, painting or 3D. NO TEXT IN THIS ART",
+          "size": {
+            "width": 64,
+            "height": 64
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_desert_MAP_BOSS_named.png"
+          },
+          "animations": {
+            "Create_an_8-frame_ATTACK_animation_for_this_exact": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_000.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_001.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_002.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_003.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_004.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_005.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_006.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_007.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "Animate_this_exact_Sunforge_Colossus_boss_with_a_s": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Sunforge_Colossus_boss_with_a_s/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "f5a2aef6-6d67-4a3c-9b3c-aee76f01574b",
+      "folder": "objects/ORIGINAL_desert_MAP_BOSS_named_2",
+      "objects": [
+        {
+          "id": "9cdc63da-926d-4a44-9837-0ba411836bb6",
+          "name": "base",
+          "prompt": "ORIGINAL desert MAP BOSS named Dune Maw for Bunny World. A massive cute but dangerous subterranean sand beast with a broad armored head, huge rounded mouth, short heavy tusks and two large side fins used to swim through sand. Only a compact powerful upper body is visible, designed to burst from beneath the desert. Warm sandstone armor plates with dark brown gaps and amber eyes. Ancient animal, not a worm or dragon. Huge distinctive silhouette, heavy but charming. 64x64 crisp pixel art, low top-down isometric-friendly view, side-facing right. Match Bunny World boss pixel language. Transparent background. No ground, sand effects, shadow, scenery, text, armor, weapon, antialiasing, painting or 3D.",
+          "size": {
+            "width": 64,
+            "height": 64
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_desert_MAP_BOSS_named_2.png"
+          },
+          "animations": {
+            "Animate_this_exact_Dune_Maw_boss_with_a_seamless_8": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Dune_Maw_boss_with_a_seamless_8/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "Create_an_8-frame_ATTACK_animation_for_this_exact": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_000.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_001.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_002.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_003.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_004.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_005.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_006.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_007.png",
+                    "animations/Create_an_8-frame_ATTACK_animation_for_this_exact/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "3d1edc9a-c7b7-4646-af92-7a218c81c968",
+      "folder": "objects/ORIGINAL_tiny_desert_enemy_nam",
+      "objects": [
+        {
+          "id": "ca13771e-850a-4e9b-8d6d-61619a4fd826",
+          "name": "base",
+          "prompt": "ORIGINAL tiny desert enemy named Dust Djinn for Bunny World. A cute mischievous desert spirit with a compact floating upper body and a lower body dissolving into one simple curling dust tail instead of legs. Two bright magical eyes, small swept-back ear-like wisps and tiny floating hands. Muted dusty brown, warm violet and restrained pale-gold accents. Magical but not human and not a traditional genie. Strong readable silhouette with minimal detail. Match established Bunny World monsters for tiny gameplay scale and crisp sparse pixel clusters. 24x24 pixel art, low top-down isometric-friendly view, side-facing right. Transparent background. No ground, shadow, lamp, clothing, weapon, scenery, text, excessive glow, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam.png"
+          },
+          "animations": {
+            "Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "6613088e-8640-4747-ab86-d5d9810e07bc",
+      "folder": "objects/ORIGINAL_tiny_desert_enemy_nam_2",
+      "objects": [
+        {
+          "id": "64c9f810-bba2-44bb-b250-4bda5cf3435f",
+          "name": "base",
+          "prompt": "ORIGINAL tiny desert enemy named Dust Djinn for Bunny World. A cute mischievous desert spirit with a compact floating upper body and a lower body dissolving into one simple curling dust tail instead of legs. Two bright magical eyes, small swept-back ear-like wisps and tiny floating hands. Muted dusty brown, warm violet and restrained pale-gold accents. Magical but not human and not a traditional genie. Strong readable silhouette with minimal detail. Match established Bunny World monsters for tiny gameplay scale and crisp sparse pixel clusters. 24x24 pixel art, low top-down isometric-friendly view, side-facing right. Transparent background. No ground, shadow, lamp, clothing, weapon, scenery, text, excessive glow, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_2.png"
+          },
+          "animations": {
+            "Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "1dbe0bb0-0367-42ae-a135-0f3e48cbf3b1",
+      "folder": "objects/ORIGINAL_tiny_desert_enemy_nam_3",
+      "objects": [
+        {
+          "id": "1c4ba1e5-34bd-4321-8fc4-3498bcf04b7b",
+          "name": "base",
+          "prompt": "ORIGINAL tiny desert enemy named Dust Djinn for Bunny World. A cute mischievous desert spirit with a compact floating upper body and a lower body dissolving into one simple curling dust tail instead of legs. Two bright magical eyes, small swept-back ear-like wisps and tiny floating hands. Muted dusty brown, warm violet and restrained pale-gold accents. Magical but not human and not a traditional genie. Strong readable silhouette with minimal detail. Match established Bunny World monsters for tiny gameplay scale and crisp sparse pixel clusters. 24x24 pixel art, low top-down isometric-friendly view, side-facing right. Transparent background. No ground, shadow, lamp, clothing, weapon, scenery, text, excessive glow, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_3.png"
+          },
+          "animations": {
+            "Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Dust_Djinn_with_a_seamless_8-fr/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "6419a57f-df11-431b-aeba-ca0439613d01",
+      "folder": "objects/ORIGINAL_tiny_desert_enemy_nam_4",
+      "objects": [
+        {
+          "id": "fae92a30-2ad0-471a-b7f3-82aadb9cda79",
+          "name": "base",
+          "prompt": "ORIGINAL tiny desert enemy named Sunscarab for Bunny World. A chunky cute fantasy beetle carrying a small glowing sun-crystal naturally embedded in its armored back. Broad low body, six simple readable legs, tiny bright eyes and a strong beetle silhouette. Dark bronze shell, warm ochre highlights and restrained golden crystal accents. Ancient desert creature, sturdy and hostile, not Egyptian themed. Match established Bunny World monsters for tiny gameplay scale, compact proportions and sparse crisp pixel clusters. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, symbols, jewelry, armor, weapon, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_4.png"
+          },
+          "animations": {
+            "Animate_this_exact_Sunscarab_with_a_seamless_8-fra": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "f882fc02-44b9-401b-b432-cf0bb60edf85",
+      "folder": "objects/ORIGINAL_tiny_desert_enemy_nam_5",
+      "objects": [
+        {
+          "id": "368a363f-64b0-4d3a-880e-b1f4f6d22640",
+          "name": "base",
+          "prompt": "ORIGINAL tiny desert enemy named Sunscarab for Bunny World. A chunky cute fantasy beetle carrying a small glowing sun-crystal naturally embedded in its armored back. Broad low body, six simple readable legs, tiny bright eyes and a strong beetle silhouette. Dark bronze shell, warm ochre highlights and restrained golden crystal accents. Ancient desert creature, sturdy and hostile, not Egyptian themed. Match established Bunny World monsters for tiny gameplay scale, compact proportions and sparse crisp pixel clusters. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, symbols, jewelry, armor, weapon, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_5.png"
+          },
+          "animations": {
+            "Animate_this_exact_Sunscarab_with_a_seamless_8-fra": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "ca0530ca-8562-4fdc-a6d8-2147d734d7c8",
+      "folder": "objects/ORIGINAL_tiny_desert_enemy_nam_6",
+      "objects": [
+        {
+          "id": "10d104d0-0fc0-4fba-ab7c-2bbfd2b15ed2",
+          "name": "base",
+          "prompt": "ORIGINAL tiny desert enemy named Sunscarab for Bunny World. A chunky cute fantasy beetle carrying a small glowing sun-crystal naturally embedded in its armored back. Broad low body, six simple readable legs, tiny bright eyes and a strong beetle silhouette. Dark bronze shell, warm ochre highlights and restrained golden crystal accents. Ancient desert creature, sturdy and hostile, not Egyptian themed. Match established Bunny World monsters for tiny gameplay scale, compact proportions and sparse crisp pixel clusters. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, symbols, jewelry, armor, weapon, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_6.png"
+          },
+          "animations": {
+            "Animate_this_exact_Sunscarab_with_a_seamless_8-fra": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Sunscarab_with_a_seamless_8-fra/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "03b56507-e523-4fd8-803e-c52d585039f0",
+      "folder": "objects/ORIGINAL_tiny_desert_enemy_nam_7",
+      "objects": [
+        {
+          "id": "eec3167e-ec56-45b0-902c-0f5e42767129",
+          "name": "base",
+          "prompt": "ORIGINAL tiny desert enemy named Cactling Bandit for Bunny World. A cute hostile living cactus creature with a compact round cactus body, two short legs, two small thorny arms and a crooked cactus crown that gives it a playful bandit-like silhouette. No human clothing or weapons. Muted cactus green with dry tan and tiny warm flower accents. Tough, cheeky and aggressive. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, armor, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_7.png"
+          },
+          "animations": {
+            "Animate_this_exact_Cactling_Bandit_with_a_seamless": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "fe50edd4-b84d-40bc-8b65-86661ed44e6d",
+      "folder": "objects/ORIGINAL_tiny_desert_enemy_nam_8",
+      "objects": [
+        {
+          "id": "a5bc30cc-c119-4297-bb31-90521b926c8b",
+          "name": "base",
+          "prompt": "ORIGINAL tiny desert enemy named Cactling Bandit for Bunny World. A cute hostile living cactus creature with a compact round cactus body, two short legs, two small thorny arms and a crooked cactus crown that gives it a playful bandit-like silhouette. No human clothing or weapons. Muted cactus green with dry tan and tiny warm flower accents. Tough, cheeky and aggressive. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, armor, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_8.png"
+          },
+          "animations": {
+            "Animate_this_exact_Cactling_Bandit_with_a_seamless": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "30b1d24b-eddc-4063-a9eb-cb06c89bf4db",
+      "folder": "objects/ORIGINAL_tiny_desert_enemy_nam_9",
+      "objects": [
+        {
+          "id": "74aea8be-c7cc-457d-ac6f-68cb32b84da4",
+          "name": "base",
+          "prompt": "ORIGINAL tiny desert enemy named Cactling Bandit for Bunny World. A cute hostile living cactus creature with a compact round cactus body, two short legs, two small thorny arms and a crooked cactus crown that gives it a playful bandit-like silhouette. No human clothing or weapons. Muted cactus green with dry tan and tiny warm flower accents. Tough, cheeky and aggressive. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, armor, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_9.png"
+          },
+          "animations": {
+            "Animate_this_exact_Cactling_Bandit_with_a_seamless": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Cactling_Bandit_with_a_seamless/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "82a3a208-54a2-4f3c-9634-8f04f50f44ef",
+      "folder": "objects/ORIGINAL_tiny_desert_enemy_nam_10",
+      "objects": [
+        {
+          "id": "e9cd5887-ffd5-4341-a726-299f8b4f937b",
+          "name": "base",
+          "prompt": "ORIGINAL tiny desert enemy named Duneling for Bunny World. A cute compact fantasy creature adapted to swimming through sand, with a round sandy body, two bright eyes, two short feet and small fin-like ears. Warm sand and muted amber colors. Charming but hostile, quick and mischievous. Strong unique silhouette, clearly a living desert creature, not a slime and not humanoid. Match the established Bunny World forest monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable feet contact. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, weapon, clothing, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_10.png"
+          },
+          "animations": {
+            "Animate_this_exact_Duneling_character_with_a_seaml": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "f2113414-eb13-434e-8b45-84ee9a38934a",
+      "folder": "objects/ORIGINAL_tiny_desert_enemy_nam_11",
+      "objects": [
+        {
+          "id": "b049ea96-3eed-4f19-ae76-07bef22abfde",
+          "name": "base",
+          "prompt": "ORIGINAL tiny desert enemy named Duneling for Bunny World. A cute compact fantasy creature adapted to swimming through sand, with a round sandy body, two bright eyes, two short feet and small fin-like ears. Warm sand and muted amber colors. Charming but hostile, quick and mischievous. Strong unique silhouette, clearly a living desert creature, not a slime and not humanoid. Match the established Bunny World forest monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable feet contact. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, weapon, clothing, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_11.png"
+          },
+          "animations": {
+            "Animate_this_exact_Duneling_character_with_a_seaml": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "150159d2-6123-47af-a110-28e7c950612f",
+      "folder": "objects/ORIGINAL_tiny_desert_enemy_nam_12",
+      "objects": [
+        {
+          "id": "9e3e3d81-f4cc-41fa-b65a-12a7b1a8ab6b",
+          "name": "base",
+          "prompt": "ORIGINAL tiny desert enemy named Duneling for Bunny World. A cute compact fantasy creature adapted to swimming through sand, with a round sandy body, two bright eyes, two short feet and small fin-like ears. Warm sand and muted amber colors. Charming but hostile, quick and mischievous. Strong unique silhouette, clearly a living desert creature, not a slime and not humanoid. Match the established Bunny World forest monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable feet contact. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, weapon, clothing, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_desert_enemy_nam_12.png"
+          },
+          "animations": {
+            "Animate_this_exact_Duneling_character_with_a_seaml": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_000.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_001.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_002.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_003.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_004.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_005.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_006.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_007.png",
+                    "animations/Animate_this_exact_Duneling_character_with_a_seaml/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-09-21T07:22:00.663453"
+}

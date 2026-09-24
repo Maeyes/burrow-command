@@ -1,0 +1,19 @@
+{
+  "name": "ลานฝึกผู้พิทักษ์",
+  "mapId": "training_yard",
+  "facing": "left",
+  "sheet": "ลานฝึกผู้พิทักษ์_attack.png",
+  "w": 128,
+  "h": 128,
+  "attack_frames": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "attack_fps": 11
+}

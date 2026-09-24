@@ -1,0 +1,148 @@
+{
+  "training-straw-dummy": {
+    "triangles": 2708,
+    "meshCount": 14,
+    "dimensionsBlenderXYZ": [
+      1.43,
+      0.6309,
+      1.69
+    ],
+    "dimensionsThreeXYZ": [
+      1.43,
+      1.69,
+      0.6309
+    ],
+    "boundsMinBlender": [
+      -0.715,
+      -0.3155,
+      0.0
+    ],
+    "materials": [
+      "Living marks",
+      "Straw",
+      "Training cloth",
+      "Wood warm",
+      "Wood worn"
+    ],
+    "root": "monster_training_straw_dummy",
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "animationClips": 0,
+    "blend": "C:\\bunny-world\\artifacts\\blender\\monsters\\training_yard\\training-straw-dummy.blend",
+    "glb": "C:\\bunny-world\\public\\assets\\monsters\\3d\\training-straw-dummy.glb",
+    "glbBytes": 150348
+  },
+  "training-rat": {
+    "triangles": 2524,
+    "meshCount": 14,
+    "dimensionsBlenderXYZ": [
+      0.9305,
+      1.4439,
+      1.0
+    ],
+    "dimensionsThreeXYZ": [
+      0.9305,
+      1.0,
+      1.4439
+    ],
+    "boundsMinBlender": [
+      -0.4652,
+      -0.8839,
+      0.01
+    ],
+    "materials": [
+      "Rat eyes",
+      "Rat fur",
+      "Rat muzzle",
+      "Rat pink",
+      "Rat teeth"
+    ],
+    "root": "monster_training_rat",
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "animationClips": 0,
+    "blend": "C:\\bunny-world\\artifacts\\blender\\monsters\\training_yard\\training-rat.blend",
+    "glb": "C:\\bunny-world\\public\\assets\\monsters\\3d\\training-rat.glb",
+    "glbBytes": 97708
+  },
+  "old-wooden-instructor": {
+    "triangles": 4048,
+    "meshCount": 23,
+    "dimensionsBlenderXYZ": [
+      1.26,
+      0.78,
+      1.6
+    ],
+    "dimensionsThreeXYZ": [
+      1.26,
+      1.6,
+      0.78
+    ],
+    "boundsMinBlender": [
+      -0.63,
+      -0.405,
+      0.0
+    ],
+    "materials": [
+      "Aged wood",
+      "Cut wood",
+      "Instructor eye sockets",
+      "Instructor magic",
+      "Moss",
+      "Rope"
+    ],
+    "root": "monster_old_wooden_instructor",
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "animationClips": 0,
+    "blend": "C:\\bunny-world\\artifacts\\blender\\monsters\\training_yard\\old-wooden-instructor.blend",
+    "glb": "C:\\bunny-world\\public\\assets\\monsters\\3d\\old-wooden-instructor.glb",
+    "glbBytes": 218340
+  },
+  "training-yard-guardian": {
+    "triangles": 4948,
+    "meshCount": 26,
+    "dimensionsBlenderXYZ": [
+      1.82,
+      1.13,
+      1.995
+    ],
+    "dimensionsThreeXYZ": [
+      1.82,
+      1.995,
+      1.13
+    ],
+    "boundsMinBlender": [
+      -0.91,
+      -0.595,
+      0.0
+    ],
+    "materials": [
+      "Guardian brass",
+      "Guardian dark wood",
+      "Guardian eye sockets",
+      "Guardian iron",
+      "Guardian magic",
+      "Guardian wood"
+    ],
+    "root": "monster_training_yard_guardian",
+    "origin": [
+      0,
+      0,
+      0
+    ],
+    "animationClips": 0,
+    "blend": "C:\\bunny-world\\artifacts\\blender\\monsters\\training_yard\\training-yard-guardian.blend",
+    "glb": "C:\\bunny-world\\public\\assets\\monsters\\3d\\training-yard-guardian.glb",
+    "glbBytes": 265504
+  }
+}

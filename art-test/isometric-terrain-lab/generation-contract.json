@@ -1,0 +1,44 @@
+{
+  "contractVersion": 2,
+  "id": "greenfield-terrain-foundation-v1",
+  "sheet": {
+    "columns": 23,
+    "rows": 1,
+    "cellWidth": 64,
+    "cellHeight": 64,
+    "width": 1472,
+    "height": 64,
+    "background": "transparent"
+  },
+  "logicalTile": {
+    "width": 64,
+    "height": 32,
+    "anchorX": 32,
+    "anchorY": 32
+  },
+  "cells": [
+    { "index": 0, "id": "grass_base", "folder": "grass", "variant": "base" },
+    { "index": 1, "id": "grass_variant_01", "folder": "grass", "variant": "01" },
+    { "index": 2, "id": "grass_variant_02", "folder": "grass", "variant": "02" },
+    { "index": 3, "id": "grass_variant_03", "folder": "grass", "variant": "03" },
+    { "index": 4, "id": "dirt_base", "folder": "dirt", "variant": "base" },
+    { "index": 5, "id": "dirt_variant_01", "folder": "dirt", "variant": "01" },
+    { "index": 6, "id": "dirt_variant_02", "folder": "dirt", "variant": "02" },
+    { "index": 7, "id": "grass_dirt_mask_00", "folder": "transitions", "variant": "mask_00", "transitionType": "all_dirt", "grassCornerMask": 0 },
+    { "index": 8, "id": "grass_dirt_mask_01", "folder": "transitions", "variant": "mask_01", "transitionType": "outer_south_east", "grassCornerMask": 1 },
+    { "index": 9, "id": "grass_dirt_mask_02", "folder": "transitions", "variant": "mask_02", "transitionType": "outer_south_west", "grassCornerMask": 2 },
+    { "index": 10, "id": "grass_dirt_mask_03", "folder": "transitions", "variant": "mask_03", "transitionType": "edge_south", "grassCornerMask": 3 },
+    { "index": 11, "id": "grass_dirt_mask_04", "folder": "transitions", "variant": "mask_04", "transitionType": "outer_north_east", "grassCornerMask": 4 },
+    { "index": 12, "id": "grass_dirt_mask_05", "folder": "transitions", "variant": "mask_05", "transitionType": "edge_east", "grassCornerMask": 5 },
+    { "index": 13, "id": "grass_dirt_mask_06", "folder": "transitions", "variant": "mask_06", "transitionType": "diagonal_north_east_south_west", "grassCornerMask": 6 },
+    { "index": 14, "id": "grass_dirt_mask_07", "folder": "transitions", "variant": "mask_07", "transitionType": "inner_north_west", "grassCornerMask": 7 },
+    { "index": 15, "id": "grass_dirt_mask_08", "folder": "transitions", "variant": "mask_08", "transitionType": "outer_north_west", "grassCornerMask": 8 },
+    { "index": 16, "id": "grass_dirt_mask_09", "folder": "transitions", "variant": "mask_09", "transitionType": "diagonal_north_west_south_east", "grassCornerMask": 9 },
+    { "index": 17, "id": "grass_dirt_mask_10", "folder": "transitions", "variant": "mask_10", "transitionType": "edge_west", "grassCornerMask": 10 },
+    { "index": 18, "id": "grass_dirt_mask_11", "folder": "transitions", "variant": "mask_11", "transitionType": "inner_north_east", "grassCornerMask": 11 },
+    { "index": 19, "id": "grass_dirt_mask_12", "folder": "transitions", "variant": "mask_12", "transitionType": "edge_north", "grassCornerMask": 12 },
+    { "index": 20, "id": "grass_dirt_mask_13", "folder": "transitions", "variant": "mask_13", "transitionType": "inner_south_west", "grassCornerMask": 13 },
+    { "index": 21, "id": "grass_dirt_mask_14", "folder": "transitions", "variant": "mask_14", "transitionType": "inner_south_east", "grassCornerMask": 14 },
+    { "index": 22, "id": "grass_dirt_mask_15", "folder": "transitions", "variant": "mask_15", "transitionType": "all_grass", "grassCornerMask": 15 }
+  ]
+}

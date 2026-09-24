@@ -1,0 +1,11 @@
+from pathlib import Path
+p=Path("art-test/iso-arena-draft/poc.js")
+s=p.read_text(encoding="utf8")
+s=s.replace("import { DESERT_ASSET_ROOT, DESERT_MONSTERS, DESERT_BOSSES, DESERT_MAPS } from './desertRoster.js';","import { DESERT_ASSET_ROOT, DESERT_MONSTERS, DESERT_BOSSES, DESERT_MAPS } from './desertRoster.js';\nimport { MINE_MONSTERS, MINE_BOSSES, MINE_MAP, MINE_BOSS_ROOT } from './mineRoster.js';\nimport { MINE_PALETTE, MINE_PROPS, MINE_ZONES, MINE_SPAWNS } from './mineLayout.js';")
+s=s.replace("['forest1','forest2','desert1','desert2','snow','blender','worldcrop']","['forest1','forest2','desert1','desert2','mine','snow','blender','worldcrop']")
+s=s.replace("const activeMap = biome.startsWith('desert') ? desertMap : forestMap;","const activeMap = biome === 'mine' ? MINE_MAP : biome.startsWith('desert') ? desertMap : forestMap;")
+s=s.replace("  snow:{ground:'#c7d6d5',edge:'#667b80',back:'#1c2c35',patch:'#b7cbca',patchHi:'#e4eeee',trail:'#8b9b9b',trailHi:'#b9c5c4',clearing:'#bfd0cf',landmark:'#aebfc0'},","  snow:{ground:'#c7d6d5',edge:'#667b80',back:'#1c2c35',patch:'#b7cbca',patchHi:'#e4eeee',trail:'#8b9b9b',trailHi:'#b9c5c4',clearing:'#bfd0cf',landmark:'#aebfc0'},\n  mine:MINE_PALETTE,")
+s=s.replace("const props = biome === 'forest2' ? forest2Props : biome === 'desert1' ? desert1Props : biome === 'desert2' ? desert2Props : forest1Props;","const props = biome === 'mine' ? MINE_PROPS : biome === 'forest2' ? forest2Props : biome === 'desert1' ? desert1Props : biome === 'desert2' ? desert2Props : forest1Props;")
+s=s.replace("const isRosterMap = biome === 'forest1' || biome === 'forest2' || biome.startsWith('desert');","const isRosterMap = biome === 'mine' || biome === 'forest1' || biome === 'forest2' || biome.startsWith('desert');")
+p.write_text(s,encoding="utf8")
+print("mine base integration applied")

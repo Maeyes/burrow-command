@@ -1,0 +1,185 @@
+{
+  "ok": true,
+  "root": "art-test\\isometric-player\\combat\\greatsword\\idle",
+  "errors": [],
+  "warnings": [
+    "Accidental text, character identity, weapon continuity, and impact readability require contact-sheet visual QA."
+  ],
+  "directions": {
+    "south": {
+      "frames": 4,
+      "bottomOpaqueY": [
+        63,
+        63,
+        63,
+        63
+      ],
+      "alphaBoxes": [
+        [
+          10,
+          1,
+          54,
+          64
+        ],
+        [
+          10,
+          2,
+          54,
+          64
+        ],
+        [
+          9,
+          3,
+          54,
+          64
+        ],
+        [
+          10,
+          2,
+          54,
+          64
+        ]
+      ]
+    },
+    "south-east": {
+      "frames": 4,
+      "bottomOpaqueY": [
+        63,
+        63,
+        63,
+        63
+      ],
+      "alphaBoxes": [
+        [
+          8,
+          1,
+          63,
+          64
+        ],
+        [
+          7,
+          1,
+          61,
+          64
+        ],
+        [
+          6,
+          2,
+          60,
+          64
+        ],
+        [
+          7,
+          2,
+          62,
+          64
+        ]
+      ]
+    },
+    "east": {
+      "frames": 4,
+      "bottomOpaqueY": [
+        63,
+        63,
+        63,
+        63
+      ],
+      "alphaBoxes": [
+        [
+          10,
+          1,
+          49,
+          64
+        ],
+        [
+          9,
+          1,
+          49,
+          64
+        ],
+        [
+          8,
+          2,
+          49,
+          64
+        ],
+        [
+          9,
+          2,
+          49,
+          64
+        ]
+      ]
+    },
+    "north-east": {
+      "frames": 4,
+      "bottomOpaqueY": [
+        63,
+        63,
+        63,
+        63
+      ],
+      "alphaBoxes": [
+        [
+          7,
+          1,
+          64,
+          64
+        ],
+        [
+          6,
+          1,
+          64,
+          64
+        ],
+        [
+          5,
+          1,
+          64,
+          64
+        ],
+        [
+          6,
+          1,
+          64,
+          64
+        ]
+      ]
+    },
+    "north": {
+      "frames": 4,
+      "bottomOpaqueY": [
+        63,
+        63,
+        63,
+        63
+      ],
+      "alphaBoxes": [
+        [
+          9,
+          1,
+          55,
+          64
+        ],
+        [
+          10,
+          2,
+          54,
+          64
+        ],
+        [
+          12,
+          3,
+          52,
+          64
+        ],
+        [
+          10,
+          2,
+          54,
+          64
+        ]
+      ]
+    }
+  }
+}

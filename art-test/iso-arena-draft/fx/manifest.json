@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "provider": "PixelLab",
+  "integrationStatus": "assets-only-not-integrated",
+  "pixelPolicy": {
+    "background": "transparent-rgba",
+    "alpha": "binary-0-or-255",
+    "interpolation": "none",
+    "playback": "one-shot-unless-noted"
+  },
+  "approved": [
+    {
+      "id": "global_hit_spark",
+      "path": "./approved/global/hit_spark/",
+      "frameCount": 5,
+      "frameDimensions": { "width": 32, "height": 32 },
+      "suggestedFrameMs": 35,
+      "anchor": "center",
+      "usage": "Overlay on every damageable monster when damage is accepted; pair with the existing short sprite flash."
+    },
+    {
+      "id": "global_tackle_fx",
+      "path": "./approved/global/tackle/",
+      "frameCount": 8,
+      "frameDimensions": { "width": 64, "height": 64 },
+      "suggestedFrameMs": 35,
+      "anchor": "center",
+      "direction": "screen-right; horizontal flip for screen-left",
+      "usage": "Shared Normal-monster Tackle visual only; gameplay collision remains authoritative."
+    },
+    {
+      "id": "global_normal_death",
+      "path": "./approved/global/normal_death/",
+      "frameCount": 8,
+      "frameDimensions": { "width": 64, "height": 64 },
+      "suggestedFrameMs": 55,
+      "anchor": "center",
+      "usage": "Shared Normal and Elite one-shot dissolution; Elite may emit a second offset copy instead of resampling."
+    },
+    {
+      "id": "global_boss_death_burst",
+      "path": "./approved/global/boss_death_burst/",
+      "frameCount": 5,
+      "frameDimensions": { "width": 96, "height": 96 },
+      "suggestedFrameMs": 60,
+      "anchor": "center",
+      "usage": "Final burst after the shared boss float/right-tilt/blink sequence."
+    },
+    {
+      "id": "forest1_mushroom_brute_telegraph",
+      "path": "./approved/forest1/mushroom_brute_telegraph/",
+      "frameCount": 4,
+      "frameDimensions": { "width": 96, "height": 64 },
+      "suggestedFrameMs": 90,
+      "anchor": "ground-center",
+      "usage": "Play in listed order so the broken warning ring grows toward Mushroom Brute impact. May repeat during anticipation."
+    },
+    {
+      "id": "forest2_thornroot_telegraph",
+      "path": "./approved/forest2/thornroot_telegraph/",
+      "frameCount": 5,
+      "frameDimensions": { "width": 128, "height": 64 },
+      "suggestedFrameMs": 80,
+      "anchor": "left-ground-origin",
+      "direction": "screen-right; horizontal flip for screen-left",
+      "usage": "Segmented path telegraph leading from Thornroot Warden toward the danger endpoint."
+    },
+    {
+      "id": "forest2_thornroot_eruption",
+      "path": "./approved/forest2/thornroot_eruption/",
+      "frameCount": 8,
+      "frameDimensions": { "width": 96, "height": 64 },
+      "suggestedFrameMs": 45,
+      "anchor": "ground-center",
+      "usage": "Play once at the Thornroot telegraph endpoint on the gameplay impact frame."
+    },
+    {
+      "id": "desert1_dune_maw_telegraph",
+      "path": "./approved/desert1/dune_maw_telegraph/",
+      "frameCount": 5,
+      "frameDimensions": { "width": 128, "height": 64 },
+      "suggestedFrameMs": 85,
+      "anchor": "ground-center",
+      "playback": "repeatable-during-anticipation",
+      "usage": "Ground warning centered on Dune Maw's emergence point; gameplay owns the danger area and timing."
+    },
+    {
+      "id": "desert1_dune_maw_eruption",
+      "path": "./approved/desert1/dune_maw_eruption/",
+      "frameCount": 7,
+      "frameDimensions": { "width": 96, "height": 96 },
+      "suggestedFrameMs": 45,
+      "anchor": "ground-center",
+      "playback": "one-shot",
+      "usage": "Compact sand eruption played at the authoritative bite/ambush impact frame."
+    },
+    {
+      "id": "desert2_sunforge_telegraph",
+      "path": "./approved/desert2/sunforge_telegraph/",
+      "frameCount": 5,
+      "frameDimensions": { "width": 128, "height": 64 },
+      "suggestedFrameMs": 85,
+      "anchor": "ground-center",
+      "playback": "repeatable-during-anticipation",
+      "usage": "Broken geometric solar warning centered on the Colossus attack target; frames build from dim amber marks to a charged ring."
+    },
+    {
+      "id": "mine_goblin_leader_cleave_impact",
+      "path": "./approved/mine/goblin_leader_cleave_impact/",
+      "frameCount": 6,
+      "frameDimensions": { "width": 64, "height": 64 },
+      "suggestedFrameMs": 40,
+      "anchor": "ground-center",
+      "direction": "screen-right; horizontal flip for screen-left",
+      "playback": "one-shot",
+      "usage": "Short iron slash accent and dust fragments layered over the existing Brutal Cleave weapon impact; it does not replace the weapon animation."
+    },
+    {
+      "id": "mine_goblin_leader_charge_telegraph",
+      "path": "./approved/mine/goblin_leader_charge_telegraph/",
+      "frameCount": 4,
+      "frameDimensions": { "width": 128, "height": 64 },
+      "suggestedFrameMs": 85,
+      "anchor": "left-ground-origin",
+      "direction": "screen-right; horizontal flip for screen-left",
+      "playback": "repeatable-during-anticipation",
+      "usage": "Sparse directional lane markings placed from the charge origin toward the authoritative endpoint."
+    },
+    {
+      "id": "mine_goblin_leader_charge_trail",
+      "path": "./approved/mine/goblin_leader_charge_trail/",
+      "frameCount": 8,
+      "frameDimensions": { "width": 96, "height": 64 },
+      "suggestedFrameMs": 35,
+      "anchor": "left-ground-origin",
+      "direction": "screen-right; horizontal flip for screen-left",
+      "playback": "one-shot",
+      "usage": "Sparse mine dust and stone pixels emitted behind the moving Goblin Leader during Leader's Charge."
+    },
+    {
+      "id": "mine_goblin_leader_charge_impact",
+      "path": "./approved/mine/goblin_leader_charge_impact/",
+      "frameCount": 5,
+      "frameDimensions": { "width": 96, "height": 96 },
+      "suggestedFrameMs": 45,
+      "anchor": "ground-center",
+      "playback": "one-shot",
+      "usage": "Compact collision burst at the charge endpoint; the selected sequence removes the generated opaque opening frames and finishes on transparency."
+    }
+  ],
+  "runtimeRequired": [
+    {
+      "id": "monster_hit_flash",
+      "reason": "A flash is a temporary render treatment on the live monster sprite, not replacement artwork."
+    },
+    {
+      "id": "boss_float_tilt_blink",
+      "reason": "The shared boss death pose transformation must operate on the frozen live boss frame."
+    },
+    {
+      "id": "forest1_mushroom_brute_impact",
+      "reason": "PixelLab repeatedly converted the abstract dirt/shockwave request into a connected object or icon. Use runtime dirt pixels, a short ground shockwave and restrained spore particles at the authoritative hit frame."
+    },
+    {
+      "id": "desert2_sunforge_impact",
+      "reason": "Two PixelLab attempts became connected solar emblems/pedestals. Use a compact amber center pulse, short radial angular line segments and a few stone fragments at the authoritative hit frame."
+    },
+    {
+      "id": "mine_goblin_leader_cleave_telegraph",
+      "reason": "Two PixelLab attempts became a terrain platform or decorative strip instead of a readable melee sector. Draw a broken frontal arc from short muted warning segments; flip with attack direction."
+    },
+    {
+      "id": "mine_goblin_leader_stomp_telegraph",
+      "reason": "PixelLab repeatedly produced a connected ring of stone blocks that read as a platform. Draw a broken expanding ground ellipse and sparse crack segments centered on the boss."
+    },
+    {
+      "id": "mine_goblin_leader_stomp_shockwave",
+      "reason": "PixelLab produced a persistent stone-ring object rather than a transient shockwave. Draw an expanding elliptical pixel ring with dirt pixels and a few stone fragments at the authoritative hit frame."
+    }
+  ],
+  "rejectedGenerationJobs": [
+    { "jobId": "0fd82891-437e-4625-adab-593009688d04", "reason": "Tackle base contained a monster." },
+    { "jobId": "4c361382-fc67-4007-bbb5-75e8910275eb", "reason": "Normal-death base contained a recognizable central form." },
+    { "jobId": "816ffd56-a24b-46ed-b2f2-629f18fef20f", "reason": "Boss-death base contained a face-like icon." },
+    { "jobId": "2add823f-c5a5-4261-9980-36eb8d875629", "reason": "Mushroom FX contained a mushroom character and terrain tile." },
+    { "jobId": "77548c72-31fd-4c29-bf94-3b4baed6f3c9", "reason": "Thornroot base contained a baked terrain tile." },
+    { "jobId": "fc5840e0-e1b8-41b6-a55d-72dc3e6528c3", "reason": "Normal-death animation retained a dense object-like center." },
+    { "jobId": "e615b5a5-ab29-45c4-a152-730bf0e91109", "reason": "Mushroom impact became a connected plate-like object." },
+    { "jobId": "90d4a3a1-ba32-4e50-b596-f2685d1b2275", "reason": "Mushroom impact became a terrain/platform icon." },
+    { "jobId": "33e3f457-c746-406e-b0c0-b0f2d1fcd4e6", "reason": "Sunforge telegraph v1 became a connected medallion/platform." },
+    { "jobId": "07ea2472-64a6-4e86-8770-a5f9811c01f7", "reason": "Sunforge impact v1 became a connected solar pedestal/icon." },
+    { "jobId": "2d9d92e1-29d5-458a-94c3-1b253026a7d8", "reason": "Sunforge impact v2 remained a connected solar emblem; runtime FX selected after two attempts." },
+    { "jobId": "d6fab99a-8e18-4393-9122-acdddc87a45f", "reason": "Cleave telegraph v1 became a terrain tile/platform." },
+    { "jobId": "6d16825e-c15c-4c7c-a9f5-5f7fe799ac8a", "reason": "Cleave telegraph v2 became a decorative dust strip instead of a melee sector; runtime FX selected after two attempts." },
+    { "jobId": "31854f36-fe1e-4378-894f-dd1fca8097ee", "reason": "Stomp telegraph base became a connected stone-block ring." },
+    { "jobId": "d86f247b-0b61-4ebb-a50e-975f16c5203c", "reason": "Stomp telegraph reroll remained a connected stone-block ring." },
+    { "jobId": "2db4b760-9a1d-4e97-b2d1-3f733322c2ee", "reason": "Stomp telegraph animation lifted/morphed the ring into an object instead of a ground warning." },
+    { "jobId": "a2995d55-b9a7-4e3d-9257-4de1bfe92d20", "reason": "Stomp shockwave animation retained a persistent stone-ring platform." },
+    { "jobId": "69ebf0bc-398f-48bb-8650-812008fe60b9", "reason": "Stomp shockwave reroll produced repeated unrelated aqua figures." },
+    { "jobId": "c5e672b3-a389-4b01-9bec-37f4d6ba67bc", "reason": "Charge telegraph v1 became a connected solid road/lane." }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "object": {
+    "id": "ee4539b8-1c68-4b32-9184-79cd00f96df4",
+    "name": "base",
+    "prompt": "Create a single Black Hole skill VFX for an isometric pixel-art fantasy RPG.\n\nA terrifying magical black hole floating very low above the ground, centered on a fixed point. The center is a deep pitch-black circular void, surrounded by a bright distorted accretion ring of violet, indigo and electric purple energy. Long curved energy streams and small glowing particles spiral inward toward the black center, clearly communicating an extremely powerful pulling force from a very large surrounding area.\n\nThe central void should be compact and readable, while thin spiral trails extend far outward to suggest a huge attraction radius. Leave transparent space between the outer trails so the effect does not become a solid magic circle.\n\nTop-down 3/4 perspective suitable for an isometric RPG ground plane.\nTrue handcrafted pixel art, crisp intentional pixel clusters, hard pixel edges, transparent background.\nNo blur, no anti-aliasing, no smooth digital painting.\nNo character, monster, weapon, text, UI, scenery or background.\nNo portal doorway, no galaxy background, no water vortex.\nThe effect must read as dangerous gravity distortion and inward suction.",
+    "size": {
+      "width": 112,
+      "height": 112
+    },
+    "directions": 1,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "Create_a_single_Black_Hole_ski.png",
+    "cell_size": {
+      "width": 112,
+      "height": 112
+    },
+    "sheet_size": {
+      "width": 1008,
+      "height": 224
+    },
+    "columns": 9,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 1,
+        "directions": [
+          "unknown"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "appear \u2192 expand/swing \u2192 peak impact \u2192 fragment/fad",
+        "animation_group_id": "4796e97f-2eb6-4202-b6ee-90b76c30d2ea",
+        "direction": "unknown"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-09-22T16:39:13.913914+00:00"
+}

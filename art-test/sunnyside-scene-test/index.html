@@ -1,0 +1,29 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Sunnyside Scene Test</title><style>*{box-sizing:border-box}body{margin:0;background:#111b17;color:#e4eee7;font-family:system-ui}header{padding:12px 18px;background:#17251f;border-bottom:1px solid #385044}h1{font-size:17px;margin:0}.sub{opacity:.65;margin-top:3px}canvas{display:block;width:min(1280px,100vw);height:auto;margin:auto;image-rendering:pixelated;background:#20382b}</style></head><body><header><h1>BUNNY WORLD · SUNNYSIDE SCENE TEST</h1><div class="sub">Sunnyside assets assembled as a gameplay environment · composition test only</div></header><canvas id="c" width="1280" height="720"></canvas><script type="module">
+const c=document.querySelector('#c'),x=c.getContext('2d');x.imageSmoothingEnabled=false;
+const R='/Sunnyside_World_Assets/';
+const load=s=>new Promise((ok,no)=>{const i=new Image;i.onload=()=>ok(i);i.onerror=no;i.src=s});
+const A={tiles:await load(R+'Tileset/spr_tileset_sunnysideworld_16px.png'),forest:await load(R+'Tileset/spr_tileset_sunnysideworld_forest_32px.png'),tree1:await load(R+'Elements/Plants/spr_deco_tree_01_strip4.png'),tree2:await load(R+'Elements/Plants/spr_deco_tree_02_strip4.png'),red:await load(R+'Elements/Plants/spr_deco_mushroom_red_01_strip4.png'),blue:await load(R+'Elements/Plants/spr_deco_mushroom_blue_01_strip4.png'),wind:await load(R+'Elements/Other/spr_deco_windmill_withshadow_strip9.png'),fire:await load(R+'Elements/VFX/Fire/spr_deco_fire_01_strip4.png'),glint:await load(R+'Elements/VFX/Glint/spr_deco_glint_01_strip6.png'),gob:await load(R+'Characters/Goblin/PNG/spr_walk_strip8.png'),skel:await load(R+'Characters/Skeleton/PNG/skeleton_walk_strip8.png')};
+const bunny=await load('/art-test/isometric-player/south.png');
+function strip(img,n,frame,px,py,scale=2){const w=img.width/n,h=img.height;x.drawImage(img,(frame%n)*w,0,w,h,Math.round(px-w*scale/2),Math.round(py-h*scale),Math.round(w*scale),Math.round(h*scale))}
+function tile(sx,sy,dx,dy,scale=4){x.drawImage(A.tiles,sx*16,sy*16,16,16,dx,dy,64,64)}
+let t=0,last=performance.now();
+function draw(now){const dt=(now-last)/1000;last=now;t+=dt;x.fillStyle='#1b3026';x.fillRect(0,0,1280,720);
+ // dense ground assembled from Sunnyside tile atlas samples
+ for(let gy=0;gy<12;gy++)for(let gx=0;gx<20;gx++){const v=(gx*7+gy*11)%5;tile(v,0,gx*64,gy*64)}
+ // dirt clearing/path using another atlas band for audition
+ x.fillStyle='rgba(116,91,55,.78)';x.beginPath();x.ellipse(640,410,290,125,0,0,Math.PI*2);x.fill();
+ x.fillStyle='rgba(116,91,55,.72)';x.fillRect(575,0,130,720);
+ const f=Math.floor(t*5);
+ const props=[[A.tree1,4,120,260,3.4],[A.tree2,4,220,205,3.3],[A.tree1,4,1080,270,3.6],[A.tree2,4,1170,420,3.5],[A.tree1,4,170,610,3.5],[A.tree2,4,1040,625,3.4]];
+ for(const p of props)strip(p[0],p[1],f,p[2],p[3],p[4]);
+ strip(A.wind,9,Math.floor(t*7),955,515,2.5);
+ for(const q of [[330,330],[905,340],[300,560],[930,585]])strip(A.red,4,f,q[0],q[1],2.4);
+ for(const q of [[390,280],[850,285]])strip(A.blue,4,f,q[0],q[1],2.3);
+ strip(A.fire,4,Math.floor(t*9),520,440,3);
+ strip(A.glint,6,Math.floor(t*8),770,350,3);
+ // hero + 10 Sunnyside monsters for scale context
+ x.fillStyle='rgba(0,0,0,.25)';x.beginPath();x.ellipse(640,465,26,9,0,0,Math.PI*2);x.fill();x.drawImage(bunny,608,401,64,64);
+ for(let i=0;i<10;i++){const a=i/10*Math.PI*2,px=640+Math.cos(a)*190,py=455+Math.sin(a)*92;const img=i%2?A.gob:A.skel;const n=8,fr=Math.floor(t*10+i)%8;strip(img,n,fr,px,py,i%2?1.75:2.2)}
+ x.fillStyle='rgba(8,14,11,.7)';x.fillRect(18,650,475,48);x.fillStyle='#dcecdf';x.font='14px system-ui';x.fillText('SUNNYSIDE COMPOSITION TEST · terrain + trees + mushrooms + windmill + VFX + monsters',32,680);
+ requestAnimationFrame(draw)}requestAnimationFrame(draw);
+</script></body></html>

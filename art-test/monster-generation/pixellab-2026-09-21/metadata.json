@@ -1,0 +1,548 @@
+{
+  "objects": [
+    {
+      "id": "4f0dd2c1-0a85-449f-aab7-0fe2f1186f19",
+      "name": "base",
+      "prompt": "ORIGINAL small round hostile woodland moss creature for a cute compact fantasy RPG. Soft chunky moss body, two distinct tiny short feet, two bright expressive eyes, exactly two or three small leaves growing from the top. Simple readable silhouette, restrained detail, not a slime, not humanoid, no clothing, no weapon. Match style references only for very small gameplay scale, sparse crisp pixel clusters, transparent padding, and feet baseline. Side-facing right, walk-ready contact pose. No ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+      "size": {
+        "width": 96,
+        "height": 96
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_small_round_hostile_w.png"
+      },
+      "animations": {
+        "Walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Walk/unknown/frame_000.png",
+                "animations/Walk/unknown/frame_001.png",
+                "animations/Walk/unknown/frame_002.png",
+                "animations/Walk/unknown/frame_003.png",
+                "animations/Walk/unknown/frame_004.png",
+                "animations/Walk/unknown/frame_005.png",
+                "animations/Walk/unknown/frame_006.png",
+                "animations/Walk/unknown/frame_007.png"
+              ],
+              "frame_count": 8
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "e6c03e0d-238a-4995-9627-50fdc44786e7",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "dfbe54f6-c767-4d2d-8722-b3cb6309266b",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree_2.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "de911580-efd1-48b3-b759-d25d613ced54",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree_3.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "c223c9d0-2510-4786-9b96-ba3b5c0d0457",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree_4.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "b7e57311-d2ad-4e96-b3de-03c0ed5b2fd3",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree_5.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "b4746056-341e-4058-b683-c82afb4c3a48",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree_6.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "acb4be86-9a39-4a21-a197-2dd6f458927c",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree_7.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "ab278386-95eb-4627-a9a7-f2f1644d9245",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree_8.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "9be27b31-4a0f-44d2-b370-f92e8d9cc2b7",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree_9.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "7deef37a-c640-410f-b62a-7b039c30da4a",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree_10.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "630905e2-20ac-42b4-a0d9-2dffe0562520",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree_11.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "46f44da5-025c-4321-9e8c-05e2891b3454",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree_12.png"
+      },
+      "animations": {}
+    },
+    {
+      "id": "284bac13-98e7-4b32-ac9e-cfb1263ba303",
+      "name": "base",
+      "prompt": "isometric pixel cute tree",
+      "size": {
+        "width": 48,
+        "height": 48
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/isometric_pixel_cute_tree_13.png"
+      },
+      "animations": {}
+    }
+  ],
+  "groups": [
+    {
+      "group_id": "bae9eb14-771c-4f24-8e1e-3984e3e2e15e",
+      "folder": "objects/ORIGINAL_small_round_hostile_w",
+      "objects": [
+        {
+          "id": "4f0dd2c1-0a85-449f-aab7-0fe2f1186f19",
+          "name": "base",
+          "prompt": "ORIGINAL small round hostile woodland moss creature for a cute compact fantasy RPG. Soft chunky moss body, two distinct tiny short feet, two bright expressive eyes, exactly two or three small leaves growing from the top. Simple readable silhouette, restrained detail, not a slime, not humanoid, no clothing, no weapon. Match style references only for very small gameplay scale, sparse crisp pixel clusters, transparent padding, and feet baseline. Side-facing right, walk-ready contact pose. No ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+          "size": {
+            "width": 96,
+            "height": 96
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_small_round_hostile_w.png"
+          },
+          "animations": {
+            "Walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/Walk/unknown/frame_000.png",
+                    "animations/Walk/unknown/frame_001.png",
+                    "animations/Walk/unknown/frame_002.png",
+                    "animations/Walk/unknown/frame_003.png",
+                    "animations/Walk/unknown/frame_004.png",
+                    "animations/Walk/unknown/frame_005.png",
+                    "animations/Walk/unknown/frame_006.png",
+                    "animations/Walk/unknown/frame_007.png"
+                  ],
+                  "frame_count": 8
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "652fa9d5-a596-4e13-af37-022204f72c6e",
+      "folder": "objects/isometric_pixel_cute_tree",
+      "objects": [
+        {
+          "id": "e6c03e0d-238a-4995-9627-50fdc44786e7",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "9143b7f3-914d-409c-87fc-31f7b72c73d4",
+      "folder": "objects/isometric_pixel_cute_tree_2",
+      "objects": [
+        {
+          "id": "dfbe54f6-c767-4d2d-8722-b3cb6309266b",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree_2.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "4ff910af-0bff-4897-a15c-b223c5262862",
+      "folder": "objects/isometric_pixel_cute_tree_3",
+      "objects": [
+        {
+          "id": "de911580-efd1-48b3-b759-d25d613ced54",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree_3.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "97ffd3fe-87a3-47dd-af6c-d911bf002c4e",
+      "folder": "objects/isometric_pixel_cute_tree_4",
+      "objects": [
+        {
+          "id": "c223c9d0-2510-4786-9b96-ba3b5c0d0457",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree_4.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "806e7172-42b4-4e85-acc4-1857cb806247",
+      "folder": "objects/isometric_pixel_cute_tree_5",
+      "objects": [
+        {
+          "id": "b7e57311-d2ad-4e96-b3de-03c0ed5b2fd3",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree_5.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "d6575479-1c82-4c7c-8998-ea4f1fa7554e",
+      "folder": "objects/isometric_pixel_cute_tree_6",
+      "objects": [
+        {
+          "id": "b4746056-341e-4058-b683-c82afb4c3a48",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree_6.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "06169c66-d602-4871-a57c-e57ae04807b6",
+      "folder": "objects/isometric_pixel_cute_tree_7",
+      "objects": [
+        {
+          "id": "acb4be86-9a39-4a21-a197-2dd6f458927c",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree_7.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "644b9f36-ee4b-4e0e-97a9-5154ac46cd42",
+      "folder": "objects/isometric_pixel_cute_tree_8",
+      "objects": [
+        {
+          "id": "ab278386-95eb-4627-a9a7-f2f1644d9245",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree_8.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "e3ad5c67-2d09-46e4-ba4b-5c7931ec2367",
+      "folder": "objects/isometric_pixel_cute_tree_9",
+      "objects": [
+        {
+          "id": "9be27b31-4a0f-44d2-b370-f92e8d9cc2b7",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree_9.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "b367e654-e58e-4865-85e2-735219246803",
+      "folder": "objects/isometric_pixel_cute_tree_10",
+      "objects": [
+        {
+          "id": "7deef37a-c640-410f-b62a-7b039c30da4a",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree_10.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "e34573ba-946e-44fc-a93b-2313112ac869",
+      "folder": "objects/isometric_pixel_cute_tree_11",
+      "objects": [
+        {
+          "id": "630905e2-20ac-42b4-a0d9-2dffe0562520",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree_11.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "75d02d01-cb8d-4052-b508-4010b0a38d07",
+      "folder": "objects/isometric_pixel_cute_tree_12",
+      "objects": [
+        {
+          "id": "46f44da5-025c-4321-9e8c-05e2891b3454",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree_12.png"
+          },
+          "animations": {}
+        }
+      ]
+    },
+    {
+      "group_id": "1ed526f1-0a3b-4771-8ad8-a8d7563b5b47",
+      "folder": "objects/isometric_pixel_cute_tree_13",
+      "objects": [
+        {
+          "id": "284bac13-98e7-4b32-ac9e-cfb1263ba303",
+          "name": "base",
+          "prompt": "isometric pixel cute tree",
+          "size": {
+            "width": 48,
+            "height": 48
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/isometric_pixel_cute_tree_13.png"
+          },
+          "animations": {}
+        }
+      ]
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-09-21T04:13:52.009602"
+}

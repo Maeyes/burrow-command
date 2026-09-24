@@ -1,0 +1,409 @@
+{
+ "idle": {
+  "south": {
+   "frames": 4,
+   "w": 64,
+   "h": 64,
+   "footY": 60,
+   "source": "idle"
+  },
+  "south-east": {
+   "frames": 4,
+   "w": 64,
+   "h": 64,
+   "footY": 59,
+   "source": "idle"
+  },
+  "east": {
+   "frames": 4,
+   "w": 64,
+   "h": 64,
+   "footY": 61,
+   "source": "idle"
+  },
+  "north-east": {
+   "frames": 4,
+   "w": 64,
+   "h": 64,
+   "footY": 61,
+   "source": "idle"
+  },
+  "north": {
+   "frames": 4,
+   "w": 64,
+   "h": 64,
+   "footY": 59,
+   "source": "idle"
+  }
+ },
+ "walk": {
+  "south": {
+   "frames": 8,
+   "w": 64,
+   "h": 64,
+   "footY": 60,
+   "source": "walk"
+  },
+  "south-east": {
+   "frames": 8,
+   "w": 64,
+   "h": 64,
+   "footY": 60,
+   "source": "walk"
+  },
+  "east": {
+   "frames": 8,
+   "w": 64,
+   "h": 64,
+   "footY": 60,
+   "source": "walk"
+  },
+  "north-east": {
+   "frames": 8,
+   "w": 64,
+   "h": 64,
+   "footY": 60,
+   "source": "walk"
+  },
+  "north": {
+   "frames": 8,
+   "w": 64,
+   "h": 64,
+   "footY": 59,
+   "source": "walk"
+  }
+ },
+ "run": {
+  "south": {
+   "frames": 8,
+   "w": 96,
+   "h": 96,
+   "footY": 76,
+   "source": "Running"
+  },
+  "south-east": {
+   "frames": 8,
+   "w": 64,
+   "h": 64,
+   "footY": 59,
+   "source": "run"
+  },
+  "east": {
+   "frames": 8,
+   "w": 64,
+   "h": 64,
+   "footY": 61,
+   "source": "run"
+  },
+  "north-east": {
+   "frames": 8,
+   "w": 64,
+   "h": 64,
+   "footY": 61,
+   "source": "run"
+  },
+  "north": {
+   "frames": 8,
+   "w": 64,
+   "h": 64,
+   "footY": 59,
+   "source": "run"
+  }
+ },
+ "hurt": {
+  "south": {
+   "frames": 6,
+   "w": 64,
+   "h": 64,
+   "footY": 61,
+   "source": "hurt"
+  },
+  "south-east": {
+   "frames": 6,
+   "w": 64,
+   "h": 64,
+   "footY": 57,
+   "source": "hurt"
+  },
+  "east": {
+   "frames": 6,
+   "w": 64,
+   "h": 64,
+   "footY": 62,
+   "source": "hurt"
+  },
+  "north-east": {
+   "frames": 6,
+   "w": 64,
+   "h": 64,
+   "footY": 60,
+   "source": "hurt"
+  },
+  "north": {
+   "frames": 6,
+   "w": 64,
+   "h": 64,
+   "footY": 59,
+   "source": "hurt"
+  }
+ },
+ "death": {
+  "south": {
+   "frames": 7,
+   "w": 64,
+   "h": 64,
+   "footY": 61,
+   "source": "death"
+  },
+  "south-east": {
+   "frames": 7,
+   "w": 64,
+   "h": 64,
+   "footY": 59,
+   "source": "death"
+  },
+  "east": {
+   "frames": 7,
+   "w": 64,
+   "h": 64,
+   "footY": 62,
+   "source": "death"
+  },
+  "north-east": {
+   "frames": 7,
+   "w": 64,
+   "h": 64,
+   "footY": 61,
+   "source": "death"
+  },
+  "north": {
+   "frames": 7,
+   "w": 64,
+   "h": 64,
+   "footY": 61,
+   "source": "death"
+  }
+ },
+ "atk_greatsword": {
+  "south": {
+   "frames": 8,
+   "w": 84,
+   "h": 84,
+   "footY": 72,
+   "source": "atk_greatsword_v2"
+  },
+  "south-east": {
+   "frames": 8,
+   "w": 84,
+   "h": 84,
+   "footY": 70,
+   "source": "atk_greatsword_v2"
+  },
+  "east": {
+   "frames": 8,
+   "w": 88,
+   "h": 88,
+   "footY": 74,
+   "source": "atk_greatsword_v2"
+  },
+  "north-east": {
+   "frames": 8,
+   "w": 88,
+   "h": 88,
+   "footY": 72,
+   "source": "atk_greatsword_v2"
+  },
+  "north": {
+   "frames": 8,
+   "w": 84,
+   "h": 84,
+   "footY": 70,
+   "source": "atk_greatsword_v2"
+  }
+ },
+ "atk_dagger": {
+  "south": {
+   "frames": 8,
+   "w": 84,
+   "h": 84,
+   "footY": 72,
+   "source": "atk_dagger_v2"
+  },
+  "south-east": {
+   "frames": 8,
+   "w": 84,
+   "h": 84,
+   "footY": 70,
+   "source": "atk_dagger_v2"
+  },
+  "east": {
+   "frames": 8,
+   "w": 88,
+   "h": 88,
+   "footY": 74,
+   "source": "atk_dagger_x2"
+  },
+  "north-east": {
+   "frames": 8,
+   "w": 88,
+   "h": 88,
+   "footY": 72,
+   "source": "atk_dagger_x1"
+  },
+  "north": {
+   "frames": 8,
+   "w": 84,
+   "h": 84,
+   "footY": 70,
+   "source": "atk_dagger_v2"
+  }
+ },
+ "atk_axe": {
+  "south": {
+   "frames": 8,
+   "w": 84,
+   "h": 84,
+   "footY": 72,
+   "source": "atk_axe"
+  },
+  "south-east": {
+   "frames": 8,
+   "w": 84,
+   "h": 84,
+   "footY": 70,
+   "source": "atk_axe_fix"
+  },
+  "east": {
+   "frames": 8,
+   "w": 88,
+   "h": 88,
+   "footY": 74,
+   "source": "atk_axe"
+  },
+  "north-east": {
+   "frames": 8,
+   "w": 88,
+   "h": 88,
+   "footY": 72,
+   "source": "atk_axe_fix"
+  },
+  "north": {
+   "frames": 8,
+   "w": 84,
+   "h": 84,
+   "footY": 70,
+   "source": "atk_axe"
+  }
+ },
+ "atk_hammer": {
+  "south": {
+   "frames": 6,
+   "w": 84,
+   "h": 84,
+   "footY": 72,
+   "source": "atk_hammer"
+  },
+  "south-east": {
+   "frames": 6,
+   "w": 84,
+   "h": 84,
+   "footY": 70,
+   "source": "atk_hammer_fix"
+  },
+  "east": {
+   "frames": 6,
+   "w": 88,
+   "h": 88,
+   "footY": 74,
+   "source": "atk_hammer"
+  },
+  "north-east": {
+   "frames": 6,
+   "w": 88,
+   "h": 88,
+   "footY": 72,
+   "source": "atk_hammer"
+  },
+  "north": {
+   "frames": 6,
+   "w": 84,
+   "h": 84,
+   "footY": 70,
+   "source": "atk_hammer"
+  }
+ },
+ "atk_bow": {
+  "south": {
+   "frames": 8,
+   "w": 84,
+   "h": 84,
+   "footY": 72,
+   "source": "atk_bow_fix"
+  },
+  "south-east": {
+   "frames": 8,
+   "w": 84,
+   "h": 84,
+   "footY": 70,
+   "source": "atk_bow"
+  },
+  "east": {
+   "frames": 7,
+   "w": 88,
+   "h": 88,
+   "footY": 74,
+   "source": "atk_bow"
+  },
+  "north-east": {
+   "frames": 8,
+   "w": 88,
+   "h": 88,
+   "footY": 72,
+   "source": "atk_bow"
+  },
+  "north": {
+   "frames": 8,
+   "w": 84,
+   "h": 84,
+   "footY": 70,
+   "source": "atk_bow"
+  }
+ },
+ "atk_swordShield": {
+  "south": {
+   "frames": 6,
+   "w": 84,
+   "h": 84,
+   "footY": 72,
+   "source": "atk_swordshield_v2"
+  },
+  "south-east": {
+   "frames": 6,
+   "w": 84,
+   "h": 84,
+   "footY": 70,
+   "source": "atk_swordshield_v2"
+  },
+  "east": {
+   "frames": 6,
+   "w": 88,
+   "h": 88,
+   "footY": 74,
+   "source": "atk_swordshield_v2"
+  },
+  "north-east": {
+   "frames": 6,
+   "w": 88,
+   "h": 88,
+   "footY": 72,
+   "source": "atk_swordshield_v2"
+  },
+  "north": {
+   "frames": 6,
+   "w": 84,
+   "h": 84,
+   "footY": 70,
+   "source": "atk_swordshield_v2"
+  }
+ }
+}

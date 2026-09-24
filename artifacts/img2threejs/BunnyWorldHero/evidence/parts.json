@@ -1,0 +1,181 @@
+{
+  "model": "BunnyWorldHero",
+  "parts": [
+    {
+      "name": "root",
+      "kind": "group",
+      "module": "root",
+      "triangles": 0
+    },
+    {
+      "name": "body",
+      "kind": "part",
+      "module": "body",
+      "triangles": 240
+    },
+    {
+      "name": "head",
+      "kind": "part",
+      "module": "head",
+      "triangles": 1008
+    },
+    {
+      "name": "ear-l",
+      "kind": "part",
+      "module": "ear-l",
+      "triangles": 1148
+    },
+    {
+      "name": "inner-ear-l",
+      "kind": "part",
+      "module": "inner-ear-l",
+      "triangles": 284
+    },
+    {
+      "name": "ear-r",
+      "kind": "part",
+      "module": "ear-r",
+      "triangles": 1148
+    },
+    {
+      "name": "inner-ear-r",
+      "kind": "part",
+      "module": "inner-ear-r",
+      "triangles": 284
+    },
+    {
+      "name": "muzzle-l",
+      "kind": "part",
+      "module": "muzzle-l",
+      "triangles": 396
+    },
+    {
+      "name": "muzzle-r",
+      "kind": "part",
+      "module": "muzzle-r",
+      "triangles": 396
+    },
+    {
+      "name": "eye-l",
+      "kind": "part",
+      "module": "eye-l",
+      "triangles": 720
+    },
+    {
+      "name": "iris-l",
+      "kind": "part",
+      "module": "iris-l",
+      "triangles": 616
+    },
+    {
+      "name": "pupil-l",
+      "kind": "part",
+      "module": "pupil-l",
+      "triangles": 520
+    },
+    {
+      "name": "catchlight-l",
+      "kind": "part",
+      "module": "catchlight-l",
+      "triangles": 252
+    },
+    {
+      "name": "eye-r",
+      "kind": "part",
+      "module": "eye-r",
+      "triangles": 720
+    },
+    {
+      "name": "iris-r",
+      "kind": "part",
+      "module": "iris-r",
+      "triangles": 616
+    },
+    {
+      "name": "pupil-r",
+      "kind": "part",
+      "module": "pupil-r",
+      "triangles": 520
+    },
+    {
+      "name": "catchlight-r",
+      "kind": "part",
+      "module": "catchlight-r",
+      "triangles": 252
+    },
+    {
+      "name": "nose",
+      "kind": "part",
+      "module": "nose",
+      "triangles": 320
+    },
+    {
+      "name": "mouth-l",
+      "kind": "part",
+      "module": "mouth-l",
+      "triangles": 144
+    },
+    {
+      "name": "mouth-r",
+      "kind": "part",
+      "module": "mouth-r",
+      "triangles": 144
+    },
+    {
+      "name": "arm-l",
+      "kind": "part",
+      "module": "arm-l",
+      "triangles": 396
+    },
+    {
+      "name": "hand-l",
+      "kind": "part",
+      "module": "hand-l",
+      "triangles": 396
+    },
+    {
+      "name": "arm-r",
+      "kind": "part",
+      "module": "arm-r",
+      "triangles": 396
+    },
+    {
+      "name": "hand-r",
+      "kind": "part",
+      "module": "hand-r",
+      "triangles": 396
+    },
+    {
+      "name": "leg-l",
+      "kind": "part",
+      "module": "leg-l",
+      "triangles": 396
+    },
+    {
+      "name": "foot-l",
+      "kind": "part",
+      "module": "foot-l",
+      "triangles": 520
+    },
+    {
+      "name": "leg-r",
+      "kind": "part",
+      "module": "leg-r",
+      "triangles": 396
+    },
+    {
+      "name": "foot-r",
+      "kind": "part",
+      "module": "foot-r",
+      "triangles": 520
+    },
+    {
+      "name": "tail",
+      "kind": "part",
+      "module": "tail",
+      "triangles": 320
+    }
+  ],
+  "unnamedMeshes": 0,
+  "integralMeshes": 28
+}

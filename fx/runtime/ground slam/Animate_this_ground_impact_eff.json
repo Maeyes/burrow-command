@@ -1,0 +1,46 @@
+{
+  "object": {
+    "id": "2bacb842-5812-47b9-ab0e-c8e6f4953738",
+    "name": "base",
+    "prompt": "Animate this ground impact effect as one continuous pixel-art RPG VFX.\n\nA powerful physical Ground Slam hits the exact center point of the ground. Start with a tiny bright impact flash, then rapidly expand cracks outward from the same center. Small rocks and debris burst upward at peak impact, then fall back down. End with dust, small debris, and the impact fading away.\n\nIMPORTANT:\nKeep the impact center locked in exactly the same position for the entire animation.\nKeep the same camera angle, perspective, canvas size, scale, and ground contact point.\nThe effect must evolve continuously from the same impact, not become different separate drawings.\nThe crater must NOT move or jump between frames.\nDo not create multiple examples, multiple impacts, a contact sheet, or separate variations.\nDo not add a character, weapon, text, frame numbers, grass, or background scenery.\n\nTrue handcrafted pixel art, crisp hard pixels, transparent background, no blur, no anti-aliasing.\nPhysical earth impact only: warm cream impact flash, brown dirt, rocks, cracks and dust.\nDesigned for an isometric fantasy RPG.",
+    "size": {
+      "width": 96,
+      "height": 96
+    },
+    "directions": 1,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "Animate_this_ground_impact_eff.png",
+    "cell_size": {
+      "width": 96,
+      "height": 96
+    },
+    "sheet_size": {
+      "width": 864,
+      "height": 192
+    },
+    "columns": 9,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 1,
+        "directions": [
+          "unknown"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "appear \u2192 peak impact \u2192 fragment/fade \u2192 disappear",
+        "animation_group_id": "d3b847c9-3968-4f21-9e0b-a72f77c5bd22",
+        "direction": "unknown"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-09-22T16:22:44.302947+00:00"
+}

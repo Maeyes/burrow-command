@@ -1,0 +1,16 @@
+{
+  "admitted": false,
+  "reasons": [
+    "mask coherence: largest connected blob is 0.28 of foreground < 0.6 (fragmented/scattered subject — ambiguous)"
+  ],
+  "provenance": {
+    "viewpoint": "reference",
+    "sourcePath": "C:\\bunny-world\\references\\bunny-hero-reference.png",
+    "width": 1536,
+    "height": 1024,
+    "foregroundCoverage": 0.111,
+    "largestComponentFraction": 0.2844,
+    "pHash": 17427180934021337296,
+    "duplicateOfHash": null
+  }
+}

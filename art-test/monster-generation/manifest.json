@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "status": "generation-in-progress",
+  "canonicalReferences": [
+    "/Sunnyside_World_Assets/Characters/Goblin/PNG/spr_walk_strip8.png",
+    "/Sunnyside_World_Assets/Characters/Skeleton/PNG/skeleton_walk_strip8.png"
+  ],
+  "contract": {
+    "animation": "walk",
+    "frameCount": 8,
+    "layout": "horizontal-strip",
+    "cellGeometry": "eight equal cells; source canvas size is recorded per monster",
+    "background": "transparent-rgba",
+    "feetAnchor": "stable-bottom-center",
+    "selectionPolicy": {
+      "normalMonsterTypes": 4,
+      "selectedCandidatesPerNormalType": 3,
+      "normalAnimations": ["walk"],
+      "mapBossCount": 1,
+      "mapBossCellDimensions": { "width": 64, "height": 64 },
+      "mapBossAnimations": ["walk", "attack"]
+    }
+  },
+  "monsters": [
+    { "id": "mossblob", "displayName": "Mossblob", "class": "normal", "sourceGeneration": { "provider": "PixelLab", "sourceObjectId": "d8b52994-74ed-4850-a177-e744ee469460", "animationGroupId": "5212e140-da6c-4bf1-ac0a-5ae239bf3288", "sourceReviewId": "7bdb9fc1-937b-4c8c-9c57-c1506fd922a3", "referenceImages": ["goblin_0.png", "goblin_2.png", "skeleton_0.png", "skeleton_2.png"] }, "file": "./mossblob/mossblob_walk_strip8.png", "frameCount": 8, "sheetDimensions": { "width": 192, "height": 24 }, "cellDimensions": { "width": 24, "height": 24 }, "validationStatus": "approved", "notes": ["Binary alpha; stable identity; visual mass matches canonical scale.", "Feet baseline range y=21..23 (2px).", "Earlier oversized and 3px-anchor-drift generations preserved as rejected evidence."] },
+    { "id": "sporekin", "displayName": "Sporekin", "class": "normal", "sourceGeneration": { "provider": "PixelLab", "sourceObjectId": "b8807c1b-845f-40a7-a1f0-05e7b8dd3f94", "sourceReviewId": "11e536d2-0825-429f-9d14-3917977fc774", "animationJobId": "f19d79fd-0db3-4934-93f0-abe5fa04960b", "referenceImages": ["goblin_0.png", "goblin_2.png", "skeleton_0.png", "skeleton_2.png"] }, "file": "./sporekin/sporekin_walk_strip8.png", "frameCount": 8, "sheetDimensions": { "width": 192, "height": 24 }, "cellDimensions": { "width": 24, "height": 24 }, "validationStatus": "approved", "notes": ["Binary alpha; stable identity; visual mass matches canonical scale.", "Pinned start/end animation; feet baseline range y=22..23 (1px).", "Two earlier hopping animations preserved as rejected evidence."] },
+    { "id": "twig_imp", "displayName": "Twig Imp", "class": "normal", "sourceGeneration": { "provider": "PixelLab", "sourceObjectId": "f5165878-f570-47cd-b7f9-e658f6092842", "sourceReviewId": "48024415-bff9-46a4-8e86-f220d47de2ce", "animationJobId": "6c8fac64-be50-4220-9233-5f0499887317", "referenceImages": ["goblin_0.png", "goblin_2.png", "skeleton_0.png", "skeleton_2.png"] }, "file": "./twig_imp/twig_imp_walk_strip8.png", "frameCount": 8, "sheetDimensions": { "width": 192, "height": 24 }, "cellDimensions": { "width": 24, "height": 24 }, "validationStatus": "approved", "notes": ["Binary alpha; stable identity and branch count.", "Feet anchor y=23 in every frame.", "Only the selected original candidate was downloaded; review job ID preserves provenance."] },
+    { "id": "acorn_guard", "displayName": "Acorn Guard", "class": "normal", "sourceGeneration": { "provider": "PixelLab", "sourceObjectId": "f574e1e4-26d4-4a44-8cd9-3d1a3ffbbb64", "sourceReviewId": "50cbefa0-81fb-46ae-8fb1-f75a282ec146", "animationJobId": "cf37b4a2-e6ce-4399-aec7-1c8112f63c13", "selectedCandidateIndex": 15, "referenceImages": ["goblin_0.png", "goblin_2.png", "skeleton_0.png", "skeleton_2.png"] }, "file": "./acorn_guard/acorn_guard_walk_strip8.png", "frameCount": 8, "sheetDimensions": { "width": 192, "height": 24 }, "cellDimensions": { "width": 24, "height": 24 }, "validationStatus": "approved", "notes": ["Binary alpha; acorn-cap identity and leaf shield remain coherent.", "Pinned start/end animation; feet baseline range y=21..23 (2px).", "Only selected candidate 15 was downloaded; review job ID preserves provenance."] },
+    { "id": "mushroom_brute", "displayName": "Mushroom Brute", "class": "elite", "sourceGeneration": null, "frameCount": 0, "sheetDimensions": null, "cellDimensions": null, "validationStatus": "pending", "notes": [] }
+  ]
+}

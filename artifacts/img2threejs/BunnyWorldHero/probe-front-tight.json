@@ -1,0 +1,13 @@
+{
+  "path": "C:\\bunny-world\\artifacts\\img2threejs\\BunnyWorldHero\\reference-front-tight.png",
+  "type": "png",
+  "bytes": 184849,
+  "width": 370,
+  "height": 315,
+  "aspectRatio": 1.1746031746031746,
+  "technicalSuitability": "conditional",
+  "warnings": [
+    "low resolution; small geometry/material details may be unreliable"
+  ],
+  "note": "This is only technical image probing. Semantic object suitability still requires visual inspection."
+}

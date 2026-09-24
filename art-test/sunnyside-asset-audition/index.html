@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Sunnyside Asset Audition</title><style>
+*{box-sizing:border-box}body{margin:0;background:#101816;color:#dbe8df;font:14px system-ui}header{position:sticky;top:0;z-index:2;background:#15221e;padding:14px 20px;border-bottom:1px solid #355047}h1{margin:0;font-size:18px}.sub{opacity:.65;margin-top:4px}.tabs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}button{background:#20352e;color:#dbe8df;border:1px solid #47665a;padding:6px 11px;cursor:pointer}button.active{background:#426b58}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;padding:18px}.card{background:#17231f;border:1px solid #2c423a;padding:10px;min-height:160px}.stage{height:105px;display:grid;place-items:center;background:#263e31;background-image:linear-gradient(45deg,#294735 25%,transparent 25%),linear-gradient(-45deg,#294735 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#294735 75%),linear-gradient(-45deg,transparent 75%,#294735 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0}.stage img{image-rendering:pixelated;max-width:128px;max-height:96px;object-fit:contain}.name{font-weight:700;margin-top:8px}.meta{opacity:.6;font-size:12px;margin-top:3px}.badge{display:inline-block;margin-top:6px;font-size:11px;padding:2px 5px;border:1px solid #527967;color:#9ed3b5}</style></head><body>
+<header><h1>SUNNYSIDE ASSET AUDITION</h1><div class="sub">Read-only candidates · visual audition before Bunny World integration</div><div class="tabs"><button class="active" data-cat="all">ALL</button><button data-cat="vegetation">VEGETATION</button><button data-cat="props">PROPS</button><button data-cat="vfx">VFX</button></div></header><main class="grid" id="grid"></main>
+<script type="module">
+const root='/Sunnyside_World_Gamemaker/sprites/';
+const items=[
+['vegetation','Tree 01','spr_deco_tree_01','35b80d4c-f4cb-4aa8-a423-b9a9470fb6ef.png','32×34 · 4f'],
+['vegetation','Tree 02','spr_deco_tree_02','77e19160-980f-4cd2-93cf-f1203c3a5222.png','28×43 · 4f'],
+['vegetation','Red Mushroom','spr_deco_mushroom_red_01','a92242b3-304a-46f9-895f-96ce5e1aec4a.png','16×16 · 4f'],
+['props','Well','spr_deco_well','c3d011a3-e1d2-4f14-83d7-d21b9f689713.png','20×25'],
+['props','Campfire','spr_deco_campfire','d292d1cc-d3d3-4222-9506-b1c7072c523c.png','23×20'],
+['props','Barrel','spr_deco_barrel_closed','b4310058-6dec-4d35-8a31-9e73bf28de81.png','13×16'],
+['props','Crate','spr_deco_crate_01','658157b4-7ff5-452e-9e1d-c4cad561928b.png','16×21'],
+['props','Stone Ore','spr_deco_ore_stone','78f8c46b-7de9-43aa-95f7-4d8433071827.png','10×10'],
+['vfx','Run Dust','dust_run_strip8','355bbbc7-1586-4dce-ae75-46a48a668ae5.png','24×9 · 8f'],
+['vfx','Leaves Hit','leaves_hit','b886aa9d-e8f2-4ea1-ba6c-14a5d16cb8ed.png','64×32 · 20f']
+];
+function draw(cat='all'){grid.innerHTML='';for(const [c,label,dir,file,meta] of items){if(cat!=='all'&&cat!==c)continue;const el=document.createElement('article');el.className='card';el.innerHTML='<div class="stage"><img src="'+root+dir+'/'+file+'"></div><div class="name">'+label+'</div><div class="meta">'+dir+' · '+meta+'</div><span class="badge">'+c.toUpperCase()+'</span>';grid.append(el)}}
+document.querySelectorAll('button').forEach(b=>b.onclick=()=>{document.querySelectorAll('button').forEach(x=>x.classList.remove('active'));b.classList.add('active');draw(b.dataset.cat)});draw();
+</script></body></html>

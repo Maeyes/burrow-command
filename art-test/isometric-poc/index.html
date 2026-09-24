@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bunny World — 2D Isometric Arena Draft</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="poc-shell">
+    <header class="topbar">
+      <div><p class="eyebrow">BUNNY WORLD · 2D ISO ARENA DRAFT</p><h1>Greenfield Arena</h1><p class="lede">2:1 isometric · procedural modular kit · native 64×64 Bunny</p></div>
+      <div class="verdict"><span class="verdict-dot"></span><div><small>COMPOSITION GATE</small><strong>Moonroot Shrine · combat bowl · depth corridor</strong></div></div>
+    </header>
+
+    <section class="viewport-frame" aria-label="Whispering Forest playable Golden Scene blockout">
+      <canvas id="scene" width="1280" height="720"></canvas>
+      <div class="scene-title"><span>WHISPERING FOREST · MOONROOT APPROACH</span><span id="scene-coordinates">WORLD −90.0, 290.0</span></div>
+      <div class="player-hud"><strong>Lv. 12 · BUNNY</strong><span class="bar hp"><i></i></span><span class="bar sp"><i></i></span></div>
+      <div class="target-hud"><small>TARGET</small><strong>Gloam Guardian</strong><span><i></i></span></div>
+      <div class="minimap" aria-label="Compact minimap"><i class="map-shrine"></i><i class="map-player"></i></div>
+      <div class="skillbar" aria-label="Skill slots"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd><kbd>5</kbd><kbd>6</kbd></div>
+      <button class="menu-button" aria-label="Menu">☰</button>
+      <div class="direction-chip" id="direction-chip">0° · NORTH</div>
+      <div class="help-chip">MOVE · CLICK / WASD · SPACE ATTACK</div>
+    </section>
+
+    <section class="control-deck">
+      <div class="debug-panel">
+        <div class="panel-heading"><div><span class="panel-index">01</span><h2>Golden Scene QA</h2></div><p>Blockout metadata · no production systems</p></div>
+        <div class="toggle-row">
+          <label><input id="toggle-composition" type="checkbox" /><span>Composition map</span></label>
+          <label><input id="toggle-grid" type="checkbox" /><span>2:1 grid</span></label>
+          <label><input id="toggle-pivots" type="checkbox" /><span>Feet pivots</span></label>
+          <label><input id="toggle-labels" type="checkbox" /><span>Entities</span></label>
+          <label><input id="toggle-collisions" type="checkbox" /><span>Footprints</span></label>
+          <label><input id="toggle-depth" type="checkbox" /><span>Depth Y</span></label>
+          <label><input id="toggle-range" type="checkbox" checked /><span>AoE range</span></label>
+          <label><input id="toggle-hitboxes" type="checkbox" /><span>Hitboxes</span></label>
+        </div>
+        <button id="attack-test" class="attack-button">Trigger combat readability test <kbd>SPACE</kbd></button>
+      </div>
+      <aside class="readout-panel">
+        <div class="panel-heading compact"><div><span class="panel-index">02</span><h2>Player telemetry</h2></div><span class="live-pill">LIVE</span></div>
+        <dl>
+          <div><dt>World X / Y</dt><dd id="player-position">−90.0 / 290.0</dd></div><div><dt>Heading</dt><dd id="active-heading">0°</dd></div>
+          <div><dt>Active rotation</dt><dd id="active-rotation">north.png</dd></div><div><dt>Velocity</dt><dd id="player-velocity">0.0 px/s</dd></div><div><dt>Depth value</dt><dd id="depth-value">290.0</dd></div>
+        </dl>
+      </aside>
+      <aside class="legend-panel">
+        <div class="panel-heading compact"><div><span class="panel-index">03</span><h2>Scene contract</h2></div></div>
+        <div class="scale-cards"><div><i class="scale-dot small"></i><span>Small</span><strong>34px</strong></div><div><i class="scale-dot medium"></i><span>Medium</span><strong>48px</strong></div><div><i class="scale-dot elite"></i><span>Elite</span><strong>72px</strong></div></div>
+        <p>Bunny remains native <strong>64×64 at 1×</strong>. Light: upper-left. Shadow: lower-right.</p>
+      </aside>
+    </section>
+    <footer><span>EXPERIMENTAL ART TEST · NOT GAME ARCHITECTURE</span><span>NO PAID GENERATION · NO PRODUCTION ASSET CHANGES</span></footer>
+  </main>
+  <script type="module" src="./poc.js"></script>
+</body>
+</html>

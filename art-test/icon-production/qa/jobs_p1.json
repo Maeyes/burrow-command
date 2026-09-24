@@ -1,0 +1,18 @@
+{
+ "ui_gear":"0122d13a-ce85-4b18-a549-a446d7f02dfe",
+ "ui_craft":"0e11bc53-f5db-486c-bf82-b2358e49e7da",
+ "ui_skill":"361bb48e-bd15-47ec-81fd-dd32a6af9eb4",
+ "ui_monster":"62c59d51-ca5c-4a74-842f-a041a306c09c",
+ "ui_settings":"6706d16a-2c82-477a-b125-69bdd892f73f",
+ "ui_potion":"0018bf61-218a-4c76-a12b-29eca3b985e3",
+ "ui_home":"f5fec57f-7e5c-49d8-8207-f14736cb8e50",
+ "ui_auto":"ec0c73dd-66a6-4a09-943f-cb4a1569edf7",
+ "family_greatsword":"ede4b12d-b4c7-479b-afdf-32cc45caaf81",
+ "family_dagger":"7762b9c4-4415-4a30-8178-a77d07edb6e9",
+ "family_axe":"376fc9fc-53e8-43b8-8de2-47fe2c7a1b2c",
+ "family_hammer":"7b9e2c11-dfd4-4790-b95e-a2a9bcc5fe38",
+ "family_bow":"330c4d80-9654-4bbe-8027-fbac44a90610",
+ "family_staff":"a15511d7-9d91-4e22-be80-c4173ba41acd",
+ "family_swordShield":"d82164a9-f20a-449e-97d8-5d77d1163ae1",
+ "starterDagger":"925010df-7fcf-4e12-854f-004f53eb96b1"
+}

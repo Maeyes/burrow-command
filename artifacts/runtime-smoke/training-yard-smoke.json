@@ -1,0 +1,46 @@
+{
+  "result": "pass",
+  "url": "http://127.0.0.1:4178/bunny.html?threeDebugRoster=1",
+  "authoritativeRoster": {
+    "สไลม์ฝึกหัด": 300,
+    "หุ่นฟางซ้อมดาบ": 360,
+    "หนูโรงฝึก": 420,
+    "ครูฝึกไม้เก่า": 580,
+    "ลานฝึกผู้พิทักษ์": 1800
+  },
+  "loadedRoots": [
+    {
+      "name": "สไลม์ฝึกหัด",
+      "root": ""
+    },
+    {
+      "name": "หุ่นฟางซ้อมดาบ",
+      "root": "monster_training_straw_dummy"
+    },
+    {
+      "name": "หนูโรงฝึก",
+      "root": "monster_training_rat"
+    },
+    {
+      "name": "ครูฝึกไม้เก่า",
+      "root": "monster_old_wooden_instructor"
+    },
+    {
+      "name": "ลานฝึกผู้พิทักษ์",
+      "root": "monster_training_yard_guardian"
+    }
+  ],
+  "worldSource": "fallback",
+  "walkableSurfaces": 1,
+  "wasdDeltaX": 1.464,
+  "slimeHpAfterFirstObservedHit": 254,
+  "slimeAliveAfterDeath": false,
+  "slimeHpAfterRespawn": 300,
+  "clickDestination": [
+    1.6682821407773964,
+    0,
+    -4.259974409252571
+  ],
+  "failedLocalRequests": [],
+  "consoleErrors": []
+}

@@ -1,0 +1,69 @@
+{
+  "character": {
+    "id": "d2efac6c-52f1-4bbe-a131-ddeb6e78800e",
+    "name": "change to white rabb",
+    "prompt": "Cute chibi anthropomorphic black rabbit adventurer for a 2D side-scrolling action RPG.\n\nThe character has the same overall appeal and proportions as a cute fantasy anime rabbit mascot: a large round head, compact chubby body, very long floppy rabbit ears, small hands and feet, and an energetic charming personality.\n\nBlack rabbit fur with subtle dark charcoal highlights so the body shape remains clearly readable.\n\nLarge bright expressive eyes with a subtle warm amber-red glow.\n\nWearing an elegant all-black fantasy adventurer outfit:\na small black top hat, fitted black long coat with coat tails, black vest, black gloves, dark boots, black bow tie, and subtle antique-gold trim and accessories.\n\nThe outfit should feel like a mysterious fantasy magician / rogue / adventurer, stylish and cute rather than evil or scary.\n\nKeep the design simple enough for consistent sprite animation.\nClear separation between arms, legs, ears, torso and clothing.\nLong ears must remain highly recognizable during movement.\n\nNo weapon equipped.\nNeutral ready stance.\nFull body visible.\n\nSIDE VIEW, facing right.\nDesigned specifically for a 2D side-scrolling action RPG.\nClean high-quality pixel art.\nCrisp readable silhouette.\nConsistent pixel scale.\nTransparent background.\nNo ground.\nNo cast shadow.\nNo environment.\nNo text.\nSingle character only.",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 8,
+    "view": "side"
+  },
+  "spritesheet": {
+    "path": "Cute_chibi_anthropomorph-change_to_white_rabb.png",
+    "cell_size": {
+      "width": 96,
+      "height": 96
+    },
+    "sheet_size": {
+      "width": 864,
+      "height": 384
+    },
+    "columns": 9,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 8,
+        "directions": [
+          "south",
+          "south-east",
+          "east",
+          "north-east",
+          "north",
+          "north-west",
+          "west",
+          "south-west"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 7,
+        "animation": "Two-Footed Jump",
+        "animation_group_id": "21b37147-0986-43ec-a8a2-95d6fb022e6f",
+        "direction": "south-east"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "The character initiates a sudden, high-velocity horizontal dash, body leaning forward with intense momentum as the legs drive off the ground in a blur of rapid motion. The long ears whip backward, trailing behind the figure to emphasize the swift displacement through the frame. The coat tails flare sharply, reacting to the aerodynamic drag of the sudden sprint while the boots remain firmly grounded in their rhythmic, pixelated stride. Every frame maintains precise, consistent positioning to convey powerful kinetic energy. Static camera, completely locked-off shot. Maintain the crisp 2D pixel art aesthetic, thick outlines, flat colors, and the strict original perspective throughout the entire fluid animation.",
+        "animation_group_id": "435064d7-1019-4b3e-8efb-a6bcb34fcc36",
+        "direction": "south-east"
+      },
+      {
+        "row": 3,
+        "type": "animation",
+        "frame_count": 8,
+        "animation": "Running",
+        "animation_group_id": "7c95dabb-5c5b-42f1-b4aa-c400c9a50052",
+        "direction": "south-east"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-09-19T15:00:59.691455+00:00"
+}

@@ -1,0 +1,35 @@
+{
+  "result": "pass",
+  "glb": "C:\\bunny-world\\artifacts\\blender\\characters\\rabbitfolk_female_v1\\rabbitfolk_female_v1.glb",
+  "glbBytes": 575876,
+  "roots": [
+    "Rabbitfolk_Female"
+  ],
+  "meshObjects": 73,
+  "triangles": 20504,
+  "materials": [
+    "BootDark",
+    "EyeBlueDark",
+    "EyeWhite",
+    "HairSilver",
+    "InnerEar",
+    "OutfitAccent",
+    "OutfitBlue",
+    "OutfitLight",
+    "Skin"
+  ],
+  "materialCount": 9,
+  "dimensionsImportedBlenderXYZ": [
+    1.8399,
+    0.74,
+    2.575
+  ],
+  "groundMinZ": 0.0,
+  "armatures": 0,
+  "animations": 0,
+  "camerasInGlb": 0,
+  "lightsInGlb": 0,
+  "genericObjectNames": [],
+  "negativeScaleObjects": [],
+  "missingComponentGroups": []
+}

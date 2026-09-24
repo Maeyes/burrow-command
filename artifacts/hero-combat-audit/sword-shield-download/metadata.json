@@ -1,0 +1,438 @@
+{
+  "group_id": "58e5f705-55ba-47cf-aa7e-f9e1f3629a89",
+  "states": [
+    {
+      "character": {
+        "id": "08d06ba3-c060-4406-b16d-383d40230f91",
+        "name": "Idle",
+        "prompt": "Cute chibi anthropomorphic black rabbit adventurer for a 2D side-scrolling action RPG.\n\nThe character has the same overall appeal and proportions as a cute fantasy anime rabbit mascot: a large round head, compact chubby body, very long floppy rabbit ears, small hands and feet, and an energetic charming personality.\n\nBlack rabbit fur with subtle dark charcoal highlights so the body shape remains clearly readable.\n\nLarge bright expressive eyes with a subtle warm amber-red glow.\n\nWearing an elegant all-black fantasy adventurer outfit:\na small black top hat, fitted black long coat with coat tails, black vest, black gloves, dark boots, black bow tie, and subtle antique-gold trim and accessories.\n\nThe outfit should feel like a mysterious fantasy magician / rogue / adventurer, stylish and cute rather than evil or scary.\n\nKeep the design simple enough for consistent sprite animation.\nClear separation between arms, legs, ears, torso and clothing.\nLong ears must remain highly recognizable during movement.\n\nNo weapon equipped.\nNeutral ready stance.\nFull body visible.\n\nSIDE VIEW, facing right.\nDesigned specifically for a 2D side-scrolling action RPG.\nClean high-quality pixel art.\nCrisp readable silhouette.\nConsistent pixel scale.\nTransparent background.\nNo ground.\nNo cast shadow.\nNo environment.\nNo text.\nSingle character only.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-09-19T01:10:24.135259+00:00"
+      },
+      "folder": "Idle",
+      "frames": {
+        "rotations": {
+          "south": "Idle/rotations/south.png",
+          "south-east": "Idle/rotations/south-east.png",
+          "east": "Idle/rotations/east.png",
+          "north-east": "Idle/rotations/north-east.png",
+          "north": "Idle/rotations/north.png",
+          "north-west": "Idle/rotations/north-west.png",
+          "west": "Idle/rotations/west.png",
+          "south-west": "Idle/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "d2efac6c-52f1-4bbe-a131-ddeb6e78800e",
+        "name": "change to white rabb",
+        "prompt": "Cute chibi anthropomorphic black rabbit adventurer for a 2D side-scrolling action RPG.\n\nThe character has the same overall appeal and proportions as a cute fantasy anime rabbit mascot: a large round head, compact chubby body, very long floppy rabbit ears, small hands and feet, and an energetic charming personality.\n\nBlack rabbit fur with subtle dark charcoal highlights so the body shape remains clearly readable.\n\nLarge bright expressive eyes with a subtle warm amber-red glow.\n\nWearing an elegant all-black fantasy adventurer outfit:\na small black top hat, fitted black long coat with coat tails, black vest, black gloves, dark boots, black bow tie, and subtle antique-gold trim and accessories.\n\nThe outfit should feel like a mysterious fantasy magician / rogue / adventurer, stylish and cute rather than evil or scary.\n\nKeep the design simple enough for consistent sprite animation.\nClear separation between arms, legs, ears, torso and clothing.\nLong ears must remain highly recognizable during movement.\n\nNo weapon equipped.\nNeutral ready stance.\nFull body visible.\n\nSIDE VIEW, facing right.\nDesigned specifically for a 2D side-scrolling action RPG.\nClean high-quality pixel art.\nCrisp readable silhouette.\nConsistent pixel scale.\nTransparent background.\nNo ground.\nNo cast shadow.\nNo environment.\nNo text.\nSingle character only.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-09-19T01:14:43.527962+00:00"
+      },
+      "folder": "change_to_white_rabb",
+      "frames": {
+        "rotations": {
+          "south": "change_to_white_rabb/rotations/south.png",
+          "south-east": "change_to_white_rabb/rotations/south-east.png",
+          "east": "change_to_white_rabb/rotations/east.png",
+          "north-east": "change_to_white_rabb/rotations/north-east.png",
+          "north": "change_to_white_rabb/rotations/north.png",
+          "north-west": "change_to_white_rabb/rotations/north-west.png",
+          "west": "change_to_white_rabb/rotations/west.png",
+          "south-west": "change_to_white_rabb/rotations/south-west.png"
+        },
+        "animations": {
+          "Two-Footed_Jump": {
+            "south": [
+              "change_to_white_rabb/animations/Two-Footed_Jump/south/frame_000.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/south/frame_001.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/south/frame_002.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/south/frame_003.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/south/frame_004.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/south/frame_005.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/south/frame_006.png"
+            ],
+            "east": [
+              "change_to_white_rabb/animations/Two-Footed_Jump/east/frame_000.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/east/frame_001.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/east/frame_002.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/east/frame_003.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/east/frame_004.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/east/frame_005.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/east/frame_006.png"
+            ],
+            "north-east": [
+              "change_to_white_rabb/animations/Two-Footed_Jump/north-east/frame_000.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/north-east/frame_001.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/north-east/frame_002.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/north-east/frame_003.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/north-east/frame_004.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/north-east/frame_005.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/north-east/frame_006.png"
+            ],
+            "south-east": [
+              "change_to_white_rabb/animations/Two-Footed_Jump/south-east/frame_000.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/south-east/frame_001.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/south-east/frame_002.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/south-east/frame_003.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/south-east/frame_004.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/south-east/frame_005.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/south-east/frame_006.png"
+            ],
+            "north": [
+              "change_to_white_rabb/animations/Two-Footed_Jump/north/frame_000.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/north/frame_001.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/north/frame_002.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/north/frame_003.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/north/frame_004.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/north/frame_005.png",
+              "change_to_white_rabb/animations/Two-Footed_Jump/north/frame_006.png"
+            ]
+          },
+          "The_character_initiates_a_sudden_high-velocity_hor": {
+            "south-east": [
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south-east/frame_000.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south-east/frame_001.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south-east/frame_002.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south-east/frame_003.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south-east/frame_004.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south-east/frame_005.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south-east/frame_006.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south-east/frame_007.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south-east/frame_008.png"
+            ],
+            "north": [
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north/frame_000.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north/frame_001.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north/frame_002.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north/frame_003.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north/frame_004.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north/frame_005.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north/frame_006.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north/frame_007.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north/frame_008.png"
+            ],
+            "north-east": [
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north-east/frame_000.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north-east/frame_001.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north-east/frame_002.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north-east/frame_003.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north-east/frame_004.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north-east/frame_005.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north-east/frame_006.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north-east/frame_007.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/north-east/frame_008.png"
+            ],
+            "south": [
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south/frame_000.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south/frame_001.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south/frame_002.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south/frame_003.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south/frame_004.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south/frame_005.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south/frame_006.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south/frame_007.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/south/frame_008.png"
+            ],
+            "east": [
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/east/frame_000.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/east/frame_001.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/east/frame_002.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/east/frame_003.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/east/frame_004.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/east/frame_005.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/east/frame_006.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/east/frame_007.png",
+              "change_to_white_rabb/animations/The_character_initiates_a_sudden_high-velocity_hor/east/frame_008.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "4d9f9845-36ed-4c56-a34a-b76332f50331",
+        "name": "with dual daggers",
+        "prompt": "Cute chibi anthropomorphic black rabbit adventurer for a 2D side-scrolling action RPG.\n\nThe character has the same overall appeal and proportions as a cute fantasy anime rabbit mascot: a large round head, compact chubby body, very long floppy rabbit ears, small hands and feet, and an energetic charming personality.\n\nBlack rabbit fur with subtle dark charcoal highlights so the body shape remains clearly readable.\n\nLarge bright expressive eyes with a subtle warm amber-red glow.\n\nWearing an elegant all-black fantasy adventurer outfit:\na small black top hat, fitted black long coat with coat tails, black vest, black gloves, dark boots, black bow tie, and subtle antique-gold trim and accessories.\n\nThe outfit should feel like a mysterious fantasy magician / rogue / adventurer, stylish and cute rather than evil or scary.\n\nKeep the design simple enough for consistent sprite animation.\nClear separation between arms, legs, ears, torso and clothing.\nLong ears must remain highly recognizable during movement.\n\nNo weapon equipped.\nNeutral ready stance.\nFull body visible.\n\nSIDE VIEW, facing right.\nDesigned specifically for a 2D side-scrolling action RPG.\nClean high-quality pixel art.\nCrisp readable silhouette.\nConsistent pixel scale.\nTransparent background.\nNo ground.\nNo cast shadow.\nNo environment.\nNo text.\nSingle character only.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-09-19T01:27:45.026417+00:00"
+      },
+      "folder": "with_dual_daggers",
+      "frames": {
+        "rotations": {
+          "south": "with_dual_daggers/rotations/south.png",
+          "south-east": "with_dual_daggers/rotations/south-east.png",
+          "east": "with_dual_daggers/rotations/east.png",
+          "north-east": "with_dual_daggers/rotations/north-east.png",
+          "north": "with_dual_daggers/rotations/north.png",
+          "north-west": "with_dual_daggers/rotations/north-west.png",
+          "west": "with_dual_daggers/rotations/west.png",
+          "south-west": "with_dual_daggers/rotations/south-west.png"
+        },
+        "animations": {
+          "Use_the_existing_Bunny_World_hero_as_the_exact_cha": {
+            "north": [
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_000.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_001.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_002.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_003.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_004.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_005.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_006.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_007.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north/frame_008.png"
+            ],
+            "east": [
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_000.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_001.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_002.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_003.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_004.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_005.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_006.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_007.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/east/frame_008.png"
+            ],
+            "south": [
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_000.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_001.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_002.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_003.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_004.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_005.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_006.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_007.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south/frame_008.png"
+            ],
+            "south-east": [
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_000.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_001.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_002.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_003.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_004.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_005.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_006.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_007.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/south-east/frame_008.png"
+            ],
+            "north-east": [
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_000.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_001.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_002.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_003.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_004.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_005.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_006.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_007.png",
+              "with_dual_daggers/animations/Use_the_existing_Bunny_World_hero_as_the_exact_cha/north-east/frame_008.png"
+            ]
+          },
+          "Breathing_Idle": {
+            "north": [
+              "with_dual_daggers/animations/Breathing_Idle/north/frame_000.png",
+              "with_dual_daggers/animations/Breathing_Idle/north/frame_001.png",
+              "with_dual_daggers/animations/Breathing_Idle/north/frame_002.png",
+              "with_dual_daggers/animations/Breathing_Idle/north/frame_003.png"
+            ],
+            "north-east": [
+              "with_dual_daggers/animations/Breathing_Idle/north-east/frame_000.png",
+              "with_dual_daggers/animations/Breathing_Idle/north-east/frame_001.png",
+              "with_dual_daggers/animations/Breathing_Idle/north-east/frame_002.png",
+              "with_dual_daggers/animations/Breathing_Idle/north-east/frame_003.png"
+            ],
+            "east": [
+              "with_dual_daggers/animations/Breathing_Idle/east/frame_000.png",
+              "with_dual_daggers/animations/Breathing_Idle/east/frame_001.png",
+              "with_dual_daggers/animations/Breathing_Idle/east/frame_002.png",
+              "with_dual_daggers/animations/Breathing_Idle/east/frame_003.png"
+            ],
+            "south": [
+              "with_dual_daggers/animations/Breathing_Idle/south/frame_000.png",
+              "with_dual_daggers/animations/Breathing_Idle/south/frame_001.png",
+              "with_dual_daggers/animations/Breathing_Idle/south/frame_002.png",
+              "with_dual_daggers/animations/Breathing_Idle/south/frame_003.png"
+            ],
+            "south-east": [
+              "with_dual_daggers/animations/Breathing_Idle/south-east/frame_000.png",
+              "with_dual_daggers/animations/Breathing_Idle/south-east/frame_001.png",
+              "with_dual_daggers/animations/Breathing_Idle/south-east/frame_002.png",
+              "with_dual_daggers/animations/Breathing_Idle/south-east/frame_003.png"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "character": {
+        "id": "3fd01462-d9a4-40ef-a8ae-df957db1ecbd",
+        "name": "with greatsword",
+        "prompt": "Cute chibi anthropomorphic black rabbit adventurer for a 2D side-scrolling action RPG.\n\nThe character has the same overall appeal and proportions as a cute fantasy anime rabbit mascot: a large round head, compact chubby body, very long floppy rabbit ears, small hands and feet, and an energetic charming personality.\n\nBlack rabbit fur with subtle dark charcoal highlights so the body shape remains clearly readable.\n\nLarge bright expressive eyes with a subtle warm amber-red glow.\n\nWearing an elegant all-black fantasy adventurer outfit:\na small black top hat, fitted black long coat with coat tails, black vest, black gloves, dark boots, black bow tie, and subtle antique-gold trim and accessories.\n\nThe outfit should feel like a mysterious fantasy magician / rogue / adventurer, stylish and cute rather than evil or scary.\n\nKeep the design simple enough for consistent sprite animation.\nClear separation between arms, legs, ears, torso and clothing.\nLong ears must remain highly recognizable during movement.\n\nNo weapon equipped.\nNeutral ready stance.\nFull body visible.\n\nSIDE VIEW, facing right.\nDesigned specifically for a 2D side-scrolling action RPG.\nClean high-quality pixel art.\nCrisp readable silhouette.\nConsistent pixel scale.\nTransparent background.\nNo ground.\nNo cast shadow.\nNo environment.\nNo text.\nSingle character only.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-09-19T01:31:15.263202+00:00"
+      },
+      "folder": "with_greatsword",
+      "frames": {
+        "rotations": {
+          "south": "with_greatsword/rotations/south.png",
+          "south-east": "with_greatsword/rotations/south-east.png",
+          "east": "with_greatsword/rotations/east.png",
+          "north-east": "with_greatsword/rotations/north-east.png",
+          "north": "with_greatsword/rotations/north.png",
+          "north-west": "with_greatsword/rotations/north-west.png",
+          "west": "with_greatsword/rotations/west.png",
+          "south-west": "with_greatsword/rotations/south-west.png"
+        },
+        "animations": {}
+      }
+    },
+    {
+      "character": {
+        "id": "b10c4872-0305-4ae7-89bd-6ce6360e8b5b",
+        "name": "sword and shield",
+        "prompt": "Cute chibi anthropomorphic black rabbit adventurer for a 2D side-scrolling action RPG.\n\nThe character has the same overall appeal and proportions as a cute fantasy anime rabbit mascot: a large round head, compact chubby body, very long floppy rabbit ears, small hands and feet, and an energetic charming personality.\n\nBlack rabbit fur with subtle dark charcoal highlights so the body shape remains clearly readable.\n\nLarge bright expressive eyes with a subtle warm amber-red glow.\n\nWearing an elegant all-black fantasy adventurer outfit:\na small black top hat, fitted black long coat with coat tails, black vest, black gloves, dark boots, black bow tie, and subtle antique-gold trim and accessories.\n\nThe outfit should feel like a mysterious fantasy magician / rogue / adventurer, stylish and cute rather than evil or scary.\n\nKeep the design simple enough for consistent sprite animation.\nClear separation between arms, legs, ears, torso and clothing.\nLong ears must remain highly recognizable during movement.\n\nNo weapon equipped.\nNeutral ready stance.\nFull body visible.\n\nSIDE VIEW, facing right.\nDesigned specifically for a 2D side-scrolling action RPG.\nClean high-quality pixel art.\nCrisp readable silhouette.\nConsistent pixel scale.\nTransparent background.\nNo ground.\nNo cast shadow.\nNo environment.\nNo text.\nSingle character only.",
+        "size": {
+          "width": 64,
+          "height": 64
+        },
+        "template_id": "mannequin",
+        "directions": 8,
+        "view": "side",
+        "created_at": "2026-09-21T14:56:07.125891+00:00"
+      },
+      "folder": "sword_and_shield",
+      "frames": {
+        "rotations": {
+          "south": "sword_and_shield/rotations/south.png",
+          "south-east": "sword_and_shield/rotations/south-east.png",
+          "east": "sword_and_shield/rotations/east.png",
+          "north-east": "sword_and_shield/rotations/north-east.png",
+          "north": "sword_and_shield/rotations/north.png",
+          "north-west": "sword_and_shield/rotations/north-west.png",
+          "west": "sword_and_shield/rotations/west.png",
+          "south-west": "sword_and_shield/rotations/south-west.png"
+        },
+        "animations": {
+          "diagonal-slash": {
+            "east": [
+              "sword_and_shield/animations/diagonal-slash/east/frame_000.png",
+              "sword_and_shield/animations/diagonal-slash/east/frame_001.png",
+              "sword_and_shield/animations/diagonal-slash/east/frame_002.png",
+              "sword_and_shield/animations/diagonal-slash/east/frame_003.png",
+              "sword_and_shield/animations/diagonal-slash/east/frame_004.png",
+              "sword_and_shield/animations/diagonal-slash/east/frame_005.png",
+              "sword_and_shield/animations/diagonal-slash/east/frame_006.png",
+              "sword_and_shield/animations/diagonal-slash/east/frame_007.png",
+              "sword_and_shield/animations/diagonal-slash/east/frame_008.png"
+            ],
+            "north": [
+              "sword_and_shield/animations/diagonal-slash/north/frame_000.png",
+              "sword_and_shield/animations/diagonal-slash/north/frame_001.png",
+              "sword_and_shield/animations/diagonal-slash/north/frame_002.png",
+              "sword_and_shield/animations/diagonal-slash/north/frame_003.png",
+              "sword_and_shield/animations/diagonal-slash/north/frame_004.png",
+              "sword_and_shield/animations/diagonal-slash/north/frame_005.png",
+              "sword_and_shield/animations/diagonal-slash/north/frame_006.png",
+              "sword_and_shield/animations/diagonal-slash/north/frame_007.png",
+              "sword_and_shield/animations/diagonal-slash/north/frame_008.png"
+            ],
+            "south-west": [
+              "sword_and_shield/animations/diagonal-slash/south-west/frame_000.png",
+              "sword_and_shield/animations/diagonal-slash/south-west/frame_001.png",
+              "sword_and_shield/animations/diagonal-slash/south-west/frame_002.png",
+              "sword_and_shield/animations/diagonal-slash/south-west/frame_003.png",
+              "sword_and_shield/animations/diagonal-slash/south-west/frame_004.png",
+              "sword_and_shield/animations/diagonal-slash/south-west/frame_005.png",
+              "sword_and_shield/animations/diagonal-slash/south-west/frame_006.png",
+              "sword_and_shield/animations/diagonal-slash/south-west/frame_007.png",
+              "sword_and_shield/animations/diagonal-slash/south-west/frame_008.png"
+            ],
+            "north-east": [
+              "sword_and_shield/animations/diagonal-slash/north-east/frame_000.png",
+              "sword_and_shield/animations/diagonal-slash/north-east/frame_001.png",
+              "sword_and_shield/animations/diagonal-slash/north-east/frame_002.png",
+              "sword_and_shield/animations/diagonal-slash/north-east/frame_003.png",
+              "sword_and_shield/animations/diagonal-slash/north-east/frame_004.png",
+              "sword_and_shield/animations/diagonal-slash/north-east/frame_005.png",
+              "sword_and_shield/animations/diagonal-slash/north-east/frame_006.png",
+              "sword_and_shield/animations/diagonal-slash/north-east/frame_007.png",
+              "sword_and_shield/animations/diagonal-slash/north-east/frame_008.png"
+            ],
+            "north-west": [
+              "sword_and_shield/animations/diagonal-slash/north-west/frame_000.png",
+              "sword_and_shield/animations/diagonal-slash/north-west/frame_001.png",
+              "sword_and_shield/animations/diagonal-slash/north-west/frame_002.png",
+              "sword_and_shield/animations/diagonal-slash/north-west/frame_003.png",
+              "sword_and_shield/animations/diagonal-slash/north-west/frame_004.png",
+              "sword_and_shield/animations/diagonal-slash/north-west/frame_005.png",
+              "sword_and_shield/animations/diagonal-slash/north-west/frame_006.png",
+              "sword_and_shield/animations/diagonal-slash/north-west/frame_007.png",
+              "sword_and_shield/animations/diagonal-slash/north-west/frame_008.png"
+            ],
+            "south": [
+              "sword_and_shield/animations/diagonal-slash/south/frame_000.png",
+              "sword_and_shield/animations/diagonal-slash/south/frame_001.png",
+              "sword_and_shield/animations/diagonal-slash/south/frame_002.png",
+              "sword_and_shield/animations/diagonal-slash/south/frame_003.png",
+              "sword_and_shield/animations/diagonal-slash/south/frame_004.png",
+              "sword_and_shield/animations/diagonal-slash/south/frame_005.png",
+              "sword_and_shield/animations/diagonal-slash/south/frame_006.png",
+              "sword_and_shield/animations/diagonal-slash/south/frame_007.png",
+              "sword_and_shield/animations/diagonal-slash/south/frame_008.png"
+            ],
+            "west": [
+              "sword_and_shield/animations/diagonal-slash/west/frame_000.png",
+              "sword_and_shield/animations/diagonal-slash/west/frame_001.png",
+              "sword_and_shield/animations/diagonal-slash/west/frame_002.png",
+              "sword_and_shield/animations/diagonal-slash/west/frame_003.png",
+              "sword_and_shield/animations/diagonal-slash/west/frame_004.png",
+              "sword_and_shield/animations/diagonal-slash/west/frame_005.png",
+              "sword_and_shield/animations/diagonal-slash/west/frame_006.png",
+              "sword_and_shield/animations/diagonal-slash/west/frame_007.png",
+              "sword_and_shield/animations/diagonal-slash/west/frame_008.png"
+            ],
+            "south-east": [
+              "sword_and_shield/animations/diagonal-slash/south-east/frame_000.png",
+              "sword_and_shield/animations/diagonal-slash/south-east/frame_001.png",
+              "sword_and_shield/animations/diagonal-slash/south-east/frame_002.png",
+              "sword_and_shield/animations/diagonal-slash/south-east/frame_003.png",
+              "sword_and_shield/animations/diagonal-slash/south-east/frame_004.png",
+              "sword_and_shield/animations/diagonal-slash/south-east/frame_005.png",
+              "sword_and_shield/animations/diagonal-slash/south-east/frame_006.png",
+              "sword_and_shield/animations/diagonal-slash/south-east/frame_007.png",
+              "sword_and_shield/animations/diagonal-slash/south-east/frame_008.png"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "3.1",
+  "export_date": "2026-09-21T15:03:10.965432"
+}

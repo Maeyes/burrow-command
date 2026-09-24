@@ -1,0 +1,77 @@
+{
+  "group_id": "d333ae5b-36e1-4210-8a44-4df9ba2e97e1",
+  "objects": [
+    {
+      "id": "d74db72c-fd9a-49c8-964b-42fb5f335e1e",
+      "name": "base",
+      "prompt": "ORIGINAL underground mine BOSS named Goblin Leader for Bunny World.\n\nA powerful goblin chieftain who rules an abandoned fantasy mine. He must clearly belong to the same creature family as small mine goblins, but have a much larger, heavier and more commanding boss silhouette.\n\nCompact broad body, oversized head, pointed goblin ears, strong short legs, thick arms, intimidating but still charming fantasy proportions. Dark moss-green skin, rugged brown mining leather, worn bronze details and muted iron accents. A rough chieftain shoulder guard and small primitive crown-like metal headpiece establish his leader status without making him look like a human knight.\n\nHe carries ONE large brutal cleaver made from battered dark iron, visually heavy enough to support powerful melee attacks.\n\nPersonality:\naggressive, territorial, cunning, proud mine chieftain.\nCute enough to fit Bunny World, but visibly dangerous.\nNot comedic and not grotesque.\n\nBOSS SCALE:\napproximately 2.3\u20132.6 times the visual mass of a normal mine goblin.\nVery strong readable silhouette at gameplay scale.\nLarge weapon must remain readable during animation.\n\n64x64 crisp handcrafted pixel art.\nlow top-down isometric-friendly view.\nside-facing RIGHT.\nfeet clearly anchored.\ntransparent background.\n\nMatch the established Bunny World monster pixel language:\ncompact proportions,\ncrisp intentional pixel clusters,\nlimited fantasy palette,\nstrong silhouette,\nno unnecessary micro-detail.\n\nNO ground.\nNO shadow.\nNO scenery.\nNO text.\nNO UI.\nNO particles.\nNO spell effects.\nNO smooth antialiasing.\nNO digital painting.\nNO 3D render.\nNO TEXT",
+      "size": {
+        "width": 64,
+        "height": 64
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_underground_mine_BOSS.png"
+      },
+      "animations": {
+        "Animate_this_exact_Goblin_Leader_performing_BRUTAL": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Goblin_Leader_performing_BRUTAL/unknown/frame_000.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_BRUTAL/unknown/frame_001.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_BRUTAL/unknown/frame_002.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_BRUTAL/unknown/frame_003.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_BRUTAL/unknown/frame_004.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_BRUTAL/unknown/frame_005.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_BRUTAL/unknown/frame_006.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_BRUTAL/unknown/frame_007.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_BRUTAL/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "Animate_this_exact_Goblin_Leader_performing_WAR_ST": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Goblin_Leader_performing_WAR_ST/unknown/frame_000.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_WAR_ST/unknown/frame_001.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_WAR_ST/unknown/frame_002.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_WAR_ST/unknown/frame_003.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_WAR_ST/unknown/frame_004.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_WAR_ST/unknown/frame_005.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_WAR_ST/unknown/frame_006.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_WAR_ST/unknown/frame_007.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_WAR_ST/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "Animate_this_exact_Goblin_Leader_performing_LEADER": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/Animate_this_exact_Goblin_Leader_performing_LEADER/unknown/frame_000.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_LEADER/unknown/frame_001.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_LEADER/unknown/frame_002.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_LEADER/unknown/frame_003.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_LEADER/unknown/frame_004.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_LEADER/unknown/frame_005.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_LEADER/unknown/frame_006.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_LEADER/unknown/frame_007.png",
+                "animations/Animate_this_exact_Goblin_Leader_performing_LEADER/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-09-21T08:16:17.908707"
+}

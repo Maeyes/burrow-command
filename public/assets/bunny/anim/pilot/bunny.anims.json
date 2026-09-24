@@ -1,0 +1,20 @@
+{
+  "name": "Bunny_Base_v2",
+  "role": "hero",
+  "facing": "right-3q",
+  "base": "bunny_base.png",
+  "hop": {
+    "sheet": "bunny_hop.png",
+    "w": 84,
+    "h": 84,
+    "frames": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "fps": 10
+  }
+}

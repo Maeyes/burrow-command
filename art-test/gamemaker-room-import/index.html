@@ -1,0 +1,10 @@
+<!doctype html><meta charset="utf-8"><title>GameMaker Room Import Test</title><style>html,body{margin:0;background:#111;color:#fff;font:14px system-ui}#bar{position:fixed;z-index:3;background:#000b;padding:8px 12px}canvas{display:block;image-rendering:pixelated}</style><div id="bar">Loading GameMaker Room1.yy…</div><canvas id="c"></canvas><script type="module">
+const roomText=await (await fetch('./Room1.yy')).text();
+const tileImg=new Image(); tileImg.src='./tiles.png'; await tileImg.decode();
+const layerStarts=[...roomText.matchAll(/\{"resourceType":"GMRTileLayer"/g)].map(m=>m.index);
+const layers=[];
+for(let i=0;i<layerStarts.length;i++){const chunk=roomText.slice(layerStarts[i],layerStarts[i+1]??roomText.length);const name=chunk.match(/"name":"([^"]+)"/)?.[1]??('layer'+i);const w=+(chunk.match(/"SerialiseWidth":(\d+)/)?.[1]??0),h=+(chunk.match(/"SerialiseHeight":(\d+)/)?.[1]??0);const raw=chunk.match(/"TileCompressedData":\[([\s\S]*?)\]/)?.[1];if(!raw||!w||!h)continue;const packed=raw.split(',').map(x=>Number(x.trim())).filter(Number.isFinite),data=[];for(let p=0;p<packed.length;){const n=packed[p++];if(n<0){const v=packed[p++];for(let k=0;k<-n;k++)data.push(v)}else{for(let k=0;k<n;k++)data.push(packed[p++])}}layers.push({name,w,h,data})}
+const W=Math.max(...layers.map(x=>x.w))*16,H=Math.max(...layers.map(x=>x.h))*16,c=document.querySelector('#c');c.width=W;c.height=H;const g=c.getContext('2d');g.imageSmoothingEnabled=false;
+for(const L of [...layers].reverse()){for(let y=0;y<L.h;y++)for(let x=0;x<L.w;x++){let v=L.data[y*L.w+x]??0;if(v===0||v===-2147483648)continue;v=v>>>0;const id=v&0x7ffff; if(!id)continue;const sx=(id%64)*16,sy=Math.floor(id/64)*16;g.drawImage(tileImg,sx,sy,16,16,x*16,y*16,16,16)}}
+document.querySelector('#bar').textContent='Imported Room1.yy — '+layers.length+' tile layers — '+W+'×'+H+' px';
+</script>

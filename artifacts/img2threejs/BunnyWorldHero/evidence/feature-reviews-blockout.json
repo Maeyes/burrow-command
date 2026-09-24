@@ -1,0 +1,20 @@
+[
+  {
+    "id": "anatomy-proportion",
+    "score": 0.48,
+    "visible": true,
+    "notes": "Oversized head and compact torso are present, but feet float, the body is too cylindrical, and the head-to-body transition lacks the soft cheek/chest overlap of the reference."
+  },
+  {
+    "id": "pose-silhouette",
+    "score": 0.52,
+    "visible": true,
+    "notes": "Neutral bilateral stance is recognizable, but limbs read as clipped cones and the ear-to-cheek negative spaces differ strongly from the locked silhouette."
+  },
+  {
+    "id": "floppy-ear-identity",
+    "score": 0.32,
+    "visible": true,
+    "notes": "The ears are long but point upward like rigid leaves. The reference ears attach high, bow outward, and hang down with their tips near the lower torso."
+  }
+]

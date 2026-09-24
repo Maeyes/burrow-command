@@ -1,0 +1,46 @@
+{
+  "object": {
+    "id": "a42d9fd8-2609-4c37-a62b-b279e494abb8",
+    "name": "base",
+    "prompt": "Animate this Meteor Storm effect as one continuous pixel-art RPG VFX.\n\nMultiple flaming meteors rapidly fall from the upper sky . Each meteor enters from above at a steep diagonal angle with a short bright fire trail, strikes with a sharp explosive impact, then another meteor lands at a slightly different position inside the same target area. Overlapping impacts create bursts of fire, sparks, glowing debris, smoke.\n\nIMPORTANT:\nKeep the target area locked in exactly the same position for the entire animation.\nKeep the same camera angle, perspective, canvas size, scale, and ground plane.\nMeteors must clearly travel downward before impact \u2014 do not make them suddenly appear on the ground.\nImpacts should occur sequentially and overlap naturally, creating a chaotic meteor shower.\nDo not turn the effect into one giant explosion.\nDo not create multiple examples, a contact sheet, separate variations, or numbered frames.\nDo not add a character, weapon, text, UI, scenery, or background.\n\nTrue handcrafted pixel art, crisp hard pixels, transparent background, no blur, no anti-aliasing.\nBright white-yellow meteor cores, orange-red flames, dark ember fragments, sparks and smoke.\nPowerful magical fire attack designed for an isometric fantasy RPG.\n\nJUST ONLY COMET NO GROUND IN THIS FX",
+    "size": {
+      "width": 96,
+      "height": 96
+    },
+    "directions": 1,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "Animate_this_Meteor_Storm_effe.png",
+    "cell_size": {
+      "width": 96,
+      "height": 96
+    },
+    "sheet_size": {
+      "width": 864,
+      "height": 192
+    },
+    "columns": 9,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 1,
+        "directions": [
+          "unknown"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "appear \u2192 expand/swing \u2192 peak impact \u2192 fragment/fad",
+        "animation_group_id": "bfb88c88-c7af-4702-8dcb-bda809e96b04",
+        "direction": "unknown"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-09-22T16:39:35.864108+00:00"
+}

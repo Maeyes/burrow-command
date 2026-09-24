@@ -1,0 +1,54 @@
+{
+  "object": {
+    "id": "adf5f8f5-e2c3-4da9-86af-f72d7d76dfd3",
+    "name": "base",
+    "prompt": "ORIGINAL GREAT MYTHICAL DRAGON enemy for Bunny World. DARK DRAGON WITH A tribal from the last billion years ago. Come up with a blue aura fire around standing with 4 legs and expanded wings Playful mischievous hostile fantasy creature. Strong readable silhouette, minimal branch detail, no weapon, no clothing clutter. Match supplied ACTUAL Goblin/Skeleton pixels only for exact tiny gameplay scale, compact proportions, sparse crisp clusters and feet contact. Side-facing right, walk-ready contact pose. Transparent; no ground, shadow, scenery, text, glow, antialiasing, vector, painting or 3D.",
+    "size": {
+      "width": 64,
+      "height": 64
+    },
+    "directions": 1,
+    "view": "low top-down"
+  },
+  "spritesheet": {
+    "path": "ORIGINAL_GREAT_MYTHICAL_DRAGON.png",
+    "cell_size": {
+      "width": 64,
+      "height": 64
+    },
+    "sheet_size": {
+      "width": 576,
+      "height": 192
+    },
+    "columns": 9,
+    "pivot": "cell-center",
+    "rows": [
+      {
+        "row": 0,
+        "type": "rotations",
+        "frame_count": 1,
+        "directions": [
+          "unknown"
+        ]
+      },
+      {
+        "row": 1,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "The creature shifts its weight forward, lifting it",
+        "animation_group_id": "79fa3025-ad55-4e06-8316-ab0271e5ed4a",
+        "direction": "unknown"
+      },
+      {
+        "row": 2,
+        "type": "animation",
+        "frame_count": 9,
+        "animation": "The dragon\u2019s chest heaves with a rhythmic, powerfu",
+        "animation_group_id": "c24dbd0c-ff04-4734-9428-f55f21dd208d",
+        "direction": "unknown"
+      }
+    ]
+  },
+  "export_version": "1.0",
+  "export_date": "2026-09-22T17:42:20.668911+00:00"
+}

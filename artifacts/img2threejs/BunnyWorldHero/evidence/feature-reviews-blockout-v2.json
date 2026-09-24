@@ -1,0 +1,5 @@
+[
+  {"id":"anatomy-proportion","score":0.62,"visible":true,"notes":"Pear torso and grounded lower silhouette improved, but head/torso overlap and limb volumes remain primitive."},
+  {"id":"pose-silhouette","score":0.61,"visible":true,"notes":"Neutral stance reads, though arms terminate as flat cylinders until meso parts unlock."},
+  {"id":"floppy-ear-identity","score":0.54,"visible":true,"notes":"Ears now descend past the cheeks, but the sweep is faceted, too vertical, and lacks the broad soft outward bow of the reference."}
+]

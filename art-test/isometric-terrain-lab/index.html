@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bunny World — Terrain Lab</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="lab-shell">
+    <header>
+      <div><p class="eyebrow">Bunny World / Asset QA</p><h1>Greenfield Terrain Lab</h1><p class="lede">64 × 32 standard 2:1 isometric foundation</p></div>
+      <div id="status" class="status pending">Loading manifest…</div>
+    </header>
+    <section class="toolbar" aria-label="Terrain Lab controls">
+      <fieldset><legend>QA scene</legend>
+        <label><input type="radio" name="scene" value="grid" checked /> Tile grid</label>
+        <label><input type="radio" name="scene" value="seam" /> Seam test</label>
+        <label><input type="radio" name="scene" value="path" /> Path test</label>
+        <label><input type="radio" name="scene" value="variants" /> Variant test</label>
+      </fieldset>
+      <fieldset><legend>Debug</legend>
+        <label><input id="debug-diamond" type="checkbox" /> Diamond</label>
+        <label><input id="debug-coordinate" type="checkbox" /> Coordinate</label>
+        <label><input id="debug-anchor" type="checkbox" /> Anchor</label>
+        <label><input id="debug-id" type="checkbox" /> Asset ID</label>
+        <label><input id="debug-transition" type="checkbox" /> Transition</label>
+      </fieldset>
+    </section>
+    <section class="viewport"><canvas id="terrain" width="1280" height="720" aria-label="Isometric terrain validation canvas"></canvas><div id="placeholder" class="placeholder" hidden><strong>DEV PLACEHOLDER</strong><span>Production PixelLab assets are not imported.</span></div></section>
+    <footer><span id="scene-readout">TILE GRID</span><span>PixelLab art only · nearest-neighbor rendering</span></footer>
+  </main>
+  <script type="module" src="./lab.js"></script>
+</body>
+</html>

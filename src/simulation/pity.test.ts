@@ -1,0 +1,3 @@
+import{describe,expect,it}from'vitest';import{createBossCorePityState,rollLootWithBossCorePity,signatureCorePityChance}from'./pity';import type{LootSourceV2}from'./loot';
+const boss:LootSourceV2={id:'boss',rank:'boss',level:10,goldMin:1,goldMax:1,oreItemId:'copperOre',core:{itemId:'cyclone',chance:.1}};
+describe('boss core pity',()=>{it('starts 10%, gains 2pp and hard pities tenth eligible clear',()=>{expect(signatureCorePityChance(0)).toBe(.1);expect(signatureCorePityChance(5)).toBe(.2);expect(signatureCorePityChance(9)).toBe(1)});it('resets scoped pity on obtain',()=>{const s=createBossCorePityState();s.failuresByKey['boss::cyclone']=9;const r=rollLootWithBossCorePity(boss,s,()=>.99);expect(r.items.cyclone).toBe(1);expect(s.failuresByKey['boss::cyclone']).toBe(0)})});

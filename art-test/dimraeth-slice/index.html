@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Bunny World — Dimraeth Slice</title>
+<link rel="stylesheet" href="../iso-arena-draft/styles.css"><link rel="stylesheet" href="../iso-arena-draft/ui-mastery-skills.css"><link rel="stylesheet" href="../iso-arena-draft/ui-icons.css">
+<style>
+  html,body{margin:0;height:100%;background:#07090b;color:#e8e2d0;font:13px/1.4 system-ui,sans-serif;overflow:hidden}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  canvas{image-rendering:pixelated;image-rendering:crisp-edges;background:#101510;max-width:100vw;max-height:100vh;aspect-ratio:16/9;width:100vw;height:auto}
+  #hud{position:fixed;left:14px;top:12px;background:rgba(8,10,12,.72);border:1px solid rgba(232,210,160,.18);padding:10px 12px;border-radius:6px;max-width:340px}
+  #hud b{color:#f0c878;letter-spacing:.08em;font-size:11px}
+  #hud p{margin:4px 0 0;color:#bdb6a4}
+  #hud kbd{background:#2a2620;border:1px solid #4a4236;border-radius:3px;padding:0 4px;font-size:11px}
+  #hud a{color:#9fd0ff}
+  #hud select{background:#1c1a16;color:#f0c878;border:1px solid #4a4236;border-radius:4px;font:12px system-ui;padding:2px 4px}
+  #hud a.active{color:#f0c878;font-weight:700;text-decoration:none}
+  body.combat-mode .dev-panel{display:none!important}
+  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:#f0c878;background:#07090b}
+  /* Production HUD ported from iso-arena-draft; gameplay state still comes from BunnySimulation. */
+  .game-ui{position:fixed;inset:0;pointer-events:none;color:#f4eedc;font-family:Inter,system-ui,sans-serif;--gold:#e9cf7a}.game-ui button{font:inherit}.player-hud,.target-hud{position:absolute;top:16px;padding:9px 11px;background:rgba(7,14,11,.82);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px)}.player-hud{pointer-events:auto;left:16px;width:220px;display:flex;gap:9px;align-items:center;text-align:left;color:#f4eedc;cursor:pointer}.portrait{display:grid;place-items:center;flex:0 0 42px;height:42px;border-radius:50%;border:2px solid #d8c57e;background:#24372d;color:#f5e6ae;font:700 17px Georgia,serif}.hero-meta{display:block;min-width:0;flex:1}.hero-meta strong{display:block;font-size:9px;letter-spacing:.08em}.hero-meta small,.target-hud small{display:block;color:#c8d0c7;font:8px ui-monospace,monospace}.bar{display:block;height:5px;margin-top:5px;background:#252b27;overflow:hidden}.bar i{display:block;height:100%}.bar.hp i{background:#bd665b}.bar.sp i{background:#65a8ad}.bar.exp{height:3px}.bar.exp i{background:#d8c57e}.target-hud{left:50%;transform:translateX(-50%);width:210px;text-align:center}.target-hud strong{display:block;font-size:9px;letter-spacing:.08em}.target-hud .bar.hp i{background:#a24f58}.target-hud[hidden],.game-ui[hidden]{display:none!important}.combat-hud{pointer-events:auto;position:absolute;z-index:12;left:50%;bottom:14px;display:flex;gap:5px;transform:translateX(-50%)}.combat-hud button{position:relative;overflow:hidden;width:50px;height:50px;padding:0;border:1px solid rgba(180,198,181,.5);border-radius:10px;background:radial-gradient(circle at 50% 48%,rgba(63,91,72,.48),rgba(24,42,32,.82) 48%,rgba(6,13,9,.97));box-shadow:0 3px 10px #0005,inset 0 0 0 1px #fff1;color:#eee6d0;cursor:pointer}.combat-hud kbd{position:absolute;right:3px;bottom:3px;display:grid;place-items:center;min-width:14px;height:14px;padding:0 2px;border:0;border-radius:4px;background:rgba(5,9,7,.82);color:#f7df82;font:800 8px ui-monospace,monospace}.combat-hud span{display:none}.quick-menu{pointer-events:auto;position:absolute;z-index:22;right:14px;bottom:14px;display:flex;gap:5px}.quick-menu button{width:54px;height:50px;border:1px solid #5d6d60;background:rgba(8,14,11,.9);color:#eee6d0;cursor:pointer;font-size:16px}.quick-menu span{display:block;margin-top:2px;font:7px ui-monospace,monospace;color:#bdc8be}.game-window{pointer-events:auto;position:absolute;z-index:40;inset:58px 12% 42px;background:linear-gradient(180deg,rgba(232,245,255,.98),rgba(199,226,242,.98));border:2px solid #fff;border-radius:22px;box-shadow:0 22px 80px #06152b80;color:#425477;overflow:auto}.game-window[hidden]{display:none}.game-window>header{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:#dff1fb}.game-window>header strong{color:#385a9d}.game-window>header button{width:32px;height:32px;border:0;border-radius:50%;background:#6485dd;color:#fff}.game-window-body{padding:14px}.character-status-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px}.character-status-columns section{padding:12px;background:#f9fcff;border:1px solid #bad2e4}.stat-row,.detail-stat-row{display:flex;align-items:center;justify-content:space-between;min-height:34px;gap:10px}.stat-row span{display:flex;justify-content:space-between;flex:1}.stat-row button{width:28px;height:26px}.equipment-actions{display:flex;gap:8px;margin-top:12px}.equipment-actions button{padding:8px 14px}#equipment-detail-modal[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="scene" width="1280" height="720"></canvas></div>
+<div id="hud" class="dev-panel">
+  <b>DIMRAETH-STYLE ENGINE</b>
+  <p>เดิน <kbd>WASD</kbd>/ลูกศร หรือคลิก · <kbd>Space</kbd> ตี (Valley Combat) · <kbd>L</kbd> กลางวัน/พลบค่ำ · <kbd>H</kbd> ซ่อนกล่องนี้</p>
+  <p>แมพ: <select id="map-select" onchange="location.search='?map='+this.value"><option value="forest">ป่า Greenfield</option><option value="town">เมือง Bunny Haven</option><option value="valley">หุบเขาน้ำตก</option><option value="forest-combat">Game Combat</option><option value="valley-combat">Valley Combat</option><option value="forest2">ป่า II · ทะเลสาบ</option><option value="desert1">ทะเลทราย I · โอเอซิส</option><option value="desert2">ทะเลทราย II · หุบผา</option><option value="mine1">เหมือง I · ทองแดง</option><option value="mine2">เหมือง II · คริสตัล</option><option value="snow1">หิมะ I · ป่าสน</option><option value="snow2">หิมะ II · ธารน้ำแข็ง</option><option value="magma1">แม็กม่า I · ลาวาไหล</option><option value="magma2">แม็กม่า II · ปล่องภูเขาไฟ</option><option value="underwater1">ใต้น้ำ I · ปะการัง</option><option value="underwater2">ใต้น้ำ II · แอตแลนติส</option><option value="asgard1">แอสการ์ด I · เกาะลอยฟ้า</option><option value="asgard2">แอสการ์ด II · วิหาร</option><option value="city">นครหลวง</option></select></p>
+  <script>document.getElementById('map-select').value=new URLSearchParams(location.search).get('map')||'forest';</script>
+  <p><a href="/art-test/iso-arena-draft/">← เกมเดิม</a></p>
+</div>
+<script>if (window !== window.top) document.getElementById('hud').hidden = true;</script>
+<div id="game-ui" class="game-ui" hidden>
+  <button id="character-hud" class="player-hud" type="button"><span class="portrait">B</span><span class="hero-meta"><strong id="hero-name">BUNNY</strong><small id="hero-level">Lv. 1</small><span class="bar hp"><i></i></span><span class="bar sp"><i></i></span><span class="bar exp"><i></i></span></span></button>
+  <div id="target-hud" class="target-hud" hidden><small>TARGET</small><strong id="target-name">MONSTER</strong><span class="bar hp"><i></i></span><small id="target-hp">0 / 0</small></div>
+  <div id="combat-hud" class="combat-hud"><button data-hotbar-slot="0"><kbd>1</kbd><span>Empty</span></button><button data-hotbar-slot="1"><kbd>2</kbd><span>Empty</span></button><button data-hotbar-slot="2"><kbd>3</kbd><span>Empty</span></button><button data-skill="potion"><kbd>Q</kbd><span>Potion</span></button><button data-hotbar-movement><kbd>SPACE</kbd><span>Empty</span></button></div>
+  <div class="quick-menu"><button data-window="Inventory">🎒<span>Gear · I</span></button><button data-window="Craft">⚒<span>Craft · Y</span></button><button data-window="Skills">✦<span>Skill · K</span></button><button data-window="Monster Index">☠<span>Monster · M</span></button><button id="sfx-toggle" type="button" title="Mute sound">🔊<span>Sound</span></button></div>
+  <section id="game-window" class="game-window" hidden><header><strong id="game-window-title">Menu</strong><button id="game-window-close" type="button">×</button></header><div id="game-window-body" class="game-window-body"></div></section>
+  <div id="equipment-detail-modal" class="equipment-detail-modal" hidden></div>
+  <div id="death-overlay" class="death-overlay" hidden><div class="death-banner"><i></i><strong>DEATH</strong><i></i></div><div class="death-countdown"><svg viewBox="0 0 100 100"><circle class="track" cx="50" cy="50" r="42"></circle><circle class="progress" cx="50" cy="50" r="42"></circle></svg><span id="death-seconds">10</span></div></div>
+  <div id="reward-feed" class="reward-feed"></div>
+  <section id="world-chat" class="world-chat"><div class="chat-tabs"><button class="active" type="button">WORLD</button><button type="button">SYSTEM</button></div><div id="chat-log" class="chat-log"><p class="system">[System] Welcome to Bunny World.</p></div><div class="chat-input-row"><span>World</span><input id="chat-input" type="text" maxlength="160" placeholder="Press Enter to chat..."></div></section>
+</div>
+<div id="loading">กำลังวาดพื้น… 0%</div>
+<script type="module">
+  const map=new URLSearchParams(location.search).get('map');
+  if(map?.endsWith('-combat'))document.body.classList.add('combat-mode');
+  import('./main.js');
+</script>
+</body>
+</html>

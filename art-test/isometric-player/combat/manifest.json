@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "provider": "PixelLab",
+  "canonicalCharacterId": "d2efac6c-52f1-4bbe-a131-ddeb6e78800e",
+  "canonicalRuntimeCanvas": { "width": 64, "height": 64 },
+  "feetPivot": { "x": 32, "y": 64 },
+  "directionOrder": ["south", "south-east", "east", "north-east", "north", "north-west", "west", "south-west"],
+  "mirroringPolicy": "unique-frames-required-unless-explicitly-reviewed",
+  "weaponFamilies": {
+    "sword": { "handedness": "one-handed", "status": "reference-slice-missing-art" },
+    "dagger": { "handedness": "one-handed-dual-wield-capable", "status": "idle-and-attack-01-approved" },
+    "axe": { "handedness": "two-handed", "status": "generation-required" },
+    "hammer": { "handedness": "two-handed", "status": "generation-required" },
+    "bow": { "handedness": "two-handed", "status": "generation-required" },
+    "wand": { "handedness": "one-handed", "status": "generation-required" },
+    "scepter": { "handedness": "one-handed", "status": "generation-required" }
+  },
+  "animations": [
+    {
+      "animationId": "hero_sword_attack_01",
+      "weaponFamily": "sword",
+      "attackName": "diagonal-slash",
+      "status": "missing-pixellab-generation",
+      "path": "./sword/diagonal-slash/{direction}/",
+      "frameCount": 8,
+      "frameDimensions": { "width": 64, "height": 64 },
+      "fps": 12,
+      "startupFrames": 3,
+      "activeFrames": [3, 4],
+      "impactFrame": 4,
+      "recoveryFrames": 3,
+      "loop": false,
+      "directions": ["south", "south-east", "east", "north-east", "north", "north-west", "west", "south-west"],
+      "mirror": false,
+      "fxEvents": [
+        { "frame": 3, "type": "weaponTrail", "fxId": "sword-medium-slash-trail" },
+        { "frame": 4, "type": "gameplayImpact" },
+        { "frame": 4, "type": "impactSpark", "fxId": "sword-small-sharp-impact" }
+      ]
+    },
+    {
+      "animationId": "hero_dagger_idle",
+      "weaponFamily": "dagger",
+      "animationName": "idle",
+      "status": "approved",
+      "path": "./dagger/idle/{direction}/",
+      "frameCount": 4,
+      "frameDimensions": { "width": 64, "height": 64 },
+      "fps": 7,
+      "loop": true,
+      "directions": ["south", "south-east", "east", "north-east", "north"],
+      "runtimeDirections": ["south", "south-east", "east", "north-east", "north", "north-west", "west", "south-west"],
+      "mirrorDirections": { "south-west": "south-east", "west": "east", "north-west": "north-east" }
+    },
+    {
+      "animationId": "hero_dagger_attack_01",
+      "weaponFamily": "dagger",
+      "attackName": "cross-slash",
+      "status": "approved",
+      "path": "./dagger/cross-slash/{direction}/",
+      "frameCount": 6,
+      "frameDimensions": { "width": 64, "height": 64 },
+      "fps": 16,
+      "startupFrames": 2,
+      "activeFrames": [2, 3],
+      "impactFrame": 3,
+      "recoveryFrames": 2,
+      "loop": false,
+      "impactPoseMinimumMs": 24,
+      "directions": ["south", "south-east", "east", "north-east", "north"],
+      "runtimeDirections": ["south", "south-east", "east", "north-east", "north", "north-west", "west", "south-west"],
+      "mirrorDirections": { "south-west": "south-east", "west": "east", "north-west": "north-east" },
+      "fxEvents": [
+        { "frame": 2, "type": "weaponTrail", "fxId": "dagger-cross-streak" },
+        { "frame": 3, "type": "gameplayImpact" },
+        { "frame": 3, "type": "impactSpark", "fxId": "dagger-small-sharp-impact" }
+      ]
+    }
+  ],
+  "generationQueue": [
+    { "family": "sword", "job": "create-reviewed-one-handed-sword-state", "directions": 8, "frames": 1, "priority": 1 },
+    { "family": "sword", "job": "attack_01-diagonal-slash", "directions": 8, "frames": 8, "priority": 2 },
+    { "family": "sword", "job": "medium-slash-trail-fx", "directions": 8, "frames": 5, "priority": 3 },
+    { "family": "sword", "job": "small-sharp-impact-fx", "directions": 1, "frames": 5, "priority": 4 },
+    { "family": "dagger", "job": "attack_02-03", "directions": 5, "runtimeMirroring": true, "frameTargets": [6, 8] },
+    { "family": "axe", "job": "attack_01-two-hand-chop", "directions": 8, "frames": 10 },
+    { "family": "hammer", "job": "attack_01-crushing-strike", "directions": 8, "frames": 12 },
+    { "family": "bow", "job": "attack_01-nock-draw-release", "directions": 8, "frames": 10 },
+    { "family": "wand", "job": "attack_01-casting-flick", "directions": 8, "frames": 8 },
+    { "family": "scepter", "job": "attack_01-channel-release", "directions": 8, "frames": 12 }
+  ]
+}
