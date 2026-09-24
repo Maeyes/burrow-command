@@ -15,16 +15,28 @@ def transpose(m):
         s=m[k];m[k]=''.join(s[i*N+j] for j in range(N) for i in range(N))
     for o in m['objects']: o['x'],o['y']=o['y'],o['x']
     m['spawn']={'x':m['spawn']['y'],'y':m['spawn']['x']};return m
-out=sys.argv[1]
-maps={
- 'snow2':(L1('snow2','snow',211,[('rock',22),('tree',26),('lantern',6)],groves=[(140,60,10),(60,150,9)]),False),
- 'underwater1':(L1('underwater1','underwater',307,[('rock',26),('bush',30),('tree',12)],groves=[(145,70,10),(95,150,10)],fixed=[{'type':'altar','x':8.5,'y':7.5}]),True),
- 'underwater2':(L1('underwater2','underwater',419,[('rock',16),('bush',18),('pillar',14)],fixed=[{'type':'altar','x':8.5,'y':7.5},{'type':'pillar','x':6.5,'y':6},{'type':'pillar','x':10.5,'y':6},{'type':'pillar','x':6.5,'y':9.5},{'type':'pillar','x':10.5,'y':9.5},{'type':'portal','x':31,'y':8.5,'id':'atlantis-gate'}]),False),
- 'asgard1':(L1('asgard1','asgard',523,[('rock',14),('tree',18),('pillar',8),('lantern',8)],ring=6,groves=[(140,65,9)]),True),
- 'asgard2':(L1('asgard2','asgard',631,[('pillar',20),('lantern',12),('rock',10)],road=1,fixed=[{'type':'altar','x':8.5,'y':7.5},{'type':'house','x':31,'y':8.5,'roof':'slate','floors':2},{'type':'portal','x':31,'y':34,'id':'bifrost'}]),False),
-}
-for name,(cfg,tr) in maps.items():
-    m=build(cfg)
-    if tr: m=transpose(m)
-    json.dump(m,open(f'{out}/{name}.json','w'),separators=(',',':'))
-    print('wrote',name)
+def _main():
+  out=sys.argv[1]
+  maps={
+   'snow2':(L1('snow2','snow',211,[('rock',22),('tree',26),('lantern',6)],groves=[(140,60,10),(60,150,9)]),False),
+   'underwater1':(L1('underwater1','underwater',307,[('rock',26),('bush',30),('tree',12)],groves=[(145,70,10),(95,150,10)],fixed=[{'type':'altar','x':8.5,'y':7.5}]),True),
+   'underwater2':(L1('underwater2','underwater',419,[('rock',16),('bush',18),('pillar',14)],fixed=[{'type':'altar','x':8.5,'y':7.5},{'type':'pillar','x':6.5,'y':6},{'type':'pillar','x':10.5,'y':6},{'type':'pillar','x':6.5,'y':9.5},{'type':'pillar','x':10.5,'y':9.5},{'type':'portal','x':31,'y':8.5,'id':'atlantis-gate'}]),False),
+   'asgard1':(L1('asgard1','asgard',523,[('rock',14),('tree',18),('pillar',8),('lantern',8)],ring=6,groves=[(140,65,9)]),True),
+   'asgard2':(L1('asgard2','asgard',631,[('pillar',20),('lantern',12),('rock',10)],road=1,fixed=[{'type':'altar','x':8.5,'y':7.5},{'type':'house','x':31,'y':8.5,'roof':'slate','floors':2},{'type':'portal','x':31,'y':34,'id':'bifrost'}]),False),
+  }
+  for name,(cfg,tr) in maps.items():
+      m=build(cfg)
+      if tr: m=transpose(m)
+      json.dump(m,open(f'{out}/{name}.json','w'),separators=(',',':'))
+      print('wrote',name)
+
+def L2(name,biome,seed,props,fixed=(),liquid=1,road=2,groves=(),monsters=14):
+    return dict(name=name,biome=biome,seed=seed,
+      hills=[(80,50,40,1),(75,40,20,2),(26,110,18,1),(135,120,18,1)],
+      rivers=[([(78,38),(84,70),(92,100),(100,130),(104,159)],10),([(140,112),(128,134),(102,142)],6)],
+      pools=[(88,92,11)],ring=0,liquid=liquid,road=road,
+      trails=[[(60,150),(60,15)],[(60,110),(18,110)],[(60,120),(140,120)]],
+      bridges=[(88,108,118,122)],groves=list(groves),props=props,fixed=list(fixed),monsters=monsters,
+      spawn={'x':15,'y':37})
+
+if __name__=="__main__": _main()
