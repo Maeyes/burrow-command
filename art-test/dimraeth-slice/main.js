@@ -12,7 +12,8 @@ import { sceneFromMap } from './scenes/custom.js';
 
 const SCENES = { forest, town, valley, ...B };
 const q = new URLSearchParams(location.search), id = q.get('map');
-const combatRoute = id === 'forest-combat' || id === 'valley-combat';
+// No ?map = the game itself; ?map=<scene> keeps the renderer showcase scenes for dev.
+const combatRoute = !id || id === 'forest-combat' || id === 'valley-combat';
 
 if (combatRoute) {
   await import('./game.js');

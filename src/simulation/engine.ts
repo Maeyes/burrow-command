@@ -37,6 +37,17 @@ export const CC_DURATION_BY_RANK={normal:1,elite:.5,boss:.25,worldBoss:.25} as c
 function masteryLevel(player:PlayerEntity,family:import('../systems/combatMath').CombatWeaponFamily){return player.masteryLevels?.[family]??0}
 function chanceAt(level:number,a:[number,number],b:[number,number],c:[number,number]){return level>=c[0]?c[1]:level>=b[0]?b[1]:level>=a[0]?a[1]:0}
 
+export const WEAPON_PROC_RULES_V2={
+  /** Lv10 skill: chance per basic attack, with its own internal cooldown. */
+  chance:.25, chanceIcdMs:2000,
+  /** Lv20 skill: fires on every Nth basic attack. */
+  everyNthHit:5,
+  /** Lv30 skill: releases when this many basic attacks have charged the gauge. */
+  gaugeHits:14,
+  /** Every weapon proc waits at least this fraction of the skill's authored cooldown. */
+  cooldownFloor:.5,
+} as const;
+
 export class BunnySimulation implements AuthoritativeSimulation {
   private _clock: SimulationClock = { nowMs: 0, tick: 0 };
 
@@ -141,6 +152,39 @@ export class BunnySimulation implements AuthoritativeSimulation {
   }
 
   private basicAttack(player: PlayerEntity, targetId: EntityId): CommandResult {
+    const result=this.basicAttackStrike(player,targetId);
+    if(!result.accepted)return result;
+    const target=entityById(this.world,targetId);
+    if(target&&target.kind==='monster')return this.accept([...result.events,...this.weaponSkillProcs(player,target)]);
+    return result;
+  }
+
+  /**
+   * Weapon Mastery skills are not pressed: they fire from basic attacks.
+   * Slot 1 (Lv10) = chance per hit, slot 2 (Lv20) = every Nth hit, slot 3 (Lv30) = charge gauge.
+   * Each proc also respects a floor of half the skill's authored cooldown so high ASPD cannot spam it.
+   */
+  private weaponSkillProcs(player: PlayerEntity, target: MonsterEntity): SimulationEvent[] {
+    const skills=player.skillEntitlements.weaponSkills;if(!skills.length)return[];
+    const st=player.weaponProc??={hits:0,gauge:0,readyAtMs:{}};const now=this._clock.nowMs;const R=WEAPON_PROC_RULES_V2;
+    st.hits++;st.gauge=Math.min(R.gaugeHits,st.gauge+1);
+    const ready=(id:string)=>now>=(st.readyAtMs[id]??0);
+    const fire=(id:string,icdMs:number)=>{
+      if(!target.alive)return[];
+      const res=this.castSkill(player,id,target.id,target.position,undefined,true);
+      if(!res.accepted)return[];
+      st.readyAtMs[id]=now+Math.max(icdMs,(SKILLS_V2[id]?.cooldownMs??0)*R.cooldownFloor);
+      return res.events;
+    };
+    const out:SimulationEvent[]=[];
+    const [s10,s20,s30]=skills;
+    if(s10&&ready(s10)&&this.random()<R.chance+(player.weaponProcChanceBonus??0))out.push(...fire(s10,R.chanceIcdMs));
+    if(s20&&st.hits%R.everyNthHit===0&&ready(s20))out.push(...fire(s20,0));
+    if(s30&&st.gauge>=R.gaugeHits&&ready(s30)){const ev=fire(s30,0);if(ev.length){st.gauge=0;out.push(...ev);}}
+    return out;
+  }
+
+  private basicAttackStrike(player: PlayerEntity, targetId: EntityId): CommandResult {
     const target = entityById(this.world, targetId);
     if (!target || !target.alive || target.kind !== 'monster') return this.reject('invalid-target');
     const bowLv=masteryLevel(player,'bow');
@@ -163,7 +207,7 @@ export class BunnySimulation implements AuthoritativeSimulation {
       if(this.random()>=hitChance(hit(player.stats,player.hitBonus+hitBonus),enemy.flee)){events.push({type:'attackMissed',sourceId:player.id,targetId:enemy.id});return;}
       const baseDefense=magic?enemy.mdef:enemy.def;const armorBreak=(enemy.armorBreakUntilMs??0)>this._clock.nowMs?(enemy.armorBreakPercent??0):0;
       const defense=baseDefense*(1-armorBreak)*(1-pierce);
-      let damage=Math.max(1,Math.round(damageAfterDefense(attackRaw(),defense,player.stats.level)*scale));
+      let damage=Math.max(1,Math.round(damageAfterDefense(attackRaw(),defense,player.stats.level)*scale*(enemy.hp/enemy.maxHp<.30?(player.executeDamageMultiplier??1):1)));
       const critical=canCrit&&this.random()<critChance;if(critical)damage=Math.max(1,Math.round(damage*BASE_CRIT_DAMAGE*(player.critDamageMultiplier??1)));
       enemy.hp=Math.max(0,enemy.hp-damage);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:damage,critical,effect:(ability==='basicAttack'||ability==='offhandAttack')?{origin:'PRIMARY',echoDepth:0}:{origin:'MASTERY_PROC',echoDepth:0,ability}});
       if(enemy.hp===0){enemy.alive=false;events.push({type:'entityDefeated',entityId:enemy.id,killerId:player.id});}
@@ -221,11 +265,12 @@ export class BunnySimulation implements AuthoritativeSimulation {
     return this.accept(events);
   }
 
-  private castSkill(player: PlayerEntity, skillId: string, targetId?: EntityId, ground?: Readonly<{x:number;y:number}>, direction?: Readonly<{x:number;y:number}>): CommandResult {
+  private castSkill(player: PlayerEntity, skillId: string, targetId?: EntityId, ground?: Readonly<{x:number;y:number}>, direction?: Readonly<{x:number;y:number}>, fromProc=false): CommandResult {
     const skill=SKILLS_V2[skillId];if(!skill)return this.reject('unknown-skill');
+    if(skill.kind==='weapon'&&!fromProc)return this.reject('weapon-skill-triggers-on-attack');
     const entitlementReason=skillEntitlementReason(player.skillEntitlements,skillId,skill.kind);if(entitlementReason)return this.reject(entitlementReason);
     if(skill.compatibleWeaponFamilies&&!skill.compatibleWeaponFamilies.includes(player.weaponFamily))return this.reject('incompatible-weapon');
-    if(this._clock.nowMs<(player.cooldowns[skillId]??0))return this.reject('skill-cooldown');
+    if(!fromProc&&this._clock.nowMs<(player.cooldowns[skillId]??0))return this.reject('skill-cooldown');
     if(skill.kind==='movement'){const dir=normalized(direction??{x:0,y:0});if(!dir.x&&!dir.y)return this.reject('movement-skill-requires-direction');player.position=clampArenaPosition({x:player.position.x+dir.x*(skill.movementDistance??120),y:player.position.y+dir.y*(skill.movementDistance??120)});const events:SimulationEvent[]=[{type:'skillCast',sourceId:player.id,skillId},{type:'positionChanged',entityId:player.id,position:player.position}];this.startSkillCooldown(player,skill,events);return this.accept(events);}
     player.lastCombatAtMs=this._clock.nowMs;const events:SimulationEvent[]=[{type:'skillCast',sourceId:player.id,skillId,targetId}];
     const staffLv=masteryLevel(player,'staff');const coreMeta=skillCoreEffect(skillId);
@@ -243,10 +288,10 @@ export class BunnySimulation implements AuthoritativeSimulation {
     const targets=skill.targeting?.endsWith('Area')?[...this.world.monsters.values()].filter(m=>m.alive&&distance(center,m.position)<=effectiveRadius):target&&target.kind==='monster'?[target]:[];if(!targets.length)return this.reject('no-targets');
     if(skillId==='blackHole'){for(const enemy of targets){const dx=center.x-enemy.position.x,dy=center.y-enemy.position.y,len=Math.hypot(dx,dy);if(len>18){const pull=Math.min(len-18,Math.max(36,len*.72));enemy.position=clampArenaPosition({x:enemy.position.x+dx/len*pull,y:enemy.position.y+dy/len*pull});events.push({type:'positionChanged',entityId:enemy.id,position:{...enemy.position}});}}}
     const scaling=skill.scaling==='magicalAttack'?magicalAttack(player.stats,player.weaponMatk):physicalAttack(player.stats,player.weaponFamily as PhysicalWeaponFamily,player.weaponAtk);const hitCount=Math.max(1,skill.hitCount??1);
-    const damageScale=(player.skillCoreDamageMultipliers?.[skillId]??1)*(mods.has('lingering')?1.2:1)*(mods.has('chain')?1.1:1)*(mods.has('combustion')&&skill.element==='fire'?1.3:1)*(mods.has('overcharge')&&skill.element==='lightning'?1.3:1)*(mods.has('concentratedForce')&&!skill.targeting?.endsWith('Area')?1.35:1);
+    const damageScale=(player.skillCoreDamageMultipliers?.[skillId]??1)*(skill.kind==='weapon'?(player.weaponSkillDamageMultiplier??1):(player.coreSkillDamageMultiplier??1))*(mods.has('lingering')?1.2:1)*(mods.has('chain')?1.1:1)*(mods.has('combustion')&&skill.element==='fire'?1.3:1)*(mods.has('overcharge')&&skill.element==='lightning'?1.3:1)*(mods.has('concentratedForce')&&!skill.targeting?.endsWith('Area')?1.35:1);
     const elementScale=skill.element&&skill.element!=='physical'?(player.elementDamageMultiplier??1):1;
     const rawPerHit=(scaling*skill.coefficient+(skill.flatPower??0))*damageScale*elementScale/hitCount;
-    for(const enemy of targets){enemy.targetPlayerId=player.id;if(skill.accuracy!=='alwaysHit'&&this.random()>=hitChance(hit(player.stats,player.hitBonus),enemy.flee)){events.push({type:'attackMissed',sourceId:player.id,targetId:enemy.id});continue;}const defense=skill.defenseType==='ignore'?0:skill.defenseType==='mdef'?enemy.mdef:enemy.def;for(let i=0;i<hitCount&&enemy.alive;i++){let damage=damageAfterDefense(rawPerHit,defense,player.stats.level);if(mods.has('execution')&&enemy.hp/enemy.maxHp<.30)damage=Math.max(1,Math.round(damage*1.25));const critical=Boolean(skill.canCrit)&&this.random()<Math.min(.7,(1+player.stats.luk*.3+player.critBonusPercent)/100);if(critical)damage=Math.max(1,Math.round(damage*BASE_CRIT_DAMAGE*(player.critDamageMultiplier??1)));enemy.hp=Math.max(0,enemy.hp-damage);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:damage,critical,effect:coreMeta});if(mods.has('lifeDrain')&&damage>0){const heal=Math.min(Math.max(1,Math.round(damage*.05)),player.maxHp-player.hp);player.hp+=heal;if(heal>0)events.push({type:'healed',sourceId:player.id,targetId:player.id,amount:heal});}if(enemy.alive&&(mods.has('echo')||mods.has('extraStrike'))&&this.random()<.20){const bonus=Math.max(1,Math.round(damage*.50));enemy.hp=Math.max(0,enemy.hp-bonus);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:bonus,critical:false,effect:echoEffect(coreMeta)});}if(enemy.alive&&staffLv>=40&&this.random()<MASTERY_COMBAT_V2.staff.echoChance){const echoDamage=Math.max(1,Math.round(damage*MASTERY_COMBAT_V2.staff.echoEffect));enemy.hp=Math.max(0,enemy.hp-echoDamage);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:echoDamage,critical:false,effect:echoEffect(coreMeta)});}if(enemy.hp===0){enemy.alive=false;events.push({type:'entityDefeated',entityId:enemy.id,killerId:player.id});}}}
+    for(const enemy of targets){enemy.targetPlayerId=player.id;if(skill.accuracy!=='alwaysHit'&&this.random()>=hitChance(hit(player.stats,player.hitBonus),enemy.flee)){events.push({type:'attackMissed',sourceId:player.id,targetId:enemy.id});continue;}const defense=skill.defenseType==='ignore'?0:skill.defenseType==='mdef'?enemy.mdef:enemy.def;for(let i=0;i<hitCount&&enemy.alive;i++){let damage=damageAfterDefense(rawPerHit,defense,player.stats.level);if(enemy.hp/enemy.maxHp<.30)damage=Math.max(1,Math.round(damage*(mods.has('execution')?1.25:1)*(player.executeDamageMultiplier??1)));const critical=Boolean(skill.canCrit)&&this.random()<Math.min(.7,(1+player.stats.luk*.3+player.critBonusPercent)/100);if(critical)damage=Math.max(1,Math.round(damage*BASE_CRIT_DAMAGE*(player.critDamageMultiplier??1)));enemy.hp=Math.max(0,enemy.hp-damage);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:damage,critical,effect:coreMeta});if(mods.has('lifeDrain')&&damage>0){const heal=Math.min(Math.max(1,Math.round(damage*.05)),player.maxHp-player.hp);player.hp+=heal;if(heal>0)events.push({type:'healed',sourceId:player.id,targetId:player.id,amount:heal});}if(enemy.alive&&(mods.has('echo')||mods.has('extraStrike'))&&this.random()<.20){const bonus=Math.max(1,Math.round(damage*.50));enemy.hp=Math.max(0,enemy.hp-bonus);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:bonus,critical:false,effect:echoEffect(coreMeta)});}if(enemy.alive&&staffLv>=40&&this.random()<MASTERY_COMBAT_V2.staff.echoChance){const echoDamage=Math.max(1,Math.round(damage*MASTERY_COMBAT_V2.staff.echoEffect));enemy.hp=Math.max(0,enemy.hp-echoDamage);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:echoDamage,critical:false,effect:echoEffect(coreMeta)});}if(enemy.hp===0){enemy.alive=false;events.push({type:'entityDefeated',entityId:enemy.id,killerId:player.id});}}}
     this.startSkillCooldown(player,skill,events);return this.accept(events);
   }
 
@@ -267,8 +312,9 @@ export class BunnySimulation implements AuthoritativeSimulation {
   }
 
   private startSkillCooldown(player: PlayerEntity, skill: SkillDefinitionV2, events: SimulationEvent[]): void {
+    if(skill.kind==='weapon')return;
     const mods=new Set(player.skillEntitlements.modifiersByActive?.[skill.id]??[]);
-    const durationMs = Math.round((skill.cooldownMs ?? 0)*(mods.has('rapidCasting')?.8:1));
+    const durationMs = Math.round((skill.cooldownMs ?? 0)*(mods.has('rapidCasting')?.8:1)*(player.coreCooldownMultiplier??1));
     if (durationMs <= 0) return;
     player.cooldowns[skill.id] = this._clock.nowMs + durationMs;
     events.push({ type: 'cooldownStarted', entityId: player.id, abilityId: skill.id, durationMs });
@@ -291,6 +337,7 @@ export class BunnySimulation implements AuthoritativeSimulation {
       }
 
       let damage = damageAfterDefense(monster.atk, target.equipmentDef + Math.floor(target.stats.vit / 2), monster.level);
+      damage=Math.max(1,Math.round(damage*(target.damageTakenMultiplier??1)*(target.hp/target.maxHp<.30?(target.lastStandDamageTakenMultiplier??1):1)));
       const shieldScale=target.hasShieldEquipped?1:MASTERY_COMBAT_V2.guard.noShieldScale;
       const shieldLv=masteryLevel(target,'swordShield');
       const blockChance=(shieldLv>=40?MASTERY_COMBAT_V2.guard.block40:shieldLv>=10?MASTERY_COMBAT_V2.guard.block10:0)*shieldScale;

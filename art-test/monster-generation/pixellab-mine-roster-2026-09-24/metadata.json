@@ -1,0 +1,1038 @@
+{
+  "objects": [
+    {
+      "id": "e3694746-ba50-49c2-b338-12903531790f",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mine enemy named Ore Mole for Bunny World. A stubby mole with big digging claws, a pink snout and small crystal chunks embedded on its back. No human clothing or weapons. Dark grey fur with pink nose and blue-grey crystal chunks. Grumpy and relentless. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named.png"
+      },
+      "animations": {
+        "walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/walk/unknown/frame_000.png",
+                "animations/walk/unknown/frame_001.png",
+                "animations/walk/unknown/frame_002.png",
+                "animations/walk/unknown/frame_003.png",
+                "animations/walk/unknown/frame_004.png",
+                "animations/walk/unknown/frame_005.png",
+                "animations/walk/unknown/frame_006.png",
+                "animations/walk/unknown/frame_007.png",
+                "animations/walk/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "attack": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/attack/unknown/frame_000.png",
+                "animations/attack/unknown/frame_001.png",
+                "animations/attack/unknown/frame_002.png",
+                "animations/attack/unknown/frame_003.png",
+                "animations/attack/unknown/frame_004.png",
+                "animations/attack/unknown/frame_005.png",
+                "animations/attack/unknown/frame_006.png",
+                "animations/attack/unknown/frame_007.png",
+                "animations/attack/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "cc61fd41-5626-4f44-8f26-c82368bd2e9a",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mine enemy named Ore Mole for Bunny World. A stubby mole with big digging claws, a pink snout and small crystal chunks embedded on its back. No human clothing or weapons. Dark grey fur with pink nose and blue-grey crystal chunks. Grumpy and relentless. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_2.png"
+      },
+      "animations": {
+        "walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/walk/unknown/frame_000.png",
+                "animations/walk/unknown/frame_001.png",
+                "animations/walk/unknown/frame_002.png",
+                "animations/walk/unknown/frame_003.png",
+                "animations/walk/unknown/frame_004.png",
+                "animations/walk/unknown/frame_005.png",
+                "animations/walk/unknown/frame_006.png",
+                "animations/walk/unknown/frame_007.png",
+                "animations/walk/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "attack": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/attack/unknown/frame_000.png",
+                "animations/attack/unknown/frame_001.png",
+                "animations/attack/unknown/frame_002.png",
+                "animations/attack/unknown/frame_003.png",
+                "animations/attack/unknown/frame_004.png",
+                "animations/attack/unknown/frame_005.png",
+                "animations/attack/unknown/frame_006.png",
+                "animations/attack/unknown/frame_007.png",
+                "animations/attack/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "786424d3-a089-4760-83f1-9730f07e5824",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mine enemy named Ore Mole for Bunny World. A stubby mole with big digging claws, a pink snout and small crystal chunks embedded on its back. No human clothing or weapons. Dark grey fur with pink nose and blue-grey crystal chunks. Grumpy and relentless. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_3.png"
+      },
+      "animations": {
+        "attack": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/attack/unknown/frame_000.png",
+                "animations/attack/unknown/frame_001.png",
+                "animations/attack/unknown/frame_002.png",
+                "animations/attack/unknown/frame_003.png",
+                "animations/attack/unknown/frame_004.png",
+                "animations/attack/unknown/frame_005.png",
+                "animations/attack/unknown/frame_006.png",
+                "animations/attack/unknown/frame_007.png",
+                "animations/attack/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/walk/unknown/frame_000.png",
+                "animations/walk/unknown/frame_001.png",
+                "animations/walk/unknown/frame_002.png",
+                "animations/walk/unknown/frame_003.png",
+                "animations/walk/unknown/frame_004.png",
+                "animations/walk/unknown/frame_005.png",
+                "animations/walk/unknown/frame_006.png",
+                "animations/walk/unknown/frame_007.png",
+                "animations/walk/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "2c9a97d4-b8ca-4c5c-86d1-1df00a02e5ae",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mine enemy named Ore Mole for Bunny World. A stubby mole with big digging claws, a pink snout and small crystal chunks embedded on its back. No human clothing or weapons. Dark grey fur with pink nose and blue-grey crystal chunks. Grumpy and relentless. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_4.png"
+      },
+      "animations": {
+        "walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/walk/unknown/frame_000.png",
+                "animations/walk/unknown/frame_001.png",
+                "animations/walk/unknown/frame_002.png",
+                "animations/walk/unknown/frame_003.png",
+                "animations/walk/unknown/frame_004.png",
+                "animations/walk/unknown/frame_005.png",
+                "animations/walk/unknown/frame_006.png",
+                "animations/walk/unknown/frame_007.png",
+                "animations/walk/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "attack": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/attack/unknown/frame_000.png",
+                "animations/attack/unknown/frame_001.png",
+                "animations/attack/unknown/frame_002.png",
+                "animations/attack/unknown/frame_003.png",
+                "animations/attack/unknown/frame_004.png",
+                "animations/attack/unknown/frame_005.png",
+                "animations/attack/unknown/frame_006.png",
+                "animations/attack/unknown/frame_007.png",
+                "animations/attack/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "0c2988ef-4141-43f4-ad81-c6da03b3cf80",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mine enemy named Ore Mole for Bunny World. A stubby mole with big digging claws, a pink snout and small crystal chunks embedded on its back. No human clothing or weapons. Dark grey fur with pink nose and blue-grey crystal chunks. Grumpy and relentless. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_5.png"
+      },
+      "animations": {
+        "walk": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/walk/unknown/frame_000.png",
+                "animations/walk/unknown/frame_001.png",
+                "animations/walk/unknown/frame_002.png",
+                "animations/walk/unknown/frame_003.png",
+                "animations/walk/unknown/frame_004.png",
+                "animations/walk/unknown/frame_005.png",
+                "animations/walk/unknown/frame_006.png",
+                "animations/walk/unknown/frame_007.png",
+                "animations/walk/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "attack": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/attack/unknown/frame_000.png",
+                "animations/attack/unknown/frame_001.png",
+                "animations/attack/unknown/frame_002.png",
+                "animations/attack/unknown/frame_003.png",
+                "animations/attack/unknown/frame_004.png",
+                "animations/attack/unknown/frame_005.png",
+                "animations/attack/unknown/frame_006.png",
+                "animations/attack/unknown/frame_007.png",
+                "animations/attack/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "c081fab1-0051-4a3d-8c09-516bcfc52729",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mine enemy named Skeleton Worker for Bunny World. A cute hostile undead miner with a compact skeletal body, oversized skull, short bony legs and small angular arms. Wears a battered miner helmet and torn dusty work straps, carrying a tiny worn pickaxe in one hand. Aged ivory bones stained with mine dust, muted charcoal, rusty brown and dull iron accents. Creepy but charming, exhausted-looking yet aggressive, like a dead miner still working the abandoned tunnels. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, gore, elaborate armor, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_6.png"
+      },
+      "animations": {
+        "The_character_shifts_its_weight_forward_with_a_rhy": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_000.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_001.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_002.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_003.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_004.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_005.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_006.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_007.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "58ff0f70-1c92-4680-94ae-dc923fba7dee",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mine enemy named Skeleton Worker for Bunny World. A cute hostile undead miner with a compact skeletal body, oversized skull, short bony legs and small angular arms. Wears a battered miner helmet and torn dusty work straps, carrying a tiny worn pickaxe in one hand. Aged ivory bones stained with mine dust, muted charcoal, rusty brown and dull iron accents. Creepy but charming, exhausted-looking yet aggressive, like a dead miner still working the abandoned tunnels. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, gore, elaborate armor, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_7.png"
+      },
+      "animations": {
+        "The_character_shifts_its_weight_forward_with_a_rhy": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_000.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_001.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_002.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_003.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_004.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_005.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_006.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_007.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "249d2cff-53ec-4326-b16a-09364f594ebe",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mine enemy named Skeleton Worker for Bunny World. A cute hostile undead miner with a compact skeletal body, oversized skull, short bony legs and small angular arms. Wears a battered miner helmet and torn dusty work straps, carrying a tiny worn pickaxe in one hand. Aged ivory bones stained with mine dust, muted charcoal, rusty brown and dull iron accents. Creepy but charming, exhausted-looking yet aggressive, like a dead miner still working the abandoned tunnels. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, gore, elaborate armor, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_8.png"
+      },
+      "animations": {
+        "The_character_shifts_its_weight_forward_with_a_rhy": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_000.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_001.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_002.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_003.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_004.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_005.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_006.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_007.png",
+                "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "b3a4745c-f8b2-4b3a-b3d7-2ed472e3b19b",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mine enemy named Goblin Worker for Bunny World. A cute hostile goblin miner with a compact squat body, oversized pointed ears, short legs and small sturdy arms. Worn simple miner vest, rough belt and a tiny old pickaxe held in one hand. Dusty moss green skin with muted brown leather, dark charcoal and dull iron accents. Scrappy, grumpy and hardworking, like a low-rank goblin forced to defend its mine. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, elaborate armor, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_9.png"
+      },
+      "animations": {
+        "The_goblin_rhythmically_shifts_its_weight_from_foo": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_000.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_001.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_002.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_003.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_004.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_005.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_006.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_007.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "97eccd8d-568f-4c6e-8fd9-a53f5d7b9e4d",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mine enemy named Goblin Worker for Bunny World. A cute hostile goblin miner with a compact squat body, oversized pointed ears, short legs and small sturdy arms. Worn simple miner vest, rough belt and a tiny old pickaxe held in one hand. Dusty moss green skin with muted brown leather, dark charcoal and dull iron accents. Scrappy, grumpy and hardworking, like a low-rank goblin forced to defend its mine. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, elaborate armor, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_10.png"
+      },
+      "animations": {
+        "The_goblin_rhythmically_shifts_its_weight_from_foo": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_000.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_001.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_002.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_003.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_004.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_005.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_006.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_007.png",
+                "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "055cfa23-a8dc-463f-918c-12659775c205",
+      "name": "base",
+      "prompt": "ORIGINAL tiny mine enemy named Goblin Worker for Bunny World. A cute hostile goblin miner with a compact squat body, oversized pointed ears, short legs and small sturdy arms. Worn simple miner vest, rough belt and a tiny old pickaxe held in one hand. Dusty moss green skin with muted brown leather, dark charcoal and dull iron accents. Scrappy, grumpy and hardworking, like a low-rank goblin forced to defend its mine. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, elaborate armor, antialiasing, painting or 3D.",
+      "size": {
+        "width": 24,
+        "height": 24
+      },
+      "directions": 1,
+      "view": "low top-down",
+      "rotations": {
+        "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_11.png"
+      },
+      "animations": {
+        "The_creature_slowly_stirs_from_a_deep_slumber_its": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_000.png",
+                "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_001.png",
+                "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_002.png",
+                "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_003.png",
+                "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_004.png",
+                "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_005.png",
+                "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_006.png",
+                "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_007.png",
+                "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        },
+        "The_goblin_executes_a_forceful_downward_smash_wit": {
+          "directions": {
+            "unknown": {
+              "frames": [
+                "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_000.png",
+                "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_001.png",
+                "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_002.png",
+                "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_003.png",
+                "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_004.png",
+                "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_005.png",
+                "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_006.png",
+                "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_007.png",
+                "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_008.png"
+              ],
+              "frame_count": 9
+            }
+          }
+        }
+      }
+    }
+  ],
+  "groups": [
+    {
+      "group_id": "50264171-95b9-410b-9f70-2de716fa10c1",
+      "folder": "objects/ORIGINAL_tiny_mine_enemy_named",
+      "objects": [
+        {
+          "id": "e3694746-ba50-49c2-b338-12903531790f",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mine enemy named Ore Mole for Bunny World. A stubby mole with big digging claws, a pink snout and small crystal chunks embedded on its back. No human clothing or weapons. Dark grey fur with pink nose and blue-grey crystal chunks. Grumpy and relentless. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named.png"
+          },
+          "animations": {
+            "walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/walk/unknown/frame_000.png",
+                    "animations/walk/unknown/frame_001.png",
+                    "animations/walk/unknown/frame_002.png",
+                    "animations/walk/unknown/frame_003.png",
+                    "animations/walk/unknown/frame_004.png",
+                    "animations/walk/unknown/frame_005.png",
+                    "animations/walk/unknown/frame_006.png",
+                    "animations/walk/unknown/frame_007.png",
+                    "animations/walk/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "attack": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/attack/unknown/frame_000.png",
+                    "animations/attack/unknown/frame_001.png",
+                    "animations/attack/unknown/frame_002.png",
+                    "animations/attack/unknown/frame_003.png",
+                    "animations/attack/unknown/frame_004.png",
+                    "animations/attack/unknown/frame_005.png",
+                    "animations/attack/unknown/frame_006.png",
+                    "animations/attack/unknown/frame_007.png",
+                    "animations/attack/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "0f90623f-c114-451b-b250-93ac93e3ecec",
+      "folder": "objects/ORIGINAL_tiny_mine_enemy_named_2",
+      "objects": [
+        {
+          "id": "cc61fd41-5626-4f44-8f26-c82368bd2e9a",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mine enemy named Ore Mole for Bunny World. A stubby mole with big digging claws, a pink snout and small crystal chunks embedded on its back. No human clothing or weapons. Dark grey fur with pink nose and blue-grey crystal chunks. Grumpy and relentless. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_2.png"
+          },
+          "animations": {
+            "walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/walk/unknown/frame_000.png",
+                    "animations/walk/unknown/frame_001.png",
+                    "animations/walk/unknown/frame_002.png",
+                    "animations/walk/unknown/frame_003.png",
+                    "animations/walk/unknown/frame_004.png",
+                    "animations/walk/unknown/frame_005.png",
+                    "animations/walk/unknown/frame_006.png",
+                    "animations/walk/unknown/frame_007.png",
+                    "animations/walk/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "attack": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/attack/unknown/frame_000.png",
+                    "animations/attack/unknown/frame_001.png",
+                    "animations/attack/unknown/frame_002.png",
+                    "animations/attack/unknown/frame_003.png",
+                    "animations/attack/unknown/frame_004.png",
+                    "animations/attack/unknown/frame_005.png",
+                    "animations/attack/unknown/frame_006.png",
+                    "animations/attack/unknown/frame_007.png",
+                    "animations/attack/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "21692460-ee35-47ab-842d-59ba38d94bb1",
+      "folder": "objects/ORIGINAL_tiny_mine_enemy_named_3",
+      "objects": [
+        {
+          "id": "786424d3-a089-4760-83f1-9730f07e5824",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mine enemy named Ore Mole for Bunny World. A stubby mole with big digging claws, a pink snout and small crystal chunks embedded on its back. No human clothing or weapons. Dark grey fur with pink nose and blue-grey crystal chunks. Grumpy and relentless. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_3.png"
+          },
+          "animations": {
+            "attack": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/attack/unknown/frame_000.png",
+                    "animations/attack/unknown/frame_001.png",
+                    "animations/attack/unknown/frame_002.png",
+                    "animations/attack/unknown/frame_003.png",
+                    "animations/attack/unknown/frame_004.png",
+                    "animations/attack/unknown/frame_005.png",
+                    "animations/attack/unknown/frame_006.png",
+                    "animations/attack/unknown/frame_007.png",
+                    "animations/attack/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/walk/unknown/frame_000.png",
+                    "animations/walk/unknown/frame_001.png",
+                    "animations/walk/unknown/frame_002.png",
+                    "animations/walk/unknown/frame_003.png",
+                    "animations/walk/unknown/frame_004.png",
+                    "animations/walk/unknown/frame_005.png",
+                    "animations/walk/unknown/frame_006.png",
+                    "animations/walk/unknown/frame_007.png",
+                    "animations/walk/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "9e6f457c-21df-4c64-adae-bcf05ca1b9e7",
+      "folder": "objects/ORIGINAL_tiny_mine_enemy_named_4",
+      "objects": [
+        {
+          "id": "2c9a97d4-b8ca-4c5c-86d1-1df00a02e5ae",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mine enemy named Ore Mole for Bunny World. A stubby mole with big digging claws, a pink snout and small crystal chunks embedded on its back. No human clothing or weapons. Dark grey fur with pink nose and blue-grey crystal chunks. Grumpy and relentless. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_4.png"
+          },
+          "animations": {
+            "walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/walk/unknown/frame_000.png",
+                    "animations/walk/unknown/frame_001.png",
+                    "animations/walk/unknown/frame_002.png",
+                    "animations/walk/unknown/frame_003.png",
+                    "animations/walk/unknown/frame_004.png",
+                    "animations/walk/unknown/frame_005.png",
+                    "animations/walk/unknown/frame_006.png",
+                    "animations/walk/unknown/frame_007.png",
+                    "animations/walk/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "attack": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/attack/unknown/frame_000.png",
+                    "animations/attack/unknown/frame_001.png",
+                    "animations/attack/unknown/frame_002.png",
+                    "animations/attack/unknown/frame_003.png",
+                    "animations/attack/unknown/frame_004.png",
+                    "animations/attack/unknown/frame_005.png",
+                    "animations/attack/unknown/frame_006.png",
+                    "animations/attack/unknown/frame_007.png",
+                    "animations/attack/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "3b00461a-9079-4b27-806c-11790bb91465",
+      "folder": "objects/ORIGINAL_tiny_mine_enemy_named_5",
+      "objects": [
+        {
+          "id": "0c2988ef-4141-43f4-ad81-c6da03b3cf80",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mine enemy named Ore Mole for Bunny World. A stubby mole with big digging claws, a pink snout and small crystal chunks embedded on its back. No human clothing or weapons. Dark grey fur with pink nose and blue-grey crystal chunks. Grumpy and relentless. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_5.png"
+          },
+          "animations": {
+            "walk": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/walk/unknown/frame_000.png",
+                    "animations/walk/unknown/frame_001.png",
+                    "animations/walk/unknown/frame_002.png",
+                    "animations/walk/unknown/frame_003.png",
+                    "animations/walk/unknown/frame_004.png",
+                    "animations/walk/unknown/frame_005.png",
+                    "animations/walk/unknown/frame_006.png",
+                    "animations/walk/unknown/frame_007.png",
+                    "animations/walk/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "attack": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/attack/unknown/frame_000.png",
+                    "animations/attack/unknown/frame_001.png",
+                    "animations/attack/unknown/frame_002.png",
+                    "animations/attack/unknown/frame_003.png",
+                    "animations/attack/unknown/frame_004.png",
+                    "animations/attack/unknown/frame_005.png",
+                    "animations/attack/unknown/frame_006.png",
+                    "animations/attack/unknown/frame_007.png",
+                    "animations/attack/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "ab1a6630-0281-44ee-959a-a00ab9ce2b8f",
+      "folder": "objects/ORIGINAL_tiny_mine_enemy_named_6",
+      "objects": [
+        {
+          "id": "c081fab1-0051-4a3d-8c09-516bcfc52729",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mine enemy named Skeleton Worker for Bunny World. A cute hostile undead miner with a compact skeletal body, oversized skull, short bony legs and small angular arms. Wears a battered miner helmet and torn dusty work straps, carrying a tiny worn pickaxe in one hand. Aged ivory bones stained with mine dust, muted charcoal, rusty brown and dull iron accents. Creepy but charming, exhausted-looking yet aggressive, like a dead miner still working the abandoned tunnels. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, gore, elaborate armor, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_6.png"
+          },
+          "animations": {
+            "The_character_shifts_its_weight_forward_with_a_rhy": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_000.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_001.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_002.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_003.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_004.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_005.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_006.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_007.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "9a3cbd1f-3a63-481a-9dc3-c5c3749e43af",
+      "folder": "objects/ORIGINAL_tiny_mine_enemy_named_7",
+      "objects": [
+        {
+          "id": "58ff0f70-1c92-4680-94ae-dc923fba7dee",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mine enemy named Skeleton Worker for Bunny World. A cute hostile undead miner with a compact skeletal body, oversized skull, short bony legs and small angular arms. Wears a battered miner helmet and torn dusty work straps, carrying a tiny worn pickaxe in one hand. Aged ivory bones stained with mine dust, muted charcoal, rusty brown and dull iron accents. Creepy but charming, exhausted-looking yet aggressive, like a dead miner still working the abandoned tunnels. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, gore, elaborate armor, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_7.png"
+          },
+          "animations": {
+            "The_character_shifts_its_weight_forward_with_a_rhy": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_000.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_001.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_002.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_003.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_004.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_005.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_006.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_007.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "c01913cd-0278-43b2-92f4-cd82c2e10200",
+      "folder": "objects/ORIGINAL_tiny_mine_enemy_named_8",
+      "objects": [
+        {
+          "id": "249d2cff-53ec-4326-b16a-09364f594ebe",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mine enemy named Skeleton Worker for Bunny World. A cute hostile undead miner with a compact skeletal body, oversized skull, short bony legs and small angular arms. Wears a battered miner helmet and torn dusty work straps, carrying a tiny worn pickaxe in one hand. Aged ivory bones stained with mine dust, muted charcoal, rusty brown and dull iron accents. Creepy but charming, exhausted-looking yet aggressive, like a dead miner still working the abandoned tunnels. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, gore, elaborate armor, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_8.png"
+          },
+          "animations": {
+            "The_character_shifts_its_weight_forward_with_a_rhy": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_000.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_001.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_002.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_003.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_004.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_005.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_006.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_007.png",
+                    "animations/The_character_shifts_its_weight_forward_with_a_rhy/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "87ac32f0-ea23-4ed3-b137-e6ea71a1ae41",
+      "folder": "objects/ORIGINAL_tiny_mine_enemy_named_9",
+      "objects": [
+        {
+          "id": "b3a4745c-f8b2-4b3a-b3d7-2ed472e3b19b",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mine enemy named Goblin Worker for Bunny World. A cute hostile goblin miner with a compact squat body, oversized pointed ears, short legs and small sturdy arms. Worn simple miner vest, rough belt and a tiny old pickaxe held in one hand. Dusty moss green skin with muted brown leather, dark charcoal and dull iron accents. Scrappy, grumpy and hardworking, like a low-rank goblin forced to defend its mine. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, elaborate armor, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_9.png"
+          },
+          "animations": {
+            "The_goblin_rhythmically_shifts_its_weight_from_foo": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_000.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_001.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_002.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_003.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_004.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_005.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_006.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_007.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "d195f738-b268-4ea3-9592-929dd27045a9",
+      "folder": "objects/ORIGINAL_tiny_mine_enemy_named_10",
+      "objects": [
+        {
+          "id": "97eccd8d-568f-4c6e-8fd9-a53f5d7b9e4d",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mine enemy named Goblin Worker for Bunny World. A cute hostile goblin miner with a compact squat body, oversized pointed ears, short legs and small sturdy arms. Worn simple miner vest, rough belt and a tiny old pickaxe held in one hand. Dusty moss green skin with muted brown leather, dark charcoal and dull iron accents. Scrappy, grumpy and hardworking, like a low-rank goblin forced to defend its mine. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, elaborate armor, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_10.png"
+          },
+          "animations": {
+            "The_goblin_rhythmically_shifts_its_weight_from_foo": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_000.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_001.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_002.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_003.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_004.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_005.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_006.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_007.png",
+                    "animations/The_goblin_rhythmically_shifts_its_weight_from_foo/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "group_id": "50bae8ca-8a29-4bb6-8dcf-d3988e19abd0",
+      "folder": "objects/ORIGINAL_tiny_mine_enemy_named_11",
+      "objects": [
+        {
+          "id": "055cfa23-a8dc-463f-918c-12659775c205",
+          "name": "base",
+          "prompt": "ORIGINAL tiny mine enemy named Goblin Worker for Bunny World. A cute hostile goblin miner with a compact squat body, oversized pointed ears, short legs and small sturdy arms. Worn simple miner vest, rough belt and a tiny old pickaxe held in one hand. Dusty moss green skin with muted brown leather, dark charcoal and dull iron accents. Scrappy, grumpy and hardworking, like a low-rank goblin forced to defend its mine. Match established Bunny World monsters for tiny gameplay scale, compact proportions, sparse crisp pixel clusters and readable silhouette. 24x24 pixel art, low top-down isometric-friendly view, side-facing right, walk-ready pose. Transparent background. No ground, shadow, scenery, text, glow, elaborate armor, antialiasing, painting or 3D.",
+          "size": {
+            "width": 24,
+            "height": 24
+          },
+          "directions": 1,
+          "view": "low top-down",
+          "rotations": {
+            "unknown": "rotations/ORIGINAL_tiny_mine_enemy_named_11.png"
+          },
+          "animations": {
+            "The_creature_slowly_stirs_from_a_deep_slumber_its": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_000.png",
+                    "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_001.png",
+                    "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_002.png",
+                    "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_003.png",
+                    "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_004.png",
+                    "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_005.png",
+                    "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_006.png",
+                    "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_007.png",
+                    "animations/The_creature_slowly_stirs_from_a_deep_slumber_its/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            },
+            "The_goblin_executes_a_forceful_downward_smash_wit": {
+              "directions": {
+                "unknown": {
+                  "frames": [
+                    "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_000.png",
+                    "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_001.png",
+                    "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_002.png",
+                    "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_003.png",
+                    "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_004.png",
+                    "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_005.png",
+                    "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_006.png",
+                    "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_007.png",
+                    "animations/The_goblin_executes_a_forceful_downward_smash_wit/unknown/frame_008.png"
+                  ],
+                  "frame_count": 9
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "export_version": "1.1",
+  "export_date": "2026-09-24T16:12:51.467083"
+}

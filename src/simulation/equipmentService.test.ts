@@ -19,8 +19,8 @@ describe('equipment lifecycle service',()=>{
  });
  it('consumes the correct Aetherstone target bracket',()=>{
   let s=funded();const c=applyEquipmentCommand(s,{type:'craft',recipe},()=>0);s=applyEquipmentCommand(c.state,{type:'equip',equipmentId:c.createdEquipmentId!}).state;
-  s={...s,equipment:{...s.equipment,enhancementBySlot:{...s.equipment.enhancementBySlot,main:39}}};const v=s.inventory.verdantAetherstone;s=applyEquipmentCommand(s,{type:'enhance',slot:'main'}).state;expect(s.inventory.verdantAetherstone).toBe(v-1);
-  s={...s,equipment:{...s.equipment,enhancementBySlot:{...s.equipment.enhancementBySlot,main:40}}};const a=s.inventory.azureAetherstone;s=applyEquipmentCommand(s,{type:'enhance',slot:'main'}).state;expect(s.inventory.azureAetherstone).toBe(a-1);
+  s={...s,equipment:{...s.equipment,enhancementBySlot:{...s.equipment.enhancementBySlot,main:19}}};const v=s.inventory.verdantAetherstone;s=applyEquipmentCommand(s,{type:'enhance',slot:'main'}).state;expect(s.inventory.verdantAetherstone).toBe(v-1);
+  s={...s,equipment:{...s.equipment,enhancementBySlot:{...s.equipment.enhancementBySlot,main:20}}};const a=s.inventory.azureAetherstone;s=applyEquipmentCommand(s,{type:'enhance',slot:'main'}).state;expect(s.inventory.azureAetherstone).toBe(a-1);
   s={...s,equipment:{...s.equipment,enhancementBySlot:{...s.equipment.enhancementBySlot,main:80}}};const violet=s.inventory.violetAetherstone;s=applyEquipmentCommand(s,{type:'enhance',slot:'main'}).state;expect(s.inventory.violetAetherstone).toBe(violet-1);
  });
  it('refinement failure respects safe floors and protection',()=>{

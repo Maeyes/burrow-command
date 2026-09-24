@@ -248,8 +248,8 @@ export function placeStructures() {
   if (SC.wall) placeWalls(SC.wall);
   for (const p of SC.portals || []) {
     const z = H(p.x, p.y);
-    WS.objects.push({ kind: 'portal', x: p.x, y: p.y, z, col: p.col, box: { x0: p.x - 40, x1: p.x + 40, y0: p.y - 40, y1: p.y + 40 }, flat: true });
-    WS.lights.push({ x: p.x, y: p.y, z: z + 6, r: 120, col: p.col, a: .7, flick: true });
+    WS.objects.push({ kind: 'portal', x: p.x, y: p.y, z, col: p.col, label: p.label, box: { x0: p.x - 40, x1: p.x + 40, y0: p.y - 40, y1: p.y + 40 }, flat: true });
+    WS.lights.push({ x: p.x, y: p.y, z: z + 6, r: 170, col: p.col, a: .9, flick: true });
   }
   // bridges: walkable deck + railings (railings are fence runs at deck height)
   for (const b of SC.bridges || []) {

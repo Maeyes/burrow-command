@@ -1,3 +1,4 @@
+import { mapTitleV2 } from '../../../src/simulation/mapNames.ts';
 // Scenes painted in the map editor (editor.html). A map file is plain data:
 // {
 //   version: 2, name, biome, roster, n: 160, cell: 16,  // roster: '' (auto) | forest | desert | mine
@@ -194,7 +195,7 @@ export function sceneFromMap(data, opts = {}) {
   const sourceText=JSON.stringify(data);let sourceHash=2166136261;
   for(let i=0;i<sourceText.length;i++){sourceHash^=sourceText.charCodeAt(i);sourceHash=Math.imul(sourceHash,16777619);}
   const scene = {
-    id: 'custom', title: (data.name || 'CUSTOM MAP').toUpperCase(), biome: data.biome || 'forest', roster: data.roster || undefined,
+    id: 'custom', title: (data.title || mapTitleV2(data.name || '') || 'CUSTOM MAP').toUpperCase(), biome: data.biome || 'forest', roster: data.roster || undefined,
     cacheKey:`map:${data.name||'custom'}:${(sourceHash>>>0).toString(16)}`,
     renderScale: opts.renderScale ?? data.renderScale ?? 1.45,
     terrain: {

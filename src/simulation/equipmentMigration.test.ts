@@ -12,3 +12,16 @@ describe('slot-bound equipment migration',()=>{
   expect(normalizeCharacterStateV2(legacy).equipment.refinementBySlot.main).toBe(12);
  });
 });
+
+describe('map id migration',()=>{
+ it('moves v1 starter-forest saves to forest1 and forestii to forest2',()=>{
+  const base=createInitialCharacterV2('c');const {mapIdVersion:_v,...legacy}=base;
+  expect(normalizeCharacterStateV2({...legacy,currentMapId:'forest2',unlockedMaps:['forest2','forestii']}).currentMapId).toBe('forest1');
+  expect(normalizeCharacterStateV2({...legacy,currentMapId:'forestii'}).currentMapId).toBe('forest2');
+  expect(normalizeCharacterStateV2({...legacy,currentMapId:'forest2',unlockedMaps:['forest2','forestii']}).unlockedMaps).toEqual(['forest1','forest2']);
+ });
+ it('leaves v2 saves alone and is idempotent',()=>{
+  const once=normalizeCharacterStateV2({...createInitialCharacterV2('c'),currentMapId:'forest2'});
+  expect(once.currentMapId).toBe('forest2');expect(normalizeCharacterStateV2(once).currentMapId).toBe('forest2');
+ });
+});

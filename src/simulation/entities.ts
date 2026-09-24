@@ -23,6 +23,8 @@ export interface PlayerEntity extends BaseEntity {
   healingMultiplier?: number;
   skillCostMultiplier?: number;
   weaponFamily: CombatWeaponFamily;
+  /** Weapon-skill proc state (see WEAPON_PROC_RULES_V2 in engine.ts). */
+  weaponProc?: { hits: number; gauge: number; readyAtMs: Record<string, number> };
   weaponAtk: number;
   weaponMatk: number;
   /** Authoritative offhand weapon contribution, kept separate so dual-wield strikes do not double-count it in the main-hand hit. */
@@ -37,6 +39,16 @@ export interface PlayerEntity extends BaseEntity {
   equipmentAspd: number;
   castSpeed?: number;
   critDamageMultiplier?: number;
+  /** Gear hooks from refine milestones and sets (equipmentCombat.ts). All default to 1 / 0. */
+  weaponSkillDamageMultiplier?: number;
+  coreSkillDamageMultiplier?: number;
+  coreCooldownMultiplier?: number;
+  damageTakenMultiplier?: number;
+  /** Applies while HP is below 30%. */
+  lastStandDamageTakenMultiplier?: number;
+  /** Applies to targets below 30% HP. */
+  executeDamageMultiplier?: number;
+  weaponProcChanceBonus?: number;
   elementDamageMultiplier?: number;
   attackRange: number;
   moveSpeed: number;

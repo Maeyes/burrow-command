@@ -20,16 +20,16 @@ describe('canonical item/craft master v2',()=>{
 
 describe('global blueprint progression',()=>{
  it('maps the locked level brackets',()=>{
-  expect(blueprintForLevel(1)).toBe('tier1Blueprint');expect(blueprintForLevel(25)).toBe('tier1Blueprint');
-  expect(blueprintForLevel(26)).toBe('tier2Blueprint');expect(blueprintForLevel(45)).toBe('tier2Blueprint');
-  expect(blueprintForLevel(46)).toBe('tier3Blueprint');expect(blueprintForLevel(65)).toBe('tier3Blueprint');
-  expect(blueprintForLevel(66)).toBe('tier4Blueprint');expect(blueprintForLevel(85)).toBe('tier4Blueprint');
-  expect(blueprintForLevel(86)).toBe('tier5Blueprint');
+  expect(blueprintForLevel(1)).toBe('tier1Blueprint');expect(blueprintForLevel(20)).toBe('tier1Blueprint');
+  expect(blueprintForLevel(21)).toBe('tier2Blueprint');expect(blueprintForLevel(40)).toBe('tier2Blueprint');
+  expect(blueprintForLevel(41)).toBe('tier3Blueprint');expect(blueprintForLevel(50)).toBe('tier3Blueprint');
+  expect(blueprintForLevel(51)).toBe('tier4Blueprint');expect(blueprintForLevel(70)).toBe('tier4Blueprint');
+  expect(blueprintForLevel(71)).toBe('tier5Blueprint');
  });
  it('gives every monster its level-tier blueprint and keeps Forest 2 compensation explicit',()=>{
-  expect(GLOBAL_BLUEPRINT_DROP_CHANCE).toBe(.02);
+  expect(GLOBAL_BLUEPRINT_DROP_CHANCE).toBe(.04);
   for(const monster of Object.values(MONSTERS_V2)){
-   const expectedChance=monster.mapId==='forest2'?(monster.rank==='boss'?.05:monster.rank==='elite'?.04:.03):.02;
+   const expectedChance=monster.mapId==='forest2'?(monster.rank==='boss'?.10:monster.rank==='elite'?.08:.06):.04;
    expect(monster.loot.blueprint).toEqual({itemId:blueprintForLevel(monster.level),chance:expectedChance});
   }
  });

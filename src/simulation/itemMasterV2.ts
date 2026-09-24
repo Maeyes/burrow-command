@@ -35,26 +35,27 @@ export interface SetDefinitionV2 {
 }
 
 export const TIER_LEVEL_RANGES = {
-  1:[1,25], 2:[26,45], 3:[46,65], 4:[66,85], 5:[86,Number.POSITIVE_INFINITY],
+  // One tier per biome: forest, desert, mine, magma, then the unreleased T5.
+  1:[1,20], 2:[21,40], 3:[41,50], 4:[51,70], 5:[71,Number.POSITIVE_INFINITY],
 } as const;
 
 export function equipmentTierForLevel(level:number):EquipmentTier {
-  if(level<=25)return 1;if(level<=45)return 2;if(level<=65)return 3;if(level<=85)return 4;return 5;
+  if(level<=20)return 1;if(level<=40)return 2;if(level<=50)return 3;if(level<=70)return 4;return 5;
 }
 export function blueprintForLevel(level:number){return `tier${equipmentTierForLevel(level)}Blueprint`;}
-export const GLOBAL_BLUEPRINT_DROP_CHANCE=.02;
+export const GLOBAL_BLUEPRINT_DROP_CHANCE=.04;
 
-const tierLevel:Record<EquipmentTier,number>={1:1,2:26,3:46,4:66,5:86};
+const tierLevel:Record<EquipmentTier,number>={1:1,2:21,3:41,4:51,5:71};
 const tierPower:Record<EquipmentTier,number>={1:18,2:35,3:60,4:95,5:140};
 const weaponRatio:Record<WeaponFamilyV2,[number,number]>={
   greatsword:[1,.3],dagger:[.8,.2],axe:[1.2,.15],hammer:[1.3,.1],bow:[.95,.2],staff:[.2,1.25],swordShield:[.8,.35],
 };
-const tierOre:Record<EquipmentTier,string>={1:'copperOre',2:'moonstoneShard',3:'silverOre',4:'mithrilOre',5:'futureT5Ore'};
+const tierOre:Record<EquipmentTier,string>={1:'copperOre',2:'moonstoneShard',3:'mithrilOre',4:'obsidianOre',5:'futureT5Ore'};
 const tierMats:Record<EquipmentTier,[string,string]>={
   1:['livingMoss','brutalSpore'],
   2:['duneRunnerClaw','cactusSpine'],
-  3:['djinnEssence','sunscarabCarapace'],
-  4:['goblinIronScrap','cursedBone'],
+  3:['goblinIronScrap','cursedBone'],
+  4:['drakeScale','magmaCore'],
   5:['futureT5MaterialA','futureT5MaterialB'],
 };
 const baseRecipe:Record<EquipmentTier,[number,number,number,number]>={
@@ -129,18 +130,20 @@ export const CRAFT_RECIPES_V2=Object.freeze(Object.fromEntries(templates.map(x=>
 export const CRAFTABLE_EQUIPMENT_COUNT=templates.length;
 
 export const SET_DEFINITIONS_V2:SetDefinitionV2[]=[
- ...([2,3,4,5] as const).flatMap(tier=>(['damage','tank','support'] as const).flatMap(role=>[
-  {id:`t${tier}-${role}-body`,tier,role,group:'body' as const,requiredPieces:3 as const,effect:
-   role==='damage'?[tier===2?'ATK/MATK +5%':tier===3?'ATK/MATK +7%':tier===4?'ATK/MATK +9%; execute damage mechanic (balance pending)':'ATK/MATK +10%; Predator Focus mechanic (balance pending)']:
-   role==='tank'?[tier===2?'HP +8%; DEF/MDEF +5%':tier===3?'HP +10%; DEF/MDEF +7%':tier===4?'HP +12%; DEF/MDEF +8%; Last Stand (balance pending)':'HP +15%; DEF/MDEF +10%; Undying Will (balance pending)']:
-   [tier===2?'Max SP +10%; SP Recovery +10%':tier===3?'Max SP +12%; SP Recovery +15%':tier===4?'Max SP +15%; SP Recovery +20%; SP Cost -10%':'Max SP +20%; SP Recovery +25%; SP Cost -10%; Overflow (balance pending)'],
-   balanceLocked:false},
-  {id:`t${tier}-${role}-accessory`,tier,role,group:'accessory' as const,requiredPieces:2 as const,effect:
-   role==='damage'?[tier===2?'CRIT +5':tier===3?'CRIT +7; CRIT DMG +10%':tier===4?'CRIT +10; CRIT DMG +15%':'CRIT +12; CRIT DMG +20%']:
-   role==='tank'?[tier===2?'HP +5%':tier===3?'HP +7%; FLEE +5':tier===4?'HP +8%; DEF/MDEF +5%':'HP +10%; DEF/MDEF +6%']:
-   [tier===2?'Max SP +8%':tier===3?'Max SP +10%; SP Recovery +10%':tier===4?'Max SP +10%; SP Recovery +15%; Healing +10%':'Healing +15%; Buff Duration +15%; SP Recovery +15%'],
-   balanceLocked:false},
- ]))
+ ...([2,3,4,5] as const).flatMap(tier=>(['damage','tank','support'] as const).flatMap(role=>{
+  const pick=<T,>(v:Record<2|3|4|5,T>)=>v[tier];
+  const body=role==='damage'?[`ATK/MATK +${pick({2:5,3:7,4:9,5:10})}%`,...(tier>=4?[`Damage +${pick({2:0,3:0,4:15,5:20})}% to targets below 30% HP`]:[])]:
+   role==='tank'?[`HP +${pick({2:8,3:10,4:12,5:15})}%`,`DEF/MDEF +${pick({2:5,3:7,4:8,5:10})}%`,...(tier>=4?[`Damage taken -${pick({2:0,3:0,4:20,5:25})}% while below 30% HP`]:[])]:
+   [`Skill Core cooldown -${pick({2:6,3:8,4:10,5:12})}%`,`Skill Core damage +${pick({2:5,3:7,4:9,5:10})}%`];
+  const acc=role==='damage'?[`CRIT +${pick({2:5,3:7,4:10,5:12})}`,...(tier>=3?[`CRIT DMG +${pick({2:0,3:10,4:15,5:20})}%`]:[])]:
+   role==='tank'?[`HP +${pick({2:5,3:7,4:8,5:10})}%`,...(tier===3?['FLEE +5']:[]),...(tier>=4?[`DEF/MDEF +${pick({2:0,3:0,4:5,5:6})}%`]:[])]:
+   [`Weapon skill damage +${pick({2:8,3:10,4:12,5:15})}%`,...(tier>=4?[`Healing +${pick({2:0,3:0,4:10,5:15})}%`]:[])];
+  // Numbers here must match equipmentCombatTotals (equipmentCombat.ts).
+  return[
+   {id:`t${tier}-${role}-body`,tier,role,group:'body' as const,requiredPieces:3 as const,effect:body,balanceLocked:true},
+   {id:`t${tier}-${role}-accessory`,tier,role,group:'accessory' as const,requiredPieces:2 as const,effect:acc,balanceLocked:true},
+  ];
+ }))
 ];
 
 if(CRAFTABLE_EQUIPMENT_COUNT!==109) throw new Error(`equipment-master-count:${CRAFTABLE_EQUIPMENT_COUNT}`);

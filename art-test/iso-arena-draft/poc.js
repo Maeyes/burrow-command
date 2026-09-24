@@ -1,3 +1,4 @@
+import { MAP_NAMES_V2 } from '../../src/simulation/mapNames.ts';
 import { FOREST_ASSET_ROOT, FOREST_MONSTERS, FOREST_BOSSES, FOREST_MAPS } from './forestRoster.js';
 import { ArenaV2Adapter } from '../../src/simulation/arenaAdapter.ts';
 import { createInitialCharacterV2, expToNextLevelV2 } from '../../src/simulation/character.ts';
@@ -74,7 +75,7 @@ const useForestEngine = biome === 'forest1';
 let forestEngineReady = false;
 let forestEngineSpawn = null;
 const MAP_PROGRESSION=['town','forest1','forest2','desert1','desert2','mine'];
-const MAP_NAMES={town:'BUNNY HAVEN',forest1:'WHISPERING FOREST I',forest2:'WHISPERING FOREST II',desert1:'SUNSCORCH DESERT I',desert2:'SUNSCORCH DESERT II',mine:'GOBLIN MINE',worldboss80:'HALL OF THE FALLEN CROWN'};
+const MAP_NAMES={town:'BUNNY HAVEN',...Object.fromEntries(Object.entries(MAP_NAMES_V2).map(([id,m])=>[id,m.title.toUpperCase()])),worldboss80:'HALL OF THE FALLEN CROWN'};
 const mapIndex=MAP_PROGRESSION.indexOf(biome);
 const warpPortals=biome==='worldboss80'?[{direction:'back',target:'town',x:WORLD.minX+190,y:WORLD.minY+190,radius:76,triggered:false}]:[
   ...(mapIndex>0?[{direction:'back',target:MAP_PROGRESSION[mapIndex-1],x:WORLD.minX+190,y:WORLD.minY+190,radius:76,triggered:false}]:[]),
@@ -696,7 +697,7 @@ function renderCraftWindow(){
 }
 
 
-const MAP_LABELS={forest1:'Whispering Forest I',forest2:'Whispering Forest II',desert1:'Sunscorch Desert I',desert2:'Sunscorch Desert II',mine:'Goblin Mine'};
+const MAP_LABELS=Object.fromEntries(Object.keys(MAP_NAMES_V2).map(id=>[id,MAP_NAMES_V2[id].title]));
 const monsterIndexUi={map:'forest1',selected:'mossblob1'};
 function dropRowsForMonster(m){
  const l=m.loot,rows=[

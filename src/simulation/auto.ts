@@ -6,9 +6,10 @@ export type ControlMode='manual'|'semiAuto'|'fullAuto';
 export interface AutoContext {mode:ControlMode;sequence:number;activeSkillIds?:readonly string[];weaponSkillIds?:readonly string[];movementSkillId?:string;hpFraction?:number;nowMs?:number;recovering?:boolean;skillPriority?:readonly string[];allowedMonsterIds?:ReadonlySet<string>;maxTargetLevel?:number}
 export function nearestTarget(player:PlayerEntity,monsters:Iterable<MonsterEntity>):MonsterEntity|undefined{let best:MonsterEntity|undefined,d=Infinity;for(const m of monsters){if(!m.alive)continue;const x=distance(player.position,m.position);if(x<d){best=m;d=x}}return best}
 function ready(player:PlayerEntity,id:string,nowMs:number){return (player.cooldowns[id]??0)<=nowMs}
-function candidateIds(ctx:AutoContext){const owned=[...(ctx.activeSkillIds??[]),...(ctx.weaponSkillIds??[])];if(!ctx.skillPriority?.length)return owned;const rank=new Map(ctx.skillPriority.map((id,i)=>[id,i]));return [...owned].sort((a,b)=>(rank.get(a)??999)-(rank.get(b)??999))}
+function candidateIds(ctx:AutoContext){// Weapon skills fire from basic attacks (engine weaponSkillProcs), so auto only casts core actives.
+ const owned=[...(ctx.activeSkillIds??[])];if(!ctx.skillPriority?.length)return owned;const rank=new Map(ctx.skillPriority.map((id,i)=>[id,i]));return [...owned].sort((a,b)=>(rank.get(a)??999)-(rank.get(b)??999))}
 function eligibleAutoSkill(player:PlayerEntity,target:MonsterEntity,monsters:readonly MonsterEntity[],ctx:AutoContext){
- for(const id of candidateIds(ctx)){const skill=SKILLS_V2[id];if(!skill||(skill.kind!=='active'&&skill.kind!=='weapon')||!skill.auto?.canAutoUse)continue;
+ for(const id of candidateIds(ctx)){const skill=SKILLS_V2[id];if(!skill||skill.kind!=='active'||!skill.auto?.canAutoUse)continue;
   if(skill.compatibleWeaponFamilies&&!skill.compatibleWeaponFamilies.includes(player.weaponFamily))continue;
   if(!ready(player,id,ctx.nowMs??0))continue;
   if(id==='healingPulse'&&(ctx.hpFraction??1)>.6)continue;

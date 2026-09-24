@@ -3,40 +3,27 @@
 
 export const MINE_BOSS_ROOT = '../ORIGINAL_underground_mine_BOSS/ORIGINAL_underground_mine_BOSS';
 
+export const MINE_ASSET_ROOT = '/art-test/monster-generation/pixellab-mine-roster-2026-09-24/objects';
+const p = (n, anim, attack, extra = {}) => ({ dir: `ORIGINAL_tiny_mine_enemy_named${n > 1 ? '_' + n : ''}`, anim, attack, count: 9, ...extra });
+const MOLE = ['walk', 'attack'];
+const SKEL = ['The_character_shifts_its_weight_forward_with_a_rhy', null];
+const GOB = ['The_goblin_rhythmically_shifts_its_weight_from_foo', null];
+
+// PixelLab mine roster (2026-09-24). Replaces the Sunnyside Goblin/Skeleton sheets.
+// Skeleton/Goblin workers have walk only; attack clips still to be generated.
 export const MINE_MONSTERS = {
-  mineGoblin: {
-    name: 'Mine Goblin',
-    family: 'goblin',
-    tier: 'normal',
-    role: 'worker-melee',
-    sheet: 'goblin',
-    ambient: ['mining', 'dig', 'carry'],
-  },
-  goblinAxer: {
-    name: 'Goblin Axer',
-    family: 'goblin',
-    tier: 'normal',
-    role: 'aggressive-melee',
-    sheet: 'goblin',
-    presentation: 'axe',
-    note: 'Role variant of the same Goblin asset; not a separate species.',
-  },
-  skeleton: {
-    name: 'Skeleton',
-    family: 'skeleton',
-    tier: 'normal',
-    role: 'undead-melee',
-    sheet: 'skeleton',
-  },
-  goblinForeman: {
-    name: 'Goblin Foreman',
-    family: 'goblin',
-    tier: 'elite',
-    role: 'elite-placeholder',
-    sheet: 'goblin',
-    ambient: ['hammering'],
-    note: 'Encounter role only until a distinct visual variant exists.',
-  },
+  emeraldMole: { ...p(1, ...MOLE), name: 'Emerald Mole', family: 'mole', tier: 'normal' },
+  oreMole: { ...p(2, ...MOLE), name: 'Ore Mole', family: 'mole', tier: 'normal' },
+  ironMole: { ...p(3, ...MOLE), name: 'Iron Mole', family: 'mole', tier: 'normal' },
+  sapphireMole: { ...p(4, ...MOLE), name: 'Sapphire Mole', family: 'mole', tier: 'normal' },
+  rubyMole: { ...p(5, ...MOLE), name: 'Ruby Mole', family: 'mole', tier: 'elite', elite: true },
+  skeletonWorker: { ...p(6, ...SKEL), name: 'Skeleton Worker', family: 'skeleton', tier: 'normal' },
+  skeletonMiner: { ...p(7, ...SKEL), name: 'Skeleton Miner', family: 'skeleton', tier: 'elite', elite: true },
+  skeletonDigger: { ...p(8, ...SKEL), name: 'Skeleton Digger', family: 'skeleton', tier: 'normal' },
+  goblinWorker: { ...p(9, ...GOB), name: 'Goblin Worker', family: 'goblin', tier: 'normal' },
+  goblinDigger: { ...p(10, ...GOB), name: 'Goblin Digger', family: 'goblin', tier: 'normal' },
+  // #11 has no walk clip yet: the wake-up loop stands in for movement.
+  goblinForeman: { ...p(11, 'The_creature_slowly_stirs_from_a_deep_slumber_its', 'The_goblin_executes_a_forceful_downward_smash_wit'), name: 'Goblin Foreman', family: 'goblin', tier: 'elite', elite: true },
 };
 
 export const MINE_BOSSES = {
@@ -58,35 +45,14 @@ export const MINE_BOSSES = {
 
 export const MINE_MAP = {
   id: 'undergroundMine',
-  title: 'Underground Mine',
+  title: 'Gloomvein Mine',
   progression: [
-    {
-      id: 'working-mine',
-      label: 'Goblin Mine',
-      roster: ['mineGoblin', 'goblinAxer'],
-      purpose: 'Establish the mine as an active goblin-controlled work area.',
-    },
-    {
-      id: 'contested-depths',
-      label: 'Goblin / Skeleton Overlap',
-      roster: ['mineGoblin', 'goblinAxer', 'skeleton'],
-      purpose: 'Introduce undead presence without replacing the goblin identity.',
-    },
-    {
-      id: 'abandoned-deep-mine',
-      label: 'Abandoned Deep Mine',
-      roster: ['skeleton', 'goblinForeman'],
-      purpose: 'Shift the dungeon toward danger and prepare the boss transition.',
-    },
-    {
-      id: 'leader-chamber',
-      label: 'Goblin Leader Chamber',
-      roster: [],
-      boss: 'goblinLeader',
-      purpose: 'Dedicated final chamber; boss is not mixed into random spawns.',
-    },
+    { id: 'working-mine', label: 'Goblin Mine', roster: ['goblinWorker', 'goblinDigger', 'oreMole', 'emeraldMole'] },
+    { id: 'contested-depths', label: 'Goblin / Skeleton Overlap', roster: ['goblinDigger', 'skeletonWorker', 'ironMole', 'sapphireMole'] },
+    { id: 'abandoned-deep-mine', label: 'Abandoned Deep Mine', roster: ['skeletonDigger', 'skeletonMiner', 'rubyMole', 'goblinForeman'] },
+    { id: 'leader-chamber', label: 'Goblin Leader Chamber', roster: [], boss: 'goblinLeader' },
   ],
-  pool: ['mineGoblin', 'goblinAxer', 'skeleton', 'goblinForeman'],
+  pool: Object.keys(MINE_MONSTERS),
   bossType: 'goblinLeader',
   boss: 'Goblin Leader',
 };

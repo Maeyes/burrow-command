@@ -2,14 +2,14 @@
 // Source data stays in iso-arena-draft roster modules; this file only normalizes it for the new renderer.
 import { FOREST_ASSET_ROOT, FOREST_MONSTERS, FOREST_BOSSES, FOREST_MAPS } from '../../iso-arena-draft/forestRoster.js';
 import { DESERT_ASSET_ROOT, DESERT_MONSTERS, DESERT_BOSSES, DESERT_MAPS } from '../../iso-arena-draft/desertRoster.js';
-import { MINE_BOSS_ROOT, MINE_MONSTERS, MINE_BOSSES, MINE_MAP } from '../../iso-arena-draft/mineRoster.js';
-
-const SUNNYSIDE_ROOT = '/Sunnyside_World_Assets';
+import { MAGMA_ASSET_ROOT, MAGMA_MONSTERS, MAGMA_BOSSES, MAGMA_MAPS } from '../../iso-arena-draft/magmaRoster.js';
+import { MINE_ASSET_ROOT, MINE_BOSS_ROOT, MINE_MONSTERS, MINE_BOSSES, MINE_MAP } from '../../iso-arena-draft/mineRoster.js';
 
 const SOURCES = {
   forest: { id: 'forest', assetRoot: FOREST_ASSET_ROOT, monsters: FOREST_MONSTERS, bosses: FOREST_BOSSES, maps: FOREST_MAPS },
   desert: { id: 'desert', assetRoot: DESERT_ASSET_ROOT, monsters: DESERT_MONSTERS, bosses: DESERT_BOSSES, maps: DESERT_MAPS },
-  mine: { id: 'mine', monsters: MINE_MONSTERS, bosses: MINE_BOSSES, map: MINE_MAP, bossRoot: MINE_BOSS_ROOT },
+  magma: { id: 'magma', assetRoot: MAGMA_ASSET_ROOT, monsters: MAGMA_MONSTERS, bosses: MAGMA_BOSSES, maps: MAGMA_MAPS },
+  mine: { id: 'mine', assetRoot: MINE_ASSET_ROOT, monsters: MINE_MONSTERS, bosses: MINE_BOSSES, map: MINE_MAP, bossRoot: MINE_BOSS_ROOT },
 };
 
 export const ROSTER_IDS = Object.freeze(Object.keys(SOURCES));
@@ -73,31 +73,17 @@ export function monsterPresentation(roster, monsterType) {
   const asset = normal || boss;
   if (!asset) return null;
 
-  if (roster.id === 'mine') {
-    if (boss) {
-      const animation = boss.animations?.leader;
-      if (!animation) return null;
-      return {
-        id: monsterType,
-        name: roster.displayName(monsterType),
-        elite: false,
-        isBoss: true,
-        kind: 'sequence',
-        count: boss.frameCount || 1,
-        frameSrc: i => `${source.bossRoot}/animations/${animation}/unknown/frame_${String(i).padStart(3, '0')}.png`,
-      };
-    }
-    const skeleton = asset.sheet === 'skeleton';
+  if (roster.id === 'mine' && boss) {
+    const animation = boss.animations?.leader;
+    if (!animation) return null;
     return {
       id: monsterType,
       name: roster.displayName(monsterType),
-      elite: asset.tier === 'elite',
-      isBoss: false,
-      kind: 'sheet',
-      count: 8,
-      sheetSrc: skeleton
-        ? `${SUNNYSIDE_ROOT}/Characters/Skeleton/PNG/skeleton_walk_strip8.png`
-        : `${SUNNYSIDE_ROOT}/Characters/Goblin/PNG/spr_walk_strip8.png`,
+      elite: false,
+      isBoss: true,
+      kind: 'sequence',
+      count: boss.frameCount || 1,
+      frameSrc: i => `${source.bossRoot}/animations/${animation}/unknown/frame_${String(i).padStart(3, '0')}.png`,
     };
   }
 
@@ -108,6 +94,10 @@ export function monsterPresentation(roster, monsterType) {
     isBoss: !!boss,
     kind: 'sequence',
     count: asset.count || 1,
+    scale: asset.scale || 1,
     frameSrc: i => `${source.assetRoot}/${asset.dir}/animations/${asset.anim}/unknown/frame_${String(i).padStart(3, '0')}.png`,
+    // Optional attack clip; monsters without one fall back to the code tackle in game.js.
+    attackCount: asset.attack ? (asset.attackCount || asset.count || 1) : 0,
+    attackSrc: asset.attack ? i => `${source.assetRoot}/${asset.dir}/animations/${asset.attack}/unknown/frame_${String(i).padStart(3, '0')}.png` : null,
   };
 }

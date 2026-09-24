@@ -50,25 +50,26 @@ export const MINE_PROPS = [
 ];
 
 export const MINE_ZONES = [
-  {id:'working-mine',label:'GOBLIN MINE',x:-395,y:-215,rx:220,ry:135,roster:['mineGoblin','goblinAxer']},
-  {id:'contested-depths',label:'CONTESTED DEPTHS',x:235,y:-115,rx:230,ry:145,roster:['mineGoblin','goblinAxer','skeleton']},
-  {id:'abandoned-deep-mine',label:'ABANDONED DEEP MINE',x:-230,y:380,rx:235,ry:145,roster:['skeleton','goblinForeman']},
+  {id:'working-mine',label:'GOBLIN MINE',x:-395,y:-215,rx:220,ry:135,roster:['goblinWorker','goblinDigger','oreMole','emeraldMole']},
+  {id:'contested-depths',label:'CONTESTED DEPTHS',x:235,y:-115,rx:230,ry:145,roster:['goblinDigger','skeletonWorker','ironMole','sapphireMole']},
+  {id:'abandoned-deep-mine',label:'ABANDONED DEEP MINE',x:-230,y:380,rx:235,ry:145,roster:['skeletonDigger','skeletonMiner','rubyMole','goblinForeman']},
   {id:'leader-chamber',label:'GOBLIN LEADER CHAMBER',x:465,y:405,rx:220,ry:140,roster:[],boss:'goblinLeader'},
 ];
 
 export const MINE_SPAWNS = [
-  {zone:'working-mine',monster:'mineGoblin',x:-500,y:-240,ambient:'mining'},
-  {zone:'working-mine',monster:'mineGoblin',x:-380,y:-145,ambient:'dig'},
-  {zone:'working-mine',monster:'goblinAxer',x:-285,y:-285},
-  {zone:'working-mine',monster:'mineGoblin',x:-455,y:-345,ambient:'carry'},
+  {zone:'working-mine',monster:'goblinWorker',x:-500,y:-240,ambient:'mining'},
+  {zone:'working-mine',monster:'oreMole',x:-380,y:-145,ambient:'dig'},
+  {zone:'working-mine',monster:'goblinDigger',x:-285,y:-285},
+  {zone:'working-mine',monster:'emeraldMole',x:-455,y:-345,ambient:'carry'},
 
-  {zone:'contested-depths',monster:'mineGoblin',x:105,y:-145,ambient:'mining'},
-  {zone:'contested-depths',monster:'goblinAxer',x:245,y:-225},
-  {zone:'contested-depths',monster:'skeleton',x:350,y:-95},
-  {zone:'contested-depths',monster:'skeleton',x:195,y:25},
+  {zone:'contested-depths',monster:'skeletonWorker',x:105,y:-145,ambient:'mining'},
+  {zone:'contested-depths',monster:'goblinDigger',x:245,y:-225},
+  {zone:'contested-depths',monster:'ironMole',x:350,y:-95},
+  {zone:'contested-depths',monster:'sapphireMole',x:195,y:25},
 
-  {zone:'abandoned-deep-mine',monster:'skeleton',x:-365,y:330},
-  {zone:'abandoned-deep-mine',monster:'skeleton',x:-175,y:455},
+  {zone:'abandoned-deep-mine',monster:'skeletonDigger',x:-365,y:330},
+  {zone:'abandoned-deep-mine',monster:'rubyMole',x:-175,y:455},
+  {zone:'abandoned-deep-mine',monster:'skeletonMiner',x:-290,y:520},
   {zone:'abandoned-deep-mine',monster:'goblinForeman',x:-65,y:330,ambient:'hammering'},
 
   {zone:'leader-chamber',monster:'goblinLeader',x:475,y:415,boss:true},

@@ -9,21 +9,23 @@ export interface SkillEntitlementsV2 {
   modifiersByActive: Readonly<Record<string,readonly string[]>>;
 }
 
+/** Unlocked at Weapon Mastery Lv10 / 20 / 30; they fire from basic attacks (engine weaponSkillProcs). */
+export const WEAPON_SKILLS_BY_FAMILY_V2: Readonly<Record<CombatWeaponFamily, readonly string[]>> = {
+  greatsword: ['bowlingBash', 'crescentBreak', 'vanguardTempest'],
+  dagger: ['crossSlash', 'shadowFlurry', 'phantomBlades'],
+  axe: ['cleavingStrike', 'executionersSweep', 'ravagerArc'],
+  hammer: ['crushingImpact', 'earthbreaker', 'cataclysm'],
+  bow: ['powerShot', 'piercingVolley', 'skyfallBarrage'],
+  staff: ['arcBolt', 'arcCascade', 'astralVolley'],
+  swordShield: ['radiantBurst', 'gravityPulse', 'astralDominion'],
+};
+
 export function skillEntitlementsForCharacter(state: CharacterStateV2, weaponFamily: CombatWeaponFamily): SkillEntitlementsV2 {
   // Weapon Mastery grants the family's three active weapon skills at Lv10/20/30.
   // Passive/mechanical mastery milestones remain separate bonuses and continue through Lv50.
   const masteryLevel = state.weaponMastery[weaponFamily]?.level ?? 1;
-  const skillsByFamily: Record<CombatWeaponFamily, readonly string[]> = {
-    greatsword: ['bowlingBash', 'crescentBreak', 'vanguardTempest'],
-    dagger: ['crossSlash', 'shadowFlurry', 'phantomBlades'],
-    axe: ['cleavingStrike', 'executionersSweep', 'ravagerArc'],
-    hammer: ['crushingImpact', 'earthbreaker', 'cataclysm'],
-    bow: ['powerShot', 'piercingVolley', 'skyfallBarrage'],
-    staff: ['arcBolt', 'arcCascade', 'astralVolley'],
-    swordShield: ['radiantBurst', 'gravityPulse', 'astralDominion'],
-  };
   const unlockedCount = masteryLevel >= 30 ? 3 : masteryLevel >= 20 ? 2 : masteryLevel >= 10 ? 1 : 0;
-  const weaponSkills = skillsByFamily[weaponFamily].slice(0, unlockedCount);
+  const weaponSkills = WEAPON_SKILLS_BY_FAMILY_V2[weaponFamily].slice(0, unlockedCount);
   return {
     active: state.skills.active.filter((id): id is string => Boolean(id)),
     movement: state.skills.movement,

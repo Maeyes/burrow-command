@@ -1,4 +1,6 @@
 import { magicalAttack, maxHp, meleeStatusAtk, rangedStatusAtk, type CombatWeaponFamily } from '../systems/combatMath';
+import { monsterBaseExpV2 } from './rewards';
+import { WEAPON_TRAINING_MAPS } from './mastery';
 import { normalizeCharacterStateV2 } from './equipmentMigration';
 import type { CharacterStateV2 } from './character';
 import { skillEntitlementsForCharacter } from './skillEntitlements';
@@ -50,6 +52,8 @@ export interface ArenaV2AdapterOptions {
   character?:CharacterStateV2;
   random?:RandomFn;
   safeZoneContains?:(position:Vec2)=>boolean;
+  /** Areas monsters may never walk into or respawn in (e.g. warp safe zones). */
+  monsterForbiddenContains?:(position:Vec2)=>boolean;
   /** Optional authored navigation constraint (for image-mask maps). Simulation movement may not leave this space. */
   walkableContains?:(position:Vec2)=>boolean;
   onReward?:(reward:PlayerRewardV2,character:CharacterStateV2,defeated?:Readonly<ArenaMonsterView>)=>void;
@@ -60,6 +64,12 @@ export interface ArenaV2AdapterOptions {
  * Presentation may sync positions inward. Combat HP, damage, rewards, Gold,
  * inventory and mastery never sync inward from presentation.
  */
+const BASE_MOVE_SPEED=180,BASE_DODGE_COOLDOWN_MS=1200;
+function gearHooks(gear:ReturnType<typeof equipmentCombatTotals>){
+  return{weaponSkillDamageMultiplier:gear.weaponSkillDamageMultiplier,coreSkillDamageMultiplier:gear.coreSkillDamageMultiplier,coreCooldownMultiplier:gear.coreCooldownMultiplier,
+    damageTakenMultiplier:gear.damageTakenMultiplier,lastStandDamageTakenMultiplier:gear.lastStandDamageTakenMultiplier,executeDamageMultiplier:gear.executeDamageMultiplier,weaponProcChanceBonus:gear.weaponProcChanceBonus};
+}
+
 export class ArenaV2Adapter {
   readonly playerId='arena-player';
   readonly simulation:BunnySimulation;
@@ -151,10 +161,10 @@ export class ArenaV2Adapter {
     const beforePlayer={...player.position};
     const beforeMonsters=new Map([...this.simulation.world.monsters].map(([id,m])=>[id,{...m.position}]));
     const events=[...this.simulation.step(deltaMs)];
-    if(this.options.walkableContains){
-      if(!this.options.walkableContains(player.position))player.position=beforePlayer;
+    if(this.options.walkableContains&&!this.options.walkableContains(player.position))player.position=beforePlayer;
+    if(this.options.walkableContains||this.options.monsterForbiddenContains){
       for(const [id,monster] of this.simulation.world.monsters){
-        if(this.options.walkableContains(monster.position))continue;
+        if((this.options.walkableContains?.(monster.position)??true)&&!this.options.monsterForbiddenContains?.(monster.position))continue;
         const previous=beforeMonsters.get(id);if(previous)monster.position=previous;
         // Force a fresh roam decision rather than repeatedly pushing into the same wall.
         monster.roamTarget=undefined;monster.nextRoamAtMs=this.simulation.clock.nowMs+250;
@@ -189,6 +199,7 @@ export class ArenaV2Adapter {
     for(let i=0;i<24;i++){
       const a=rnd()*Math.PI*2,r=120+rnd()*260,p={x:home.x+Math.cos(a)*r,y:home.y+Math.sin(a)*r};
       if(this.options.walkableContains&&!this.options.walkableContains(p))continue;
+      if(this.options.monsterForbiddenContains?.(p))continue;
       if(hero&&Math.hypot(p.x-hero.x,p.y-hero.y)<320)continue;
       return p;
     }
@@ -230,7 +241,7 @@ export class ArenaV2Adapter {
         if(!view||!def||!ledger)continue;
         const rewardGear=equipmentCombatTotals(this.characterState);
         const [reward]=resolveDefeatRewards(ledger,{[this.playerId]:this.characterState},{
-          enemyLevel:def.level,rank:def.rank,baseExp:this.baseExp(def),weaponByPlayer:{[this.playerId]:this.weaponFamily},loot:def.loot,trainingMap:this.options.zoneId==='forest2',
+          enemyLevel:def.level,rank:def.rank,baseExp:this.baseExp(def),weaponByPlayer:{[this.playerId]:this.weaponFamily},loot:def.loot,trainingMap:WEAPON_TRAINING_MAPS.has(this.options.zoneId),
           expMultiplierByPlayer:{[this.playerId]:rewardGear.expMultiplier},dropMultiplierByPlayer:{[this.playerId]:rewardGear.dropMultiplier},eventMultipliers:this.gmEventMultipliers,
         },this.options.random,{[this.playerId]:this.pityState});
         if(!reward)continue;
@@ -242,8 +253,7 @@ export class ArenaV2Adapter {
   }
 
   private baseExp(def:MonsterDefinitionV2):number{
-    const rankMultiplier=def.rank==='boss'?5:def.rank==='elite'?2:1;
-    return Math.max(1,Math.floor(def.level*4*rankMultiplier));
+    return monsterBaseExpV2(def);
   }
 
   private definitionFor(view:ArenaMonsterView):MonsterDefinitionV2|undefined{return view.monsterType?MONSTERS_V2[view.monsterType]:undefined;}
@@ -269,7 +279,7 @@ export class ArenaV2Adapter {
     const vitDefense=Math.floor(player.stats.vit/2);
     player.equipmentDef=Math.max(0,Math.round((35+gear.equipmentDef+vitDefense)*gear.defMultiplier-vitDefense));
     player.equipmentMdef=Math.max(0,Math.round((25+gear.equipmentMdef)*gear.mdefMultiplier));
-    player.hitBonus=gear.hitBonus;player.fleeBonus=gear.fleeBonus;
+    player.hitBonus=gear.hitBonus;player.fleeBonus=gear.fleeBonus;Object.assign(player,gearHooks(gear));player.critDamageMultiplier=gear.critDamageMultiplier;player.moveSpeed=BASE_MOVE_SPEED*gear.moveSpeedMultiplier;player.dodgeCooldownMs=BASE_DODGE_COOLDOWN_MS*gear.dodgeCooldownMultiplier;
     player.critBonusPercent=gear.critBonusPercent;player.equipmentAspd=3+gear.equipmentAspd;
     player.maxHp=Math.max(1,Math.round(maxHp(player.stats,gear.equipmentMaxHp)*gear.maxHpMultiplier));
     const spFraction=(player.maxSp??1)>0?(player.sp??player.maxSp??1)/(player.maxSp??1):1;
@@ -320,7 +330,7 @@ export class ArenaV2Adapter {
     const resolvedMaxSp=Math.max(1,Math.round((40+stats.level*4+stats.int*3+gear.masterMaxSp)*gear.maxSpMultiplier));
     return{id:this.playerId,kind:'player',position:{x:view.x,y:view.y},hp:view.hp??resolvedMaxHp,maxHp:view.maxHp??resolvedMaxHp,alive:true,sp:view.sp??resolvedMaxSp,maxSp:view.maxSp??resolvedMaxSp,spRecoveryMultiplier:gear.spRecoveryMultiplier,healingMultiplier:gear.healingMultiplier,skillCostMultiplier:gear.skillCostMultiplier,
       stats,weaponFamily:family,weaponAtk,weaponMatk,offhandWeaponAtk,offhandWeaponMatk,hasOffhandWeaponEquipped:offhand.equipped,equipmentDef,equipmentMdef,hitBonus:gear.hitBonus,fleeBonus:gear.fleeBonus,
-      critBonusPercent:gear.critBonusPercent,equipmentAspd:gear.equipmentAspd,castSpeed:gear.castSpeed,critDamageMultiplier:gear.critDamageMultiplier,elementDamageMultiplier:gear.elementDamageMultiplier,attackRange:family==='bow'?420:58,moveSpeed:180,dodgeDistance:90,dodgeCooldownMs:1200,nextDodgeAtMs:0,
+      critBonusPercent:gear.critBonusPercent,equipmentAspd:gear.equipmentAspd,castSpeed:gear.castSpeed,critDamageMultiplier:gear.critDamageMultiplier,elementDamageMultiplier:gear.elementDamageMultiplier,attackRange:family==='bow'?420:58,moveSpeed:BASE_MOVE_SPEED*gear.moveSpeedMultiplier,dodgeDistance:90,dodgeCooldownMs:BASE_DODGE_COOLDOWN_MS*gear.dodgeCooldownMultiplier,...gearHooks(gear),nextDodgeAtMs:0,
       lastClientSequence:0,nextBasicAttackAtMs:0,cooldowns:{},skillEntitlements:skillEntitlementsForCharacter(this.characterState,family),skillCoreDamageMultipliers:Object.fromEntries([...this.characterState.skills.active,this.characterState.skills.movement].filter(Boolean).map(id=>[id,skillCoreDamageMultiplier(this.characterState,id!)])),
       masteryLevels:Object.fromEntries(Object.entries(this.characterState.weaponMastery).map(([k,v])=>[k,v.level])),hasShieldEquipped:this.hasShieldEquipped()};
   }

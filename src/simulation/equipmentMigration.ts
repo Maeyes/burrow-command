@@ -7,7 +7,11 @@ type LegacyEquipmentInstance = EquipmentInstanceStateV2 & {refine?:number;enhanc
  * Legacy item-bound refinement is migrated only from the item currently equipped in a slot.
  * Once normalized, item progression fields are stripped so they cannot remain authoritative.
  */
+// Map ids v1 named the starter forest "forest2" and the second forest "forestii".
+// v2 renamed them to forest1/forest2 to match the monster data.
+function legacyMapIdFor(version:number|undefined){return(id:string)=>version===2?id:id==='forest2'?'forest1':id==='forestii'?'forest2':id;}
 export function normalizeCharacterStateV2(state:CharacterStateV2):CharacterStateV2{
+ const legacyMapId=legacyMapIdFor(state.mapIdVersion);
  const equipment=state.equipment as CharacterStateV2['equipment'] & {refinementBySlot?:Record<string,number>};
  const legacyMastery=state.weaponMastery as unknown as Record<string,{level:number;xp:number}>;
  const weaponMastery={...legacyMastery} as Record<string,{level:number;xp:number}>;
@@ -28,8 +32,9 @@ export function normalizeCharacterStateV2(state:CharacterStateV2):CharacterState
  }
  return{
   ...state,
-  unlockedMaps:Array.isArray(state.unlockedMaps)?state.unlockedMaps:['forest2'],
-  currentMapId:state.currentMapId||'forest2',
+  unlockedMaps:(Array.isArray(state.unlockedMaps)?state.unlockedMaps:['forest1']).map(legacyMapId),
+  currentMapId:legacyMapId(state.currentMapId||'forest1'),
+  mapIdVersion:2,
   weaponMastery:weaponMastery as CharacterStateV2['weaponMastery'],
   equipment:{
    ...equipment,

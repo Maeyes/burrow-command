@@ -16,7 +16,7 @@ export function progressionCategory(slot:string,offhandType?:'weapon'|'shield'):
  if(slot==='offhand')return offhandType==='shield'?'defensive':'offensive';
  return'utility';
 }
-export function enhancementStoneForLevel(nextLevel:number):'verdantAetherstone'|'azureAetherstone'|'violetAetherstone'{if(nextLevel<=40)return'verdantAetherstone';if(nextLevel<=80)return'azureAetherstone';return'violetAetherstone'}
+export function enhancementStoneForLevel(nextLevel:number):'verdantAetherstone'|'azureAetherstone'|'violetAetherstone'{if(nextLevel<=20)return'verdantAetherstone';if(nextLevel<=80)return'azureAetherstone';return'violetAetherstone'}
 export function enhancementRequirement(_baseGold:number,nextLevel:number){if(nextLevel<1||nextLevel>120)throw new Error('invalid-enhancement-level');return{stoneId:enhancementStoneForLevel(nextLevel),stoneQty:1,gold:Math.max(100,Math.round((100*Math.pow(1.06,nextLevel-1))/10)*10)}}
 
 export const REFINE_SUCCESS=[1,.95,.90,.85,.75,.65,.55,.45,.35,.25,.20,.15,.10,.07,.05] as const;

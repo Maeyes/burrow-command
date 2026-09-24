@@ -15,6 +15,10 @@ const STEP_UP = 12; // max height change the player can walk over (stairs are ~7
 const actors=[];
 let actorUpdater=null;
 export function setRuntimeActors(next=[]){actors.length=0;actors.push(...next);}
+let clickHandler=null,safeZones=[];
+/** Safe-zone rings drawn on the ground: [{x,y,r}] in world units. */
+export function setRuntimeSafeZones(z=[]){safeZones=Array.isArray(z)?z:[];}
+export function setRuntimeClickHandler(fn=null){clickHandler=typeof fn==='function'?fn:null;}
 export function setRuntimeActorUpdater(fn=null){actorUpdater=typeof fn==='function'?fn:null;}
 export function getTerrainRuntime(){return WS.terrain;}
 export function projectRuntimePoint(x,y,z=0){const p=toScreen(x,y,z);return viewZoom===1?{x:p[0],y:p[1]}:{x:W/2+(p[0]-W/2)*viewZoom,y:H/2+(p[1]-H/2)*viewZoom};}
@@ -346,18 +350,26 @@ function drawObject(o, psx, psy, afterPlayer) {
   } else if (o.kind === 'portal') {
     const [cx, cy] = toScreen(o.x, o.y, o.z);
     if (cx < -80 || cx > W + 80 || cy < -80 || cy > H + 80) return;
-    const [r, g, b] = o.col;
+    const [r, g, b] = o.col, V = K * worldVisualScale;
     const ring = (rad, n, speed, size, alpha) => {
       for (let i = 0; i < n; i++) {
         const a = i / n * Math.PI * 2 + time * speed, wx = Math.cos(a) * rad, wy = Math.sin(a) * rad;
         const k = .55 + .45 * Math.sin(i * 1.7 + time * 4);
-        ctx.fillStyle = `rgba(${r},${g},${b},${alpha * k})`; ctx.fillRect(Math.round(cx + (wx - wy) / 2 * K), Math.round(cy + (wx + wy) / 4 * K), size, size);
+        ctx.fillStyle = `rgba(${r},${g},${b},${alpha * k})`; ctx.fillRect(Math.round(cx + (wx - wy) / 2 * V), Math.round(cy + (wx + wy) / 4 * V), Math.max(size, Math.round(size * V)), Math.max(size, Math.round(size * V)));
       }
     };
-    ring(40, 64, .4, 2, .95); ring(30, 40, -.7, 1, .8); ring(18, 20, 1.2, 1, .7);
+    // ground glow (additive, dithered rows) so the pad reads from far away
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    const pulse = .75 + .25 * Math.sin(time * 3);
+    for (let ry = -11; ry <= 11; ry++) {
+      const hw = Math.round(30 * V * Math.sqrt(1 - (ry / 11.5) ** 2));
+      ctx.fillStyle = `rgba(${r},${g},${b},${(.22 * (1 - Math.abs(ry) / 12)) * pulse})`; ctx.fillRect(cx - hw, Math.round(cy + ry * V * 1.2), hw * 2, Math.ceil(V * 1.2));
+    }
+    ctx.restore();
+    ring(40, 64, .4, 2, .95); ring(30, 40, -.7, 1, .8); ring(18, 20, 1.2, 1, .7); ring(48, 48, -.25, 2, .6);
     for (let i = 0; i < 6; i++) {
       const a = i / 6 * Math.PI * 2 - time * .4, wx = Math.cos(a) * 34, wy = Math.sin(a) * 34;
-      ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(Math.round(cx + (wx - wy) / 2 * K), Math.round(cy + (wx + wy) / 4 * K) - 1, 2, 3);
+      ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fillRect(Math.round(cx + (wx - wy) / 2 * V), Math.round(cy + (wx + wy) / 4 * V) - 1, 2, 3);
     }
   }
   if (o.flagAt) drawFlag(o.flagAt);
@@ -454,6 +466,73 @@ function drawCaustics() {
   ctx.restore();
 }
 
+function drawPortalBeacons() {
+  // Drawn after the depth-sorted objects so trees/rocks never hide where a warp is.
+  for (const o of WS.objects) {
+    if (o.kind !== 'portal') continue;
+    const [cx, cy] = toScreen(o.x, o.y, o.z);
+    if (cx < -120 || cx > W + 120 || cy < -60 || cy > H + 260) continue;
+    const [r, g, b] = o.col, V = K * worldVisualScale, pulse = .75 + .25 * Math.sin(time * 3);
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    // light pillar: stacked rows fading upward, with bright streaks scrolling up
+    const ph = 100 * V, pw = 22 * V;
+    for (let y = 0; y < ph; y += 2) {
+      const f = 1 - y / ph, hw = Math.round(pw / 2 * (.55 + .45 * f));
+      const streak = ((y / K + time * 60) % 26) < 3 ? .35 : 0;
+      ctx.fillStyle = `rgba(${r},${g},${b},${(.3 * f + streak * f) * pulse})`; ctx.fillRect(cx - hw, cy - y, hw * 2, 2); ctx.fillStyle = `rgba(255,255,255,${.28 * f * pulse})`; ctx.fillRect(cx - Math.max(1, Math.round(hw / 4)), cy - y, Math.max(2, Math.round(hw / 2)), 2);
+    }
+    ctx.restore();
+    // bobbing chevron + destination label above the pad
+    const by = Math.round(cy - 104 * V + Math.sin(time * 3.2) * 4 * V);
+    ctx.fillStyle = 'rgba(255,255,255,.95)';
+    for (let i = 0; i < 6; i++) { ctx.fillRect(Math.round(cx - (6 - i) * V), Math.round(by + i * V), Math.ceil(2 * V), Math.ceil(V)); ctx.fillRect(Math.round(cx + (4 - i) * V), Math.round(by + i * V), Math.ceil(2 * V), Math.ceil(V)); }
+    if (o.label) {
+      ctx.font = `bold ${Math.round(11 * V)}px system-ui`; ctx.textAlign = 'center';
+      const tw = ctx.measureText(o.label).width + 12 * V, ty = by - 8 * V;
+      ctx.fillStyle = 'rgba(8,12,20,.78)'; ctx.fillRect(Math.round(cx - tw / 2), ty - 12 * V, Math.round(tw), 16 * V);
+      ctx.fillStyle = `rgb(${r},${g},${b})`; ctx.fillRect(Math.round(cx - tw / 2), Math.round(ty + 3 * V), Math.round(tw), Math.ceil(V));
+      ctx.fillStyle = '#f4f0e0'; ctx.fillText(o.label, cx, ty); ctx.textAlign = 'left';
+    }
+  }
+}
+function drawSafeZones() {
+  // Thick dashed ring that hugs the terrain (each vertex sits at its own ground height), slowly marching.
+  const lw = Math.max(3, Math.round(3 * K * worldVisualScale));
+  ctx.save(); ctx.lineCap = 'butt';
+  for (const zn of safeZones) {
+    const [cx, cy] = toScreen(zn.x, zn.y, 0), sr = zn.r * worldVisualScale;
+    if (cx < -sr - 60 || cx > W + sr + 60 || cy < -sr / 2 - 120 || cy > H + sr / 2 + 120) continue;
+    const n = 72, inside = player && Math.hypot(player.x - zn.x, player.y - zn.y) < zn.r;
+    const pts = [];
+    for (let i = 0; i <= n; i++) {
+      const a = i / n * Math.PI * 2, x = zn.x + Math.cos(a) * zn.r, y = zn.y + Math.sin(a) * zn.r;
+      const z = WS.terrain.walkHeight(x, y); pts.push(z === null ? null : toScreen(x, y, z));
+    }
+    const pass = (col, dy, w) => {
+      ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath();
+      const shift = Math.floor(time * 4) % 3;
+      for (let i = 0; i < n; i++) {
+        if ((i + shift) % 3 === 2 || !pts[i] || !pts[i + 1]) continue;   // gaps = dashes
+        ctx.moveTo(pts[i][0], pts[i][1] + dy); ctx.lineTo(pts[i + 1][0], pts[i + 1][1] + dy);
+      }
+      ctx.stroke();
+    };
+    const pulse = .8 + .2 * Math.sin(time * 3);
+    pass('rgba(12,30,18,.55)', lw * .6, lw);                                           // cool drop shadow
+    pass(`rgba(150,255,175,${(inside ? .95 : .75) * pulse})`, 0, lw);
+    // soft inner band
+    ctx.globalAlpha = inside ? .22 : .14; pass('rgb(150,255,175)', 0, lw * 4); ctx.globalAlpha = 1;
+    // "SAFE ZONE" tag at the ring's front edge
+    const front = pts[Math.round(n / 8)];
+    if (front) {
+      ctx.font = `bold ${Math.round(10 * K * worldVisualScale)}px system-ui`; ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(8,20,12,.7)'; const tw = ctx.measureText('SAFE ZONE').width + 10;
+      ctx.fillRect(Math.round(front[0] - tw / 2), Math.round(front[1] + lw * 2), Math.round(tw), Math.round(14 * K * worldVisualScale));
+      ctx.fillStyle = '#b9ffc8'; ctx.fillText('SAFE ZONE', front[0], front[1] + lw * 2 + 11 * K * worldVisualScale);
+    }
+  }
+  ctx.restore(); ctx.textAlign = 'left';
+}
 function drawParticles() {
   for (const p of particles) {
     if (p.sx !== undefined) {
@@ -543,7 +622,8 @@ function drawMinimap(){
     if(x<x0||x>x0+mw||y<y0||y>y0+mh)continue;
     ctx.fillStyle='#2a0f0c';ctx.fillRect(Math.round(x)-2,Math.round(y)-2,4,4);ctx.fillStyle='#ff6a55';ctx.fillRect(Math.round(x)-1,Math.round(y)-1,2,2);
   }
-  for(const pt of WS.scene.portals||[]){const [x,y]=toMini(pt.x,pt.y);ctx.strokeStyle='#9fe0ff';ctx.lineWidth=1;ctx.strokeRect(Math.round(x)-3,Math.round(y)-2,6,4);}
+  for(const zn of safeZones){const [x,y]=toMini(zn.x,zn.y),[x2]=toMini(zn.x+zn.r,zn.y);ctx.strokeStyle='rgba(140,240,160,.7)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,Math.max(3,Math.abs(x2-x)),0,Math.PI*2);ctx.stroke();}
+  for(const pt of WS.scene.portals||[]){const [x,y]=toMini(pt.x,pt.y),s=3+Math.round((Math.sin(time*4)+1)*1.5);ctx.fillStyle='#bff0ff';ctx.fillRect(Math.round(x)-2,Math.round(y)-2,4,4);ctx.strokeStyle='#9fe0ff';ctx.lineWidth=1;ctx.strokeRect(Math.round(x)-s,Math.round(y)-s,s*2,s*2);}
   // player arrow points where the hero faces (screen directions, same as the sprite)
   const px=x0+mw/2,py=y0+mh/2,ang=(player.dir||0)*Math.PI/4;
   ctx.translate(px,py);ctx.rotate(ang);
@@ -577,6 +657,7 @@ function frame(now) {
       if (Math.sin(time * 3 + i * 1.7) >= .55) ctx.fillRect(Math.round(fx + (wx - wy) / 2 * K), Math.round(fy + (wx + wy) / 4 * K), 2, 1);
     }
   }
+  drawSafeZones();
   const [psx, psy] = toScreen(player.x, player.y, player.zGround);
   ctx.fillStyle = 'rgba(16,20,34,.38)';
   const shadowRx=Math.max(7,Math.round(15*playerVisualScale)),shadowRy=Math.max(2,Math.round(5*playerVisualScale));
@@ -596,6 +677,7 @@ function frame(now) {
   vis.sort(compare);
   let after = false;
   for (const o of vis) { if (o === player) after = true; drawObject(o, psx, psy, after && o !== player); }
+  drawPortalBeacons();
   drawParticles();
   // Lighting/vignette are screen-space overlays. Reset camera zoom first so they always
   // cover the full viewport instead of becoming a visible zoomed rectangle.
@@ -669,7 +751,7 @@ export async function boot(scene, { canvasEl, loadingEl, playerSprites = null, z
   const onKeyDown=e=>{keys.add(e.code);if(e.code==='KeyL')dusk=!dusk;if(e.code==='F3'){debugTraversal=!debugTraversal;e.preventDefault();}if(e.code==='KeyH'){const h=document.getElementById('hud');if(h)h.hidden=!h.hidden;}if(e.code.startsWith('Arrow'))e.preventDefault();};
   const onKeyUp=e=>keys.delete(e.code);
   const onWheel=e=>{const factor=e.deltaY<0?1.1:1/1.1;viewZoom=Math.max(.7,Math.min(1.8,viewZoom*factor));e.preventDefault();};
-  const onPointer=e=>{const r=canvas.getBoundingClientRect(),mx=(e.clientX-r.left)*W/r.width,my=(e.clientY-r.top)*H/r.height,hit=WS.terrain.pick(mx-W/2+cam.x,my-H/2+cam.y);player.target={x:hit.x,y:hit.y};};
+  const onPointer=e=>{const r=canvas.getBoundingClientRect(),mx=(e.clientX-r.left)*W/r.width,my=(e.clientY-r.top)*H/r.height,hit=WS.terrain.pick(mx-W/2+cam.x,my-H/2+cam.y);if(clickHandler){clickHandler(hit,e);return;}player.target={x:hit.x,y:hit.y};};
   window.addEventListener('keydown',onKeyDown);window.addEventListener('keyup',onKeyUp);canvas.addEventListener('wheel',onWheel,{passive:false});canvas.addEventListener('pointerdown',onPointer);
   bootListeners=[[window,'keydown',onKeyDown],[window,'keyup',onKeyUp],[canvas,'wheel',onWheel,{passive:false}],[canvas,'pointerdown',onPointer]];
   window.__slice = { WS, player, cam, actors, setRuntimeActors, setRuntimeActorUpdater, terrain:WS.terrain, projectRuntimePoint, canRuntimeActorStand, bakeMs, setDusk: v => { dusk = v; } };

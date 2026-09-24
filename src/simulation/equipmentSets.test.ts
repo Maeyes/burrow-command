@@ -25,9 +25,9 @@ describe('equipment set effects',()=>{
   setPiece(c,'accessoryLeft','l','t2-tank-accessory');setPiece(c,'accessoryRight','r','t2-tank-accessory');
   x=equipmentCombatTotals(c);expect(x.maxHpMultiplier).toBeCloseTo(1.13);
  });
- it('applies support SP economy from complete sets',()=>{
+ it('applies the support (skill) set to Skill Cores and weapon skills',()=>{
   const c=createInitialCharacterV2('s');setPiece(c,'armor','a','t4-support-body');setPiece(c,'cape','b','t4-support-body');setPiece(c,'shoes','s','t4-support-body');
   setPiece(c,'accessoryLeft','l','t4-support-accessory');setPiece(c,'accessoryRight','r','t4-support-accessory');
-  const x=equipmentCombatTotals(c);expect(x.maxSpMultiplier).toBeCloseTo(1.25);expect(x.spRecoveryMultiplier).toBeCloseTo(1.35);expect(x.healingMultiplier).toBeCloseTo(1.10);expect(x.skillCostMultiplier).toBeCloseTo(.90);
+  const x=equipmentCombatTotals(c);expect(x.coreCooldownMultiplier).toBeCloseTo(.90);expect(x.coreSkillDamageMultiplier).toBeCloseTo(1.09);expect(x.weaponSkillDamageMultiplier).toBeCloseTo(1.12);expect(x.healingMultiplier).toBeCloseTo(1.10);
  });
 });

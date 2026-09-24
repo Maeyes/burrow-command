@@ -11,7 +11,12 @@ export const DESERT_MONSTERS={
   cactling1:{...p('ORIGINAL_tiny_desert_enemy_nam_7','Animate_this_exact_Cactling_Bandit_with_a_seamless'),name:'Cactling Bandit'},
   cactling2:{...p('ORIGINAL_tiny_desert_enemy_nam_8','Animate_this_exact_Cactling_Bandit_with_a_seamless'),name:'Elite Cactling Bandit',elite:true},
   cactling3:{...p('ORIGINAL_tiny_desert_enemy_nam_9','Animate_this_exact_Cactling_Bandit_with_a_seamless'),name:'Bloom Cactling'},
-  duneling1:{...p('ORIGINAL_tiny_desert_enemy_nam_10','Animate_this_exact_Duneling_character_with_a_seaml'),name:'Elite Duneling',elite:true},
+  mirageJackal1:{dir:'mirageJackal1',anim:'walk',attack:'attack',count:9,attackCount:9,name:'Elite Mirage Jackal',elite:true},
+ mirageJackal2:{dir:'mirageJackal2',anim:'walk',attack:'attack',count:9,attackCount:9,name:'Mirage Jackal'},
+ mirageJackal3:{dir:'mirageJackal3',anim:'walk',attack:'attack',count:9,attackCount:9,name:'Dune Jackal'},
+ sandScorpion1:{dir:'sandScorpion1',anim:'walk',attack:'attack',count:9,attackCount:9,name:'Sand Scorpion'},
+ sandScorpion2:{dir:'sandScorpion2',anim:'walk',attack:'attack',count:9,attackCount:9,name:'Elite Sand Scorpion',elite:true},
+ duneling1:{...p('ORIGINAL_tiny_desert_enemy_nam_10','Animate_this_exact_Duneling_character_with_a_seaml'),name:'Elite Duneling',elite:true},
   duneling2:{...p('ORIGINAL_tiny_desert_enemy_nam_11','Animate_this_exact_Duneling_character_with_a_seaml'),name:'Dune Runner'},
   duneling3:{...p('ORIGINAL_tiny_desert_enemy_nam_12','Animate_this_exact_Duneling_character_with_a_seaml'),name:'Duneling'},
 };
@@ -22,6 +27,6 @@ export const DESERT_BOSSES={
 };
 
 export const DESERT_MAPS={
-  desert1:{title:'Duneshade Basin',level:'Lv. 31–45',boss:'Dune Maw',bossType:'dunemaw',pool:['duneling1','duneling2','duneling3','cactling1','cactling2','cactling3']},
-  desert2:{title:'Sunscorch Expanse',level:'Lv. 46–60',boss:'Sunforge Colossus',bossType:'colossus',pool:['dust1','dust2','dust3','scarab1','scarab2','scarab3']},
+  desert1:{title:'Duneshade Basin',level:'Lv. 21–30',boss:'Dune Maw',bossType:'dunemaw',pool:['duneling1','duneling2','duneling3','cactling1','cactling2','cactling3','mirageJackal1','mirageJackal2','mirageJackal3']},
+  desert2:{title:'Sunscorch Expanse',level:'Lv. 31–40',boss:'Sunforge Colossus',bossType:'colossus',pool:['dust1','dust2','dust3','scarab1','scarab2','scarab3','sandScorpion1','sandScorpion2']},
 };

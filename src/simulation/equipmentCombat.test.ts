@@ -20,8 +20,9 @@ describe('slot-bound equipment -> combat stats',()=>{
   const c=createInitialCharacterV2('c');equip(c,'main','weapon');equip(c,'armor','armor');
   c.equipment.refinementBySlot.main=10;c.equipment.refinementBySlot.armor=10;
   const x=equipmentCombatTotals(c);
-  expect(x.atkMultiplier).toBeCloseTo(1.05);expect(x.matkMultiplier).toBeCloseTo(1.05);
-  expect(x.defMultiplier).toBeCloseTo(1.05);expect(x.mdefMultiplier).toBeCloseTo(1.05);expect(x.maxHpMultiplier).toBeCloseTo(1.05);
+  // 10 levels x 0.5% = 5%, plus the +5/+10 refine milestones: main +3% ATK, armor +5% HP and +5% DEF/MDEF.
+  expect(x.atkMultiplier).toBeCloseTo(1.08);expect(x.matkMultiplier).toBeCloseTo(1.08);
+  expect(x.defMultiplier).toBeCloseTo(1.10);expect(x.mdefMultiplier).toBeCloseTo(1.10);expect(x.maxHpMultiplier).toBeCloseTo(1.10);expect(x.critBonusPercent).toBe(3);
  });
  it('classifies weapon offhand offensive and shield offhand defensive',()=>{
   const offensive=createInitialCharacterV2('o');equip(offensive,'offhand','dagger',{offhandType:'weapon'});offensive.equipment.enhancementBySlot.offhand=3;offensive.equipment.refinementBySlot.offhand=4;
@@ -32,7 +33,7 @@ describe('slot-bound equipment -> combat stats',()=>{
  it('keeps main and offhand weapon refinement isolated by hand',()=>{
   const c=createInitialCharacterV2('dual');equip(c,'main','main',{baseCombat:{atk:20}});equip(c,'offhand','off',{offhandType:'weapon',baseCombat:{atk:10}});
   c.equipment.refinementBySlot.main=10;c.equipment.refinementBySlot.offhand=4;
-  const x=equipmentCombatTotals(c);expect(x.atkMultiplier).toBeCloseTo(1.05);expect(x.offhandAtkMultiplier).toBeCloseTo(1.02);
+  const x=equipmentCombatTotals(c);expect(x.atkMultiplier).toBeCloseTo(1.08);expect(x.offhandAtkMultiplier).toBeCloseTo(1.02);
  });
  it('does not invent utility-slot progression bonuses',()=>{
   const c=createInitialCharacterV2('c');equip(c,'hat','hat');c.equipment.enhancementBySlot.hat=120;c.equipment.refinementBySlot.hat=15;
@@ -48,5 +49,20 @@ describe('slot-bound equipment -> combat stats',()=>{
  it('requires six slots for Master Refinement',()=>{
   const c=createInitialCharacterV2('c');for(let i=0;i<5;i++){const slot='master'+i;equip(c,slot,'eq'+i);c.equipment.refinementBySlot[slot]=15;}
   expect(equipmentCombatTotals(c).masterRefinement).toBe(0);
+ });
+});
+
+describe('refine milestones',()=>{
+ it('stack per piece at +5/+10/+15',()=>{
+  const c=createInitialCharacterV2('r');equip(c,'main','weapon');equip(c,'cape','cape');equip(c,'hat','hat');
+  c.equipment.refinementBySlot.main=15;c.equipment.refinementBySlot.cape=15;c.equipment.refinementBySlot.hat=10;
+  const x=equipmentCombatTotals(c);
+  expect(x.critBonusPercent).toBe(3);expect(x.weaponSkillDamageMultiplier).toBeCloseTo(1.15);
+  expect(x.fleeBonus).toBe(5);expect(x.coreCooldownMultiplier).toBeCloseTo(.95);
+  expect(x.expMultiplier).toBeCloseTo(1.02);
+ });
+ it('give nothing below +5',()=>{
+  const c=createInitialCharacterV2('r');equip(c,'shoes','shoes');c.equipment.refinementBySlot.shoes=4;
+  const x=equipmentCombatTotals(c);expect(x.fleeBonus).toBe(0);expect(x.moveSpeedMultiplier).toBe(1);
  });
 });

@@ -1,4 +1,4 @@
-// Whispering Forest I: Bunny World's first leveling field, authored on the shared map engine.
+// Mossveil Hollow: Bunny World's first leveling field, authored on the shared map engine.
 import { T, smooth, inRect } from '../engine/util.js';
 import { SLATE } from '../engine/palettes.js';
 
@@ -22,7 +22,7 @@ export default function forestScene() {
     return d<.18?96:d<.48?64:d<1?32:0;
   };
   return {
-    id: 'forest1', title: 'WHISPERING FOREST I',
+    id: 'forest1', title: 'MOSSVEIL HOLLOW',
     terrain: {
       height:(x,y)=>Math.max(northRidge(x,y)||westRidge(x,y)||waterfallHill(x,y)?48:0,hillTier(x,y)),
       // Overlook access is optional; the main leveling loop stays on the broad low field.

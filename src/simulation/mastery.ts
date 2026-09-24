@@ -5,6 +5,10 @@ export type EnemyRank = 'normal'|'elite'|'boss'|'worldBoss';
 
 export const MASTERY_CAP = 50;
 
+/** Maps that pay full weapon mastery XP regardless of level gap (see masteryLevelMultiplier). */
+export const WEAPON_TRAINING_MAPS: ReadonlySet<string> = new Set(['mine', 'magma1']);
+export const TRAINING_FULL_XP_LEVEL = 60;
+
 export function masteryContribution(rank: EnemyRank): number {
   if (rank === 'elite') return 5;
   if (rank === 'boss') return 20;
@@ -14,10 +18,10 @@ export function masteryContribution(rank: EnemyRank): number {
 
 export function masteryLevelMultiplier(heroLevel:number, enemyLevel:number,trainingMap=false): number {
   if(trainingMap){
-    // Forest II is the weapon-training map: full Weapon Mastery XP through hero Lv50,
-    // then exponential decay so high-level characters naturally graduate from the zone.
-    if(heroLevel<=50)return 1;
-    return Math.exp(-0.08*(heroLevel-50));
+    // Mid-game weapon-training maps (Gloomvein Mine, Cinderpeak Caldera): full Weapon Mastery XP
+    // through hero Lv60, then exponential decay so high-level characters graduate from them.
+    if(heroLevel<=TRAINING_FULL_XP_LEVEL)return 1;
+    return Math.exp(-0.08*(heroLevel-TRAINING_FULL_XP_LEVEL));
   }
   const delta=heroLevel-enemyLevel;
   if (delta<=10) return 1;
@@ -29,8 +33,8 @@ export function masteryLevelMultiplier(heroLevel:number, enemyLevel:number,train
 export function masteryXpRequired(level:number):number {
   const lv=Math.max(1,Math.min(MASTERY_CAP-1,level));
   const base=12 + lv*5 + Math.pow(lv,1.55)*2;
-  // Early mastery should reach the first Lv10 identity milestone sooner; Lv10+ keeps the original curve.
-  return Math.floor(base*(lv<10?0.75:1));
+  // Early mastery should reach the first Lv10 skill quickly (~210 normal kills); Lv10+ keeps the original curve.
+  return Math.floor(base*(lv<10?0.375:1));
 }
 
 export function grantMasteryContribution(state:WeaponMasteryState,family:CombatWeaponFamily,heroLevel:number,enemyLevel:number,rank:EnemyRank,xpMultiplier=1,trainingMap=false):WeaponMasteryState {

@@ -4,26 +4,17 @@
 import { MONSTERS_V2 } from '../../../src/simulation/monsterDataV2.ts';
 import { UNIVERSAL_ORE_CHANCE, UNIVERSAL_ASTRALITE_CHANCE } from '../../../src/simulation/loot.ts';
 import { UTILITY_EQUIPMENT_V2 } from '../../../src/simulation/utilityEquipmentV2.ts';
+import { monsterBaseExpV2 } from '../../../src/simulation/rewards.ts';
 import { equipmentCombatTotals } from '../../../src/simulation/equipmentCombat.ts';
 import { iconHtml } from '../../iso-arena-draft/iconFor.js';
 import { presentationForMonsterId } from './rosters.js';
+import { MAP_ORDER_V2, mapTitleV2 } from '../../../src/simulation/mapNames.ts';
 
-// Display order and names; maps not listed here still appear (after these) under their id.
-const MAP_LABELS = {
-  forest1: 'Whispering Forest I', forest2: 'Whispering Forest II',
-  desert1: 'Sunscorch Desert I', desert2: 'Sunscorch Desert II',
-  mine: 'Goblin Mine',
-  magma1: 'Magma I', magma2: 'Magma II',
-  underwater1: 'Undersea I', underwater2: 'Undersea II',
-  snow1: 'Snowfield I', snow2: 'Snowfield II',
-  asgard1: 'Asgard I', asgard2: 'Asgard II',
-};
-const mapLabel = id => MAP_LABELS[id] || id;
+const mapLabel = mapTitleV2;
 const ui = { map: null, selected: null };
 let previewRaf = 0;
 
-// Must match ArenaV2Adapter.baseExp (src/simulation/arenaAdapter.ts).
-const baseExp = m => Math.max(1, Math.floor(m.level * 4 * (m.rank === 'boss' ? 5 : m.rank === 'elite' ? 2 : 1)));
+const baseExp = monsterBaseExpV2;
 const pct = chance => `${(chance * 100).toFixed(chance < .01 ? 2 : 1).replace(/\.0$/, '')}%`;
 const escapeAttr = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
@@ -75,7 +66,7 @@ export function renderMonsterIndex({ win, title, body, character, currentMapId, 
   title.textContent = 'Monster Index';
   try {
     const all = Object.values(MONSTERS_V2);
-    const known = Object.keys(MAP_LABELS);
+    const known = MAP_ORDER_V2;
     const maps = [...new Set(all.map(m => m.mapId))].sort((a, b) => (known.indexOf(a) + 1 || 99) - (known.indexOf(b) + 1 || 99));
     if (!maps.includes(ui.map)) ui.map = maps.includes(currentMapId) ? currentMapId : maps[0];
     const roster = all.filter(m => m.mapId === ui.map).sort((a, b) => a.level - b.level);

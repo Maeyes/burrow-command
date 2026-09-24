@@ -18,8 +18,8 @@ export interface LootSourceV2 {
 export interface LootResultV2 { gold:number; items:Record<string,number> }
 
 // Craft-economy baseline: ore should not be the progression bottleneck; Astralite remains rarer.
-export const UNIVERSAL_ORE_CHANCE=0.12;
-export const UNIVERSAL_ASTRALITE_CHANCE=0.02;
+export const UNIVERSAL_ORE_CHANCE=0.20;
+export const UNIVERSAL_ASTRALITE_CHANCE=0.03;
 
 function quantity(roll:DropRoll,rng:RandomFn):number {
  const min=roll.min??1,max=roll.max??min;

@@ -18,7 +18,7 @@ const common = { renderScale: 1.45, densNoise: .6, worn: 1 };
 export function forest2() {
   const lake = (x, y) => blob(x, y, 24, 22, 7.2, 4.6, .25, 3);
   return {
-    ...common, id: 'forest2', title: 'WHISPERING FOREST II', biome: 'forest', cliffStyle: 'natural',
+    ...common, id: 'forest2', title: 'ELDERROOT WILDS', biome: 'forest', cliffStyle: 'natural',
     terrain: {
       height: (x, y) => ((x < 8 * T && y < 30 * T) || y < 6 * T ? 48 : 0),
       waterMask: lake, waterDepth: 12,
@@ -38,7 +38,7 @@ export function forest2() {
 export function desert1() {
   const oasis = (x, y) => blob(x, y, 22, 24, 3.4, 2.6, .2, 7);
   return {
-    ...common, id: 'desert1', title: 'SUNSCORCH DUNES', biome: 'desert',
+    ...common, id: 'desert1', title: 'DUNESHADE BASIN', biome: 'desert',
     terrain: {
       height: (x, y) => (blob(x, y, 9, 9, 5.5, 4.5, .3, 1) || blob(x, y, 31, 8, 4.5, 3.8, .3, 2) || y < 3.5 * T || x < 3 * T ? 52 : 0),
       waterMask: oasis,
@@ -58,7 +58,7 @@ export function desert1() {
 // ---------------- Desert II: canyon river with a falls and a rope bridge ----------------
 export function desert2() {
   return {
-    ...common, id: 'desert2', title: 'CANYON OF ECHOES', biome: 'desert',
+    ...common, id: 'desert2', title: 'SUNSCORCH EXPANSE', biome: 'desert',
     terrain: {
       height: (x, y) => (y < 14 * T + (vnoise(x * .01, 4) - .5) * 60 || x < 11 * T ? 60 : 0),
       rivers: [{ pts: [[30 * T, -8 * T], [29 * T, 8 * T], [26.2 * T, 19 * T], [27.6 * T, 28 * T], [25.5 * T, 46 * T]], width: [56, 90], depth: 12 }],
@@ -110,7 +110,7 @@ export function mine2() {
 // ---------------- Snow ----------------
 export function snow1() {
   return {
-    ...common, id: 'snow1', title: 'FROSTPINE FIELD', biome: 'snow', cliffStyle: 'natural',
+    ...common, id: 'snow1', title: 'FROSTFANG TUNDRA', biome: 'snow', cliffStyle: 'natural',
     terrain: {
       height: (x, y) => (y < 7 * T + (vnoise(x * .01, 2) - .5) * 80 || x < 5 * T ? 50 : 0),
       waterMask: (x, y) => blob(x, y, 25, 24, 6, 3.8, .25, 12), waterDepth: 6,
@@ -122,7 +122,7 @@ export function snow1() {
 export function snow2() {
   const L1 = 46, L2 = 92;
   return {
-    ...common, id: 'snow2', title: 'GLACIER STEPS', biome: 'snow',
+    ...common, id: 'snow2', title: 'RIMEHEART GLACIER', biome: 'snow',
     terrain: {
       height: (x, y) => (y < 8 * T || x < 6 * T ? L2 : y < 16 * T || x < 14 * T ? L1 : 0),
       rivers: [{ pts: [[24 * T, -8 * T], [24 * T, 6 * T], [22.5 * T, 13 * T], [24.5 * T, 22 * T], [23 * T, 46 * T]], width: [50, 80], depth: 10 }],
@@ -138,7 +138,7 @@ export function snow2() {
 // ---------------- Magma ----------------
 export function magma1() {
   return {
-    ...common, id: 'magma1', title: 'EMBER FLATS', biome: 'magma',
+    ...common, id: 'magma1', title: 'CINDERPEAK CALDERA', biome: 'magma',
     terrain: {
       height: (x, y) => (blob(x, y, 10, 10, 6, 5, .35, 3) || y < 4 * T ? 44 : 0),
       rivers: [
@@ -155,7 +155,7 @@ export function magma1() {
 export function magma2() {
   const lake = (x, y) => blob(x, y, 21, 20, 9, 7, .25, 5) && !blob(x, y, 21, 20, 3.2, 2.6, .15, 6);
   return {
-    ...common, id: 'magma2', title: 'MOLTEN CALDERA', biome: 'magma',
+    ...common, id: 'magma2', title: 'OBSIDIAN THRONE', biome: 'magma',
     terrain: {
       height: (x, y) => (!blob(x, y, 21, 20, 15, 12.5, .25, 1) ? 70 : 0),
       waterMask: lake, waterDepth: 14,
@@ -169,7 +169,7 @@ export function magma2() {
 // ---------------- Underwater ----------------
 export function underwater1() {
   return {
-    ...common, id: 'underwater1', title: 'CORAL SHALLOWS', biome: 'underwater', cliffStyle: 'natural',
+    ...common, id: 'underwater1', title: 'CORALGLEAM REEF', biome: 'underwater', cliffStyle: 'natural',
     terrain: {
       height: (x, y) => (blob(x, y, 8, 8, 7, 6, .35, 1) || blob(x, y, 33, 12, 5, 6, .35, 2) ? 40 : 0),
       rivers: [{ pts: [[-6 * T, 30 * T], [10 * T, 27 * T], [22 * T, 31 * T], [34 * T, 26 * T], [46 * T, 28 * T]], width: [90, 120], depth: 26 }],
@@ -179,7 +179,7 @@ export function underwater1() {
 }
 export function underwater2() {
   return {
-    ...common, id: 'underwater2', title: 'SUNKEN ATLANTIS', biome: 'underwater',
+    ...common, id: 'underwater2', title: 'ABYSSAL TRENCH', biome: 'underwater',
     terrain: {
       height: (x, y) => (inRect(x, y, R4(14, 26, 10, 18)) ? 30 : y < 5 * T || x < 4 * T ? 50 : 0),
       stairs: [{ ...R4(19.4, 20.6, 18, 18 + 1.5), dir: '-y', from: 0, to: 30 }],
@@ -196,7 +196,7 @@ export function underwater2() {
 export function asgard1() {
   const island = (x, y) => blob(x, y, 20, 20, 13, 11, .25, 4) || blob(x, y, 33, 9, 4, 3.5, .2, 5);
   return {
-    ...common, id: 'asgard1', title: 'BIFROST ISLE', biome: 'asgard',
+    ...common, id: 'asgard1', title: 'BIFROST HEIGHTS', biome: 'asgard',
     terrain: {
       height: (x, y) => (blob(x, y, 16, 15, 5, 4, .2, 6) ? 44 : 0),
       waterMask: (x, y) => !island(x, y), waterDepth: 70,
@@ -211,7 +211,7 @@ export function asgard1() {
 export function asgard2() {
   const island = (x, y) => blob(x, y, 20, 20, 15, 13, .2, 8);
   return {
-    ...common, id: 'asgard2', title: 'HALL OF VALOR', biome: 'asgard',
+    ...common, id: 'asgard2', title: 'VALHALLA', biome: 'asgard',
     terrain: {
       height: (x, y) => (inRect(x, y, R4(12, 28, 6, 15)) ? 36 : 0),
       waterMask: (x, y) => !island(x, y), waterDepth: 70,
