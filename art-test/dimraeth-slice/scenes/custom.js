@@ -21,6 +21,7 @@ export const ROOFS = { red: RED, slate: SLATE, orange: ORANGE, green: GREENR };
 // Everything the editor can stamp. `r` = editor footprint radius in tiles (for picking/overlap).
 export const OBJECT_TYPES = {
   tree: { label: 'ต้นไม้', r: .5, color: '#3f7a34' },
+  palm: { label: 'ต้นปาล์ม', r: .5, color: '#7fae3a' },
   bush: { label: 'พุ่มไม้', r: .35, color: '#6ea647' },
   rock: { label: 'หิน', r: .4, color: '#8b8a90' },
   lantern: { label: 'ตะเกียง/คบเพลิง', r: .25, color: '#ffd27a' },
@@ -216,6 +217,7 @@ export function sceneFromMap(data, opts = {}) {
     const p = P(o);
     switch (o.type) {
       case 'tree': scene.trees.push({ ...p, kind: o.kind || biomeOf(scene).trees.a }); break;
+      case 'palm': scene.trees.push({ ...p, kind: 'palm' }); break;
       case 'bush': case 'rock': case 'altar': scene.props.push({ type: o.type, ...p, seed: Math.round(o.x * 7 + o.y * 13), r: 30 }); break;
       case 'pillar': scene.props.push({ type: 'pillar', ...p, h: o.h || 64, broken: !!o.broken, seed: Math.round(o.x * 7 + o.y), r: 30 }); break;
       case 'lantern': scene.lanterns.push(p); break;
