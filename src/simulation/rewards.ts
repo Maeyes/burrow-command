@@ -17,8 +17,11 @@ import type { MonsterDefinitionV2 } from './monsterDataV2';
 // rising to ~380 at Lv120, instead of the old flat level*4 that collapsed after Lv70.
 export function monsterBaseExpV2(def:Pick<MonsterDefinitionV2,'level'|'rank'>):number{
  const rank=def.rank==='boss'?5:def.rank==='elite'?2:1;
- return Math.max(1,Math.round(expToNextLevelV2(def.level)/(80+2.5*def.level)*rank));
+ return Math.max(1,Math.round(expToNextLevelV2(def.level)/killsPerLevelV2(def.level)*rank));
 }
+/** Same-level normal kills per level. Early levels ramp from 6 (Lv1) so the first maps feel
+ *  quick; from ~Lv23 the original 80+2.5*Lv pacing takes over. */
+export function killsPerLevelV2(level:number):number{return Math.min(80+2.5*level,6*Math.max(1,level));}
 export interface DefeatRewardContext {enemyLevel:number;rank:EnemyRank;baseExp:number;loot:LootSourceV2;weaponByPlayer:Record<string,CombatWeaponFamily>;trainingMap?:boolean;expMultiplierByPlayer?:Record<string,number>;dropMultiplierByPlayer?:Record<string,number>;eventMultipliers?:{exp?:number;weaponExp?:number;drop?:number;gold?:number;upgradeItem?:number;blueprint?:number}}
 export interface PlayerRewardV2 {playerId:string;exp:number;loot:LootResultV2;character:CharacterStateV2}
 

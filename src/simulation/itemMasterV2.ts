@@ -1,6 +1,6 @@
 import type { EquipmentCombatContributionV2 } from './character';
 
-export type EquipmentTier = 1|2|3|4|5;
+export type EquipmentTier = 1|2|3|4|5|6;
 export type WeaponFamilyV2 = 'greatsword'|'dagger'|'axe'|'hammer'|'bow'|'staff'|'swordShield';
 export type CraftRoleV2 = 'neutral'|'damage'|'tank'|'support';
 export type CraftSlotV2 = 'main'|'offhand'|'armor'|'cape'|'shoes'|'accessoryLeft'|'accessoryRight';
@@ -30,43 +30,44 @@ export interface CanonicalEquipmentTemplateV2 {
 }
 
 export interface SetDefinitionV2 {
-  id:string; tier:2|3|4|5; role:'damage'|'tank'|'support'; group:'body'|'accessory';
+  id:string; tier:2|3|4|5|6; role:'damage'|'tank'|'support'; group:'body'|'accessory';
   requiredPieces:2|3; effect:string[]; balanceLocked:boolean;
 }
 
 export const TIER_LEVEL_RANGES = {
-  // One tier per biome: forest, desert, mine, magma, then the unreleased T5.
-  1:[1,20], 2:[21,40], 3:[41,50], 4:[51,70], 5:[71,Number.POSITIVE_INFINITY],
+  // One tier per biome: forest, desert, mine, magma, snow (T5), then sea + Asgard (T6).
+  1:[1,20], 2:[21,40], 3:[41,50], 4:[51,70], 5:[71,90], 6:[91,Number.POSITIVE_INFINITY],
 } as const;
 
 export function equipmentTierForLevel(level:number):EquipmentTier {
-  if(level<=20)return 1;if(level<=40)return 2;if(level<=50)return 3;if(level<=70)return 4;return 5;
+  if(level<=20)return 1;if(level<=40)return 2;if(level<=50)return 3;if(level<=70)return 4;if(level<=90)return 5;return 6;
 }
 export function blueprintForLevel(level:number){return `tier${equipmentTierForLevel(level)}Blueprint`;}
 export const GLOBAL_BLUEPRINT_DROP_CHANCE=.04;
 
-const tierLevel:Record<EquipmentTier,number>={1:1,2:21,3:41,4:51,5:71};
-const tierPower:Record<EquipmentTier,number>={1:18,2:35,3:60,4:95,5:140};
+const tierLevel:Record<EquipmentTier,number>={1:1,2:21,3:41,4:51,5:71,6:91};
+const tierPower:Record<EquipmentTier,number>={1:18,2:35,3:60,4:95,5:140,6:200};
 const weaponRatio:Record<WeaponFamilyV2,[number,number]>={
   greatsword:[1,.3],dagger:[.8,.2],axe:[1.2,.15],hammer:[1.3,.1],bow:[.95,.2],staff:[.2,1.25],swordShield:[.8,.35],
 };
-const tierOre:Record<EquipmentTier,string>={1:'copperOre',2:'moonstoneShard',3:'mithrilOre',4:'obsidianOre',5:'futureT5Ore'};
+const tierOre:Record<EquipmentTier,string>={1:'copperOre',2:'moonstoneShard',3:'mithrilOre',4:'obsidianOre',5:'starsilverOre',6:'runegoldOre'};
 const tierMats:Record<EquipmentTier,[string,string]>={
   1:['livingMoss','brutalSpore'],
   2:['duneRunnerClaw','cactusSpine'],
   3:['goblinIronScrap','cursedBone'],
   4:['drakeScale','magmaCore'],
-  5:['futureT5MaterialA','futureT5MaterialB'],
+  5:['rimeCrystal','frostPelt'],
+  6:['abyssPearl','stormFeather'],
 };
 const baseRecipe:Record<EquipmentTier,[number,number,number,number]>={
-  1:[2,4,0,120],2:[3,6,2,320],3:[4,8,3,750],4:[6,11,4,1600],5:[10,20,10,5500],
+  1:[2,4,0,120],2:[3,6,2,320],3:[4,8,3,750],4:[6,11,4,1600],5:[10,20,10,5500],6:[14,28,14,11000],
 };
 const slotWeight:Record<CraftSlotV2,number>={main:1,offhand:.8,armor:1.2,cape:.8,shoes:.8,accessoryLeft:.6,accessoryRight:.6};
 function recipe(tier:EquipmentTier,slot:CraftSlotV2,prefer=0):CanonicalRecipeV2{
  const [ore,primary,secondary,gold]=baseRecipe[tier],w=slotWeight[slot],m=tierMats[tier];
  return {blueprintId:`tier${tier}Blueprint`,oreId:tierOre[tier],oreQty:Math.max(2,Math.round(ore*w)),
   materials:[{itemId:m[prefer],qty:Math.max(2,Math.round(primary*w))},...(secondary?[{itemId:m[1-prefer],qty:Math.max(1,Math.round(secondary*w))}]:[])],
-  gold:Math.round(gold*w/10)*10,available:tier<5};
+  gold:Math.round(gold*w/10)*10,available:true};
 }
 function weapon(id:string,name:string,tier:EquipmentTier,family:WeaponFamilyV2):CanonicalEquipmentTemplateV2{
  const p=tierPower[tier],[a,m]=weaponRatio[family];
@@ -80,7 +81,7 @@ function offhand(id:string,name:string,tier:EquipmentTier,type:'weapon'|'shield'
  return {id,name,tier,requiredLevel:tierLevel[tier],slot:'offhand',role:type==='shield'?'tank':'damage',offhandType:type,
   weaponFamily:type==='weapon'?'dagger':undefined,
   baseCombat:type==='weapon'?{atk:Math.round(p*.32),matk:Math.round(p*.08)}:
-   ({1:{def:12,mdef:8,maxHp:50},2:{def:25,mdef:18,maxHp:120},3:{def:45,mdef:32,maxHp:220},4:{def:70,mdef:50,maxHp:350},5:{def:105,mdef:75,maxHp:550}} as const)[tier],
+   ({1:{def:12,mdef:8,maxHp:50},2:{def:25,mdef:18,maxHp:120},3:{def:45,mdef:32,maxHp:220},4:{def:70,mdef:50,maxHp:350},5:{def:105,mdef:75,maxHp:550},6:{def:150,mdef:105,maxHp:800}} as const)[tier],
   baseGoldCost:r.gold,recipe:r};
 }
 const bodyBase={
@@ -89,16 +90,17 @@ const bodyBase={
      tank:{armor:{def:55,mdef:38,maxHp:220},cape:{def:32,mdef:28,maxHp:120},shoes:{def:28,mdef:20,maxHp:100},accessoryLeft:{def:8,mdef:8,maxHp:100}},
      support:{armor:{def:35,mdef:48,maxHp:100},cape:{def:20,mdef:32},shoes:{def:18,mdef:25},accessoryLeft:{matk:6}}},
 } as const;
-const scale:Record<EquipmentTier,number>={1:1,2:1,3:1.55,4:2.2,5:3};
+const scale:Record<EquipmentTier,number>={1:1,2:1,3:1.55,4:2.2,5:3,6:4};
 function scaled(v:EquipmentCombatContributionV2,tier:EquipmentTier){const s=scale[tier];return Object.fromEntries(Object.entries(v).map(([k,n])=>[k,Math.round((n as number)*s)])) as EquipmentCombatContributionV2}
 const roleNames={
   2:{damage:'Wildfang',tank:'Ironbark',support:'Spiritbloom'},
   3:{damage:'Sunscar',tank:'Dune Bastion',support:'Mirage'},
   4:{damage:'Blacksteel',tank:'Stoneguard',support:'Runebound'},
-  5:{damage:'Apex',tank:'Immortal',support:'Celestial'},
+  5:{damage:'Frostfang',tank:'Glacierhold',support:'Rimeweave'},
+  6:{damage:'Ragnarok',tank:'Bifrost Aegis',support:'Tidecaller'},
 } as const;
 const suffix={armor:'Armor',cape:'Cape',shoes:'Boots',accessoryLeft:'Ring',accessoryRight:'Pendant'} as const;
-function setItem(tier:2|3|4|5,role:'damage'|'tank'|'support',slot:keyof typeof suffix):CanonicalEquipmentTemplateV2{
+function setItem(tier:2|3|4|5|6,role:'damage'|'tank'|'support',slot:keyof typeof suffix):CanonicalEquipmentTemplateV2{
  const family=roleNames[tier][role], id=`t${tier}${role[0].toUpperCase()+role.slice(1)}${slot[0].toUpperCase()+slot.slice(1)}`;
  const source=bodyBase[2][role][slot==='accessoryRight'?'accessoryLeft':slot] as EquipmentCombatContributionV2,r=recipe(tier,slot,role==='support'?1:0);
  return {id,name:`${family} ${suffix[slot]}`,tier,requiredLevel:tierLevel[tier],slot,role,setId:`t${tier}-${role}-${slot==='accessoryLeft'||slot==='accessoryRight'?'accessory':'body'}`,
@@ -110,14 +112,16 @@ const weaponNames={
   2:[['wildwoodSword','Wildwood Sword','greatsword'],['thornfangDagger','Thornfang Dagger','dagger'],['ironrootAxe','Ironroot Axe','axe'],['ironbarkHammer','Ironbark Hammer','hammer'],['thornwoodBow','Thornwood Bow','bow'],['bloomWand','Bloom Wand','staff'],['bloomScepter','Bloom Scepter','swordShield']],
   3:[['sunscarBlade','Sunscar Blade','greatsword'],['duneFangDagger','Dune Fang Dagger','dagger'],['sunbreakerAxe','Sunbreaker Axe','axe'],['duneforgeHammer','Duneforge Hammer','hammer'],['scorchwindBow','Scorchwind Bow','bow'],['mirageWand','Mirage Wand','staff'],['sunspireScepter','Sunspire Scepter','swordShield']],
   4:[['blacksteelSword','Blacksteel Sword','greatsword'],['goblinShiv','Goblin Shiv','dagger'],['blacksteelCleaver','Blacksteel Cleaver','axe'],['stonebreakerHammer','Stonebreaker Hammer','hammer'],['goblinWarbow','Goblin Warbow','bow'],['runeboundWand','Runebound Wand','staff'],['runeboundScepter','Runebound Scepter','swordShield']],
-  5:[['apexSword','Apex Sword','greatsword'],['apexDagger','Apex Dagger','dagger'],['apexAxe','Apex Axe','axe'],['apexHammer','Apex Hammer','hammer'],['apexBow','Apex Bow','bow'],['celestialWand','Celestial Wand','staff'],['celestialScepter','Celestial Scepter','swordShield']],
+  5:[['frostbiteGreatsword','Frostbite Greatsword','greatsword'],['icefangDagger','Icefang Dagger','dagger'],['glacierCleaver','Glacier Cleaver','axe'],['avalancheMaul','Avalanche Maul','hammer'],['rimewindBow','Rimewind Bow','bow'],['frostspireStaff','Frostspire Staff','staff'],['winterguardScepter','Winterguard Scepter','swordShield']],
+  6:[['einherjarBlade','Einherjar Blade','greatsword'],['fenrirFang','Fenrir Fang','dagger'],['jotunnAxe','Jotunn Axe','axe'],['thunderMaul','Thunder Maul','hammer'],['skyrendBow','Skyrend Bow','bow'],['yggdrasilStaff','Yggdrasil Staff','staff'],['aegisScepter','Aegis Scepter','swordShield']],
 } as const;
 
 const templates:CanonicalEquipmentTemplateV2[]=[];
-for(const tier of [1,2,3,4,5] as EquipmentTier[]) for(const [id,name,family] of weaponNames[tier]) templates.push(weapon(id,name,tier,family));
-for(const tier of [1,2,3,4,5] as EquipmentTier[]){
- templates.push(offhand(`t${tier}OffhandDagger`,tier===1?'Sporefang Dirk':`T${tier} Offhand Dagger`,tier,'weapon'));
- templates.push(offhand(`t${tier}Shield`,tier===1?'Mossguard Buckler':`T${tier} Guard Shield`,tier,'shield'));
+for(const tier of [1,2,3,4,5,6] as EquipmentTier[]) for(const [id,name,family] of weaponNames[tier]) templates.push(weapon(id,name,tier,family));
+const offhandNames:Partial<Record<EquipmentTier,[string,string]>>={1:['Sporefang Dirk','Mossguard Buckler'],5:['Icefang Dirk','Glacier Shield'],6:['Fenrir Dirk','Bifrost Shield']};
+for(const tier of [1,2,3,4,5,6] as EquipmentTier[]){
+ templates.push(offhand(`t${tier}OffhandDagger`,offhandNames[tier]?.[0]??`T${tier} Offhand Dagger`,tier,'weapon'));
+ templates.push(offhand(`t${tier}Shield`,offhandNames[tier]?.[1]??`T${tier} Guard Shield`,tier,'shield'));
  if(tier===1){
   for(const [slot,name] of [['armor','Mossguard Armor'],['cape','Sporeveil Cape'],['shoes','Mossstep Shoes'],['accessoryLeft','Sporeloop Charm']] as const){
    const r=recipe(1,slot,slot==='cape'||slot==='accessoryLeft'?1:0);
@@ -130,14 +134,14 @@ export const CRAFT_RECIPES_V2=Object.freeze(Object.fromEntries(templates.map(x=>
 export const CRAFTABLE_EQUIPMENT_COUNT=templates.length;
 
 export const SET_DEFINITIONS_V2:SetDefinitionV2[]=[
- ...([2,3,4,5] as const).flatMap(tier=>(['damage','tank','support'] as const).flatMap(role=>{
-  const pick=<T,>(v:Record<2|3|4|5,T>)=>v[tier];
-  const body=role==='damage'?[`ATK/MATK +${pick({2:5,3:7,4:9,5:10})}%`,...(tier>=4?[`Damage +${pick({2:0,3:0,4:15,5:20})}% to targets below 30% HP`]:[])]:
-   role==='tank'?[`HP +${pick({2:8,3:10,4:12,5:15})}%`,`DEF/MDEF +${pick({2:5,3:7,4:8,5:10})}%`,...(tier>=4?[`Damage taken -${pick({2:0,3:0,4:20,5:25})}% while below 30% HP`]:[])]:
-   [`Skill Core cooldown -${pick({2:6,3:8,4:10,5:12})}%`,`Skill Core damage +${pick({2:5,3:7,4:9,5:10})}%`];
-  const acc=role==='damage'?[`CRIT +${pick({2:5,3:7,4:10,5:12})}`,...(tier>=3?[`CRIT DMG +${pick({2:0,3:10,4:15,5:20})}%`]:[])]:
-   role==='tank'?[`HP +${pick({2:5,3:7,4:8,5:10})}%`,...(tier===3?['FLEE +5']:[]),...(tier>=4?[`DEF/MDEF +${pick({2:0,3:0,4:5,5:6})}%`]:[])]:
-   [`Weapon skill damage +${pick({2:8,3:10,4:12,5:15})}%`,...(tier>=4?[`Healing +${pick({2:0,3:0,4:10,5:15})}%`]:[])];
+ ...([2,3,4,5,6] as const).flatMap(tier=>(['damage','tank','support'] as const).flatMap(role=>{
+  const pick=<T,>(v:Record<2|3|4|5|6,T>)=>v[tier];
+  const body=role==='damage'?[`ATK/MATK +${pick({2:5,3:7,4:9,5:10,6:12})}%`,...(tier>=4?[`Damage +${pick({2:0,3:0,4:15,5:20,6:25})}% to targets below 30% HP`]:[])]:
+   role==='tank'?[`HP +${pick({2:8,3:10,4:12,5:15,6:18})}%`,`DEF/MDEF +${pick({2:5,3:7,4:8,5:10,6:12})}%`,...(tier>=4?[`Damage taken -${pick({2:0,3:0,4:20,5:25,6:30})}% while below 30% HP`]:[])]:
+   [`Skill Core cooldown -${pick({2:6,3:8,4:10,5:12,6:14})}%`,`Skill Core damage +${pick({2:5,3:7,4:9,5:10,6:12})}%`];
+  const acc=role==='damage'?[`CRIT +${pick({2:5,3:7,4:10,5:12,6:14})}`,...(tier>=3?[`CRIT DMG +${pick({2:0,3:10,4:15,5:20,6:25})}%`]:[])]:
+   role==='tank'?[`HP +${pick({2:5,3:7,4:8,5:10,6:12})}%`,...(tier===3?['FLEE +5']:[]),...(tier>=4?[`DEF/MDEF +${pick({2:0,3:0,4:5,5:6,6:7})}%`]:[])]:
+   [`Weapon skill damage +${pick({2:8,3:10,4:12,5:15,6:18})}%`,...(tier>=4?[`Healing +${pick({2:0,3:0,4:10,5:15,6:20})}%`]:[])];
   // Numbers here must match equipmentCombatTotals (equipmentCombat.ts).
   return[
    {id:`t${tier}-${role}-body`,tier,role,group:'body' as const,requiredPieces:3 as const,effect:body,balanceLocked:true},
@@ -146,4 +150,4 @@ export const SET_DEFINITIONS_V2:SetDefinitionV2[]=[
  }))
 ];
 
-if(CRAFTABLE_EQUIPMENT_COUNT!==109) throw new Error(`equipment-master-count:${CRAFTABLE_EQUIPMENT_COUNT}`);
+if(CRAFTABLE_EQUIPMENT_COUNT!==133) throw new Error(`equipment-master-count:${CRAFTABLE_EQUIPMENT_COUNT}`);

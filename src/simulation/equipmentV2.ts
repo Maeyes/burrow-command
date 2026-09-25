@@ -2,7 +2,9 @@ export type EquipmentRarity='normal'|'good'|'rare'|'epic'|'legend'|'mythic'|'whi
 export type EquipmentSlot='armor'|'cape'|'shoes'|'accessoryLeft'|'accessoryRight'|'hat'|'face'|'mouth'|'main'|'offhand';
 export type EquipmentProgressionCategory='offensive'|'defensive'|'utility';
 export interface EquipmentV2 {id:string;templateId:string;slot:EquipmentSlot;rarity:EquipmentRarity;affixes:string[];baseGoldCost:number;offhandType?:'weapon'|'shield'}
-export interface MasterRefinementBonusV2 {milestone:0|5|10|15;atk:number;matk:number;maxHp:number;maxSp:number}
+/** Master refinement (6 equipped pieces at +5/+10/+15). Percent bonuses so it scales with the build
+ *  instead of the old flat +200/+400/+800 ATK that out-weighed mid-game gear. */
+export interface MasterRefinementBonusV2 {milestone:0|5|10|15;atkPct:number;matkPct:number;maxHpPct:number;maxSpPct:number}
 
 export const CRAFT_RARITY_TABLE:ReadonlyArray<readonly[EquipmentRarity,number]>=[['normal',.50],['good',.27],['rare',.15],['epic',.06],['legend',.017],['mythic',.0028],['whiteAscended',.0002]];
 export const RARITY_AFFIX_COUNT:Record<EquipmentRarity,number>={normal:0,good:0,rare:0,epic:1,legend:2,mythic:3,whiteAscended:4};
@@ -34,10 +36,10 @@ export function resolveRefinement(current:number,rng:number,protectedAttempt=fal
 }
 export function masterRefinementBonus(refines:number[]):MasterRefinementBonusV2{
  const qualifying=(n:number)=>refines.filter(x=>x>=n).length>=6;
- if(qualifying(15))return{milestone:15,atk:800,matk:800,maxHp:1500,maxSp:500};
- if(qualifying(10))return{milestone:10,atk:400,matk:400,maxHp:900,maxSp:300};
- if(qualifying(5))return{milestone:5,atk:200,matk:200,maxHp:500,maxSp:200};
- return{milestone:0,atk:0,matk:0,maxHp:0,maxSp:0};
+ if(qualifying(15))return{milestone:15,atkPct:.15,matkPct:.15,maxHpPct:.12,maxSpPct:.12};
+ if(qualifying(10))return{milestone:10,atkPct:.10,matkPct:.10,maxHpPct:.08,maxSpPct:.08};
+ if(qualifying(5))return{milestone:5,atkPct:.05,matkPct:.05,maxHpPct:.05,maxSpPct:.05};
+ return{milestone:0,atkPct:0,matkPct:0,maxHpPct:0,maxSpPct:0};
 }
 
 export const OPTION_AFFIX_POOL=['atkPct','matkPct','defPct','mdefPct','hpPct','crit','aspd','expPct','dropPct'] as const;

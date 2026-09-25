@@ -31,7 +31,12 @@ import { SKILL_MODIFIERS_V2 } from '../../src/simulation/skillModifiersV2.ts';
 import { skillCoreUpgradeQuote } from '../../src/simulation/skillCoreService.ts';
 import { WEAPON_SKILLS_BY_FAMILY_V2 } from '../../src/simulation/skillEntitlements.ts';
 import { WEAPON_PROC_RULES_V2 } from '../../src/simulation/engine.ts';
+import { nextAutoSkillCommand } from '../../src/simulation/auto.ts';
 import { beginHeroAttack, cancelHeroAttack, createHeroAttackPlayback, updateHeroAttackPlayback } from '../iso-arena-draft/heroCombat.js';
+import { prettyItem, showUiError } from './ui/shared.js';
+import { syncHotbar, syncHotbarCooldowns, pulseHotbarSkill } from './ui/skills.js';
+import { bindProductionUi } from './ui/windows.js';
+import { bindUiRuntime } from './ui/runtime.js';
 
 const mirrorImage=img=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.translate(img.width,0);g.scale(-1,1);g.drawImage(img,0,0);return c;};
 const loadImage=src=>new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(new Error(`Failed to load image: ${src}`));i.src=src;});
@@ -43,7 +48,7 @@ const sliceSheet=(img,count)=>{
 
 const blessedHero=await loadBlessedHero();
 const playback=createHeroAttackPlayback(blessedHero.attackDefinition('dagger','south'));
-let facing='south',combatTarget=null,lastTargetSample=null,chaseStuck=0,lastKnownLevel=1;
+let facing='south',combatTarget=null,lastTargetSample=null,chaseStuck=0,lastKnownLevel=1,skillCastLockUntil=0,lastAutoSkillTry=0;
 // Click-to-move pathfinding + Auto Hunt (see combat/nav.js, combat/autohunt.js).
 const nav=createNavigator(),autoHunt=createAutoHunt();
 let heroRef=null,navReplanIn=0,clickHitMonster=false,lastHuntLabel='';
@@ -93,21 +98,20 @@ const markerType=(sp,i)=>{
   if(Array.isArray(sp?.pool)&&sp.pool.length){const candidates=sp.pool.filter(id=>monsterPresentation(roster,id));if(candidates.length)return candidates[i%candidates.length];}
   return pool[i%pool.length];
 };
-let spots;
-if(scene.gameplay.spawnPoints?.length>0){
-  spots=scene.gameplay.spawnPoints.map((sp,i)=>([sp.x/64,sp.y/64,markerType(sp,i)]));
-}else if(routeId==='valley-combat'){
-  const valleyPositions=[[21.8,25.2],[18.8,27.2],[15.2,24.7],[29.2,25.4],[13.2,18.2],[9.4,12.4]];
-  spots=valleyPositions.map(([tx,ty],i)=>[tx,ty,pool[i%pool.length]]);
-}else{
-  spots=Array.from({length:scene.gameplay.fieldPopulation},(_,i)=>{
-    const angle=i*2.399963229728653,ring=4.8+(i%9)*1.35;
-    const tx=scene.spawn.x/64+Math.cos(angle)*ring,ty=scene.spawn.y/64+Math.sin(angle)*ring;
-    return[tx,ty,pool[i%pool.length]];
-  });
-  const safeR=(scene.gameplay.minHeroDistance??192)/64+1.5;
-  for(const sp of spots){const dx=sp[0]-scene.spawn.x/64,dy=sp[1]-scene.spawn.y/64,d=Math.hypot(dx,dy);if(d<safeR){const k=safeR/Math.max(d,.01);sp[0]=scene.spawn.x/64+dx*k;sp[1]=scene.spawn.y/64+dy*k;}}
-}
+// Field population (2026-09-25): every map fields FIELD_POPULATION mobs scattered over its whole
+// walkable area (placed after boot, once terrain exists) plus one boss in its lair. Normals are
+// 3:1 over elites so elite-heavy rosters don't flood the map.
+const FIELD_POPULATION=80,ELITE_WEIGHT=1,NORMAL_WEIGHT=3;
+const bossType=roster.bossType&&monsterPresentation(roster,roster.bossType)?roster.bossType:null;
+const fieldPool=pool.filter(id=>id!==bossType&&monsterPresentation(roster,id));
+const fieldCount=routeId==='valley-combat'?6:FIELD_POPULATION;
+// Elites fill a fixed share of the field (ELITE_WEIGHT/(ELITE_WEIGHT+NORMAL_WEIGHT) = 25%), spread
+// evenly over the elite species; normals share the rest. Rosters with whole elite species stay balanced.
+const eliteIds=fieldPool.filter(id=>monsterPresentation(roster,id).elite),normalIds=fieldPool.filter(id=>!monsterPresentation(roster,id).elite);
+const eliteCount=!normalIds.length?fieldCount:!eliteIds.length?0:Math.round(fieldCount*ELITE_WEIGHT/(ELITE_WEIGHT+NORMAL_WEIGHT));
+const fieldTypes=[...Array.from({length:fieldCount-eliteCount},(_,i)=>normalIds[i%normalIds.length]),...Array.from({length:eliteCount},(_,i)=>eliteIds[i%eliteIds.length])];
+let spots=fieldTypes.map(type=>[scene.spawn.x/64,scene.spawn.y/64,type]);
+if(bossType)spots.push([scene.spawn.x/64,scene.spawn.y/64,bossType]);
 
 const presentations=new Map();
 for(const monsterType of new Set(spots.map(sp=>sp[2]))){
@@ -133,12 +137,41 @@ setRuntimeSafeZones(SAFE_ZONES);
 const nearestSafeZone=({x,y})=>SAFE_ZONES.reduce((b,z)=>!b||Math.hypot(x-z.x,y-z.y)<Math.hypot(x-b.x,y-b.y)?z:b,null);
 const inSafeZone=({x,y},pad=0)=>SAFE_ZONES.some(z=>Math.hypot(x-z.x,y-z.y)<z.r+pad);
 spots=spots.map(([tx,ty,type])=>{let x=tx*64,y=ty*64;for(const z of SAFE_ZONES){const dx=x-z.x,dy=y-z.y,d=Math.hypot(dx,dy);if(d<z.r+40){const k=(z.r+40)/Math.max(1,d);x=z.x+(d>1?dx*k:z.r+40);y=z.y+(d>1?dy*k:0);}}return[x/64,y/64,type];});
+const MAP_PX=(scene.n??160)*(scene.cell??16);
+const standable=(x,y)=>{const z=runtimeWalkHeight(x,y);return z!==null&&canRuntimeActorStand(x,y,z);};
+// Main ground = walkable cells reachable from the arrival point without changing terrain level.
+// Mobs spawn, respawn and roam only here, so hills stay free to explore and nobody fights across a cliff.
+const GROUND_CELL=32,GROUND_N=Math.ceil(MAP_PX/GROUND_CELL),SAME_LEVEL_Z=12;
+let mainGround=null;
+function buildMainGround(){
+  const z0=runtimeWalkHeight(scene.spawn.x,scene.spawn.y);if(z0===null)return;
+  const grid=new Uint8Array(GROUND_N*GROUND_N),seen=new Uint8Array(GROUND_N*GROUND_N);
+  const at=(i,j)=>{const x=(i+.5)*GROUND_CELL,y=(j+.5)*GROUND_CELL,z=runtimeWalkHeight(x,y);return z!==null&&Math.abs(z-z0)<=SAME_LEVEL_Z&&canRuntimeActorStand(x,y,z);};
+  const si=Math.floor(scene.spawn.x/GROUND_CELL),sj=Math.floor(scene.spawn.y/GROUND_CELL),queue=[[si,sj]];seen[sj*GROUND_N+si]=1;
+  while(queue.length){const [i,j]=queue.pop();if(!at(i,j))continue;grid[j*GROUND_N+i]=1;
+    for(const [a,b] of [[i+1,j],[i-1,j],[i,j+1],[i,j-1]])if(a>=0&&b>=0&&a<GROUND_N&&b<GROUND_N&&!seen[b*GROUND_N+a]){seen[b*GROUND_N+a]=1;queue.push([a,b]);}}
+  mainGround=grid;
+}
+const onMainGround=p=>{if(!mainGround)return true;const i=Math.floor(p.x/GROUND_CELL),j=Math.floor(p.y/GROUND_CELL);return i>=0&&j>=0&&i<GROUND_N&&j<GROUND_N&&mainGround[j*GROUND_N+i]===1;};
+const canEngage=(a,b)=>{const za=runtimeWalkHeight(a.x,a.y),zb=runtimeWalkHeight(b.x,b.y);return za===null||zb===null||Math.abs(za-zb)<=SAME_LEVEL_Z;};
+// Random spot on the main ground, outside safe zones and away from the hero.
+function randomFieldPoint(hero,tries=60,taken=null,minGap=0){
+  for(let i=0;i<tries;i++){
+    const p={x:48+Math.random()*(MAP_PX-96),y:48+Math.random()*(MAP_PX-96)};
+    if(!standable(p.x,p.y)||!onMainGround(p)||inSafeZone(p,60))continue;
+    if(hero&&Math.hypot(p.x-hero.x,p.y-hero.y)<320)continue;
+    if(taken&&taken.some(q=>Math.hypot(p.x-q.x,p.y-q.y)<minGap))continue;
+    return p;
+  }
+  return null;
+}
 const monsterViews=spots.map(([tx,ty,monsterType],i)=>{
   const p=presentations.get(monsterType);
   return{id:`${gameplayMapId}-m${i}`,monsterType,x:tx*64,y:ty*64,hp:1,maxHp:1,dead:false,elite:!!p?.elite,isBoss:!!p?.isBoss};
 });
 const playerView={x:scene.spawn.x,y:scene.spawn.y};
-const sim=new ArenaV2Adapter({zoneId:gameplayMapId,player:playerView,monsters:monsterViews,character:persistentCharacter,walkableContains:({x,y})=>{const z=runtimeWalkHeight(x,y);return z!==null&&canRuntimeActorStand(x,y,z);},safeZoneContains:p=>inSafeZone(p),monsterForbiddenContains:p=>inSafeZone(p,20),onReward:(reward,character,defeated)=>{persistentCharacter={...character,currentMapId:gameplayMapId};saveCharacter(persistentCharacter);combatSFX.playPickup();presentReward(reward,defeated);}});
+const sim=new ArenaV2Adapter({zoneId:gameplayMapId,player:playerView,monsters:monsterViews,character:persistentCharacter,walkableContains:({x,y})=>{const z=runtimeWalkHeight(x,y);return z!==null&&canRuntimeActorStand(x,y,z);},safeZoneContains:p=>inSafeZone(p),monsterForbiddenContains:p=>inSafeZone(p,20)||!onMainGround(p),canEngage:(a,b)=>canEngage(a,b),respawnPointPicker:hero=>randomFieldPoint(hero),onReward:(reward,character,defeated)=>{persistentCharacter={...character,currentMapId:gameplayMapId};saveCharacter(persistentCharacter);combatSFX.playPickup();presentReward(reward,defeated);}});
+bindUiRuntime({sim,saveCharacter,SAVE_KEY,gameplayMapId,pushRewardLine});
 const actors=monsterViews.map((view,i)=>{
   const p=presentations.get(view.monsterType);
   return{
@@ -208,9 +241,10 @@ setRuntimeActorUpdater(({dt,player})=>{
   blessedHero.update(dt);
   syncWarpPrompt(player);
   driveAutoHunt(player,simPlayer,dt);
+  const autoSkillUsed=tryAutoCoreSkill(simPlayer);
 
   if(combatTarget){player.target=null;
-  if(!playback.active){
+  if(!playback.active&&!autoSkillUsed&&performance.now()>=skillCastLockUntil){
     const dx=combatTarget.x-player.x,dy=combatTarget.y-player.y,d=Math.hypot(dx,dy);
     const attackRange=Math.max(1,simPlayer?.attackRange??58),chaseStopRange=Math.max(1,attackRange*.7);
     // A targeted passive mob stops wandering (it has 'noticed' the hero) so the swing can't miss.
@@ -230,7 +264,10 @@ setRuntimeActorUpdater(({dt,player})=>{
           const dx=monster.position.x-authoritative.position.x,dy=monster.position.y-authoritative.position.y,range=authoritative.attackRange;
           if(Math.hypot(dx,dy)<=range){
             const result=sim.basicAttack(target.id),damageEvent=result?.events?.find(event=>event.type==='damageDealt'&&event.targetId===target.id);
-            if(damageEvent){const actor=actors.find(a=>a.view.id===target.id);combatSFX.playHit({critical:damageEvent.critical});combatFX.playHitSpark(target.x,target.y,{visualScale:actor?.visualScale??1});}
+            // Every hand's strike gets its own hit sound/spark; follow-up hits (off-hand, double
+            // attack) land 110ms apart so two-dagger swings read as two blows.
+            const actor=actors.find(a=>a.view.id===target.id);
+            result?.events?.filter(event=>event.type==='damageDealt'&&event.targetId===target.id&&event.sourceId===sim.playerId).forEach((event,k)=>setTimeout(()=>{combatSFX.playHit({critical:event.critical});combatFX.playHitSpark(target.x,target.y,{visualScale:actor?.visualScale??1});},k*110));
             presentCombatEvents(result?.events);
           }
 
@@ -255,6 +292,7 @@ setRuntimeActorUpdater(({dt,player})=>{
 });
 
 let deathUntil=0;
+function announceBoss(view){const log=document.getElementById('chat-log');if(!log)return;const p=document.createElement('p');p.className='system';p.textContent=`[World] ${presentations.get(view.monsterType)?.name??'A boss'} has appeared in ${mapTitleV2(gameplayMapId)}!`;log.append(p);log.scrollTop=log.scrollHeight;}
 function pushRewardLine(text){const feed=document.getElementById('reward-feed');if(!feed)return;const line=document.createElement('div');line.textContent=text;feed.prepend(line);setTimeout(()=>line.remove(),5000);while(feed.children.length>6)feed.lastElementChild?.remove();}
 function appendWorldChat(text,{system=false}={}){const log=document.getElementById('chat-log');if(!log)return;const line=document.createElement('p');line.textContent=text;if(system)line.className='system';log.appendChild(line);while(log.children.length>40)log.firstElementChild?.remove();log.scrollTop=log.scrollHeight;}
 // Loot and reward feed, as in the arena prototype: sparkles coloured by drop rarity + reward lines.
@@ -267,19 +305,64 @@ function presentReward(reward,defeated){
   if(reward.exp>0)pushRewardLine(`ได้รับ ${reward.exp} EXP`);
   if(reward.loot?.gold>0)pushRewardLine(`ได้รับ ${reward.loot.gold} Gold`);
 }
-function presentDamageText(event){
+// World FX belong to the scene layer, never to document.body above game windows.
+const worldFxRoot=document.getElementById('wrap');
+const skillFxLayer=document.createElement('div');skillFxLayer.className='skill-fx-layer';worldFxRoot.appendChild(skillFxLayer);
+const barrierAura=document.createElement('div');barrierAura.id='barrier-aura';barrierAura.hidden=true;barrierAura.innerHTML='<i></i><i></i>';worldFxRoot.appendChild(barrierAura);
+function pulseBarrierAura(){barrierAura.classList.remove('hit');void barrierAura.offsetWidth;barrierAura.classList.add('hit');}
+function showSkillCastFx(skillId,targetId){
+  const skill=SKILLS_V2[skillId];if(!skill)return;
+  const player=sim.simulation.world.players.get(sim.playerId),target=targetId?sim.simulation.world.monsters.get(targetId):null;
+  const pos=(skill.targeting==='target'||skill.targeting==='targetArea'||skill.targeting==='groundArea')&&target?target.position:player?.position;
+  const canvasEl=document.getElementById('scene');if(!pos||!canvasEl)return;
+  const p=projectRuntimePoint(pos.x,pos.y,runtimeWalkHeight(pos.x,pos.y)??0),rect=canvasEl.getBoundingClientRect(),x=rect.left+p.x*rect.width/canvasEl.width,y=rect.top+p.y*rect.height/canvasEl.height;
+  const fx=document.createElement('div');fx.className=`skill-cast-fx ${skill.element||'neutral'} ${skill.kind==='weapon'?'mastery':''} ${skillId==='barrier'?'barrier':''}`;fx.style.left=x+'px';fx.style.top=y+'px';skillFxLayer.appendChild(fx);setTimeout(()=>fx.remove(),650);
+}
+function skillRejectMessage(reason){
+  return reason==='insufficient-sp'?'Not enough SP':reason==='skill-cooldown'?'Skill is on cooldown':reason==='out-of-range'?'Target is out of range':reason==='invalid-target'||reason==='ground-target-required'||reason==='no-targets'?'Select a valid target':reason==='incompatible-weapon'?'Wrong weapon for this Skill Core':reason||'Skill failed';
+}
+function executeCoreSkill(skillId,{auto=false}={}){
+  const skill=SKILLS_V2[skillId];if(!skill||skill.kind!=='active')return false;
+  const target=combatTarget&&!combatTarget.dead?sim.simulation.world.monsters.get(combatTarget.id):undefined;
+  let targetId,ground;
+  if(skill.targeting==='groundArea'){
+    if(!target){if(!auto)showUiError('Select a target first');return false;}ground={...target.position};
+  }else if(skill.targeting==='target'||skill.targeting==='targetArea'||(!skill.targeting&&Boolean(skill.scaling))){
+    if(!target){if(!auto)showUiError('Select a target first');return false;}targetId=target.id;
+  }
+  const result=sim.castSkill(skillId,targetId,ground);
+  if(!result?.accepted){if(!auto&&result?.reason)showUiError(skillRejectMessage(result.reason));return false;}
+  skillCastLockUntil=performance.now()+220;
+  presentCombatEvents(result.events);
+  syncHud();
+  return true;
+}
+function tryAutoCoreSkill(simPlayer){
+  if(!autoHunt.on||resting||deathUntil||playback.active||!simPlayer?.alive||performance.now()-lastAutoSkillTry<140)return false;
+  lastAutoSkillTry=performance.now();
+  const target=combatTarget&&!combatTarget.dead?sim.simulation.world.monsters.get(combatTarget.id):undefined;
+  const monsters=[...sim.simulation.world.monsters.values()].filter(m=>m.alive);
+  const command=nextAutoSkillCommand(simPlayer,target,monsters,{mode:'fullAuto',sequence:0,activeSkillIds:simPlayer.skillEntitlements.active,weaponSkillIds:simPlayer.skillEntitlements.weaponSkills,movementSkillId:simPlayer.skillEntitlements.movement,hpFraction:simPlayer.hp/simPlayer.maxHp,nowMs:sim.simulation.clock.nowMs,recovering:false});
+  if(!command||command.type!=='castSkill')return false;
+  return executeCoreSkill(command.skillId,{auto:true});
+}
+
+function presentDamageText(event,stack=0){
   if(!floaters)return;
   if(event.type==='healed'&&event.targetId===sim.playerId){const p=sim.simulation.world.players.get(sim.playerId)?.position;if(p)floaters.text(p.x,p.y,`+${event.amount}`,{color:'#70f59a',dx:30});return;}
+  if(event.type==='barrierApplied'&&event.entityId===sim.playerId){const p=sim.simulation.world.players.get(sim.playerId)?.position;if(p)floaters.text(p.x,p.y,`BARRIER +${event.amount}`,{color:'#f7fbff',size:15,lift:44});return;}
+  if(event.type==='barrierAbsorbed'&&event.entityId===sim.playerId){const p=sim.simulation.world.players.get(sim.playerId)?.position;if(p)floaters.text(p.x,p.y,`-${event.amount}`,{color:'#ffffff',size:15,lift:34});return;}
   if(event.type!=='damageDealt')return;
-  if(event.targetId===sim.playerId){const p=sim.simulation.world.players.get(sim.playerId)?.position;if(p)floaters.text(p.x,p.y,`-${event.amount}`,{color:'#ff6b5e',size:event.critical?17:14});return;}
+  if(event.targetId===sim.playerId){if(event.amount<=0)return;const p=sim.simulation.world.players.get(sim.playerId)?.position;if(p)floaters.text(p.x,p.y,`-${event.amount}`,{color:'#ff6b5e',size:event.critical?17:14});return;}
   if(event.sourceId!==sim.playerId)return;
   const v=monsterViews.find(m=>m.id===event.targetId);if(!v)return;
   const origin=event.effect?.origin,ability=event.effect?.ability,proc=origin==='MASTERY_PROC';
-  const label=proc?(ability==='multiShot'?'ADDITIONAL HIT!':ability==='cleave'?'CLEAVE!':'DOUBLE ATTACK!'):'';
+  const label=proc?(ability==='multiShot'?'ADDITIONAL HIT!':ability==='cleave'?'CLEAVE!':String(ability||'').startsWith('doubleAttack')?'DOUBLE ATTACK!':SKILLS_V2[ability]?.name?`${SKILLS_V2[ability].name.toUpperCase()}!`:'MASTERY!'):'';
   const text=event.critical?`${label||'CRITICAL!'} ★  ${event.amount}`:label?`${label}  ${event.amount}`:`${event.amount}`;
-  floaters.text(v.x,v.y,text,{color:event.critical?'#ffe36f':ability==='multiShot'?'#a98cff':proc?'#9fe8ff':'#ffffff',size:event.critical?19:proc?16:15,lift:proc?46:event.critical?38:26});
+  const show=()=>floaters.text(v.x,v.y,text,{color:event.critical?'#ffe36f':ability==='multiShot'?'#a98cff':proc?'#9fe8ff':'#ffffff',size:event.critical?19:proc?16:15,lift:(proc?46:event.critical?38:26)+stack*20});
+  if(stack)setTimeout(show,stack*110);else show();
 }
-function presentCombatEvents(events){for(const event of events||[]){presentDamageText(event);if(event.type==='attackStarted'&&event.sourceId!==sim.playerId){const actor=actors.find(a=>a.view.id===event.sourceId),target=event.targetId===sim.playerId?sim.simulation.world.players.get(sim.playerId)?.position:null;if(actor&&target)beginMonsterAttack(actor,target);}if(event.type==='damageDealt'&&event.targetId===sim.playerId&&event.amount>0)blessedHero.hurt();if(event.type==='entityDefeated'&&event.entityId===sim.playerId){blessedHero.die();deathUntil=performance.now()+10000;const o=document.getElementById('death-overlay');if(o)o.hidden=false;combatSFX.playDeath();cancelCombat();}if(event.type==='entityRespawned'&&event.entityId===sim.playerId){blessedHero.respawn();deathUntil=0;const o=document.getElementById('death-overlay');if(o)o.hidden=true;}if(event.type==='entityDefeated'&&event.entityId!==sim.playerId){combatSFX.playDeath({volume:0.5});const target=monsterViews.find(v=>v.id===event.entityId),actor=actors.find(a=>a.view.id===event.entityId);if(target){const fxOptions={visualScale:actor?.visualScale??1};target.isBoss?combatFX.playBossDeath(target.x,target.y,fxOptions):combatFX.playNormalDeath(target.x,target.y,fxOptions);}pushRewardLine('Monster defeated');}}}
+function presentCombatEvents(events){const hitsOn={};for(const event of events||[]){let stack=0;if(event.type==='damageDealt'&&event.sourceId===sim.playerId){stack=hitsOn[event.targetId]??0;hitsOn[event.targetId]=stack+1;}presentDamageText(event,stack);if(event.type==='barrierApplied'&&event.entityId===sim.playerId)pulseBarrierAura();if(event.type==='barrierAbsorbed'&&event.entityId===sim.playerId)pulseBarrierAura();if(event.type==='skillCast'&&event.sourceId===sim.playerId){combatSFX.playSkillCast(event.skillId);pulseHotbarSkill(event.skillId);showSkillCastFx(event.skillId,event.targetId);}if(event.type==='attackStarted'&&event.sourceId!==sim.playerId){const actor=actors.find(a=>a.view.id===event.sourceId),target=event.targetId===sim.playerId?sim.simulation.world.players.get(sim.playerId)?.position:null;if(actor&&target)beginMonsterAttack(actor,target);}if(event.type==='damageDealt'&&event.targetId===sim.playerId&&event.amount>0)blessedHero.hurt();if(event.type==='entityDefeated'&&event.entityId===sim.playerId){blessedHero.die();deathUntil=performance.now()+10000;const o=document.getElementById('death-overlay');if(o)o.hidden=false;combatSFX.playDeath();cancelCombat();}if(event.type==='entityRespawned'&&event.entityId!==sim.playerId){const v=monsterViews.find(x=>x.id===event.entityId);if(v?.isBoss)announceBoss(v);}if(event.type==='entityRespawned'&&event.entityId===sim.playerId){blessedHero.respawn();deathUntil=0;const o=document.getElementById('death-overlay');if(o)o.hidden=true;}if(event.type==='entityDefeated'&&event.entityId!==sim.playerId){combatSFX.playDeath({volume:0.5});const target=monsterViews.find(v=>v.id===event.entityId),actor=actors.find(a=>a.view.id===event.entityId);if(target){const fxOptions={visualScale:actor?.visualScale??1};target.isBoss?combatFX.playBossDeath(target.x,target.y,fxOptions):combatFX.playNormalDeath(target.x,target.y,fxOptions);}pushRewardLine('Monster defeated');}}}
 function syncDeathOverlay(){const o=document.getElementById('death-overlay'),v=document.getElementById('death-seconds'),ring=document.querySelector('.death-countdown .progress');if(!o||!v)return;if(!deathUntil){o.hidden=true;return;}const remain=Math.max(0,deathUntil-performance.now()),left=Math.ceil(remain/1000);v.textContent=String(left);if(ring)ring.style.strokeDashoffset=String(264*(1-remain/10000));if(remain<=0){deathUntil=0;o.hidden=true;}}
 function bindChat(){const input=document.getElementById('chat-input');if(!input)return;window.addEventListener('keydown',e=>{if(e.code!=='Enter')return;if(document.activeElement===input){e.preventDefault();e.stopImmediatePropagation();const msg=input.value.trim();if(msg){appendWorldChat(`Bunny: ${msg}`);input.value='';}input.blur();return;}if(e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement)return;e.preventDefault();e.stopImmediatePropagation();input.focus();},true);}
 bindChat();
@@ -289,12 +372,25 @@ const weaponGauge=document.createElement('div');weaponGauge.id='weapon-gauge';we
 weaponGauge.style.cssText='position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;width:180px;height:8px;border-radius:4px;background:rgba(10,14,18,.8);border:1px solid #d9bd72;overflow:hidden;pointer-events:none';
 weaponGauge.innerHTML='<i style="display:block;height:100%;width:0;background:linear-gradient(90deg,#d9a441,#ffe08a)"></i>';document.body.appendChild(weaponGauge);
 function syncWeaponGauge(p){const ult=p?.skillEntitlements?.weaponSkills?.[2];weaponGauge.hidden=!ult;if(!ult)return;const g=p.weaponProc?.gauge??0;weaponGauge.title=`${SKILLS_V2[ult]?.name||ult}: ${g}/${WEAPON_PROC_RULES_V2.gaugeHits}`;weaponGauge.firstChild.style.width=`${100*g/WEAPON_PROC_RULES_V2.gaugeHits}%`;}
+function syncBarrierUi(p){
+  const hpBar=document.querySelector('.player-hud .bar.hp');
+  if(hpBar&&!hpBar.querySelector('.barrier-fill')){const fill=document.createElement('span');fill.className='barrier-fill';hpBar.appendChild(fill);}
+  const active=Boolean(p&&(p.barrierHp??0)>0&&(p.barrierUntilMs??0)>sim.simulation.clock.nowMs);
+  const fill=hpBar?.querySelector('.barrier-fill');
+  if(hpBar)hpBar.classList.toggle('barrier-active',active);
+  if(fill)fill.style.width=active?`${100*(p.barrierHp??0)/Math.max(1,p.barrierMaxHp??1)}%`:'0%';
+  barrierAura.hidden=!active;
+  if(active&&window.__slice?.player){
+    const hero=window.__slice.player,canvasEl=document.getElementById('scene');
+    if(canvasEl){const point=projectRuntimePoint(hero.x,hero.y,hero.z??0),rect=canvasEl.getBoundingClientRect();barrierAura.style.left=(rect.left+point.x*rect.width/canvasEl.width)+'px';barrierAura.style.top=(rect.top+point.y*rect.height/canvasEl.height-22)+'px';}
+  }
+}
 function syncHud(){
   const ui=document.getElementById('game-ui');if(ui)ui.hidden=false;
   const p=sim.simulation.world.players.get(sim.playerId),c=sim.character;
   const set=(sel,v)=>{const el=document.querySelector(sel);if(el)el.textContent=v;};
   const width=(sel,v)=>{const el=document.querySelector(sel);if(el)el.style.width=`${Math.max(0,Math.min(100,v))}%`;};
-  syncWeaponGauge(p);
+  syncWeaponGauge(p);syncBarrierUi(p);syncHotbarCooldowns();
   set('#hero-name',(c.name||'Bunny').toUpperCase());set('#hero-level',`Lv. ${c.level}`);
   if(c.level>lastKnownLevel){combatSFX.playLevelUp();lastKnownLevel=c.level;}
   width('.player-hud .bar.hp i',p?.maxHp?(p.hp/p.maxHp)*100:0);width('.player-hud .bar.sp i',p?.maxSp?((p.sp??0)/p.maxSp)*100:0);
@@ -302,212 +398,9 @@ function syncHud(){
   const target=document.getElementById('target-hud');
   if(target){target.hidden=!combatTarget||combatTarget.dead;if(combatTarget&&!combatTarget.dead){const a=actors.find(x=>x.view.id===combatTarget.id);set('#target-name',a?.name||'MONSTER');set('#target-hp',`${Math.ceil(combatTarget.hp)} / ${Math.ceil(combatTarget.maxHp)}`);width('#target-hud .bar.hp i',combatTarget.maxHp?combatTarget.hp/combatTarget.maxHp*100:0);}}
 }
-const CRAFT_UI_RECIPES=Object.values(EQUIPMENT_MASTER_V2).map(item=>({id:item.id,name:item.name,tier:item.tier,slot:item.slot,type:item.slot==='main'?'Weapon':item.slot==='offhand'?'Offhand':(item.slot==='accessoryLeft'||item.slot==='accessoryRight')?'Accessory':item.slot[0].toUpperCase()+item.slot.slice(1),blueprintId:item.recipe.blueprintId,oreId:item.recipe.oreId,oreQty:item.recipe.oreQty,materials:item.recipe.materials,gold:item.recipe.gold,baseGoldCost:item.baseGoldCost,baseCombat:item.baseCombat,offhandType:item.offhandType,setId:item.setId,requiredLevel:item.requiredLevel,available:item.recipe.available,role:item.role}));
-const CRAFT_SET_BY_ID=new Map(SET_DEFINITIONS_V2.map(set=>[set.id,set]));
-const CRAFT_RARITIES=[['Normal','50%'],['Good','27%'],['Rare','15%'],['Epic','6%'],['Legend','1.7%'],['Mythic','0.28%'],['White Ascended','0.02%']];
-const craftUi={type:'Weapon',tier:'All',selected:'mosswoodSword',batch:1};
-const prettyItem=id=>String(id||'').replace(/([A-Z])/g,' $1').replace(/^./,c=>c.toUpperCase());
-function craftStatLines(stats={}){const labels={atk:'ATK',matk:'MATK',def:'DEF',mdef:'MDEF',maxHp:'HP',crit:'CRIT',aspd:'ASPD',hit:'HIT',flee:'FLEE'};return Object.entries(stats).filter(([,v])=>Number(v)!==0).map(([k,v])=>`<div><span>${labels[k]||k}</span><b>+${v}</b></div>`).join('')||'<div><span>Base Stats</span><b>—</b></div>';}
-function equippedSetCount(setId,c){return Object.values(c.equipment.equippedBySlot).filter(Boolean).map(id=>c.equipment.instances[id]).filter(item=>item?.setId===setId).length;}
-function craftSetDetail(recipe,c){if(!recipe.setId)return '<div class="craft-no-set">No Set Bonus</div>';const set=CRAFT_SET_BY_ID.get(recipe.setId);if(!set)return '';const count=Math.min(set.requiredPieces,equippedSetCount(recipe.setId,c)),active=count>=set.requiredPieces;return `<div class="craft-set-box ${active?'set-active':'set-inactive'}"><div class="craft-set-head"><div><strong>${recipe.name.split(' ')[0]} Set</strong><small>${set.group==='body'?'BODY SET':'ACCESSORY SET'} · ${set.role.toUpperCase()}</small></div><b>${count}/${set.requiredPieces}</b></div>${set.effect.map(effect=>`<p>◆ ${effect}</p>`).join('')}</div>`;}
-function showUiError(message){let t=document.querySelector('.equipment-result-toast');if(!t){t=document.createElement('div');t.className='equipment-result-toast';document.body.append(t);}t.className='equipment-result-toast error show';t.textContent=message;clearTimeout(showUiError.timer);showUiError.timer=setTimeout(()=>t.classList.remove('show'),1800);}
-function renderCraftWindow(){
- const body=document.getElementById('game-window-body'),c=sim.character,types=['Weapon','Offhand','Armor','Cape','Shoes','Accessory'];if(!body)return;
- let list=CRAFT_UI_RECIPES.filter(r=>r.type===craftUi.type&&(craftUi.tier==='All'||r.tier===Number(craftUi.tier)));if(!list.length)list=CRAFT_UI_RECIPES.filter(r=>craftUi.tier==='All'||r.tier===Number(craftUi.tier));const selected=list.find(r=>r.id===craftUi.selected)||list[0];
- body.innerHTML=`<div class="craft-topbar"><div class="craft-tabs">${types.map(t=>`<button data-craft-type="${t}" class="${craftUi.type===t?'active':''}">${t}</button>`).join('')}</div><label>Tier <select id="craft-tier"><option value="All">All T</option>${[1,2,3,4,5].map(t=>`<option value="${t}" ${String(craftUi.tier)===String(t)?'selected':''}>T${t}</option>`).join('')}</select></label></div><div class="craft-three"><section class="craft-card craft-list"><header>CRAFTING LIST</header>${list.map(r=>`<button data-craft-recipe="${r.id}" class="${selected?.id===r.id?'active':''}"><span class="craft-icon">${iconHtml(r.id,'equipment','◆')}</span><span><strong>${r.name}</strong><small>T${r.tier} · ${r.type}</small></span></button>`).join('')}</section><section class="craft-card craft-detail"><header>ITEM DETAIL</header>${selected?`<div class="craft-preview">${iconHtml(selected.id,'equipment','◆')}</div><div class="craft-detail-title"><h2>${selected.name}</h2><span class="tier-chip">T${selected.tier} · ${selected.type}</span></div><div class="craft-tags"><span>Lv ${selected.requiredLevel}+</span><span>${selected.role.toUpperCase()}</span></div><div class="craft-stat-box"><h3>BASE STATS</h3>${craftStatLines(selected.baseCombat)}</div>${craftSetDetail(selected,c)}<div class="craft-meta"><span>Slot</span><b>${selected.slot.toUpperCase()}</b><span>Required Level</span><b>${selected.requiredLevel}</b><span>Base value</span><b>${selected.baseGoldCost} G</b></div>`:''}</section><section class="craft-card craft-cost"><header>MATERIALS & RARITY</header>${selected?`<div class="craft-materials">${[[selected.blueprintId,1],[selected.oreId,selected.oreQty],...selected.materials.map(m=>[m.itemId,m.qty])].map(([id,q])=>`<div><span class="craft-mat-name">${iconHtml(id,'item','')}${prettyItem(id)}</span><b class="${(c.inventory[id]??0)>=q?'enough':'missing'}">${c.inventory[id]??0} / ${q}</b></div>`).join('')}<div class="gold-cost"><span>Gold</span><b>${c.gold.toLocaleString()} / ${selected.gold.toLocaleString()}</b></div></div><h3>RARITY CHANCE</h3><div class="rarity-chances">${CRAFT_RARITIES.map(([n,p])=>`<span class="rarity-mini rarity-${n.toLowerCase().replace(' ','-')}"><i>${n}</i><b>${p}</b></span>`).join('')}</div><div class="craft-batch-picker"><span>CRAFT QTY</span>${[1,10,20,50].map(q=>`<button data-craft-qty="${q}" class="${craftUi.batch===q?'active':''}">×${q}</button>`).join('')}</div><button class="craft-button" data-craft-now="${selected.id}" ${selected.available?'':'disabled'}>${selected.available?(craftUi.batch===1?'CRAFT':`BATCH CRAFT ×${craftUi.batch}`):'PLANNED'}</button>`:''}</section></div>`;
- body.querySelectorAll('[data-craft-type]').forEach(b=>b.onclick=()=>{craftUi.type=b.dataset.craftType;craftUi.selected='';renderCraftWindow();});body.querySelector('#craft-tier')?.addEventListener('change',e=>{craftUi.tier=e.target.value;craftUi.selected='';renderCraftWindow();});body.querySelectorAll('[data-craft-recipe]').forEach(b=>b.onclick=()=>{craftUi.selected=b.dataset.craftRecipe;renderCraftWindow();});body.querySelectorAll('[data-craft-qty]').forEach(b=>b.onclick=()=>{craftUi.batch=Number(b.dataset.craftQty);renderCraftWindow();});
- body.querySelector('[data-craft-now]')?.addEventListener('click',()=>{const r=CRAFT_UI_RECIPES.find(x=>x.id===selected?.id);if(!r)return;const qty=craftUi.batch||1,recipe={templateId:r.id,slot:r.slot,blueprintId:r.blueprintId,oreId:r.oreId,oreQty:r.oreQty,materials:r.materials,gold:r.gold,baseGoldCost:r.baseGoldCost,baseCombat:r.baseCombat,offhandType:r.offhandType,setId:r.setId,requiredLevel:r.requiredLevel,available:r.available};try{const need=[[r.blueprintId,1],[r.oreId,r.oreQty],...r.materials.map(m=>[m.itemId,m.qty])];if(need.find(([id,n])=>(c.inventory[id]??0)<n*qty)||c.gold<r.gold*qty){showUiError(`Materials/Gold insufficient for ×${qty}`);return;}const made=[];for(let i=0;i<qty;i++){const res=sim.equipmentCommand({type:'craft',recipe});const item=sim.character.equipment.instances[res.createdEquipmentId];if(item)made.push(item);}saveCharacter(sim.character);renderCraftWindow();if(made.length===1)showCraftSuccess(made[0]);else if(made.length)showBatchCraftResults(made,r.name);}catch(error){showUiError(String(error?.message||error));}});
-}
 
-const masteryUi={selected:null,milestone:null};
-const MASTERY_NAMES={greatsword:'Greatsword',dagger:'Dagger',axe:'Axe',hammer:'Hammer',bow:'Bow',staff:'Staff',swordShield:'Sword + Shield'};
-const MASTERY_GLYPHS={greatsword:'⚔',dagger:'†',axe:'🪓',hammer:'🔨',bow:'🏹',staff:'✦',swordShield:'🛡'};
-const MASTERY_MILESTONE_NAMES={cleave:'Cleave',cleaveII:'Cleave II',wideCleave:'Wide Cleave',cleaveIII:'Cleave III',perfectCleave:'Perfect Cleave',doubleAttack:'Double Attack',doubleAttackII:'Double Attack II',precisionFollowup:'Precision Follow-up',criticalFollowup:'Critical Follow-up',doubleAttackIII:'Double Attack III',heavyBlow:'Heavy Blow',heavyBlowII:'Heavy Blow II',armorBreak:'Armor Break',heavyBlowIII:'Heavy Blow III',crushingArmorBreak:'Crushing Armor Break',crushingImpact:'Crushing Impact',crushingImpactII:'Crushing Impact II',concussion:'Concussion',crushingImpactIII:'Crushing Impact III',shockwave:'Shockwave',multiShot:'Multi Shot',multiShotII:'Multi Shot II',eagleEye:'Eagle Eye',piercingArrow:'Piercing Arrow',multiShotIII:'Multi Shot III',concentration:'Concentration',mobileCasting:'Mobile Casting',flowCasting:'Flow Casting',coreEcho:'Core Echo',perfectCasting:'Perfect Casting',guard:'Guard',firmGuard:'Firm Guard',counterGuard:'Counter Guard',perfectGuard:'Perfect Guard',aegisMastery:'Aegis Mastery'};
-const skillsHubUi={tab:'skills'};
-function skillLabel(id){return id?String(id).replace(/([A-Z])/g,' $1').replace(/^./,x=>x.toUpperCase()):'Empty'}
-function coreRarity(id){return id?(sim.character.skills.coreRarity?.[id]??'normal'):'normal'}
-function coreRarityIndex(id){return ['normal','good','rare','epic','legend','mythic','whiteAscended'].indexOf(coreRarity(id))}
-function coreDamageBonus(id){return Math.max(0,coreRarityIndex(id))*10}
-function skillDetailHtml(id){const s=SKILLS_V2[id];if(!s)return '<p>Skill data unavailable.</p>';const scaling=s.scaling==='physicalAttack'?'Physical ATK':s.scaling==='magicalAttack'?'Magical ATK':null,total=s.coefficient?Math.round(s.coefficient*100)+'% '+scaling:null,target={selfArea:'AoE around caster',targetArea:'AoE around target',groundArea:'Ground-targeted AoE',target:'Single target'}[s.targeting]||'Utility';return `<div class="skill-detail-block"><div class="skill-detail-title"><strong>${s.name}</strong><span>SKILL CORE · ${s.kind.toUpperCase()}</span></div><p>${target}${s.element?' · '+s.element.toUpperCase():''}</p><div class="skill-detail-stats">${s.radius?`<span>AoE Radius <b>${s.radius}</b></span>`:''}${s.range?`<span>Range <b>${s.range}</b></span>`:''}${s.hitCount?`<span>Hits <b>${s.hitCount}</b></span>`:''}${total?`<span>Damage <b>${total}</b></span>`:''}${s.cooldownMs?`<span>Cooldown <b>${s.cooldownMs/1000}s</b></span>`:''}</div></div>`;}
-// Weapon skills are not pressed; each slot has its own basic-attack trigger (engine WEAPON_PROC_RULES_V2).
-const WEAPON_SKILL_TRIGGERS=[
-  {level:10,text:()=>`${Math.round(WEAPON_PROC_RULES_V2.chance*100)}% chance on each basic attack`},
-  {level:20,text:()=>`Every ${WEAPON_PROC_RULES_V2.everyNthHit}th basic attack`},
-  {level:30,text:()=>`When the gauge fills (${WEAPON_PROC_RULES_V2.gaugeHits} basic attacks)`},
-];
-function weaponSkillsHtml(family,level){const ids=WEAPON_SKILLS_BY_FAMILY_V2[family]||[];return `<div class="mastery-panel-head" style="margin-top:12px"><strong>WEAPON SKILLS</strong><span>TRIGGER ON ATTACK</span></div>${ids.map((id,i)=>{const t=WEAPON_SKILL_TRIGGERS[i],on=level>=t.level,s=SKILLS_V2[id];return `<div class="mastery-detail-card ${on?'unlocked':'locked'}"><strong>${iconHtml(id,'skill','✦')} ${s?.name||id}</strong><span>${on?'UNLOCKED':'LOCKED · LV '+t.level}</span><p>${t.text()}.</p></div>`}).join('')}`;}
-function renderWeaponMastery(target){const c=sim.character,families=Object.keys(MASTERY_NAMES);if(!masteryUi.selected||!c.weaponMastery[masteryUi.selected])masteryUi.selected=families[0];const selected=masteryUi.selected,m=c.weaponMastery[selected]||{level:1,xp:0},milestones=WEAPON_MASTERY_MILESTONES[selected]||[];if(!masteryUi.milestone||!milestones.some(x=>x.id===masteryUi.milestone))masteryUi.milestone=(milestones.filter(x=>m.level>=x.level).at(-1)||milestones[0])?.id;const detail=milestones.find(x=>x.id===masteryUi.milestone)||milestones[0],unlocked=detail&&m.level>=detail.level;target.innerHTML=`<div class="mastery-layout"><section class="mastery-panel"><div class="mastery-panel-head"><strong>WEAPON MASTERY</strong><span>LV PROGRESS</span></div><div class="mastery-progress-list">${families.map(f=>{const x=c.weaponMastery[f]||{level:1,xp:0},max=x.level>=50?0:masteryXpRequired(x.level),pct=x.level>=50?100:Math.min(100,max?x.xp/max*100:0);return `<button class="mastery-progress-card ${f===selected?'active':''}" data-mastery-family="${f}"><span class="mastery-family-glyph">${iconHtml(f,'family',MASTERY_GLYPHS[f])}</span><span class="mastery-family-info"><b>${MASTERY_NAMES[f]}</b><small>Lv ${x.level}</small><i><em style="width:${pct}%"></em></i><small class="mastery-xp">${x.level>=50?'MAX':Math.floor(x.xp)+' / '+max+' XP'}</small></span></button>`}).join('')}</div></section><section class="mastery-panel mastery-milestone-panel"><div class="mastery-panel-head"><strong>${MASTERY_NAMES[selected]}</strong><span>MILESTONES</span></div><div class="mastery-milestone-grid">${milestones.map(x=>`<button class="mastery-milestone ${m.level>=x.level?'unlocked':'locked'} ${x.id===masteryUi.milestone?'selected':''}" data-milestone="${x.id}"><span class="mastery-level-tag">Lv ${x.level}</span><span class="mastery-milestone-glyph">${iconHtml(selected+'_'+x.id,'mastery',MASTERY_GLYPHS[selected])}</span></button>`).join('')}</div>${detail?`<div class="mastery-detail-card ${unlocked?'unlocked':'locked'}"><strong>${MASTERY_MILESTONE_NAMES[detail.id]||detail.id}</strong><span>${unlocked?'UNLOCKED':'LOCKED · LV '+detail.level}</span><p>${detail.description}</p></div>`:''}${weaponSkillsHtml(selected,m.level)}</section></div>`;target.querySelectorAll('[data-mastery-family]').forEach(b=>b.onclick=()=>{masteryUi.selected=b.dataset.masteryFamily;masteryUi.milestone=null;renderSkillsHub();});target.querySelectorAll('[data-milestone]').forEach(b=>b.onclick=()=>{masteryUi.milestone=b.dataset.milestone;renderSkillsHub();});}
-function closeDetailModal(){const modal=document.getElementById('equipment-detail-modal');if(!modal)return;modal.hidden=true;modal.replaceChildren();}
-function bindDetailModalClose(modal){const close=modal.querySelector('.rpg-modal-close');if(close)close.onclick=e=>{e.preventDefault();e.stopPropagation();closeDetailModal();};modal.onclick=e=>{if(e.target===modal)closeDetailModal();};}
 
-function showSkillCorePicker(slot){const c=sim.character,modal=document.getElementById('equipment-detail-modal'),equipped=new Set(c.skills.active.filter(Boolean)),owned=Object.entries(c.inventory).filter(([id,q])=>q>0&&inventoryItemMeta(id).tags.includes('skill-core')&&SKILLS_V2[id]?.kind!=='movement'&&!equipped.has(id));modal.innerHTML=`<button class="rpg-modal-close">×</button><div class="equipment-detail-card"><div class="skill-picker-head"><strong>INSTALL SKILL CORE ${slot+1}</strong></div><div class="skill-picker-list">${owned.length?owned.map(([id,q])=>`<button data-pick-core="${id}"><b>${iconHtml(id,'skill','')}${SKILLS_V2[id]?.name||skillLabel(id)}</b><small>OWNED ×${q}</small>${skillDetailHtml(id)}</button>`).join(''):'<p>No Skill Core available.</p>'}</div></div>`;modal.hidden=false;bindDetailModalClose(modal);modal.querySelectorAll('[data-pick-core]').forEach(b=>b.onclick=()=>{sim.skillCoreCommand({type:'equipCore',coreId:b.dataset.pickCore,slot});modal.hidden=true;renderSkillsHub();syncHotbar();});}
-function showSkillModPicker(coreId,modSlot){const c=sim.character,modal=document.getElementById('equipment-detail-modal'),owned=Object.entries(c.inventory).filter(([id,q])=>q>0&&inventoryItemMeta(id).tags.includes('skill-modifier'));modal.innerHTML=`<button class="rpg-modal-close">×</button><div class="equipment-detail-card"><div class="skill-picker-head"><strong>INSTALL SKILL MOD ${modSlot+1}</strong></div><div class="skill-picker-list">${owned.map(([id,q])=>`<button data-pick-mod="${id}"><b>${iconHtml(id,'item','')}${SKILL_MODIFIERS_V2[id]?.name||skillLabel(id)}</b><small>×${q}</small><p>${SKILL_MODIFIERS_V2[id]?.description||''}</p></button>`).join('')||'<p>No Skill Mod owned.</p>'}</div></div>`;modal.hidden=false;bindDetailModalClose(modal);modal.querySelectorAll('[data-pick-mod]').forEach(b=>b.onclick=()=>{sim.skillCoreCommand({type:'equipModifier',coreId,modifierId:b.dataset.pickMod,modSlot});modal.hidden=true;renderSkillsHub();});}
-function showSkillCoreUpgrade(coreId){const modal=document.getElementById('equipment-detail-modal'),quote=skillCoreUpgradeQuote(sim.character,coreId),rarity=coreRarity(coreId);modal.innerHTML=`<button class="rpg-modal-close">×</button><div class="equipment-detail-card skill-core-upgrade core-rarity-${rarity}"><div class="craft-success-heading">UPGRADE CORE</div><div class="skill-core-upgrade-icon">${iconHtml(coreId,'skill','✦')}</div><h2>${skillLabel(coreId)}</h2><div>${rarity.replace('whiteAscended','White Ascended').toUpperCase()} · DMG +${coreDamageBonus(coreId)}%</div>${quote?`<p><b>${quote.current.toUpperCase()} → ${quote.next.toUpperCase()}</b></p><button class="craft-button" data-upgrade-core>UPGRADE · ${quote.gold} G</button>`:'<p>MAX RARITY</p>'}</div>`;modal.hidden=false;bindDetailModalClose(modal);modal.querySelector('[data-upgrade-core]')?.addEventListener('click',()=>{try{sim.skillCoreCommand({type:'upgradeCore',coreId});showSkillCoreUpgrade(coreId);renderSkillsHub();syncHotbar();}catch(e){showUiError(String(e?.message||e));}});}
-function renderSkillsWindow(target){const s=sim.character.skills;target.innerHTML=`<div class="skill-core-shell"><div class="skill-core-head"><strong>SKILL CORE LOADOUT</strong><span>3 CORE · 2 MOD EACH</span></div><div class="skill-core-list">${[0,1,2].map(i=>{const core=s.active[i],mods=core?(s.modifiersByActive[core]||[]).slice(0,2):[];return `<section class="skill-core-card"><button class="skill-core-main ${!core?'empty':'core-rarity-'+coreRarity(core)}" data-core-slot="${i}"><div class="skill-core-icon">${core?iconHtml(core,'skill','✦'):'＋'}</div><div><small>CORE ${i+1}</small><strong>${skillLabel(core)}</strong>${core?`<em>DMG +${coreDamageBonus(core)}%</em>`:''}</div></button><div class="skill-core-arrow">➜</div><div class="skill-mods">${[0,1].map(j=>`<button class="skill-mod ${!mods[j]?'empty':''}" data-mod-slot="${j}" data-mod-core="${core||''}" ${!core?'disabled':''}><span>${iconHtml(mods[j],'item','◆')}</span><div><small>MOD ${j+1}</small><b>${skillLabel(mods[j])}</b></div></button>`).join('')}</div>${core?`<div class="skill-core-inline-detail">${skillDetailHtml(core)}</div>`:''}</section>`}).join('')}</div><div class="movement-slot-wrap"><small>MOVEMENT</small><div class="movement-skill-tile ${!s.movement?'empty':''}"><span>${s.movement?iconHtml(s.movement,'skill','➤'):'＋'}</span><b>${skillLabel(s.movement)}</b></div></div></div>`;target.querySelectorAll('[data-core-slot]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.coreSlot),core=sim.character.skills.active[i];core?showSkillCoreUpgrade(core):showSkillCorePicker(i);});target.querySelectorAll('[data-mod-slot]').forEach(b=>b.onclick=()=>b.dataset.modCore&&showSkillModPicker(b.dataset.modCore,Number(b.dataset.modSlot)));}
-function renderSkillsHub(){const title=document.getElementById('game-window-title'),body=document.getElementById('game-window-body');title.textContent='Skills & Mastery';body.innerHTML=`<div class="skills-hub-tabs"><button data-skills-tab="skills" class="${skillsHubUi.tab==='skills'?'active':''}">SKILL CORE</button><button data-skills-tab="mastery" class="${skillsHubUi.tab==='mastery'?'active':''}">WEAPON MASTERY</button></div><div id="skills-hub-content"></div>`;const host=body.querySelector('#skills-hub-content');skillsHubUi.tab==='mastery'?renderWeaponMastery(host):renderSkillsWindow(host);body.querySelectorAll('[data-skills-tab]').forEach(b=>b.onclick=()=>{skillsHubUi.tab=b.dataset.skillsTab;renderSkillsHub();});}
-function syncHotbar(){const skills=sim.character.skills.active;document.querySelectorAll('[data-hotbar-slot]').forEach((b,i)=>{const id=skills[i];b.dataset.skillId=id||'';const span=b.querySelector('span');if(span)span.textContent=skillLabel(id);b.title=id?(SKILLS_V2[id]?.name||skillLabel(id)):'Empty';});const move=document.querySelector('[data-hotbar-movement]');if(move){move.dataset.skillId=sim.character.skills.movement||'';const span=move.querySelector('span');if(span)span.textContent=skillLabel(sim.character.skills.movement);}}
 
-const equipmentUi={tab:'Gear',selectedId:null,tier:'all',slot:'all'};
-const batchDestroyUi={active:false,selected:new Set()};
-const GEAR_SLOT_FILTERS=[['all','All Parts'],['main','Main'],['offhand','Offhand'],['armor','Armor'],['cape','Cape'],['shoes','Shoes'],['accessory','Accessory'],['hat','Hat'],['face','Face'],['mouth','Mouth']];
-const ITEM_INFO={livingMoss:'Crafting material from Mossblobs.',brutalSpore:'Crafting material from Sporekin.',copperOre:'Early crafting ore.',ironOre:'Forest crafting ore.',moonstoneShard:'Desert crafting ore.',silverOre:'Advanced desert crafting ore.',mithrilOre:'Mine crafting ore.',verdantAetherstone:'Enhancement stone up to +40.',azureAetherstone:'Enhancement stone for +41–80.',violetAetherstone:'Enhancement stone for +81–120.',astraliteStone:'Refinement material.'};
-function gearMatchesFilter(item){const template=EQUIPMENT_MASTER_V2[item.templateId],tier=template?.tier;if(equipmentUi.tier!=='all'&&tier!==Number(equipmentUi.tier))return false;const s=equipmentUi.slot;if(s==='all')return true;if(s==='accessory')return item.slot==='accessoryLeft'||item.slot==='accessoryRight';return item.slot===s;}
-function gearGlyph(slot){return {armor:'◈',cape:'⌁',shoes:'⌑',accessoryLeft:'◇',accessoryRight:'◇',hat:'♢',face:'◉',mouth:'◆',main:'†',offhand:'◐'}[slot]||'◆';}
-function inventoryCategory(id){return inventoryCategoryFor(id)}
-function itemInfo(id){const skill=SKILLS_V2[id],meta=inventoryItemMeta(id);if(skill&&meta.tags.includes('skill-core'))return `Skill Core: ${skill.name}.`;return ITEM_INFO[id]||(meta.category==='Blueprint'?'Equipment blueprint used for crafting.':meta.category==='Crafting Mat'?'Crafting material.':meta.category==='Upgrading Mat'?'Upgrade material.':'Adventure item.');}
-
-function renderSettings(body){body.innerHTML='<div class="settings-panel"><h3>ACCOUNT</h3><p class="window-note">Reset Account permanently deletes this browser\'s Bunny World character, then starts a new game.</p><button class="danger-button" type="button" data-reset-account>RESET ACCOUNT</button></div>';body.querySelector('[data-reset-account]').onclick=()=>{if(!confirm('Reset your Bunny World account? All character progress, inventory, equipment and skills on this browser will be permanently deleted.'))return;if(!confirm('Are you sure? This cannot be undone.'))return;try{localStorage.removeItem(SAVE_KEY);}catch{}location.reload();};}
-// GM event multipliers (dev-only button). Applies to rewards through ArenaV2Adapter.setGmEventMultipliers.
-const gmEvent={enabled:false,exp:2,weaponExp:2,drop:2,gold:2,upgradeItem:2,blueprint:2};
-function applyGmEvent(){const on=gmEvent.enabled;sim.setGmEventMultipliers({exp:on?gmEvent.exp:1,weaponExp:on?gmEvent.weaponExp:1,drop:on?gmEvent.drop:1,gold:on?gmEvent.gold:1,upgradeItem:on?gmEvent.upgradeItem:1,blueprint:on?gmEvent.blueprint:1});}
-function renderGmEventPanel(title,body){title.textContent='GM EVENT CONTROL';const rows=[['exp','CHAR EXP'],['weaponExp','WEAPON EXP'],['drop','DROP'],['gold','GOLD'],['upgradeItem','UPGRADE ITEM'],['blueprint','BLUEPRINT']];body.innerHTML=`<div class="gm-panel"><div class="gm-master"><div><strong>EVENT MODE</strong><small>${gmEvent.enabled?'LIVE':'OFF'}</small></div><label class="gm-switch"><input id="gm-master" data-gm-master type="checkbox" ${gmEvent.enabled?'checked':''}><span></span></label></div><p class="window-note">Set each reward multiplier independently from ×2 to ×10.</p><div class="gm-toggle-list">${rows.map(([k,l])=>`<label><span>${l}</span><div class="gm-multiplier-control"><button type="button" data-gm-minus="${k}">−</button><strong>×${gmEvent[k]}</strong><button type="button" data-gm-plus="${k}">+</button></div></label>`).join('')}</div></div>`;const again=()=>{applyGmEvent();renderGmEventPanel(title,body);};body.querySelector('[data-gm-master]').onchange=e=>{gmEvent.enabled=e.target.checked;again();};body.querySelectorAll('[data-gm-minus]').forEach(b=>b.onclick=()=>{gmEvent[b.dataset.gmMinus]=Math.max(2,gmEvent[b.dataset.gmMinus]-1);again();});body.querySelectorAll('[data-gm-plus]').forEach(b=>b.onclick=()=>{gmEvent[b.dataset.gmPlus]=Math.min(10,gmEvent[b.dataset.gmPlus]+1);again();});}
-if(import.meta.env.DEV){const gm=document.createElement('button');gm.dataset.window='GM Event';gm.type='button';gm.innerHTML='GM<span>Event</span>';document.querySelector('.quick-menu')?.insertBefore(gm,document.getElementById('sfx-toggle'));}
-// Gear / Inventory, item detail, upgrade modules and Character Status: ported verbatim from the
-// arena prototype (iso-arena-draft/poc.js) so both games share one UI. Only references were renamed.
-const equipmentPanel=document.createElement('section');equipmentPanel.className='equipment-panel';equipmentPanel.hidden=true;equipmentPanel.style.zIndex='60'; // above the auto-hunt pill and HUD, below the item modal (80)
-const equipmentDetailModal=document.getElementById('equipment-detail-modal');
-(document.getElementById('game-ui')||document.body).append(equipmentPanel);
-// The auto-hunt pill sits in its own stacking layer; hide it while the Gear panel covers the screen.
-new MutationObserver(()=>{const t=document.getElementById('autohunt-toggle');if(t)t.style.visibility=equipmentPanel.hidden?'':'hidden';}).observe(equipmentPanel,{attributes:true,attributeFilter:['hidden']});
-const gameUi={pendingStats:{}};
-const gameWindow=document.getElementById('game-window'),gameWindowTitle=document.getElementById('game-window-title'),gameWindowBody=document.getElementById('game-window-body');
-function equipmentAction(command){
-  try{
-    const selectedId=equipmentUi.selectedId;
-    const keepUpgradeModal=(command.type==='enhance'||command.type==='refine'||command.type==='addOption'||command.type==='reoption')&&selectedId&& !equipmentDetailModal.hidden;
-    const result=sim.equipmentCommand(command);saveCharacter(sim.character);
-    // Presentation state must follow the authoritative build immediately; previously it only refreshed on page load.
-    if(command.type==='refine')showRefineResult(result.refineSuccess===true);
-    // Keep the same item and upgrade view open after Enhance/Refine so repeated attempts need one click only.
-    if((command.type==='enhance'||command.type==='refine'||command.type==='addOption'||command.type==='reoption')&&selectedId&&sim.character.equipment.instances[selectedId]){
-      equipmentUi.selectedId=selectedId;renderEquipmentUi();
-      const item=sim.character.equipment.instances[selectedId],detail=equipmentPanel.querySelector('.rpg-detail-panel');
-      const upgradeMode=command.type==='refine'?'refine':(command.type==='addOption'||command.type==='reoption')?'option':'enhance';if(keepUpgradeModal){equipmentDetailModal.innerHTML=`<button class="rpg-modal-close" type="button" aria-label="Close">×</button><div class="equipment-detail-card">${upgradeHtml(item,sim.character,upgradeMode)}</div>`;equipmentDetailModal.hidden=false;equipmentDetailModal.querySelector('.rpg-modal-close').onclick=()=>equipmentDetailModal.hidden=true;bindEquipmentActionButtons(equipmentDetailModal);}else if(detail){detail.innerHTML=upgradeHtml(item,sim.character,upgradeMode);bindEquipmentActionButtons();}
-    }else{equipmentUi.selectedId=null;renderEquipmentUi();if(command.type==='equip'&&!equipmentDetailModal.hidden)equipmentDetailModal.hidden=true;}
-  }catch(error){showEquipmentError(String(error?.message||error));}
-}
-function showEquipmentError(message){let toast=document.querySelector('.equipment-result-toast');if(!toast){toast=document.createElement('div');toast.className='equipment-result-toast error';(document.getElementById('game-ui')||document.body).append(toast);}toast.className='equipment-result-toast error show';toast.textContent=message;clearTimeout(showEquipmentError.timer);showEquipmentError.timer=setTimeout(()=>toast.classList.remove('show'),1500);}
-function showCraftSuccess(item){
- const c=sim.character;
- equipmentUi.selectedId=item.id;
- equipmentDetailModal.innerHTML=`<button class="rpg-modal-close" type="button" aria-label="Close">×</button><div class="equipment-detail-card craft-success-card"><div class="craft-success-heading">CRAFT SUCCEEDED!</div>${itemDetailHtml(item,c,false)}</div>`;
- equipmentDetailModal.hidden=false;
- equipmentDetailModal.querySelector('.rpg-modal-close').onclick=()=>equipmentDetailModal.hidden=true;
- bindEquipmentActionButtons(equipmentDetailModal);
-}
-function showBatchCraftResults(items,name){let page=0;const pages=[];for(let i=0;i<items.length;i+=10)pages.push(items.slice(i,i+10));const render=()=>{const batch=pages[page],summary=Object.entries(items.reduce((a,x)=>(a[x.rarity]=(a[x.rarity]||0)+1,a),{})).map(([r,n])=>`${r.toUpperCase()} ×${n}`).join(' · ');equipmentDetailModal.innerHTML=`<div class="batch-craft-result"><small>BATCH CRAFT · ${name}</small><h2>REVEAL ${page+1}/${pages.length}</h2><div class="batch-craft-grid">${batch.map(x=>`<div class="batch-craft-drop rarity-${x.rarity}"><span>${iconHtml(x.templateId,'equipment',gearGlyph(x.slot))}</span><strong>${x.rarity.toUpperCase()}</strong></div>`).join('')}</div><p>${summary}</p><button data-batch-next>${page<pages.length-1?'NEXT ×10':'DONE'}</button></div>`;equipmentDetailModal.hidden=false;equipmentDetailModal.querySelector('[data-batch-next]').onclick=()=>{if(page<pages.length-1){page++;render();}else equipmentDetailModal.hidden=true;};};render();}
-function showRefineResult(success){let toast=document.querySelector('.equipment-result-toast');if(!toast){toast=document.createElement('div');toast.className='equipment-result-toast';(document.getElementById('game-ui')||document.body).append(toast);}toast.className='equipment-result-toast '+(success?'success':'fail')+' show';toast.innerHTML=success?'<strong>REFINE SUCCEEDED!</strong><span>Refinement level increased</span>':'<strong>REFINE FAILED</strong><span>Refinement did not succeed</span>';clearTimeout(showRefineResult.timer);showRefineResult.timer=setTimeout(()=>toast.classList.remove('show'),1400);}
-function gearTile(item,c,equipped=false,emptySlot=''){
-  if(!item)return `<button class="rpg-gear-tile empty" data-empty-slot="${emptySlot}" title="Craft equipment for ${emptySlot}"><span class="gear-glyph">＋</span></button>`;
-  // Equipped accessories can originate from the opposite accessory template; progression belongs to the occupied slot, not item.slot.
-  const progressionSlot=equipped&&emptySlot?emptySlot:item.slot;
-  const enhance=c.equipment.enhancementBySlot?.[progressionSlot]??0,refine=c.equipment.refinementBySlot?.[progressionSlot]??0;
-  const progression=equipped?`<span class="enhance-mark">+${enhance}</span><span class="refine-mark">+${refine}</span>`:'';
-  const select=batchDestroyUi.active&&!equipped,checked=select&&batchDestroyUi.selected.has(item.id);
-  return `<button class="rpg-gear-tile rarity-${item.rarity} ${equipped?'equipped':''} ${checked?'batch-selected':''}" data-id="${item.id}" title="${prettyItem(item.templateId)}">${select?`<span class="batch-check">${checked?'✓':'○'}</span>`:''}${progression}<span class="gear-glyph">${iconHtml(item.templateId,'equipment',gearGlyph(item.slot))}</span></button>`;
-}
-function equippedSlotForItem(item,c){return Object.entries(c.equipment.equippedBySlot).find(([,id])=>id===item.id)?.[0]??item.slot;}
-function itemDetailHtml(item,c,equipped){
-  const progressionSlot=equipped?equippedSlotForItem(item,c):item.slot;
-  const enhance=c.equipment.enhancementBySlot?.[progressionSlot]??0,refine=c.equipment.refinementBySlot?.[progressionSlot]??0,base=item.baseCombat||{},rarityMultiplier=equipmentRarityStatMultiplier(item.rarity);
-  const stat=Object.entries(base).map(([k,v])=>`<span>${k.toUpperCase()} <b>${Math.round(Number(v)*rarityMultiplier)}</b></span>`).join('')||'<span>Starter equipment</span>';
-  const utility=UTILITY_EQUIPMENT_V2[item.templateId],source=utility?Object.values(MONSTERS_V2).filter(m=>(m.loot.equipmentDrops??[]).some(d=>d.itemId===item.templateId)).map(m=>m.name).join(', '):'';
-  const template=EQUIPMENT_MASTER_V2[item.templateId],displayName=template?.name||prettyItem(item.templateId),set= item.setId?CRAFT_SET_BY_ID.get(item.setId):null,setCount=set?Math.min(set.requiredPieces,equippedSetCount(item.setId,c)):0,setActive=Boolean(set&&setCount>=set.requiredPieces),setHtml=set?`<div class="equipment-set-status ${setActive?'set-active':'set-inactive'}"><div><strong>${displayName.split(' ')[0]} Set</strong><b>${setCount}/${set.requiredPieces}</b></div>${set.effect.map(effect=>`<p>◆ ${effect}</p>`).join('')}</div>`:'';
-  const detailStats=Object.entries(base).filter(([,v])=>Number(v)!==0).map(([k,v])=>`<div><span>${({maxHp:'HP',maxSp:'SP'}[k]||k.toUpperCase())}</span><b>+${Math.round(Number(v)*rarityMultiplier)}</b></div>`).join('')||'<div><span>Base Stats</span><b>—</b></div>';
-  const optionText=item.affixes.length?item.affixes.join(' · '):'No bonus options';
-  return `<div class="equip-inspect"><div class="equip-inspect-preview">${gearTile(item,c,equipped)}</div><div class="equip-inspect-title"><h2>${displayName}</h2><span class="tier-chip">T${template?.tier??'?'} · ${prettyItem(item.slot)}</span></div><div class="craft-tags"><span>Lv ${item.requiredLevel??1}+</span><span class="rarity-label rarity-${item.rarity}">${item.rarity.toUpperCase()}</span>${template?.role?`<span>${template.role.toUpperCase()}</span>`:''}</div>${utility?`<p class="window-note">${utility.description}</p>`:''}<div class="craft-stat-box equip-stat-box"><h3>ITEM STATS</h3>${detailStats}</div><div class="equip-option-box"><h3>OPTIONS</h3><p>${optionText}</p></div>${setHtml}${source?`<div class="equip-source">Source <b>${source}</b></div>`:''}${equipped&&!utility?`<div class="equip-progression"><div><span>ENHANCEMENT</span><b>+${enhance}</b></div><div><span>REFINEMENT</span><b>+${refine}</b></div></div>`:utility?'<div class="equip-source">Acquisition <b>DROP ONLY</b></div>':''}<div class="rpg-detail-actions">${equipped?`<button data-open-upgrade="${item.id}" data-upgrade-mode="enhance">ENHANCE</button><button data-open-upgrade="${item.id}" data-upgrade-mode="refine">REFINE</button><button data-open-upgrade="${item.id}" data-upgrade-mode="option">OPTION</button><button data-unequip="${progressionSlot}">UNEQUIP</button>`:`<button data-equip-now="${item.id}">EQUIP</button><button data-destroy="${item.id}">DESTROY</button>`}</div></div>`;
-}
-function upgradeHtml(item,c,mode='enhance'){
-  const slot=equippedSlotForItem(item,c),enhance=c.equipment.enhancementBySlot?.[slot]??0,refine=c.equipment.refinementBySlot?.[slot]??0;
-  const nextEnhance=enhance+1,category=progressionCategory(slot,item.offhandType);
-  let req=null;try{if(nextEnhance<=c.level)req=enhancementRequirement(item.baseGoldCost,nextEnhance);}catch{}
-  const utilityEnhance=slot==='hat'?'EXP +0.1% (multiplicative)':slot==='face'?'Drop +0.1% (multiplicative)':slot==='mouth'?'EXP +0.05% · Drop +0.05% (multiplicative)':'Utility';
-  const enhanceGain=category==='offensive'?'ATK +2 · MATK +2':category==='defensive'?'DEF +1 · MDEF +1':utilityEnhance;
-  const refineGain=category==='offensive'?'Character ATK +0.5% · MATK +0.5%':category==='defensive'?'Character DEF +0.5% · MDEF +0.5% · Max HP +0.5%':'ASPD +0.05 · Cast SPD +0.05 · CRI DMG +0.3% · Element DMG +0.3%';
-  const target=refine+1,rate=refine<15?Math.round(REFINE_SUCCESS[refine]*100):0,astraliteNeed=refine<15?astraliteCost(target):0,astraliteHave=c.inventory.astraliteStone??0,canRefine=refine<15&&astraliteHave>=astraliteNeed;
-  const enhanceStatus=enhance>=120?'Maximum enhancement reached':nextEnhance>c.level?`Requires Hero Lv. ${nextEnhance}`:req?`${prettyItem(req.stoneId)} ×${req.stoneQty}<br>Gold ${req.gold}`:'Enhancement unavailable';
-  const tabs=`<div class="upgrade-module-tabs"><button data-switch-upgrade="enhance" class="${mode==='enhance'?'active':''}">ENHANCE</button><button data-switch-upgrade="refine" class="${mode==='refine'?'active':''}">REFINE</button><button data-switch-upgrade="option" class="${mode==='option'?'active':''}">OPTION</button></div>`;
-  let body='';
-  if(mode==='refine') body=`<section class="upgrade-module"><h3>REFINE</h3><div class="upgrade-level">+${refine} <i>→</i> +${Math.min(target,15)}</div><p class="upgrade-gain"><strong>Next refinement:</strong> ${refineGain}</p><p>${refine<15?`Success ${rate}%<br>Astralite ${astraliteHave} / ${astraliteNeed}`:'Maximum refinement reached'}</p><button data-refine="${slot}" ${canRefine?'':'disabled'}>REFINE</button></section>`;
-  else if(mode==='option') body=`<section class="upgrade-module option-module"><h3>OPTIONS</h3><div class="current-options">${item.affixes.length?item.affixes.map((a,i)=>`<span><b>${i+1}</b>${prettyItem(a)}</span>`).join(''):'<p>No options yet</p>'}</div><div class="option-module-actions"><div><strong>ADD OPTION</strong><small>Option Stone · ${c.inventory.optionStone??0}</small><button data-add-option="${item.id}">ADD</button></div><div><strong>RE-OPTION</strong><small>Re-option Stone · ${c.inventory.reoptionStone??0}</small><button data-reoption="${item.id}" ${item.affixes.length?'':'disabled'}>RE-OPTION</button></div></div></section>`;
-  else body=`<section class="upgrade-module"><h3>ENHANCE</h3><div class="upgrade-level">+${enhance} <i>→</i> +${Math.min(nextEnhance,120)}</div><p class="upgrade-gain"><strong>Next upgrade:</strong> ${enhanceGain}</p><p>${enhanceStatus}</p><button data-enhance="${slot}" ${req&&enhance<120?'':'disabled'}>ENHANCE</button></section>`;
-  return `<button class="rpg-back" data-back-detail="${item.id}">‹ ITEM DETAIL</button><div class="upgrade-title"><strong>${prettyItem(item.templateId)}</strong><span>${prettyItem(slot)}</span></div>${tabs}<div class="upgrade-module-host">${body}</div>`;
-}
-function masterRefinementCard(c){
-  const gear=equipmentCombatTotals(c),levels=Object.entries(c.equipment.equippedBySlot).filter(([,id])=>Boolean(id)).map(([slot])=>c.equipment.refinementBySlot?.[slot]??0);
-  const active=gear.masterRefinement,next=active<5?5:active<10?10:active<15?15:null,target=next??15,count=levels.filter(level=>level>=target).length;
-  const bonus=active===15?'ATK +800 · MATK +800 · HP +1500 · SP +500':active===10?'ATK +400 · MATK +400 · HP +900 · SP +300':active===5?'ATK +200 · MATK +200 · HP +500 · SP +200':'Refine 6 equipped slots to +5';
-  const badge=active?`+${active}`:'—',status=next?`${Math.min(count,6)}/6 slots ≥ +${next}`:'MAXIMUM';
-  return `<div class="master-refinement-card ${active?'active':'inactive'}"><div class="master-refinement-top"><span class="master-refinement-badge">${badge}</span><div><strong>MASTER REFINEMENT</strong><small>${active?`Tier +${active} active`:'Inactive'}</small></div><b>${status}</b></div><div class="master-refinement-bonus">${bonus}</div>${next?`<div class="master-refinement-track"><i style="width:${Math.min(100,(count/6)*100)}%"></i></div>`:''}</div>`;
-}
-function renderEquipmentUi(){
-  const c=sim.character,tabs=['Gear','Crafting Mat','Upgrading Mat','Blueprint','Skill Core','Quest','Misc'];
-  const equippedIds=new Set(Object.values(c.equipment.equippedBySlot).filter(Boolean));
-  const inventoryGear=Object.values(c.equipment.instances).filter(x=>!equippedIds.has(x.id));
-  equipmentPanel.innerHTML=`<button class="rpg-modal-close" type="button" aria-label="Close">×</button><div class="rpg-equipment-shell"><div class="rpg-equip-side"><div class="rpg-screen-title"><strong>GEAR</strong><span>Equipment</span></div><div class="rpg-character-stage"><div class="gear-column left">${['hat','mouth','main','cape','accessoryLeft'].map(slot=>{const id=c.equipment.equippedBySlot[slot];return gearTile(id&&c.equipment.instances[id],c,true,slot)}).join('')}</div><div class="character-silhouette"><span>🐰</span><strong>${c.name}</strong><small>LV. ${c.level}</small>${masterRefinementCard(c)}</div><div class="gear-column right">${['face','armor','offhand','shoes','accessoryRight'].map(slot=>{const id=c.equipment.equippedBySlot[slot];return gearTile(id&&c.equipment.instances[id],c,true,slot)}).join('')}</div></div><div class="rpg-detail-panel"></div></div><div class="rpg-inventory-side"><div class="rpg-screen-title"><strong>INVENTORY</strong><span>${inventoryGear.length} gear · ${c.gold} G</span></div><div class="inventory-tabs">${tabs.map(t=>`<button data-tab="${t}" class="${equipmentUi.tab===t?'active':''}">${t}</button>`).join('')}</div>${equipmentUi.tab==='Gear'?`<div class="batch-destroy-bar"><button data-batch-mode class="${batchDestroyUi.active?'active':''}">${batchDestroyUi.active?'CANCEL SELECT':'BATCH DESTROY'}</button>${batchDestroyUi.active?`<button data-select-visible>SELECT ALL FILTERED</button><button data-destroy-selected ${batchDestroyUi.selected.size?'':'disabled'}>DESTROY SELECTED (${batchDestroyUi.selected.size})</button>`:''}</div><div class="gear-filters"><div class="gear-filter-row"><span>TIER</span>${['all','1','2','3','4','5'].map(t=>`<button data-gear-tier="${t}" class="${equipmentUi.tier===t?'active':''}">${t==='all'?'ALL':'T'+t}</button>`).join('')}</div><div class="gear-filter-row gear-slot-filter"><span>PART</span>${GEAR_SLOT_FILTERS.map(([id,label])=>`<button data-gear-slot="${id}" class="${equipmentUi.slot===id?'active':''}">${label}</button>`).join('')}</div></div>`:''}<div class="inventory-grid"></div></div></div>`;
-  const grid=equipmentPanel.querySelector('.inventory-grid');
-  if(equipmentUi.tab==='Gear'){const visibleGear=inventoryGear.filter(gearMatchesFilter);grid.innerHTML=visibleGear.length?visibleGear.map(x=>gearTile(x,c,false)).join(''):'<div class="inventory-empty">No gear matches these filters</div>';grid.scrollTop=0;}
-  else{const entries=Object.entries(c.inventory).filter(([id])=>inventoryCategory(id)===equipmentUi.tab);grid.innerHTML=entries.length?entries.map(([id,qty])=>`<button class="rpg-item-tile" data-item-info="${id}"><span class="item-glyph">${iconHtml(id,'item','◆')}</span><strong>${prettyItem(id)}</strong><b>${qty}</b></button>`).join(''):'<div class="inventory-empty">No items in this category</div>';}
-  equipmentPanel.querySelector('.rpg-modal-close')?.addEventListener('click',()=>equipmentPanel.hidden=true);
-  equipmentPanel.querySelectorAll('[data-item-info]').forEach(el=>el.onclick=()=>{const id=el.dataset.itemInfo,qty=c.inventory[id]??0,meta=inventoryItemMeta(id),skill=SKILLS_V2[id];const mod=SKILL_MODIFIERS_V2[id];const coreActions=meta.tags.includes('skill-core')?(skill?.kind==='movement'?'<button data-equip-movement-core="'+id+'">EQUIP MOVEMENT</button>':'<div class="core-equip-actions"><button data-equip-core="'+id+'" data-core-slot="0">EQUIP CORE 1</button><button data-equip-core="'+id+'" data-core-slot="1">EQUIP CORE 2</button><button data-equip-core="'+id+'" data-core-slot="2">EQUIP CORE 3</button></div>'):'';equipmentDetailModal.innerHTML=`<button class="rpg-modal-close" type="button" aria-label="Close">×</button><div class="equipment-detail-card"><div class="rpg-detail-head"><div class="rpg-item-tile"><span class="item-glyph">${iconHtml(id,'item','◆')}</span></div><div><strong>${prettyItem(id)}</strong><small>${meta.category.toUpperCase()} · ×${qty}</small></div></div>${skill&&meta.tags.includes('skill-core')?skillDetailHtml(id):mod?`<div class="skill-detail-block"><div class="skill-detail-title"><strong>${mod.name}</strong><span>SKILL MOD</span></div><p>${mod.description}</p><p class="skill-formula">Equip this Mod into MOD 1 or MOD 2 of an installed Skill Core. Its effect is applied by the authoritative combat simulation.</p></div>`:`<p class="item-description">${itemInfo(id)}</p>`}${coreActions}</div>`;equipmentDetailModal.hidden=false;equipmentDetailModal.querySelector('.rpg-modal-close').onclick=()=>equipmentDetailModal.hidden=true;equipmentDetailModal.querySelectorAll('[data-equip-core]').forEach(b=>b.onclick=()=>{sim.skillCoreCommand({type:'equipCore',coreId:b.dataset.equipCore,slot:Number(b.dataset.coreSlot)});saveCharacter(sim.character);equipmentDetailModal.hidden=true;syncHotbar();renderEquipmentUi();renderSkillsHub();});equipmentDetailModal.querySelectorAll('[data-equip-movement-core]').forEach(b=>b.onclick=()=>{sim.skillCoreCommand({type:'equipMovementCore',coreId:b.dataset.equipMovementCore});saveCharacter(sim.character);equipmentDetailModal.hidden=true;renderEquipmentUi();});});
-  equipmentPanel.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{equipmentDetailModal.hidden=true;equipmentDetailModal.replaceChildren();equipmentUi.tab=b.dataset.tab;equipmentUi.selectedId=null;renderEquipmentUi();});
-  equipmentPanel.querySelectorAll('[data-gear-tier]').forEach(b=>b.onclick=()=>{equipmentUi.tier=b.dataset.gearTier;equipmentUi.selectedId=null;renderEquipmentUi();});
-  equipmentPanel.querySelectorAll('[data-gear-slot]').forEach(b=>b.onclick=()=>{equipmentUi.slot=b.dataset.gearSlot;equipmentUi.selectedId=null;renderEquipmentUi();});
-  equipmentPanel.querySelector('[data-batch-mode]')?.addEventListener('click',()=>{batchDestroyUi.active=!batchDestroyUi.active;batchDestroyUi.selected.clear();equipmentUi.selectedId=null;renderEquipmentUi();});
-  equipmentPanel.querySelector('[data-select-visible]')?.addEventListener('click',()=>{inventoryGear.filter(gearMatchesFilter).forEach(x=>batchDestroyUi.selected.add(x.id));renderEquipmentUi();});
-  equipmentPanel.querySelector('[data-destroy-selected]')?.addEventListener('click',()=>{const ids=[...batchDestroyUi.selected].filter(id=>sim.character.equipment.instances[id]);if(!ids.length)return;if(!confirm(`Destroy ${ids.length} selected gear? This cannot be undone.`))return;let destroyed=0;for(const id of ids){try{sim.equipmentCommand({type:'dismantle',equipmentId:id});destroyed++;}catch{}}saveCharacter(sim.character);batchDestroyUi.selected.clear();batchDestroyUi.active=false;pushRewardLine(`Destroyed ${destroyed} gear`);renderEquipmentUi();});
-  equipmentPanel.querySelectorAll('[data-empty-slot]').forEach(el=>el.onclick=()=>{const slot=el.dataset.emptySlot;craftUi.type=slot==='main'?'Weapon':slot==='offhand'?'Offhand':slot==='armor'?'Armor':slot==='cape'?'Cape':slot==='shoes'?'Shoes':slot==='accessoryLeft'||slot==='accessoryRight'?'Accessory':'Weapon';equipmentPanel.hidden=true;openBasicWindow('Craft');});
-  equipmentPanel.querySelectorAll('[data-id]').forEach(el=>el.onclick=()=>{if(batchDestroyUi.active){const id=el.dataset.id;if(batchDestroyUi.selected.has(id))batchDestroyUi.selected.delete(id);else batchDestroyUi.selected.add(id);renderEquipmentUi();return;}equipmentUi.selectedId=el.dataset.id;const item=c.equipment.instances[equipmentUi.selectedId];if(!item)return;equipmentDetailModal.innerHTML=`<button class="rpg-modal-close" type="button" aria-label="Close">×</button><div class="equipment-detail-card">${itemDetailHtml(item,c,equippedIds.has(item.id))}</div>`;equipmentDetailModal.hidden=false;equipmentDetailModal.querySelector('.rpg-modal-close').onclick=()=>equipmentDetailModal.hidden=true;bindEquipmentActionButtons(equipmentDetailModal);});
-  if(equipmentUi.selectedId&&c.equipment.instances[equipmentUi.selectedId]){const item=c.equipment.instances[equipmentUi.selectedId];equipmentPanel.querySelector('.rpg-detail-panel').innerHTML=itemDetailHtml(item,c,equippedIds.has(item.id));}
-  bindEquipmentActionButtons();
-}
-function confirmDestroyEquipment(itemId,root=equipmentPanel){
-  const item=sim.character.equipment.instances[itemId];if(!item)return;
-  const host=root===equipmentDetailModal?root.querySelector('.equipment-detail-card'):equipmentPanel.querySelector('.rpg-detail-panel');if(!host)return;
-  host.innerHTML=`<div class="destroy-confirm"><strong>Are you sure you want to destroy?</strong><p>${prettyItem(item.templateId)} will be permanently destroyed.</p><div class="rpg-detail-actions"><button data-confirm-destroy="${item.id}">YES</button><button data-cancel-destroy="${item.id}">NO</button></div></div>`;
-  host.querySelector('[data-cancel-destroy]')?.addEventListener('click',()=>{host.innerHTML=itemDetailHtml(item,sim.character,false);bindEquipmentActionButtons(root);});
-  host.querySelector('[data-confirm-destroy]')?.addEventListener('click',()=>{
-    try{
-      sim.equipmentCommand({type:'dismantle',equipmentId:item.id});saveCharacter(sim.character);
-      host.innerHTML='<div class="destroy-confirm destroyed"><strong>DESTROYED</strong></div>';
-      equipmentUi.selectedId=null;renderEquipmentUi();
-      setTimeout(()=>{if(root===equipmentDetailModal)equipmentDetailModal.hidden=true;},550);
-    }catch(error){showEquipmentError(String(error?.message||error));}
-  });
-}
-
-function bindEquipmentActionButtons(root=equipmentPanel){
-  root.querySelectorAll('[data-equip-now]').forEach(b=>b.onclick=()=>{const id=b.dataset.equipNow,item=sim.character.equipment.instances[id];if(item&&(item.slot==='accessoryLeft'||item.slot==='accessoryRight')){const slots=sim.character.equipment.equippedBySlot;const target=!slots.accessoryLeft?'accessoryLeft':!slots.accessoryRight?'accessoryRight':item.slot;equipmentAction({type:'equip',equipmentId:id,targetSlot:target});}else equipmentAction({type:'equip',equipmentId:id});});
-  root.querySelectorAll('[data-unequip]').forEach(b=>b.onclick=()=>equipmentAction({type:'unequip',slot:b.dataset.unequip}));
-  root.querySelectorAll('[data-destroy]').forEach(b=>b.onclick=()=>confirmDestroyEquipment(b.dataset.destroy,root));
-  root.querySelectorAll('[data-open-upgrade]').forEach(b=>b.onclick=()=>{const item=sim.character.equipment.instances[b.dataset.openUpgrade];const host=root===equipmentDetailModal?root.querySelector('.equipment-detail-card'):equipmentPanel.querySelector('.rpg-detail-panel');host.innerHTML=upgradeHtml(item,sim.character,b.dataset.upgradeMode||'enhance');bindEquipmentActionButtons(root);});
-  root.querySelectorAll('[data-switch-upgrade]').forEach(b=>b.onclick=()=>{const itemId=equipmentUi.selectedId;const item=sim.character.equipment.instances[itemId];if(!item)return;const host=root===equipmentDetailModal?root.querySelector('.equipment-detail-card'):equipmentPanel.querySelector('.rpg-detail-panel');host.innerHTML=upgradeHtml(item,sim.character,b.dataset.switchUpgrade);bindEquipmentActionButtons(root);});
-  root.querySelectorAll('[data-back-detail]').forEach(b=>b.onclick=()=>{const item=sim.character.equipment.instances[b.dataset.backDetail];const host=root===equipmentDetailModal?root.querySelector('.equipment-detail-card'):equipmentPanel.querySelector('.rpg-detail-panel');host.innerHTML=itemDetailHtml(item,sim.character,true);bindEquipmentActionButtons(root);});
-  root.querySelectorAll('[data-enhance]').forEach(b=>b.onclick=()=>equipmentAction({type:'enhance',slot:b.dataset.enhance}));
-  root.querySelectorAll('[data-refine]').forEach(b=>b.onclick=()=>equipmentAction({type:'refine',slot:b.dataset.refine}));
-  root.querySelectorAll('[data-add-option]').forEach(b=>b.onclick=()=>equipmentAction({type:'addOption',equipmentId:b.dataset.addOption}));
-  root.querySelectorAll('[data-reoption]').forEach(b=>b.onclick=()=>equipmentAction({type:'reoption',equipmentId:b.dataset.reoption,lockedIndexes:[]}));
-}
-function openCharacterWindow(){const c=sim.character;let statEditGuardUntil=0;gameWindow.hidden=false;gameWindowTitle.textContent='CHARACTER STATUS';const stats=['str','agi','vit','int','dex','luk'];gameUi.pendingStats={};const render=()=>{const used=Object.values(gameUi.pendingStats).reduce((a,v)=>a+v,0),remaining=c.unspentStatPoints-used,preview={...c.stats};for(const s of stats)preview[s]+=gameUi.pendingStats[s]||0;const p=sim.simulation.world.players.get(sim.playerId);const d={ATK:Math.round(p.weaponAtk+preview.str+preview.str*preview.str/100+preview.dex/5+preview.luk/3),MATK:Math.round(p.weaponMatk+preview.int+preview.int*preview.int/100+preview.dex/5+preview.luk/3),DEF:Math.round(p.equipmentDef+preview.vit/2),MDEF:Math.round(p.equipmentMdef+preview.int/2+preview.vit/4),HIT:175+c.level+preview.dex+p.hitBonus,FLEE:100+c.level+preview.agi+p.fleeBonus,CRIT:(1+preview.luk*.3+p.critBonusPercent).toFixed(1)+'%',ASPD:Math.floor(150+preview.agi*.25+preview.dex*.1+p.equipmentAspd),HP:100+c.level*12+preview.vit*10};gameWindowBody.innerHTML='<p class="window-note">Lv. '+c.level+' · Status Point: <b>'+remaining+'</b></p><div class="character-status-columns"><section><h3>STATUS</h3>'+stats.map(s=>'<div class="stat-row"><span><strong>'+s.toUpperCase()+'</strong><b>'+preview[s]+'</b></span>'+(remaining>0?'<button data-stat-plus="'+s+'">+</button>':'')+'</div>').join('')+'</section><section><h3>DETAIL STATUS</h3>'+Object.entries(d).map(([k,v])=>'<div class="detail-stat-row"><span>'+k+'</span><b>'+v+'</b></div>').join('')+'</section></div><div class="equipment-actions"><button id="stats-confirm" type="button" aria-disabled="'+(used<=0)+'">Confirm</button><button id="stats-reset">Reset</button></div>';gameWindowBody.querySelectorAll('[data-stat-plus]').forEach(b=>b.onclick=e=>{e.preventDefault();e.stopPropagation();if(remaining<=0)return;statEditGuardUntil=performance.now()+350;gameUi.pendingStats[b.dataset.statPlus]=(gameUi.pendingStats[b.dataset.statPlus]||0)+1;render();});const confirm=gameWindowBody.querySelector('#stats-confirm');if(confirm)confirm.onclick=e=>{e.preventDefault();e.stopPropagation();if(performance.now()<statEditGuardUntil)return;const allocation={...gameUi.pendingStats};if(!Object.values(allocation).some(v=>v>0))return;if(sim.allocateStats(allocation)){saveCharacter(sim.character);gameUi.pendingStats={};openCharacterWindow();}};gameWindowBody.querySelector('#stats-reset').onclick=()=>{gameUi.pendingStats={};render();};};render();}
-function openBasicWindow(name){
-  const win=document.getElementById('game-window'),title=document.getElementById('game-window-title'),body=document.getElementById('game-window-body');
-  if(!win||!title||!body)return;win.hidden=false;title.textContent=name;equipmentPanel.hidden=true;
-  const c=sim.character,p=sim.simulation.world.players.get(sim.playerId);
-  if(name==='Inventory'){equipmentUi.tab='Gear';equipmentUi.selectedId=null;renderEquipmentUi();win.hidden=true;equipmentPanel.hidden=false;return;}
-  if(name==='Skills'){renderSkillsHub();return;}
-  if(name==='Craft'){renderCraftWindow();return;}
-  if(name==='Settings'){renderSettings(body);return;}
-  if(name==='GM Event'){renderGmEventPanel(title,body);return;}
-  if(name==='Monster Index'){renderMonsterIndex({win,title,body,character:c,currentMapId:gameplayMapId,itemInfo,prettyItem});return;}
-}
-function bindProductionUi(){
-  document.querySelectorAll('[data-window]').forEach(b=>b.addEventListener('click',()=>openBasicWindow(b.dataset.window)));
-  document.getElementById('character-hud')?.addEventListener('click',openCharacterWindow);
-  document.getElementById('game-window-close')?.addEventListener('click',()=>{document.getElementById('game-window').hidden=true;});
-  window.addEventListener('keydown',e=>{if(e.code==='KeyI')openBasicWindow('Inventory');if(e.code==='KeyK')openBasicWindow('Skills');if(e.code==='KeyY')openBasicWindow('Craft');if(e.code==='KeyM')openBasicWindow('Monster Index');if(e.key==='Escape'){const detail=document.getElementById('equipment-detail-modal');if(detail&&!detail.hidden){closeDetailModal();return;}if(!equipmentPanel.hidden){equipmentPanel.hidden=true;return;}const w=document.getElementById('game-window');if(w)w.hidden=true;}});
-}
-// Same as the arena prototype: static [data-ui-icon] glyphs are swapped for the pixel UI icons.
-document.querySelectorAll('[data-ui-icon]').forEach(el=>{el.innerHTML=iconHtml(el.dataset.uiIcon,'ui',el.innerHTML,'pixel-icon ui-icon');});
 bindProductionUi();
 const sfxToggle=document.getElementById('sfx-toggle');
 function syncSfxToggle(){if(!sfxToggle)return;sfxToggle.innerHTML=`${combatSFX.enabled?'🔊':'🔇'}<span>${combatSFX.enabled?'Sound':'Muted'}</span>`;sfxToggle.title=combatSFX.enabled?'Mute sound':'Enable sound';}
@@ -519,23 +412,26 @@ let nearbyPortal=null,zoneTransferBusy=false;
 function syncWarpPrompt(player){nearbyPortal=activePortalAt(scene,player);warpPrompt.hidden=!nearbyPortal;if(nearbyPortal)warpPrompt.textContent=`Warp to ${mapTitleV2(nearbyPortal.to)} [E]`;}
 async function performWarp(){if(zoneTransferBusy||!nearbyPortal||!window.__slice)return;zoneTransferBusy=true;cancelCombat();const result=await requestZoneTransfer({fromMap:gameplayMapId,portalId:nearbyPortal.id,scene,player:window.__slice.player});if(result.denied){showUiError(result.reason);zoneTransferBusy=false;return;}combatSFX.playWarp();persistentCharacter={...sim.character,currentMapId:result.map};saveCharacter(persistentCharacter);combatFX.teardown();setRuntimeActors([]);setRuntimeActorUpdater(null);teardown();const url=new URL(location.href);url.searchParams.set('map','forest-combat');if(import.meta.env.DEV)url.searchParams.set('file',result.map);else url.searchParams.delete('file');sessionStorage.setItem('bunny-world-zone-spawn',JSON.stringify(result.spawn));location.replace(url);}
 window.addEventListener('keydown',e=>{if((e.code==='KeyE'||e.code==='Enter')&&nearbyPortal){e.preventDefault();performWarp();}});
-document.querySelectorAll('[data-hotbar-slot]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.skillId;if(!id)return;try{sim.castSkill(id,combatTarget?.id);}catch(e){showUiError(String(e?.message||e));}}));
+document.querySelectorAll('[data-hotbar-slot]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.skillId;if(id)executeCoreSkill(id);}));
+window.addEventListener('keydown',e=>{if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement)return;const slot={Digit1:0,Digit2:1,Digit3:2}[e.code];if(slot===undefined)return;const id=document.querySelector(`[data-hotbar-slot="${slot}"]`)?.dataset.skillId;if(id){e.preventDefault();executeCoreSkill(id);}});
 document.querySelector('[data-hotbar-movement]')?.addEventListener('click',()=>{const id=sim.character.skills.movement;if(!id)return;try{sim.castSkill(id,undefined,undefined,{x:1,y:0});}catch(e){showUiError(String(e?.message||e));}});
 
 
 // ---- chasing: walk straight when the way is clear, otherwise follow an A* route ----
 function giveUpTarget(target){if(autoHunt.on)autoHunt.ban(target.id);nav.clear();cancelCombat();chaseStuck=0;}
+let chaseWindow=null,chaseForceNavUntil=0;
 function chaseTarget(player,target,d,stopRange,dt){
-  const direct=d<200&&canWalkStraight(player.x,player.y,target.x,target.y);
+  // A target on another ground level (up/down a cliff) cannot be fought from here.
+  if(!canEngage(player,target)&&d<260){giveUpTarget(target);return;}
+  const direct=d<200&&performance.now()>=chaseForceNavUntil&&canWalkStraight(player.x,player.y,target.x,target.y);
   if(direct){
     nav.clear();
-    const before=d;
     moveRuntimePlayerToward(target.x,target.y,Math.min(Math.max(0,d-stopRange),125*dt));
-    const after=Math.hypot(target.x-player.x,target.y-player.y);
-    // blocked (tree/rock/cliff between us): give up instead of running on the spot
-    chaseStuck=after<before-.5?0:chaseStuck+dt;
-    if(chaseStuck>1.2)giveUpTarget(target);
-    return;
+    // Sliding along a ledge still shaves a little distance each frame, so judge real progress over
+    // half a second; no progress -> route around with A* (below) instead of running on the spot.
+    const now=performance.now();
+    if(!chaseWindow||chaseWindow.id!==target.id||now-chaseWindow.t>500){if(chaseWindow?.id===target.id&&chaseWindow.d-d<20)chaseForceNavUntil=now+2500;chaseWindow={id:target.id,t:now,d};}
+    if(now>=chaseForceNavUntil)return;
   }
   navReplanIn-=dt;
   if(!nav.active||navReplanIn<=0||!nav.goal||Math.hypot(nav.goal.x-target.x,nav.goal.y-target.y)>120){
@@ -640,3 +536,19 @@ const pendingSpawn=(()=>{try{const v=JSON.parse(sessionStorage.getItem('bunny-wo
 if(pendingSpawn){scene.spawn={x:pendingSpawn.x,y:pendingSpawn.y};playerView.x=pendingSpawn.x;playerView.y=pendingSpawn.y;}
 persistentCharacter={...sim.character,currentMapId:gameplayMapId};saveCharacter(persistentCharacter);
 await boot(scene,{canvasEl:canvas,loadingEl:document.getElementById('loading'),playerSprites:null,playerScale:1,worldScale:1.45,zoom:1});
+// Terrain now exists: scatter the field over the whole map (min gap ~3 tiles) and put the boss in
+// its lair, the walkable spot farthest from the arrival point.
+{
+  buildMainGround();
+  const hero={x:playerView.x,y:playerView.y},taken=[];
+  for(const view of monsterViews){
+    let p;
+    if(view.isBoss){
+      let best=null,bestD=-1;for(let i=0;i<400;i++){const q=randomFieldPoint(null,1);if(!q)continue;const d=Math.hypot(q.x-scene.spawn.x,q.y-scene.spawn.y);if(d>bestD){best=q;bestD=d;}}
+      p=best;
+    }else p=randomFieldPoint(hero,80,taken,128)||randomFieldPoint(hero,80,taken,80)||randomFieldPoint(hero,80);
+    if(!p)continue;taken.push(p);sim.placeMonster(view.id,p);
+    const actor=actors.find(a=>a.view===view);if(actor){actor.x=p.x;actor.y=p.y;}
+  }
+  const boss=monsterViews.find(v=>v.isBoss);if(boss)announceBoss(boss);
+}

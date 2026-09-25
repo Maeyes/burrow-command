@@ -3,12 +3,18 @@
 import { FOREST_ASSET_ROOT, FOREST_MONSTERS, FOREST_BOSSES, FOREST_MAPS } from '../../iso-arena-draft/forestRoster.js';
 import { DESERT_ASSET_ROOT, DESERT_MONSTERS, DESERT_BOSSES, DESERT_MAPS } from '../../iso-arena-draft/desertRoster.js';
 import { MAGMA_ASSET_ROOT, MAGMA_MONSTERS, MAGMA_BOSSES, MAGMA_MAPS } from '../../iso-arena-draft/magmaRoster.js';
+import { SNOW_ASSET_ROOT, SNOW_MONSTERS, SNOW_BOSSES, SNOW_MAPS } from '../../iso-arena-draft/snowRoster.js';
+import { SEA_ASSET_ROOT, SEA_MONSTERS, SEA_BOSSES, SEA_MAPS } from '../../iso-arena-draft/seaRoster.js';
+import { ASGARD_ASSET_ROOT, ASGARD_MONSTERS, ASGARD_BOSSES, ASGARD_MAPS } from '../../iso-arena-draft/asgardRoster.js';
 import { MINE_ASSET_ROOT, MINE_BOSS_ROOT, MINE_MONSTERS, MINE_BOSSES, MINE_MAP } from '../../iso-arena-draft/mineRoster.js';
 
 const SOURCES = {
   forest: { id: 'forest', assetRoot: FOREST_ASSET_ROOT, monsters: FOREST_MONSTERS, bosses: FOREST_BOSSES, maps: FOREST_MAPS },
   desert: { id: 'desert', assetRoot: DESERT_ASSET_ROOT, monsters: DESERT_MONSTERS, bosses: DESERT_BOSSES, maps: DESERT_MAPS },
   magma: { id: 'magma', assetRoot: MAGMA_ASSET_ROOT, monsters: MAGMA_MONSTERS, bosses: MAGMA_BOSSES, maps: MAGMA_MAPS },
+  snow: { id: 'snow', assetRoot: SNOW_ASSET_ROOT, monsters: SNOW_MONSTERS, bosses: SNOW_BOSSES, maps: SNOW_MAPS },
+  underwater: { id: 'underwater', assetRoot: SEA_ASSET_ROOT, monsters: SEA_MONSTERS, bosses: SEA_BOSSES, maps: SEA_MAPS },
+  asgard: { id: 'asgard', assetRoot: ASGARD_ASSET_ROOT, monsters: ASGARD_MONSTERS, bosses: ASGARD_BOSSES, maps: ASGARD_MAPS },
   mine: { id: 'mine', assetRoot: MINE_ASSET_ROOT, monsters: MINE_MONSTERS, bosses: MINE_BOSSES, map: MINE_MAP, bossRoot: MINE_BOSS_ROOT },
 };
 

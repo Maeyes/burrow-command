@@ -14,3 +14,19 @@ export const SKILL_MODIFIERS_V2:Record<string,SkillModifierDefinitionV2>={
  concentratedForce:{id:'concentratedForce',name:'Concentrated Force',description:'Single-target Skill Cores deal +35% damage.'},
 };
 export const skillModifierDefinitions=(ids:readonly string[])=>ids.map(id=>SKILL_MODIFIERS_V2[id]).filter((x):x is SkillModifierDefinitionV2=>Boolean(x));
+
+export function skillModifierCount(ids:readonly string[]|undefined,id:string){
+ return (ids??[]).reduce((n,x)=>n+(x===id?1:0),0);
+}
+
+/**
+ * Duplicate Skill Mods scale the first copy multiplicatively instead of adding another full copy.
+ * Example: 20% + duplicate 20% => 20% * 1.20 = 24%.
+ */
+export function stackedSkillModifierFraction(ids:readonly string[]|undefined,id:string,baseFraction:number){
+ const count=skillModifierCount(ids,id);
+ if(count<=0)return 0;
+ let value=baseFraction;
+ for(let i=1;i<count;i++)value*=1+baseFraction;
+ return value;
+}

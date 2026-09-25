@@ -618,7 +618,19 @@ function drawMinimap(){
   ctx.drawImage(miniBase,cx-mw/2/z,cy-mh/2/z,mw/z,mh/z,x0,y0,mw,mh);
   ctx.imageSmoothingEnabled=false;
   for(const a of actors){
-    if(a.hidden||a.dead)continue;const [x,y]=toMini(a.x,a.y,a.z||0);
+    if(a.hidden||a.dead)continue;
+    let [x,y]=toMini(a.x,a.y,a.z||0);
+    const boss=Boolean(a.isBoss||a.view?.isBoss);
+    if(boss){
+      // Boss remains visible even when outside the current minimap crop: clamp the marker
+      // to the inner edge so the player still knows its direction.
+      x=Math.max(x0+9,Math.min(x0+mw-9,x));y=Math.max(y0+9,Math.min(y0+mh-22,y));
+      const pulse=1+Math.sin(time*5)*.12;
+      ctx.save();ctx.translate(Math.round(x),Math.round(y));ctx.scale(pulse,pulse);
+      ctx.fillStyle='rgba(74,12,15,.92)';ctx.strokeStyle='#ffe184';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,0,7,0,Math.PI*2);ctx.fill();ctx.stroke();
+      ctx.fillStyle='#ffe184';ctx.beginPath();ctx.moveTo(-5,3);ctx.lineTo(-5,-3);ctx.lineTo(-2,0);ctx.lineTo(0,-5);ctx.lineTo(2,0);ctx.lineTo(5,-3);ctx.lineTo(5,3);ctx.closePath();ctx.fill();
+      ctx.restore();continue;
+    }
     if(x<x0||x>x0+mw||y<y0||y>y0+mh)continue;
     ctx.fillStyle='#2a0f0c';ctx.fillRect(Math.round(x)-2,Math.round(y)-2,4,4);ctx.fillStyle='#ff6a55';ctx.fillRect(Math.round(x)-1,Math.round(y)-1,2,2);
   }

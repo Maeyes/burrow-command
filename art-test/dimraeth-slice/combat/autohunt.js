@@ -3,7 +3,6 @@
 
 export const AUTOHUNT_DEFAULTS = Object.freeze({
   leashRadius: 950,        // never wander further than this from where Auto Hunt was switched on
-  maxLevelAbove: 4,        // skip normal monsters more than N levels above the hero
   restBelow: 0.4,          // stand still and regenerate under this HP fraction…
   resumeAbove: 0.8,        // …until back above this one
   packRadius: 210,         // other mobs this close to a candidate will join the fight
@@ -45,9 +44,9 @@ export function createAutoHunt(options = {}) {
       if (!m.alive || hunt.banned(m.id)) return false;
       if (m.aggroed) return true;                                   // it is already on us: always fair game
       if (m.boss) return false;                                     // bosses are never auto-pulled
-      const gap = m.level - hero.level, hpFrac = hero.hp / Math.max(1, hero.maxHp);
-      if (m.elite) return gap <= 1 && hpFrac >= 0.8;
-      if (gap > cfg.maxLevelAbove) return false;
+      // No level lock: any field mob is fair game (scoring still prefers ones near the hero's level).
+      // Elites only while the hero is healthy.
+      if (m.elite && hero.hp / Math.max(1, hero.maxHp) < 0.8) return false;
       if (hunt.anchor && Math.hypot(m.x - hunt.anchor.x, m.y - hunt.anchor.y) > cfg.leashRadius) return false;
       return true;
     },

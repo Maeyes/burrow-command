@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { BunnySimulation, WEAPON_PROC_RULES_V2 } from './engine';
 import type { MonsterEntity, PlayerEntity } from './entities';
+import type { CombatWeaponFamily } from '../systems/combatMath';
 import { addMonster, addPlayer, createWorldState } from './world';
 
-const player = (weaponSkills:string[]): PlayerEntity => ({
+const player = (weaponSkills:string[],weaponFamily:CombatWeaponFamily='greatsword'): PlayerEntity => ({
   id:'p1', kind:'player', position:{x:0,y:0}, hp:5000, maxHp:5000, alive:true,
   stats:{level:30,str:10,agi:1,vit:30,int:5,dex:30,luk:1},
-  weaponFamily:'greatsword', weaponAtk:1, weaponMatk:0, equipmentDef:40, equipmentMdef:20,
+  weaponFamily, weaponAtk:20, weaponMatk:20, equipmentDef:40, equipmentMdef:20,
   hitBonus:0,fleeBonus:0,critBonusPercent:0,equipmentAspd:0,attackRange:60,moveSpeed:6,
   dodgeDistance:3,dodgeCooldownMs:1200,nextDodgeAtMs:0,
   lastClientSequence:0,nextBasicAttackAtMs:0,cooldowns:{},
@@ -18,8 +19,8 @@ const tank = (): MonsterEntity => ({
   moveSpeed:0,attackIntervalMs:1e9,nextBasicAttackAtMs:1e12,isElite:false,isBoss:false,
 });
 // rng .5: every attack hits (hit chance 95%) but the Lv10 25% roll never passes; rng .1 passes it.
-function swing(skills:string[],rng:()=>number,attacks:number){
-  const world=createWorldState('forest1');addPlayer(world,player(skills));addMonster(world,tank());
+function swing(skills:string[],rng:()=>number,attacks:number,weaponFamily:CombatWeaponFamily='greatsword'){
+  const world=createWorldState('forest1');addPlayer(world,player(skills,weaponFamily));addMonster(world,tank());
   const sim=new BunnySimulation(world,rng);const casts:{n:number;skillId:string}[]=[];
   for(let n=1;n<=attacks;n++){
     const r=sim.dispatch({type:'basicAttack',playerId:'p1',targetId:'m1',clientSequence:n});
@@ -43,6 +44,16 @@ describe('weapon mastery skills trigger from basic attacks',()=>{
   it('Lv10 skill fires on a successful chance roll only',()=>{
     expect(swing(['bowlingBash'],()=>.5,6)).toEqual([]);           // .5 >= 25% chance: never fires
     expect(swing(['bowlingBash'],()=>.1,3).map(c=>c.n)).toEqual([1,2,3]); // .1 < 25%: fires each (ICD cleared by step)
+  });
+  it('fires the Lv10 mastery skill for every weapon family through the same proc path',()=>{
+    const first:Record<CombatWeaponFamily,string>={greatsword:'bowlingBash',dagger:'crossSlash',axe:'cleavingStrike',hammer:'crushingImpact',bow:'powerShot',staff:'arcBolt',swordShield:'radiantBurst'};
+    for(const [family,skillId] of Object.entries(first) as [CombatWeaponFamily,string][]){
+      expect(swing([skillId],()=>.1,1,family).map(x=>x.skillId),family).toContain(skillId);
+    }
+  });
+  it('supports cross-family on-hit loadouts independently of the equipped weapon family',()=>{
+    const casts=swing(['crossSlash'],()=>.1,1,'greatsword');
+    expect(casts.map(c=>c.skillId)).toEqual(['crossSlash']);
   });
   it('cannot be cast by pressing',()=>{
     const world=createWorldState('forest1');addPlayer(world,player(['bowlingBash']));addMonster(world,tank());

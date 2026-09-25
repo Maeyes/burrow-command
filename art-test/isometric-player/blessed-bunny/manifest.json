@@ -78,36 +78,36 @@
    "frames": 8,
    "w": 96,
    "h": 96,
-   "footY": 76,
-   "source": "Running"
+   "footY": 78,
+   "source": "running-8-frames 2026-09-25"
   },
   "south-east": {
    "frames": 8,
-   "w": 64,
-   "h": 64,
-   "footY": 59,
-   "source": "run"
+   "w": 96,
+   "h": 96,
+   "footY": 78,
+   "source": "running-8-frames 2026-09-25"
   },
   "east": {
    "frames": 8,
-   "w": 64,
-   "h": 64,
-   "footY": 61,
-   "source": "run"
+   "w": 96,
+   "h": 96,
+   "footY": 78,
+   "source": "running-8-frames 2026-09-25"
   },
   "north-east": {
    "frames": 8,
-   "w": 64,
-   "h": 64,
-   "footY": 61,
-   "source": "run"
+   "w": 96,
+   "h": 96,
+   "footY": 78,
+   "source": "running-8-frames 2026-09-25"
   },
   "north": {
    "frames": 8,
-   "w": 64,
-   "h": 64,
-   "footY": 59,
-   "source": "run"
+   "w": 96,
+   "h": 96,
+   "footY": 77,
+   "source": "running-8-frames 2026-09-25"
   }
  },
  "hurt": {

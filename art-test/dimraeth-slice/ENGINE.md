@@ -26,6 +26,10 @@ Keys: WASD / arrows / click to walk · `L` day ↔ dusk · `H` hide HUD.
 |---|---|
 | `main.js` | Routes `?map=`. Both legacy combat URLs (`forest-combat`, `valley-combat`) delegate to the single `game.js`; non-combat scenes still call `boot()` directly. |
 | `game.js` | The only combat game page: ArenaV2Adapter, HUD, inventory, skills/mastery, runtime actors, minimap integration, SFX/FX hooks and map/roster selection. |
+| `src/simulation/masteryLoadout.ts` | Authoritative Weapon Mastery build loadout: passive capacity grows from 1→5 with the character's highest Weapon Mastery tier (Lv10/20/30/40/50), plus one on-hit active for each Lv10/Lv20/Lv30 mastery band. Cross-family mixing is allowed; combat reads installed loadout entries rather than all earned mastery levels. |
+| `src/simulation/skillModifiersV2.ts` | Skill Mod duplicate stacking authority. The second identical mod scales the first mod's percentage multiplicatively (for example 20% → 24%), rather than adding another full +20%. Upgraded Mod rarity also scales both copies' authored percentages before duplicate stacking. |
+| `src/simulation/skillCoreService.ts` | Shared upgrade authority for Skill Cores, Skill Mods and Movement Cores: same rarity, gold and success schedule; Core/Movement require 2 spare duplicates and Mod requires 6 (3×). The currently installed Core/Movement and all attached Mod copies are reserved and cannot be consumed. Rarity adds 10% per successful tier to damaging Core/Mod effects, and Movement Core gains exactly +1 world-unit travel distance per tier. The Skill window shows owned, reserved and available copies alongside required duplicates, current Gold vs cost, success chance and before/after effect; upgrade controls are disabled when materials/Gold are insufficient. All installed copies of one Mod ID share that Mod ID's rarity under the existing item-ID progression model. Movement skills use the authored walkability callback to travel their upgraded distance on large maps without legacy arena clamping or passing through blocked tiles. |
+| Barrier HUD/minimap | Barrier is authoritative absorb-before-HP with a white overlay bar, white absorbed-damage floaters and hero shield FX. The minimap renders bosses with a pulsing crown marker and clamps off-crop bosses to the minimap edge so their direction remains visible. |
 | `combat/rosters.js` | Adapts Forest/Desert/Mine roster modules from `iso-arena-draft` without copying their data; resolves the current pool and presentation assets. |
 | `combat/hero.js` | Loads the Blessed Bunny manifest + frames, mirrors west directions, owns hero idle/walk/run/hurt/death/baked weapon attack presentation and manifest `footY` anchoring. |
 | `engine/util.js` | Constants, projection, noise, dithering, helpers. |
@@ -194,3 +198,31 @@ terrain level 0–3 (44 px per level), water, road, spawn. The engine derives ev
 - `templeSprite()`: Asgard marble peristyle (3-step base, fluted columns, gold frieze, pediment with a sun disc). Editor object `temple` (4.5 × 3 tiles).
 - `palaceSprite()`: an original undersea palace (pearl hall, glowing arched windows, spiral-shell towers, scallop dome). Editor object `palace` (4 × 3.25 tiles). It is built with `composeSprites()`, which stacks cylinder and face sprites back to front.
 - Editor object `palm`: the desert palm, which can be placed in any biome.
+
+
+### Event Time presentation
+
+The DEV GM Event control in `ui/system.js` applies reward multipliers through `ArenaV2Adapter.setGmEventMultipliers()` and calls `ui/eventBanner.js`. The Event Time announcement is presentation-only: an animated golden center-screen banner appears once on **OFF → ON**, while a compact top ribbon continues showing active multipliers. Editing multipliers while live updates only the ribbon; turning the event off clears both. `ui/ui.css` owns the FX and includes a reduced-motion fallback. No reward/balance logic is duplicated in the banner.
+
+
+### Shield Block rebalance
+
+Every successful Block now mitigates **50% incoming damage**, increased to **70%** when the `swordShield:firmGuard` mastery passive is installed (with a shield equipped). Existing no-shield Guard penalties remain in place. All six T1–T6 offhand shield templates receive a **slot-bound** Block chance bonus from shield refinement: **+5 = +2 percentage points, +10 = +4 total, +15 = +6 total**. Bonuses are cumulative and follow the offhand shield slot when gear is swapped; they do not apply to an offhand dagger or invalid two-handed/shield combination. Installed Guard adds 8%; Perfect Guard raises mastery contribution to 12%. Total effective Block chance (mastery + shield refinement + any valid equipped-shield innate) is capped at **35%**. Character Status shows current effective Block chance and mitigation, while the existing gear refinement UI displays per-milestone Block bonuses.
+
+
+### Innate weapon passives (equipped weapon, no Mastery slots)
+
+`src/simulation/weaponInnatePassives.ts` derives bonuses exclusively from the actually equipped main-hand template and the valid offhand shield or dagger; it recognizes the original non-craftable `starterDagger`. The adapter recalculates and replaces all innate stats whenever equipment or character state changes. Mastery Loadout passives still require their normal slots, and these innate bonuses do not occupy them.
+
+| Main weapon | Innate bonus |
+| --- | --- |
+| Dagger | ASPD +3, CRI +3, CRI DMG +6%; a real second dagger in Offhand adds 50% of these bonuses (total +4.5/+4.5/+9%). |
+| Hammer | Max HP +6%, total DEF +3%. |
+| Greatsword | Physical ATK +5%, affecting basic hits and physical skills. |
+| One-handed sword (`swordShield`/Scepter family) | Physical ATK +3.5% whether or not a shield is equipped (70% of the Greatsword innate bonus). |
+| Shield (any T1–T6 offhand shield) | Block chance +5 percentage points with any compatible main weapon, including Dagger and Staff; independently stacks with shield refinement. |
+| Staff | MATK +5%. |
+| Axe | Ignore 10% enemy physical DEF and heal for 2% of actual physical hit damage; on AoE physical skills, the first successfully hit target contributes full lifesteal, and additional targets contribute half. Echo-generated bonus hits do not lifesteal a second time. |
+| Bow | Ranged physical ATK +5% and HIT +5. |
+
+The new total Block cap is **35%**, combining Guard (8% or 12% with selected Perfect Guard), shield-refine bonuses (+5/+10/+15 => +2/+4/+6 percentage points), and innate from any equipped shield (+5 points). Example Dagger + Shield or One-handed Sword + Shield with Perfect Guard and shield +15 gives **23%**. Existing successful-Block 50% mitigation / 70% with Firm Guard and no-shield penalties are unchanged. Character Status reports the active Weapon Innate and relevant battle stats; the equipment detail card describes the item's innate effect. An offhand dagger adds its 50% bonus only with a main-hand Dagger. The shield innate is independent of main-hand family as long as that family can equip a shield, but never applies alongside a two-handed main weapon.

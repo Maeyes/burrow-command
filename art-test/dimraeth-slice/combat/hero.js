@@ -225,9 +225,9 @@ async function createBlessedHero() {
       }
 
       if (moving) {
-        const anim = running ? 'run' : 'walk';
-        const set = loaded[anim][dir];
-        return visualOf(set, frameByTime(set, running ? 12 : 9, nowMs), { state: anim });
+        // The walk clip read as a moonwalk on diagonals; every move uses the run clip.
+        const set = loaded.run[dir];
+        return visualOf(set, frameByTime(set, running ? 12 : 10, nowMs), { state: 'run' });
       }
 
       const set = loaded.idle[dir];

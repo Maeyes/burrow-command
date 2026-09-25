@@ -1,13 +1,16 @@
 import type { CombatStats, CombatWeaponFamily } from '../systems/combatMath';
 
 export type WeaponMasteryState = Record<CombatWeaponFamily, { level: number; xp: number }>;
+export type MasteryActiveLevelV2=10|20|30;
+export interface MasteryPassiveSelectionV2 { family:CombatWeaponFamily; milestoneId:string }
+export interface WeaponMasteryLoadoutV2 { passive:MasteryPassiveSelectionV2[]; active:Partial<Record<MasteryActiveLevelV2,string>> }
 
 export interface SkillLoadoutV2 {
   active: [string?, string?, string?];
   movement?: string;
   passive: [string?, string?];
   modifiersByActive: Record<string, string[]>;
-  /** Rarity progression belongs to the character's installed/owned core identity. Missing = normal. */
+  /** Upgrade rarity per Skill Core, Skill Mod or Movement Core ID. Missing = normal. */
   coreRarity?: Record<string, 'normal'|'good'|'rare'|'epic'|'legend'|'mythic'|'whiteAscended'>;
 }
 
@@ -32,6 +35,7 @@ export interface CharacterStateV2 {
   inventory: Record<string, number>;
   equipment: EquipmentProgressV2;
   weaponMastery: WeaponMasteryState;
+  masteryLoadout: WeaponMasteryLoadoutV2;
   skills: SkillLoadoutV2;
   unlockedMaps: string[];
   currentMapId: string;
@@ -67,6 +71,7 @@ export function createInitialCharacterV2(characterId: string, name = 'Bunny'): C
       },
     },
     weaponMastery: Object.fromEntries(families.map(f => [f,{level:1,xp:0}])) as WeaponMasteryState,
+    masteryLoadout:{passive:[],active:{}},
     skills: { active: [], passive: [], modifiersByActive: {} },
     unlockedMaps: ['forest1'],
     currentMapId: 'forest1',

@@ -64,10 +64,21 @@ export interface PlayerEntity extends BaseEntity {
   skillEntitlements: import('./skillEntitlements').SkillEntitlementsV2;
   /** Additive rarity bonus multiplier per installed Skill Core; e.g. Good = 1.10. */
   skillCoreDamageMultipliers?: Record<string,number>;
-  /** Snapshot of all character-wide mastery levels; effects remain active after weapon switching. */
-  masteryLevels?: Partial<Record<CombatWeaponFamily, number>>;
+  /** Skill Mod upgrade bonus, keyed by mod item ID; combined with duplicate stacking. */
+  skillModifierMultipliers?: Record<string,number>;
+  /** Movement Core upgrade bonus in world units, keyed by movement skill ID (+1 per successful tier). */
+  movementSkillDistanceBonuses?: Record<string,number>;
+  /** Installed mastery milestone passives, encoded as "family:milestoneId". Combat reads only this loadout. */
+  masteryPassives?: readonly string[];
   /** True only when authoritative offhand equipment is classified as a shield. */
   hasShieldEquipped?: boolean;
+  /** Shield-only Block chance from offhand refinement +5/+10/+15; capped with mastery/innate at 35%. */
+  shieldBlockChanceBonus?: number;
+  /** Innate passives from currently equipped main weapon / valid offhand pairing (never Mastery slots). */
+  innateBlockChanceBonus?: number;
+  innatePhysicalAttackMultiplier?: number;
+  innatePhysicalArmorPenetration?: number;
+  innatePhysicalLifeSteal?: number;
   guardedUntilMs?: number;
   /** Temporary Barrier Skill Core shield. */
   barrierHp?: number;

@@ -18,18 +18,17 @@ describe('authoritative skill entitlements', () => {
     expect(skillEntitlementReason(entitlement, 'barrier', 'passive')).toBe('passive-skill');
   });
 
-  it('unlocks the current weapon family skills at mastery 10, 20, and 30', () => {
+  it('derives mastery on-hit skills only from the three-band loadout', () => {
     const character = createInitialCharacterV2('c');
-    character.weaponMastery.greatsword.level = 9;
-    expect(skillEntitlementsForCharacter(character, 'greatsword').weaponSkills).toEqual([]);
-    character.weaponMastery.greatsword.level = 10;
-    expect(skillEntitlementsForCharacter(character, 'greatsword').weaponSkills).toEqual(['bowlingBash']);
+    character.weaponMastery.dagger.level = 10;
     character.weaponMastery.greatsword.level = 20;
-    expect(skillEntitlementsForCharacter(character, 'greatsword').weaponSkills).toEqual(['bowlingBash','crescentBreak']);
-    character.weaponMastery.greatsword.level = 30;
-    const entitlement = skillEntitlementsForCharacter(character, 'greatsword');
-    expect(entitlement.weaponSkills).toEqual(['bowlingBash','crescentBreak','vanguardTempest']);
-    expect(skillEntitlementReason(entitlement, 'vanguardTempest', 'weapon')).toBeUndefined();
+    character.weaponMastery.axe.level = 30;
+    character.masteryLoadout.active = {10:'crossSlash',20:'crescentBreak',30:'ravagerArc'};
+    const entitlement = skillEntitlementsForCharacter(character, 'staff');
+    expect(entitlement.weaponSkills).toEqual(['crossSlash','crescentBreak','ravagerArc']);
+    expect(skillEntitlementReason(entitlement, 'ravagerArc', 'weapon')).toBeUndefined();
     expect(skillEntitlementReason(entitlement, 'powerShot', 'weapon')).toBe('weapon-skill-locked');
+    character.masteryLoadout.active[10]='powerShot'; // Bow mastery is still locked.
+    expect(skillEntitlementsForCharacter(character).weaponSkills).toEqual([undefined,'crescentBreak','ravagerArc']);
   });
 });

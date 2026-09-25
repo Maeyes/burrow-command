@@ -1,0 +1,1243 @@
+[
+ {
+  "map": "sea1",
+  "monster": "Bubble_Crab",
+  "variant": 1,
+  "id": "fb111ee4-420f-4068-a76b-e7a948968f0f",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Bubble_Crab_1",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "crab_lunges_right_and_snaps_its_claws_once_then_r"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "crab_scuttling_forward_to_the_right_in_a_looping_w"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Bubble_Crab",
+  "variant": 2,
+  "id": "0bf3d9cd-0fd4-4a77-9489-c2955fa3f9e1",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Bubble_Crab_2",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "crab_lunges_right_and_snaps_its_claws_once_then_r"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "crab_scuttling_forward_to_the_right_in_a_looping_w"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Bubble_Crab",
+  "variant": 3,
+  "id": "7d171ac3-52d8-4311-b284-16b999132815",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Bubble_Crab_3",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "crab_lunges_right_and_snaps_its_claws_once_then_r"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "crab_scuttling_forward_to_the_right_in_a_looping_w"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Pufferling",
+  "variant": 1,
+  "id": "6dfe522b-0315-4d54-85f7-d62bfd0063e9",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Pufferling_1",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "pufferfish_puffs_up_with_spikes_out_and_bumps_forw"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "round_pufferfish_swimming_forward_to_the_right_in"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Pufferling",
+  "variant": 2,
+  "id": "c9246817-5178-4306-b317-dfa0b0e97273",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Pufferling_2",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "pufferfish_puffs_up_with_spikes_out_and_bumps_forw"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "round_pufferfish_swimming_forward_to_the_right_in"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Pufferling",
+  "variant": 3,
+  "id": "ec98d84d-eeb4-4bcc-a8b6-776fc7d12734",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Pufferling_3",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "pufferfish_puffs_up_with_spikes_out_and_bumps_forw"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "round_pufferfish_swimming_forward_to_the_right_in"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Jelly_Drifter",
+  "variant": 1,
+  "id": "0a0665e6-5ef6-434c-b523-f6f1267fb2ed",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Jelly_Drifter_1",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "jellyfish_dome_contracts_and_tentacles_lash_forwar"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "small_jellyfish_swimming_forward_to_the_right_in_a"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Jelly_Drifter",
+  "variant": 2,
+  "id": "93732e2c-19b9-4fca-8957-e994529f5746",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Jelly_Drifter_2",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "jellyfish_dome_contracts_and_tentacles_lash_forwar"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "small_jellyfish_swimming_forward_to_the_right_in_a"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Jelly_Drifter",
+  "variant": 3,
+  "id": "31470d34-3d62-46c2-a99d-85233d2140b9",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Jelly_Drifter_3",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "jellyfish_dome_contracts_and_tentacles_lash_forwar"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "small_jellyfish_swimming_forward_to_the_right_in_a"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Coral_Crab_Knight",
+  "variant": 1,
+  "id": "c985718f-ab39-4f79-9cf0-b890220167cd",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Coral_Crab_Knight_1",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "crab_slams_its_oversized_claw_forward_to_the_right"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "heavy_crab_scuttling_forward_to_the_right_in_a_loo"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Coral_Crab_Knight",
+  "variant": 2,
+  "id": "c80ed1dc-45bd-4a57-b1ba-eba6697d49e8",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Coral_Crab_Knight_2",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "crab_slams_its_oversized_claw_forward_to_the_right"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "heavy_crab_scuttling_forward_to_the_right_in_a_loo"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Coral_Crab_Knight",
+  "variant": 3,
+  "id": "4fe13321-11d8-4ccb-b55c-2e8884eb0376",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Coral_Crab_Knight_3",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "crab_slams_its_oversized_claw_forward_to_the_right"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "heavy_crab_scuttling_forward_to_the_right_in_a_loo"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Giant_Clam_King",
+  "variant": 1,
+  "id": "742cec9d-62b9-4a7e-9f42-e9e76d38117d",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Giant_Clam_King_1",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "clam_shell_snaps_shut_forward_to_the_right_and_its"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "large_clam_hopping_slowly_forward_to_the_right_in"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Giant_Clam_King",
+  "variant": 2,
+  "id": "1a3d817d-4f42-4186-8ae4-55563e1a866d",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Giant_Clam_King_2",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "clam_shell_snaps_shut_forward_to_the_right_and_its"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "large_clam_hopping_slowly_forward_to_the_right_in"
+   }
+  }
+ },
+ {
+  "map": "sea1",
+  "monster": "Giant_Clam_King",
+  "variant": 3,
+  "id": "78d973c4-7edc-43ee-8e1f-9298dfefa1b2",
+  "dir": "art-test/monster-generation/pixellab-sea1-roster-2026-09-25/objects/Giant_Clam_King_3",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "clam_shell_snaps_shut_forward_to_the_right_and_its"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "large_clam_hopping_slowly_forward_to_the_right_in"
+   }
+  }
+ },
+ {
+  "map": "sea2",
+  "monster": "Abyss_Eel",
+  "variant": 1,
+  "id": "de2dc73d-40ee-4af8-b848-d141ebdf24de",
+  "dir": "art-test/monster-generation/pixellab-sea2-roster-2026-09-25/objects/Abyss_Eel_1",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "eel_coils_back_then_strikes_forward_to_the_right_w"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "short_curled_eel_swimming_forward_to_the_right_in"
+   }
+  }
+ },
+ {
+  "map": "sea2",
+  "monster": "Abyss_Eel",
+  "variant": 2,
+  "id": "7566d3a1-c2a7-4456-ae0c-fd082f7f4022",
+  "dir": "art-test/monster-generation/pixellab-sea2-roster-2026-09-25/objects/Abyss_Eel_2",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "eel_coils_back_then_strikes_forward_to_the_right_w"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "short_curled_eel_swimming_forward_to_the_right_in"
+   }
+  }
+ },
+ {
+  "map": "sea2",
+  "monster": "Abyss_Eel",
+  "variant": 3,
+  "id": "4a3dcf48-30e6-46ed-abd5-3191939bf9ae",
+  "dir": "art-test/monster-generation/pixellab-sea2-roster-2026-09-25/objects/Abyss_Eel_3",
+  "animations": {
+   "attack": {
+    "frames": 18,
+    "source": "eel_coils_back_then_strikes_forward_to_the_right_w"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "short_curled_eel_swimming_forward_to_the_right_in"
+   }
+  }
+ },
+ {
+  "map": "sea2",
+  "monster": "Abyss_Shark",
+  "variant": 1,
+  "id": "d726c92c-5bc4-483e-a2e9-fc94f2f7c2dc",
+  "dir": "art-test/monster-generation/pixellab-sea2-roster-2026-09-25/objects/Abyss_Shark_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "compact_shark_swimming_forward_to_the_right_in_a_l"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "shark_lunges_forward_to_the_right_and_snaps_its_ja"
+   }
+  }
+ },
+ {
+  "map": "sea2",
+  "monster": "Abyss_Shark",
+  "variant": 2,
+  "id": "d14c0ba0-7b47-4edd-85e3-7bb04981553b",
+  "dir": "art-test/monster-generation/pixellab-sea2-roster-2026-09-25/objects/Abyss_Shark_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "compact_shark_swimming_forward_to_the_right_in_a_l"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "shark_lunges_forward_to_the_right_and_snaps_its_ja"
+   }
+  }
+ },
+ {
+  "map": "sea2",
+  "monster": "Abyss_Shark",
+  "variant": 3,
+  "id": "c6cda0ec-a570-41eb-9cf4-142edad4ed41",
+  "dir": "art-test/monster-generation/pixellab-sea2-roster-2026-09-25/objects/Abyss_Shark_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "compact_shark_swimming_forward_to_the_right_in_a_l"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "shark_lunges_forward_to_the_right_and_snaps_its_ja"
+   }
+  }
+ },
+ {
+  "map": "sea2",
+  "monster": "Squidling",
+  "variant": 1,
+  "id": "22e2127c-e696-465c-9aca-2e695f3fe31d",
+  "dir": "art-test/monster-generation/pixellab-sea2-roster-2026-09-25/objects/Squidling_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_squid_jetting_forward_to_the_right_in_a_loop"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "squid_whips_its_tentacles_forward_to_the_right_onc"
+   }
+  }
+ },
+ {
+  "map": "sea2",
+  "monster": "Squidling",
+  "variant": 2,
+  "id": "806ba7e7-a248-4aaf-a0e8-97e9d30fbaf8",
+  "dir": "art-test/monster-generation/pixellab-sea2-roster-2026-09-25/objects/Squidling_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_squid_jetting_forward_to_the_right_in_a_loop"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "squid_whips_its_tentacles_forward_to_the_right_onc"
+   }
+  }
+ },
+ {
+  "map": "sea2",
+  "monster": "Squidling",
+  "variant": 3,
+  "id": "6631908e-f9aa-4b13-861d-98b9fd769964",
+  "dir": "art-test/monster-generation/pixellab-sea2-roster-2026-09-25/objects/Squidling_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_squid_jetting_forward_to_the_right_in_a_loop"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "squid_whips_its_tentacles_forward_to_the_right_onc"
+   }
+  }
+ },
+ {
+  "map": "sea2",
+  "monster": "Squidling",
+  "variant": 4,
+  "id": "51c74b0e-6620-4c02-b89f-748e4fcbeecb",
+  "dir": "art-test/monster-generation/pixellab-sea2-roster-2026-09-25/objects/Squidling_4",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_squid_jetting_forward_to_the_right_in_a_loop"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "squid_whips_its_tentacles_forward_to_the_right_onc"
+   }
+  }
+ },
+ {
+  "map": "snow1",
+  "monster": "Snow_Fox",
+  "variant": 1,
+  "id": "80e7dd66-c509-486d-baee-370186c5431d",
+  "dir": "art-test/monster-generation/pixellab-snow1-roster-2026-09-25/objects/Snow_Fox_1",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "fox_pounces_forward_to_the_right_and_flicks_its_th"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "small_fox_trotting_forward_to_the_right_in_a_loopi"
+   }
+  }
+ },
+ {
+  "map": "snow1",
+  "monster": "Snow_Fox",
+  "variant": 2,
+  "id": "677ec6b9-793f-43e4-bc35-0212034aa49f",
+  "dir": "art-test/monster-generation/pixellab-snow1-roster-2026-09-25/objects/Snow_Fox_2",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "fox_pounces_forward_to_the_right_and_flicks_its_th"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "small_fox_trotting_forward_to_the_right_in_a_loopi"
+   }
+  }
+ },
+ {
+  "map": "snow1",
+  "monster": "Mammoth",
+  "variant": 1,
+  "id": "f0d2daa9-f7dd-4a63-a590-014f50b0ee85",
+  "dir": "art-test/monster-generation/pixellab-snow1-roster-2026-09-25/objects/Mammoth_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "compact_woolly_mammoth_stomping_forward_to_the_rig"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "mammoth_lowers_its_head_and_swings_its_curved_tusk"
+   }
+  }
+ },
+ {
+  "map": "snow1",
+  "monster": "Mammoth",
+  "variant": 2,
+  "id": "b0ed8d31-e029-437f-9055-1efb65189699",
+  "dir": "art-test/monster-generation/pixellab-snow1-roster-2026-09-25/objects/Mammoth_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "compact_woolly_mammoth_stomping_forward_to_the_rig"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "mammoth_lowers_its_head_and_swings_its_curved_tusk"
+   }
+  }
+ },
+ {
+  "map": "snow1",
+  "monster": "Mammoth",
+  "variant": 3,
+  "id": "9133d104-9cbb-411f-99fc-27d8be8c96ba",
+  "dir": "art-test/monster-generation/pixellab-snow1-roster-2026-09-25/objects/Mammoth_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "compact_woolly_mammoth_stomping_forward_to_the_rig"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "mammoth_lowers_its_head_and_swings_its_curved_tusk"
+   }
+  }
+ },
+ {
+  "map": "snow1",
+  "monster": "Elder_Mammoth",
+  "variant": 1,
+  "id": "ae349fa8-195c-4e83-bf09-ae01d1e31283",
+  "dir": "art-test/monster-generation/pixellab-snow1-roster-2026-09-25/objects/Elder_Mammoth_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "large_woolly_mammoth_with_ice_chunks_on_its_back_s"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "mammoth_rears_up_and_slams_its_long_tusks_down_for"
+   }
+  }
+ },
+ {
+  "map": "snow1",
+  "monster": "Elder_Mammoth",
+  "variant": 2,
+  "id": "9c25c260-562e-4aec-8e64-dbf99e1df9f3",
+  "dir": "art-test/monster-generation/pixellab-snow1-roster-2026-09-25/objects/Elder_Mammoth_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "large_woolly_mammoth_with_ice_chunks_on_its_back_s"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "mammoth_rears_up_and_slams_its_long_tusks_down_for"
+   }
+  }
+ },
+ {
+  "map": "snow1",
+  "monster": "Elder_Mammoth",
+  "variant": 3,
+  "id": "0c549b9c-2f04-473f-b3a4-186bcc61e60e",
+  "dir": "art-test/monster-generation/pixellab-snow1-roster-2026-09-25/objects/Elder_Mammoth_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "large_woolly_mammoth_with_ice_chunks_on_its_back_s"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "mammoth_rears_up_and_slams_its_long_tusks_down_for"
+   }
+  }
+ },
+ {
+  "map": "snow1",
+  "monster": "Yeti",
+  "variant": 1,
+  "id": "e4aac45d-f61a-46ba-adbd-b8f913bef675",
+  "dir": "art-test/monster-generation/pixellab-snow1-roster-2026-09-25/objects/Yeti_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "huge-shouldered_yeti_lumbering_forward_to_the_righ"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "yeti_roars_and_slams_both_big_fists_down_forward_t"
+   }
+  }
+ },
+ {
+  "map": "snow1",
+  "monster": "Yeti",
+  "variant": 2,
+  "id": "968848e7-34e2-482a-a23b-749163ccd202",
+  "dir": "art-test/monster-generation/pixellab-snow1-roster-2026-09-25/objects/Yeti_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "huge-shouldered_yeti_lumbering_forward_to_the_righ"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "yeti_roars_and_slams_both_big_fists_down_forward_t"
+   }
+  }
+ },
+ {
+  "map": "snow1",
+  "monster": "Yeti",
+  "variant": 3,
+  "id": "3c642e5e-8e60-4247-8116-201d0bfa923c",
+  "dir": "art-test/monster-generation/pixellab-snow1-roster-2026-09-25/objects/Yeti_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "huge-shouldered_yeti_lumbering_forward_to_the_righ"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "yeti_roars_and_slams_both_big_fists_down_forward_t"
+   }
+  }
+ },
+ {
+  "map": "snow2",
+  "monster": "Frost_Wolf",
+  "variant": 1,
+  "id": "f7687701-aea9-42b2-a47c-5265dc64b99f",
+  "dir": "art-test/monster-generation/pixellab-snow2-roster-2026-09-25/objects/Frost_Wolf_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_wolf_with_icy_spikes_on_its_back_prowling_fo"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "wolf_lunges_forward_to_the_right_and_bites_once_t"
+   }
+  }
+ },
+ {
+  "map": "snow2",
+  "monster": "Frost_Wolf",
+  "variant": 2,
+  "id": "cb5b87ad-9278-4695-ad3f-81e9ee64ef21",
+  "dir": "art-test/monster-generation/pixellab-snow2-roster-2026-09-25/objects/Frost_Wolf_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_wolf_with_icy_spikes_on_its_back_prowling_fo"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "wolf_lunges_forward_to_the_right_and_bites_once_t"
+   }
+  }
+ },
+ {
+  "map": "snow2",
+  "monster": "Frost_Wolf",
+  "variant": 3,
+  "id": "53026751-a08d-44e2-b722-f5e73e750766",
+  "dir": "art-test/monster-generation/pixellab-snow2-roster-2026-09-25/objects/Frost_Wolf_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_wolf_with_icy_spikes_on_its_back_prowling_fo"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "wolf_lunges_forward_to_the_right_and_bites_once_t"
+   }
+  }
+ },
+ {
+  "map": "snow2",
+  "monster": "Ice_Wraith",
+  "variant": 1,
+  "id": "ad3509e6-80cc-4ae5-ad47-4e053ca932ad",
+  "dir": "art-test/monster-generation/pixellab-snow2-roster-2026-09-25/objects/Ice_Wraith_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_hooded_floating_wisp_hovering_forward_to_the"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "wisp_dashes_forward_to_the_right_and_claws_with_it"
+   }
+  }
+ },
+ {
+  "map": "snow2",
+  "monster": "Ice_Wraith",
+  "variant": 2,
+  "id": "58e07bd3-ae87-44e0-b8d3-bdf383c93750",
+  "dir": "art-test/monster-generation/pixellab-snow2-roster-2026-09-25/objects/Ice_Wraith_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_hooded_floating_wisp_hovering_forward_to_the"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "wisp_dashes_forward_to_the_right_and_claws_with_it"
+   }
+  }
+ },
+ {
+  "map": "snow2",
+  "monster": "Ice_Wraith",
+  "variant": 3,
+  "id": "2ccb80ba-b9af-4c38-902c-68d75cbee9e8",
+  "dir": "art-test/monster-generation/pixellab-snow2-roster-2026-09-25/objects/Ice_Wraith_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_hooded_floating_wisp_hovering_forward_to_the"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "wisp_dashes_forward_to_the_right_and_claws_with_it"
+   }
+  }
+ },
+ {
+  "map": "snow2",
+  "monster": "Snow_Troll",
+  "variant": 1,
+  "id": "b4f4d77e-25c8-454b-9d9b-59e4de907ecc",
+  "dir": "art-test/monster-generation/pixellab-snow2-roster-2026-09-25/objects/Snow_Troll_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "stocky_troll_with_big_feet_and_an_ice_club_stompin"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "troll_raises_its_ice_club_overhead_and_smashes_it"
+   }
+  }
+ },
+ {
+  "map": "snow2",
+  "monster": "Snow_Troll",
+  "variant": 2,
+  "id": "a9c60726-f1f7-4159-af1d-872c42203d58",
+  "dir": "art-test/monster-generation/pixellab-snow2-roster-2026-09-25/objects/Snow_Troll_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "stocky_troll_with_big_feet_and_an_ice_club_stompin"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "troll_raises_its_ice_club_overhead_and_smashes_it"
+   }
+  }
+ },
+ {
+  "map": "snow2",
+  "monster": "Snow_Troll",
+  "variant": 3,
+  "id": "18068f3c-7718-49e9-8970-6c3aa5e82e23",
+  "dir": "art-test/monster-generation/pixellab-snow2-roster-2026-09-25/objects/Snow_Troll_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "stocky_troll_with_big_feet_and_an_ice_club_stompin"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "troll_raises_its_ice_club_overhead_and_smashes_it"
+   }
+  }
+ },
+ {
+  "map": "snow2",
+  "monster": "Frost_Giant_Junior",
+  "variant": 1,
+  "id": "f38650a7-1a1d-4dab-a50c-7d4dc9ae6598",
+  "dir": "art-test/monster-generation/pixellab-snow2-roster-2026-09-25/objects/Frost_Giant_Junior_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "compact_icy_giant_with_a_braided_beard_striding_fo"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "icy_giant_swings_its_crystal_axe_in_a_big_chop_for"
+   }
+  }
+ },
+ {
+  "map": "asgard1",
+  "monster": "Einherjar",
+  "variant": 1,
+  "id": "fa0d8bd8-668b-48c4-a9b7-a535f07dcc34",
+  "dir": "art-test/monster-generation/pixellab-asgard1-roster-2026-09-25/objects/Einherjar_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_spirit_warrior_with_winged_helm_round_shiel"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "warrior_thrusts_its_short_sword_forward_to_the_rig"
+   }
+  }
+ },
+ {
+  "map": "asgard1",
+  "monster": "Einherjar",
+  "variant": 2,
+  "id": "a79ecf13-6303-42ee-8c0a-4b28570bd768",
+  "dir": "art-test/monster-generation/pixellab-asgard1-roster-2026-09-25/objects/Einherjar_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_spirit_warrior_with_winged_helm_round_shiel"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "warrior_thrusts_its_short_sword_forward_to_the_rig"
+   }
+  }
+ },
+ {
+  "map": "asgard1",
+  "monster": "Einherjar",
+  "variant": 3,
+  "id": "1ae77120-3730-4956-a6a7-99cc993c37f1",
+  "dir": "art-test/monster-generation/pixellab-asgard1-roster-2026-09-25/objects/Einherjar_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_spirit_warrior_with_winged_helm_round_shiel"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "warrior_thrusts_its_short_sword_forward_to_the_rig"
+   }
+  }
+ },
+ {
+  "map": "asgard1",
+  "monster": "Storm_Raven",
+  "variant": 1,
+  "id": "aadc5a8f-bac3-4a10-889e-e7350609d078",
+  "dir": "art-test/monster-generation/pixellab-asgard1-roster-2026-09-25/objects/Storm_Raven_1",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "raven_dives_forward_to_the_right_and_slashes_with"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "round_black_raven_with_small_lightning_sparks_flap"
+   }
+  }
+ },
+ {
+  "map": "asgard1",
+  "monster": "Storm_Raven",
+  "variant": 2,
+  "id": "2cfc0e0d-9c01-4a5a-a9f7-b03e1f85b61a",
+  "dir": "art-test/monster-generation/pixellab-asgard1-roster-2026-09-25/objects/Storm_Raven_2",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "raven_dives_forward_to_the_right_and_slashes_with"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "round_black_raven_with_small_lightning_sparks_flap"
+   }
+  }
+ },
+ {
+  "map": "asgard1",
+  "monster": "Storm_Raven",
+  "variant": 3,
+  "id": "049ba507-353e-4c05-bb60-8b81365f1b6b",
+  "dir": "art-test/monster-generation/pixellab-asgard1-roster-2026-09-25/objects/Storm_Raven_3",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "raven_dives_forward_to_the_right_and_slashes_with"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "round_black_raven_with_small_lightning_sparks_flap"
+   }
+  }
+ },
+ {
+  "map": "asgard1",
+  "monster": "Rune_Sentinel",
+  "variant": 1,
+  "id": "ce360650-a212-446f-9040-6f253174cd02",
+  "dir": "art-test/monster-generation/pixellab-asgard1-roster-2026-09-25/objects/Rune_Sentinel_1",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "stone_guardian_slams_its_fist_down_forward_to_the"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "stubby_stone_guardian_with_runes_on_its_chest_stom"
+   }
+  }
+ },
+ {
+  "map": "asgard1",
+  "monster": "Rune_Sentinel",
+  "variant": 2,
+  "id": "c9d56da1-6c90-47ef-9cfd-44dea0bdf8eb",
+  "dir": "art-test/monster-generation/pixellab-asgard1-roster-2026-09-25/objects/Rune_Sentinel_2",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "stone_guardian_slams_its_fist_down_forward_to_the"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "stubby_stone_guardian_with_runes_on_its_chest_stom"
+   }
+  }
+ },
+ {
+  "map": "asgard1",
+  "monster": "Rune_Sentinel",
+  "variant": 3,
+  "id": "c8e91df0-de2f-4452-8526-cadc10a97302",
+  "dir": "art-test/monster-generation/pixellab-asgard1-roster-2026-09-25/objects/Rune_Sentinel_3",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "stone_guardian_slams_its_fist_down_forward_to_the"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "stubby_stone_guardian_with_runes_on_its_chest_stom"
+   }
+  }
+ },
+ {
+  "map": "asgard1",
+  "monster": "Valkyrie",
+  "variant": 1,
+  "id": "d6325435-bf57-409e-97e2-0e09bf182cd8",
+  "dir": "art-test/monster-generation/pixellab-asgard1-roster-2026-09-25/objects/Valkyrie_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_winged_warrior_maiden_with_a_spear_and_white"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "winged_warrior_maiden_thrusts_her_spear_forward_to"
+   }
+  }
+ },
+ {
+  "map": "asgard1",
+  "monster": "Valkyrie",
+  "variant": 2,
+  "id": "5891ab3f-5952-416b-ab32-d71dee422ae5",
+  "dir": "art-test/monster-generation/pixellab-asgard1-roster-2026-09-25/objects/Valkyrie_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_winged_warrior_maiden_with_a_spear_and_white"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "winged_warrior_maiden_thrusts_her_spear_forward_to"
+   }
+  }
+ },
+ {
+  "map": "asgard1",
+  "monster": "Valkyrie",
+  "variant": 3,
+  "id": "38452027-9e48-4ab8-aeee-1a4d46ef72d9",
+  "dir": "art-test/monster-generation/pixellab-asgard1-roster-2026-09-25/objects/Valkyrie_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "small_winged_warrior_maiden_with_a_spear_and_white"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "winged_warrior_maiden_thrusts_her_spear_forward_to"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Golden_Einherjar",
+  "variant": 1,
+  "id": "f4d49ffb-f04e-453c-8d22-698f97b5c83e",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Golden_Einherjar_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "spirit_warrior_in_full_gold_armor_with_a_horned_he"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "warrior_chops_its_axe_forward_to_the_right_once_t"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Golden_Einherjar",
+  "variant": 2,
+  "id": "6d7bb2af-565a-44c5-9f74-b33965b3e2d8",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Golden_Einherjar_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "spirit_warrior_in_full_gold_armor_with_a_horned_he"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "warrior_chops_its_axe_forward_to_the_right_once_t"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Golden_Einherjar",
+  "variant": 3,
+  "id": "3e13ffac-ac49-44b5-8a32-aa131c32839d",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Golden_Einherjar_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "spirit_warrior_in_full_gold_armor_with_a_horned_he"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "warrior_chops_its_axe_forward_to_the_right_once_t"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Sleipnir_Spawn",
+  "variant": 1,
+  "id": "eaf481ba-5c72-491d-8031-3e636845e2c0",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Sleipnir_Spawn_1",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "horse_rears_up_and_stomps_forward_to_the_right_onc"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "small_spirit_horse_with_eight_short_legs_galloping"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Sleipnir_Spawn",
+  "variant": 2,
+  "id": "a67d4978-73ba-4dd1-9fba-e4d8bc0a9a7d",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Sleipnir_Spawn_2",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "horse_rears_up_and_stomps_forward_to_the_right_onc"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "small_spirit_horse_with_eight_short_legs_galloping"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Sleipnir_Spawn",
+  "variant": 3,
+  "id": "51baf913-b021-4dbe-ac4a-efacbf818d47",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Sleipnir_Spawn_3",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "horse_rears_up_and_stomps_forward_to_the_right_onc"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "small_spirit_horse_with_eight_short_legs_galloping"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Rune_Colossus",
+  "variant": 1,
+  "id": "9a901b84-8072-485c-99ba-d77eece01725",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Rune_Colossus_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "chunky_stone_giant_covered_in_rune_carvings_stompi"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "stone_giant_slams_both_fists_down_forward_to_the_r"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Rune_Colossus",
+  "variant": 2,
+  "id": "8d1717ae-d627-49e0-8c49-a3cb9cfe9115",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Rune_Colossus_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "chunky_stone_giant_covered_in_rune_carvings_stompi"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "stone_giant_slams_both_fists_down_forward_to_the_r"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Rune_Colossus",
+  "variant": 3,
+  "id": "4998274d-f385-4e1d-b01a-a67707193885",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Rune_Colossus_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "chunky_stone_giant_covered_in_rune_carvings_stompi"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "stone_giant_slams_both_fists_down_forward_to_the_r"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Fenrir_Pup",
+  "variant": 1,
+  "id": "5fdc22ef-990f-4cb2-bd3e-f4272272238d",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Fenrir_Pup_1",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "big-pawed_wolf_pup_with_a_broken_chain_collar_boun"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "wolf_pup_lunges_forward_to_the_right_and_bites_onc"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Fenrir_Pup",
+  "variant": 2,
+  "id": "459dcded-0ac9-43bb-8ff7-32f78959ee0f",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Fenrir_Pup_2",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "big-pawed_wolf_pup_with_a_broken_chain_collar_boun"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "wolf_pup_lunges_forward_to_the_right_and_bites_onc"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Fenrir_Pup",
+  "variant": 3,
+  "id": "0ff20617-81c0-403b-8fbd-f3f6b4905712",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Fenrir_Pup_3",
+  "animations": {
+   "walk": {
+    "frames": 9,
+    "source": "big-pawed_wolf_pup_with_a_broken_chain_collar_boun"
+   },
+   "attack": {
+    "frames": 9,
+    "source": "wolf_pup_lunges_forward_to_the_right_and_bites_onc"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Valkyrie_Captain",
+  "variant": 1,
+  "id": "dc7cfd5d-1f14-4b55-aaee-4995d1180e72",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Valkyrie_Captain_1",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "winged_warrior_thrusts_a_long_spear_forward_to_the"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "winged_warrior_with_silver-plated_wings_and_a_long"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Valkyrie_Captain",
+  "variant": 2,
+  "id": "02a1855d-1d5f-4a0e-81cb-57aeac151dda",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Valkyrie_Captain_2",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "winged_warrior_thrusts_a_long_spear_forward_to_the"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "winged_warrior_with_silver-plated_wings_and_a_long"
+   }
+  }
+ },
+ {
+  "map": "asgard2",
+  "monster": "Valkyrie_Captain",
+  "variant": 3,
+  "id": "8d307074-e541-4e3c-9e81-90c852093cfe",
+  "dir": "art-test/monster-generation/pixellab-asgard2-roster-2026-09-25/objects/Valkyrie_Captain_3",
+  "animations": {
+   "attack": {
+    "frames": 9,
+    "source": "winged_warrior_thrusts_a_long_spear_forward_to_the"
+   },
+   "walk": {
+    "frames": 9,
+    "source": "winged_warrior_with_silver-plated_wings_and_a_long"
+   }
+  }
+ }
+]

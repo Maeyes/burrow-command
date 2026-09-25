@@ -5,11 +5,13 @@ import { normalizeCharacterStateV2 } from './equipmentMigration';
 import type { CharacterStateV2 } from './character';
 import { skillEntitlementsForCharacter } from './skillEntitlements';
 import { equipmentCombatTotals } from './equipmentCombat';
+import { weaponInnateBonuses } from './weaponInnatePassives';
 import { equipmentRarityStatMultiplier } from './equipmentV2';
 import { EQUIPMENT_MASTER_V2 } from './itemMasterV2';
 import { applyEquipmentCommand, type EquipmentCommandV2, type EquipmentCommandResultV2 } from './equipmentService';
 import { grantLootWithEquipment } from './equipmentLoot';
-import { applySkillCoreCommand, skillCoreDamageMultiplier, type SkillCoreCommandV2 } from './skillCoreService';
+import { applySkillCoreCommand, skillCoreDamageMultiplier, movementSkillDistanceBonus, type SkillCoreCommandV2 } from './skillCoreService';
+import { applyMasteryLoadoutCommand, masteryPassiveKeys, type MasteryLoadoutCommandV2 } from './masteryLoadout';
 import { allocateCharacterStatsV2, createInitialCharacterV2 } from './character';
 import type { SimulationCommand, SimulationEvent, Vec2 } from './contracts';
 import { createContributionLedger, recordContribution, type ContributionLedger } from './contribution';
@@ -56,6 +58,10 @@ export interface ArenaV2AdapterOptions {
   monsterForbiddenContains?:(position:Vec2)=>boolean;
   /** Optional authored navigation constraint (for image-mask maps). Simulation movement may not leave this space. */
   walkableContains?:(position:Vec2)=>boolean;
+  /** Map-wide respawn spot for a defeated field mob (bosses always return to their lair). */
+  respawnPointPicker?:(heroPosition:Vec2|undefined)=>Vec2|null;
+  /** Terrain rule for fighting: false when the two positions are on different ground levels. */
+  canEngage?:(a:Vec2,b:Vec2)=>boolean;
   onReward?:(reward:PlayerRewardV2,character:CharacterStateV2,defeated?:Readonly<ArenaMonsterView>)=>void;
 }
 
@@ -69,6 +75,15 @@ function gearHooks(gear:ReturnType<typeof equipmentCombatTotals>){
   return{weaponSkillDamageMultiplier:gear.weaponSkillDamageMultiplier,coreSkillDamageMultiplier:gear.coreSkillDamageMultiplier,coreCooldownMultiplier:gear.coreCooldownMultiplier,
     damageTakenMultiplier:gear.damageTakenMultiplier,lastStandDamageTakenMultiplier:gear.lastStandDamageTakenMultiplier,executeDamageMultiplier:gear.executeDamageMultiplier,weaponProcChanceBonus:gear.weaponProcChanceBonus};
 }
+
+function innateHooks(innate:ReturnType<typeof weaponInnateBonuses>){
+  return {innatePhysicalAttackMultiplier:innate.physicalAtkMultiplier,innatePhysicalArmorPenetration:innate.physicalArmorPenetration,
+    innatePhysicalLifeSteal:innate.physicalLifeSteal,innateBlockChanceBonus:innate.blockChanceBonus};
+}
+
+/** Field mobs return 8s after death somewhere else on the map; bosses hold their lair for 5 min (phase 1). */
+export const MONSTER_RESPAWN_MS=8000;
+export const BOSS_RESPAWN_MS=5*60*1000;
 
 export class ArenaV2Adapter {
   readonly playerId='arena-player';
@@ -92,6 +107,7 @@ export class ArenaV2Adapter {
     this.weaponFamily=options.weaponFamily??'dagger';
     this.playerSpawn={x:options.player.x,y:options.player.y};
     this.characterState=normalizeCharacterStateV2(options.character??createInitialCharacterV2(this.playerId,'Arena Bunny'));
+    this.weaponFamily=weaponInnateBonuses(this.characterState).family??this.weaponFamily;
     const world=createWorldState(options.zoneId);
     addPlayer(world,this.makePlayer(options.player,this.weaponFamily));
     options.monsters.forEach((view,index)=>{
@@ -99,7 +115,15 @@ export class ArenaV2Adapter {
       view.id=id; this.monsterViews.set(id,view); this.contributions.set(id,createContributionLedger());
       addMonster(world,this.makeMonster(view,id));
     });
-    this.simulation=new BunnySimulation(world,options.random);
+    // Movement skills traverse the current scene's walkable geometry instead of legacy arena bounds.
+    const movementResolver=options.walkableContains?(start:Readonly<Vec2>,end:Vec2):Vec2=>{
+      const steps=Math.max(1,Math.ceil(Math.hypot(end.x-start.x,end.y-start.y)/8));
+      let last={...start};
+      for(let i=1;i<=steps;i++){const t=i/steps,point={x:start.x+(end.x-start.x)*t,y:start.y+(end.y-start.y)*t};if(!options.walkableContains!(point))break;last=point;}
+      return last;
+    }:undefined;
+    this.simulation=new BunnySimulation(world,options.random,movementResolver);
+    if(options.canEngage)this.simulation.canEngage=options.canEngage;
     this.syncPresentation();
   }
 
@@ -125,6 +149,10 @@ export class ArenaV2Adapter {
   }
   skillCoreCommand(command:SkillCoreCommandV2):Readonly<CharacterStateV2>{
     this.characterState=applySkillCoreCommand(this.characterState,command,this.options.random);
+    this.refreshPlayerBuild();this.syncPresentation();return this.characterState;
+  }
+  masteryLoadoutCommand(command:MasteryLoadoutCommandV2):Readonly<CharacterStateV2>{
+    this.characterState=applyMasteryLoadoutCommand(this.characterState,command);
     this.refreshPlayerBuild();this.syncPresentation();return this.characterState;
   }
   autoStep(mode:ControlMode,filter?:{allowedMonsterIds?:ReadonlySet<string>;maxTargetLevel?:number;restEnabled?:boolean;restBelowHpFraction?:number;resumeAboveHpFraction?:number}){
@@ -166,6 +194,8 @@ export class ArenaV2Adapter {
       for(const [id,monster] of this.simulation.world.monsters){
         if((this.options.walkableContains?.(monster.position)??true)&&!this.options.monsterForbiddenContains?.(monster.position))continue;
         const previous=beforeMonsters.get(id);if(previous)monster.position=previous;
+        // A mob held back by its ground (the hero stood on a ledge it cannot reach) drops the chase.
+        if(monster.targetPlayerId&&this.options.canEngage&&!this.options.canEngage(monster.position,player.position))monster.targetPlayerId=undefined;
         // Force a fresh roam decision rather than repeatedly pushing into the same wall.
         monster.roamTarget=undefined;monster.nextRoamAtMs=this.simulation.clock.nowMs+250;
       }
@@ -193,9 +223,12 @@ export class ArenaV2Adapter {
 
   /** A defeated mob comes back somewhere else in its home area, out of the hero's face (RO-style),
    *  never inside walls/water. Falls back to its authored home spot. */
-  private respawnPoint(monster:{position:{x:number;y:number};homePosition?:{x:number;y:number}}):{x:number;y:number}{
+  private respawnPoint(monster:{position:{x:number;y:number};homePosition?:{x:number;y:number};isBoss?:boolean}):{x:number;y:number}{
     const rnd=this.options.random??Math.random,home=monster.homePosition??monster.position;
     const hero=this.simulation.world.players.get(this.playerId)?.position;
+    if(monster.isBoss)return {...home};
+    const picked=this.options.respawnPointPicker?.(hero);
+    if(picked){if('homePosition' in monster)monster.homePosition={...picked};return picked;}
     for(let i=0;i<24;i++){
       const a=rnd()*Math.PI*2,r=120+rnd()*260,p={x:home.x+Math.cos(a)*r,y:home.y+Math.sin(a)*r};
       if(this.options.walkableContains&&!this.options.walkableContains(p))continue;
@@ -210,6 +243,12 @@ export class ArenaV2Adapter {
     const p=this.simulation.world.players.get(this.playerId)!;
     p.position={x:this.options.player.x,y:this.options.player.y};
     for(const [id,view] of this.monsterViews){const m=this.simulation.world.monsters.get(id);if(m)m.position={x:view.x,y:view.y};}
+  }
+
+  /** Move a monster (and its roam home) — used to scatter the field once the map's terrain exists. */
+  placeMonster(id:string,position:Vec2):void{
+    const m=this.simulation.world.monsters.get(id),view=this.monsterViews.get(id);if(!m)return;
+    m.position={...position};m.homePosition={...position};m.roamTarget=undefined;if(view){view.x=position.x;view.y=position.y;}
   }
 
   respawnMonster(id:string):boolean{
@@ -237,7 +276,7 @@ export class ArenaV2Adapter {
         const player=this.simulation.world.players.get(this.playerId);
         if(this.autoRestEnabled&&player&&player.hp/player.maxHp<=this.autoRestBelow)this.autoResting=true;
         const view=this.monsterViews.get(event.entityId);const def=view&&this.definitionFor(view);const ledger=this.contributions.get(event.entityId);
-        if(view && !view.isBoss)this.respawnAtMs.set(event.entityId,this.simulation.clock.nowMs+2800);
+        if(view)this.respawnAtMs.set(event.entityId,this.simulation.clock.nowMs+(view.isBoss?BOSS_RESPAWN_MS:MONSTER_RESPAWN_MS));
         if(!view||!def||!ledger)continue;
         const rewardGear=equipmentCombatTotals(this.characterState);
         const [reward]=resolveDefeatRewards(ledger,{[this.playerId]:this.characterState},{
@@ -266,7 +305,7 @@ export class ArenaV2Adapter {
 
   private refreshPlayerBuild():void{
     const player=this.simulation.world.players.get(this.playerId);if(!player)return;
-    const gear=equipmentCombatTotals(this.characterState);const hpFraction=player.maxHp>0?player.hp/player.maxHp:1;
+    const gear=equipmentCombatTotals(this.characterState);const innate=weaponInnateBonuses(this.characterState);const hpFraction=player.maxHp>0?player.hp/player.maxHp:1;
     player.stats=this.characterState.stats;
     const mainId=this.characterState.equipment.equippedBySlot.main;const mainItem=mainId?this.characterState.equipment.instances[mainId]:undefined;const equippedFamily=mainItem?EQUIPMENT_MASTER_V2[mainItem.templateId]?.weaponFamily:undefined;if(equippedFamily){player.weaponFamily=equippedFamily;this.weaponFamily=equippedFamily;}
     player.attackRange=player.weaponFamily==='bow'?420:58;
@@ -275,17 +314,17 @@ export class ArenaV2Adapter {
     const offhand=this.offhandWeaponContribution();
     player.offhandWeaponAtk=Math.max(0,Math.round((physicalStatus+offhand.atk)*gear.offhandAtkMultiplier-physicalStatus));player.offhandWeaponMatk=Math.max(0,Math.round((magicalStatus+offhand.matk)*gear.offhandMatkMultiplier-magicalStatus));player.hasOffhandWeaponEquipped=offhand.equipped;
     player.weaponAtk=Math.max(0,Math.round((physicalStatus+gear.weaponAtk-offhand.atk)*gear.atkMultiplier-physicalStatus));
-    player.weaponMatk=Math.max(0,Math.round((magicalStatus+gear.weaponMatk-offhand.matk)*gear.matkMultiplier-magicalStatus));
+    player.weaponMatk=Math.max(0,Math.round((magicalStatus+gear.weaponMatk-offhand.matk)*gear.matkMultiplier*innate.matkMultiplier-magicalStatus));
     const vitDefense=Math.floor(player.stats.vit/2);
-    player.equipmentDef=Math.max(0,Math.round((35+gear.equipmentDef+vitDefense)*gear.defMultiplier-vitDefense));
+    player.equipmentDef=Math.max(0,Math.round((35+gear.equipmentDef+vitDefense)*gear.defMultiplier*innate.defMultiplier-vitDefense));
     player.equipmentMdef=Math.max(0,Math.round((25+gear.equipmentMdef)*gear.mdefMultiplier));
-    player.hitBonus=gear.hitBonus;player.fleeBonus=gear.fleeBonus;Object.assign(player,gearHooks(gear));player.critDamageMultiplier=gear.critDamageMultiplier;player.moveSpeed=BASE_MOVE_SPEED*gear.moveSpeedMultiplier;player.dodgeCooldownMs=BASE_DODGE_COOLDOWN_MS*gear.dodgeCooldownMultiplier;
-    player.critBonusPercent=gear.critBonusPercent;player.equipmentAspd=3+gear.equipmentAspd;
-    player.maxHp=Math.max(1,Math.round(maxHp(player.stats,gear.equipmentMaxHp)*gear.maxHpMultiplier));
+    player.hitBonus=gear.hitBonus+innate.hitBonus;player.fleeBonus=gear.fleeBonus;Object.assign(player,gearHooks(gear),innateHooks(innate));player.critDamageMultiplier=gear.critDamageMultiplier+innate.critDamageBonus;player.moveSpeed=BASE_MOVE_SPEED*gear.moveSpeedMultiplier;player.dodgeCooldownMs=BASE_DODGE_COOLDOWN_MS*gear.dodgeCooldownMultiplier;
+    player.critBonusPercent=gear.critBonusPercent+innate.critBonus;player.equipmentAspd=3+gear.equipmentAspd+innate.aspdBonus;
+    player.maxHp=Math.max(1,Math.round(maxHp(player.stats,gear.equipmentMaxHp)*gear.maxHpMultiplier*innate.hpMultiplier));
     const spFraction=(player.maxSp??1)>0?(player.sp??player.maxSp??1)/(player.maxSp??1):1;
     player.maxSp=Math.max(1,Math.round((40+player.stats.level*4+player.stats.int*3+gear.masterMaxSp)*gear.maxSpMultiplier));player.spRecoveryMultiplier=gear.spRecoveryMultiplier;player.healingMultiplier=gear.healingMultiplier;player.skillCostMultiplier=gear.skillCostMultiplier;
     player.sp=Math.max(0,Math.min(player.maxSp,player.maxSp*spFraction));
-    player.hp=Math.max(1,Math.min(player.maxHp,Math.round(player.maxHp*hpFraction)));player.skillEntitlements=skillEntitlementsForCharacter(this.characterState,player.weaponFamily);player.masteryLevels=Object.fromEntries(Object.entries(this.characterState.weaponMastery).map(([k,v])=>[k,v.level]));player.hasShieldEquipped=this.hasShieldEquipped();
+    player.hp=Math.max(1,Math.min(player.maxHp,Math.round(player.maxHp*hpFraction)));player.skillEntitlements=skillEntitlementsForCharacter(this.characterState,player.weaponFamily);player.skillCoreDamageMultipliers=Object.fromEntries(this.characterState.skills.active.filter(Boolean).map(id=>[id!,skillCoreDamageMultiplier(this.characterState,id!)]));player.skillModifierMultipliers=Object.fromEntries(Object.values(this.characterState.skills.modifiersByActive??{}).flat().filter(Boolean).map(id=>[id,skillCoreDamageMultiplier(this.characterState,id)]));player.movementSkillDistanceBonuses=this.characterState.skills.movement?{[this.characterState.skills.movement]:movementSkillDistanceBonus(this.characterState,this.characterState.skills.movement)}:{};player.masteryPassives=masteryPassiveKeys(this.characterState);player.hasShieldEquipped=innate.hasShieldEquipped;player.shieldBlockChanceBonus=innate.hasShieldEquipped?gear.shieldBlockChanceBonus:0;
   }
 
   private offhandWeaponContribution():{atk:number;matk:number;equipped:boolean}{
@@ -309,30 +348,25 @@ export class ArenaV2Adapter {
     return{atk,matk,equipped:true};
   }
 
-  private hasShieldEquipped():boolean{
-    const mainId=this.characterState.equipment.equippedBySlot.main;const main=mainId?this.characterState.equipment.instances[mainId]:undefined;const family=main?EQUIPMENT_MASTER_V2[main.templateId]?.weaponFamily:undefined;if(family==='bow'||family==='axe'||family==='greatsword')return false;
-    const id=this.characterState.equipment.equippedBySlot.offhand;
-    return Boolean(id&&this.characterState.equipment.instances[id]?.offhandType==='shield');
-  }
-
   private makePlayer(view:ArenaPlayerView,family:CombatWeaponFamily):PlayerEntity{
-    const stats=this.characterState.stats;const gear=equipmentCombatTotals(this.characterState);
+    const stats=this.characterState.stats;const gear=equipmentCombatTotals(this.characterState);const innate=weaponInnateBonuses(this.characterState);
     const physicalStatus=family==='bow'?rangedStatusAtk(stats):meleeStatusAtk(stats);const magicalStatus=magicalAttack(stats,0);
     const offhand=this.offhandWeaponContribution();
     const weaponAtk=Math.max(0,Math.round((physicalStatus+gear.weaponAtk-offhand.atk)*gear.atkMultiplier-physicalStatus));
-    const weaponMatk=Math.max(0,Math.round((magicalStatus+gear.weaponMatk-offhand.matk)*gear.matkMultiplier-magicalStatus));
+    const weaponMatk=Math.max(0,Math.round((magicalStatus+gear.weaponMatk-offhand.matk)*gear.matkMultiplier*innate.matkMultiplier-magicalStatus));
     const offhandWeaponAtk=Math.max(0,Math.round((physicalStatus+offhand.atk)*gear.offhandAtkMultiplier-physicalStatus));
     const offhandWeaponMatk=Math.max(0,Math.round((magicalStatus+offhand.matk)*gear.offhandMatkMultiplier-magicalStatus));
     const vitDefense=Math.floor(stats.vit/2);
-    const equipmentDef=Math.max(0,Math.round((35+gear.equipmentDef+vitDefense)*gear.defMultiplier-vitDefense));
+    const equipmentDef=Math.max(0,Math.round((35+gear.equipmentDef+vitDefense)*gear.defMultiplier*innate.defMultiplier-vitDefense));
     const equipmentMdef=Math.max(0,Math.round((25+gear.equipmentMdef)*gear.mdefMultiplier));
-    const resolvedMaxHp=Math.max(1,Math.round(maxHp(stats,gear.equipmentMaxHp)*gear.maxHpMultiplier));
+    const resolvedMaxHp=Math.max(1,Math.round(maxHp(stats,gear.equipmentMaxHp)*gear.maxHpMultiplier*innate.hpMultiplier));
     const resolvedMaxSp=Math.max(1,Math.round((40+stats.level*4+stats.int*3+gear.masterMaxSp)*gear.maxSpMultiplier));
     return{id:this.playerId,kind:'player',position:{x:view.x,y:view.y},hp:view.hp??resolvedMaxHp,maxHp:view.maxHp??resolvedMaxHp,alive:true,sp:view.sp??resolvedMaxSp,maxSp:view.maxSp??resolvedMaxSp,spRecoveryMultiplier:gear.spRecoveryMultiplier,healingMultiplier:gear.healingMultiplier,skillCostMultiplier:gear.skillCostMultiplier,
-      stats,weaponFamily:family,weaponAtk,weaponMatk,offhandWeaponAtk,offhandWeaponMatk,hasOffhandWeaponEquipped:offhand.equipped,equipmentDef,equipmentMdef,hitBonus:gear.hitBonus,fleeBonus:gear.fleeBonus,
-      critBonusPercent:gear.critBonusPercent,equipmentAspd:gear.equipmentAspd,castSpeed:gear.castSpeed,critDamageMultiplier:gear.critDamageMultiplier,elementDamageMultiplier:gear.elementDamageMultiplier,attackRange:family==='bow'?420:58,moveSpeed:BASE_MOVE_SPEED*gear.moveSpeedMultiplier,dodgeDistance:90,dodgeCooldownMs:BASE_DODGE_COOLDOWN_MS*gear.dodgeCooldownMultiplier,...gearHooks(gear),nextDodgeAtMs:0,
-      lastClientSequence:0,nextBasicAttackAtMs:0,cooldowns:{},skillEntitlements:skillEntitlementsForCharacter(this.characterState,family),skillCoreDamageMultipliers:Object.fromEntries([...this.characterState.skills.active,this.characterState.skills.movement].filter(Boolean).map(id=>[id,skillCoreDamageMultiplier(this.characterState,id!)])),
-      masteryLevels:Object.fromEntries(Object.entries(this.characterState.weaponMastery).map(([k,v])=>[k,v.level])),hasShieldEquipped:this.hasShieldEquipped()};
+      stats,weaponFamily:family,weaponAtk,weaponMatk,offhandWeaponAtk,offhandWeaponMatk,hasOffhandWeaponEquipped:offhand.equipped,equipmentDef,equipmentMdef,hitBonus:gear.hitBonus+innate.hitBonus,fleeBonus:gear.fleeBonus,
+      critBonusPercent:gear.critBonusPercent+innate.critBonus,equipmentAspd:3+gear.equipmentAspd+innate.aspdBonus,castSpeed:gear.castSpeed,critDamageMultiplier:gear.critDamageMultiplier+innate.critDamageBonus,elementDamageMultiplier:gear.elementDamageMultiplier,attackRange:family==='bow'?420:58,moveSpeed:BASE_MOVE_SPEED*gear.moveSpeedMultiplier,dodgeDistance:90,dodgeCooldownMs:BASE_DODGE_COOLDOWN_MS*gear.dodgeCooldownMultiplier,...gearHooks(gear),...innateHooks(innate),nextDodgeAtMs:0,
+      lastClientSequence:0,nextBasicAttackAtMs:0,cooldowns:{},skillEntitlements:skillEntitlementsForCharacter(this.characterState,family),skillCoreDamageMultipliers:Object.fromEntries(this.characterState.skills.active.filter(Boolean).map(id=>[id!,skillCoreDamageMultiplier(this.characterState,id!)])),
+      skillModifierMultipliers:Object.fromEntries(Object.values(this.characterState.skills.modifiersByActive??{}).flat().filter(Boolean).map(id=>[id,skillCoreDamageMultiplier(this.characterState,id)])),movementSkillDistanceBonuses:this.characterState.skills.movement?{[this.characterState.skills.movement]:movementSkillDistanceBonus(this.characterState,this.characterState.skills.movement)}:{},
+      masteryPassives:masteryPassiveKeys(this.characterState),hasShieldEquipped:innate.hasShieldEquipped,shieldBlockChanceBonus:innate.hasShieldEquipped?gear.shieldBlockChanceBonus:0};
   }
 
   private makeMonster(view:ArenaMonsterView,id:string):MonsterEntity{

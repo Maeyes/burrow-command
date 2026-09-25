@@ -44,8 +44,8 @@ export const WEAPON_MASTERY_MILESTONES:Record<CombatWeaponFamily,MasteryMileston
   {level:50,id:'perfectCasting',kind:'capstone',description:'Move at normal speed while casting.'},
  ],
  swordShield:[
-  {level:10,id:'guard',kind:'mechanic',description:'Block Chance +8%.'},
-  {level:20,id:'firmGuard',kind:'upgrade',description:'Successful Block gains +20% additional damage mitigation.'},
+  {level:10,id:'guard',kind:'mechanic',description:'Block Chance +8%; successful Blocks reduce incoming damage by 50% with a shield.'},
+  {level:20,id:'firmGuard',kind:'upgrade',description:'Successful Block mitigation rises from 50% to 70% with a shield.'},
   {level:30,id:'counterGuard',kind:'mechanic',description:'Successful Block has 20% chance to Counter Attack.'},
   {level:40,id:'perfectGuard',kind:'upgrade',description:'Block Chance gains another +4% (total +12%).'},
   {level:50,id:'aegisMastery',kind:'capstone',description:'Successful Block grants Guarded for 2s: Damage Taken -10%.'},

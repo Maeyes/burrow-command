@@ -1,0 +1,24 @@
+[
+ {
+  "monster": "Frost_Giant_Boss",
+  "id": "6b8977dd-b199-4623-aca0-00f1033a7703",
+  "animations": {
+   "skill1": 9,
+   "skill2": 9,
+   "skill3": 9,
+   "skill4": 9,
+   "walk": 9
+  }
+ },
+ {
+  "monster": "Ice_Troll_Boss",
+  "id": "a3004181-4b81-4f96-af74-6e709387d163",
+  "animations": {
+   "skill1": 9,
+   "skill2": 9,
+   "skill3": 9,
+   "skill4": 9,
+   "walk": 9
+  }
+ }
+]

@@ -3,7 +3,7 @@ import { CRAFTABLE_EQUIPMENT_COUNT, EQUIPMENT_MASTER_V2, GLOBAL_BLUEPRINT_DROP_C
 import { MONSTERS_V2 } from './monsterDataV2';
 
 describe('canonical item/craft master v2',()=>{
- it('contains the locked 109 templates',()=>expect(CRAFTABLE_EQUIPMENT_COUNT).toBe(109));
+ it('contains the locked 133 templates (T1-T6)',()=>expect(CRAFTABLE_EQUIPMENT_COUNT).toBe(133));
  it('uses one global tier blueprint per craft',()=>{
   for(const item of Object.values(EQUIPMENT_MASTER_V2)){
    expect(item.recipe.blueprintId).toBe(`tier${item.tier}Blueprint`);
@@ -15,7 +15,7 @@ describe('canonical item/craft master v2',()=>{
   for(const item of Object.values(EQUIPMENT_MASTER_V2).filter(x=>x.tier===1))
    expect(item.recipe.materials.some(m=>forbidden.has(m.itemId))).toBe(false);
  });
- it('marks T5 planned until its content/material sources exist',()=>expect(Object.values(EQUIPMENT_MASTER_V2).filter(x=>x.tier===5).every(x=>!x.recipe.available)).toBe(true));
+ it('opens T5 and T6 now that snow, sea and Asgard drop their materials',()=>expect(Object.values(EQUIPMENT_MASTER_V2).filter(x=>x.tier>=5).every(x=>x.recipe.available)).toBe(true));
 });
 
 describe('global blueprint progression',()=>{
@@ -24,12 +24,12 @@ describe('global blueprint progression',()=>{
   expect(blueprintForLevel(21)).toBe('tier2Blueprint');expect(blueprintForLevel(40)).toBe('tier2Blueprint');
   expect(blueprintForLevel(41)).toBe('tier3Blueprint');expect(blueprintForLevel(50)).toBe('tier3Blueprint');
   expect(blueprintForLevel(51)).toBe('tier4Blueprint');expect(blueprintForLevel(70)).toBe('tier4Blueprint');
-  expect(blueprintForLevel(71)).toBe('tier5Blueprint');
+  expect(blueprintForLevel(71)).toBe('tier5Blueprint');expect(blueprintForLevel(90)).toBe('tier5Blueprint');expect(blueprintForLevel(91)).toBe('tier6Blueprint');
  });
- it('gives every monster its level-tier blueprint and keeps Forest 2 compensation explicit',()=>{
+ it('gives every monster its level-tier blueprint and keeps Forest 2 and late-boss compensation explicit',()=>{
   expect(GLOBAL_BLUEPRINT_DROP_CHANCE).toBe(.04);
   for(const monster of Object.values(MONSTERS_V2)){
-   const expectedChance=monster.mapId==='forest2'?(monster.rank==='boss'?.10:monster.rank==='elite'?.08:.06):.04;
+   const expectedChance=monster.rank==='boss'&&monster.level>90?.10:monster.mapId==='forest2'?(monster.rank==='boss'?.10:monster.rank==='elite'?.08:.06):.04;
    expect(monster.loot.blueprint).toEqual({itemId:blueprintForLevel(monster.level),chance:expectedChance});
   }
  });

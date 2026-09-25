@@ -3,7 +3,7 @@ import type { EnemyRank } from './mastery';
 import { blueprintForLevel, GLOBAL_BLUEPRINT_DROP_CHANCE } from './itemMasterV2';
 
 export interface MonsterDefinitionV2 {
- id:string;name:string;mapId:'forest1'|'forest2'|'desert1'|'desert2'|'mine'|'magma1'|'magma2';level:number;rank:EnemyRank;
+ id:string;name:string;mapId:'forest1'|'forest2'|'desert1'|'desert2'|'mine'|'magma1'|'magma2'|'snow1'|'snow2'|'underwater1'|'underwater2'|'asgard1'|'asgard2';level:number;rank:EnemyRank;
  maxHp:number;atk:number;def:number;mdef:number;flee:number;attackRange:number;moveSpeed:number;attackIntervalMs:number;loot:LootSourceV2;
 }
 type Spec=Omit<MonsterDefinitionV2,'loot'> & {ore:string;material?:[string,number];aether?:[string,number];modifier?:[string,number];core?:[string,number];blueprint?:[string,number];unique?:[string,number];signature?:[string,number];equipmentDrops?:Array<[string,number]>};
@@ -11,10 +11,13 @@ type Spec=Omit<MonsterDefinitionV2,'loot'> & {ore:string;material?:[string,numbe
 // drop raised. Specs keep the authored base rates; these multipliers apply on top.
 export const DROP_TUNING_V2={material:1.3,aether:1.5,modifier:1.5,core:2,equipment:1.5} as const;
 const tuned=(roll:[string,number]|undefined,k:number,rank:EnemyRank,scaleBoss=true)=>roll&&{itemId:roll[0],chance:Math.min(1,roll[1]*(rank==='boss'&&!scaleBoss?1:k))};
-const mk=(s:Spec):MonsterDefinitionV2=>{const forest2=s.mapId==='forest2';const blueprintChance=forest2?(s.rank==='boss'?.10:s.rank==='elite'?.08:.06):GLOBAL_BLUEPRINT_DROP_CHANCE;const rankGoldMultiplier=s.rank==='boss'?1.44:s.rank==='elite'?1.2:1;const lateGameGoldScale=s.level<=40?1:Math.pow(1.03,s.level-40);const averageGold=6*Math.pow(s.level,1.35)*rankGoldMultiplier*lateGameGoldScale;const T=DROP_TUNING_V2;return{...s,loot:{id:s.id,rank:s.rank,level:s.level,goldMin:Math.max(1,Math.round(averageGold*.8)),goldMax:Math.max(1,Math.round(averageGold*1.2)),oreItemId:s.ore,material:tuned(s.material,T.material,s.rank),aetherstone:tuned(s.aether,T.aether,s.rank),modifier:tuned(s.modifier,T.modifier,s.rank),
+const mk=(s:Spec):MonsterDefinitionV2=>{const forest2=s.mapId==='forest2';const lateBoss=s.rank==='boss'&&s.level>90;const blueprintChance=lateBoss?.10:forest2?(s.rank==='boss'?.10:s.rank==='elite'?.08:.06):GLOBAL_BLUEPRINT_DROP_CHANCE;const rankGoldMultiplier=s.rank==='boss'?1.44:s.rank==='elite'?1.2:1;const lateGameGoldScale=s.level<=40?1:Math.pow(1.03,s.level-40);const averageGold=6*Math.pow(s.level,1.35)*rankGoldMultiplier*lateGameGoldScale;const T=DROP_TUNING_V2;return{...s,loot:{id:s.id,rank:s.rank,level:s.level,goldMin:Math.max(1,Math.round(averageGold*.8)),goldMax:Math.max(1,Math.round(averageGold*1.2)),oreItemId:s.ore,material:tuned(s.material,T.material,s.rank),aetherstone:tuned(s.aether,T.aether,s.rank),modifier:tuned(s.modifier,T.modifier,s.rank),
  // Boss cores already have pity (pity.ts); only normal/elite core rates are doubled.
  core:tuned(s.core,T.core,s.rank,false),blueprint:{itemId:blueprintForLevel(s.level),chance:blueprintChance},equipmentDrops:s.equipmentDrops?.map(([itemId,chance])=>({itemId,chance:Math.min(1,chance*T.equipment)}))}}};
-const MAP_DIFFICULTY:Record<Spec['mapId'],number>={forest1:1,forest2:1.75,desert1:2.8,desert2:4.35,mine:6.5,magma1:8.5,magma2:11};
+// HP-only correction from the balance sim: Duneshade Basin is where T2 gear lands, and its
+// monsters fell to ~1 hit. Attack/defense keep following MAP_DIFFICULTY.
+const MAP_HP_BONUS:Partial<Record<Spec['mapId'],number>>={desert1:1.8,desert2:1.3};
+const MAP_DIFFICULTY:Record<Spec['mapId'],number>={forest1:1,forest2:1.75,desert1:2.8,desert2:4.35,mine:6.5,magma1:8.5,magma2:11,snow1:13,snow2:15,underwater1:17,underwater2:19,asgard1:21,asgard2:23};
 const n=(id:string,name:string,mapId:Spec['mapId'],level:number,rank:EnemyRank,ore:string,extra:Partial<Spec>={}):MonsterDefinitionV2=>{
  // Map progression is exponential: every new region is a meaningful combat step rather than
  // reusing one flat stat block. Forest 1 remains the onboarding anchor.
@@ -25,7 +28,7 @@ const n=(id:string,name:string,mapId:Spec['mapId'],level:number,rank:EnemyRank,o
  const rankDefense=rank==='boss'?1.8:rank==='elite'?1.4:1;
  const baseHp=106,baseAtk=12,baseDef=7,baseMdef=3;
  return mk({id,name,mapId,level,rank,ore,
-  maxHp:Math.round(baseHp*mapScale*levelScale*rankHp),
+  maxHp:Math.round(baseHp*mapScale*(MAP_HP_BONUS[mapId]??1)*levelScale*rankHp),
   atk:Math.round(baseAtk*Math.pow(mapScale,.72)*Math.pow(levelScale,.55)*rankAtk),
   def:Math.round(baseDef*Math.pow(mapScale,.82)*Math.pow(levelScale,.7)*rankDefense),
   mdef:Math.max(3,Math.round(baseMdef*Math.pow(mapScale,.86)*Math.pow(levelScale,.72)*rankDefense)),
@@ -107,4 +110,89 @@ export const MONSTERS_V2:Record<string,MonsterDefinitionV2>=Object.fromEntries([
  n('lavaLizard','Lava Lizard','magma2',67,'elite','obsidianOre',{material:['drakeScale',1],aether:['azureAetherstone',.35],modifier:['chain',.08],core:['fireball',.04]}),
  n('infernalGolem','Infernal Golem','magma2',68,'elite','obsidianOre',{material:['magmaCore',1],aether:['azureAetherstone',.35],modifier:['extraStrike',.08],core:['groundSlam',.04],equipmentDrops:[['obsidianMask',.03]]}),
  n('darkDragonKnight','Dark Dragon Knight','magma2',70,'boss','obsidianOre',{aether:['azureAetherstone',.45],modifier:['bloodPrice',.20],core:['bladeRush',.10],equipmentDrops:[['knightsHelm',.08]]}),
+ // Snow / sea / Asgard rosters (PixelLab 2026-09-25). Snow drops the T5 kit (Starsilver Ore, Rime Crystal,
+ // Frost Pelt); sea and Asgard drop T6 (Runegold Ore, Abyss Pearl, Storm Feather). Violet Aetherstone from Lv81.
+ n('snowFox','Snow Fox','snow1',71,'normal','starsilverOre',{material:['frostPelt',0.45],aether:['azureAetherstone',0.12],modifier:['rapidCasting',.01]}),
+ n('frostFox','Frost Fox','snow1',73,'elite','starsilverOre',{material:['frostPelt',1],aether:['azureAetherstone',0.35],modifier:['rapidCasting',.08],core:['iceLance',.04]}),
+ n('mammoth','Mammoth','snow1',73,'normal','starsilverOre',{material:['frostPelt',0.45],aether:['azureAetherstone',0.12],modifier:['concentratedForce',.01]}),
+ n('woollyMammoth','Woolly Mammoth','snow1',75,'normal','starsilverOre',{material:['frostPelt',0.5],aether:['azureAetherstone',0.12],modifier:['concentratedForce',.01],core:['groundSlam',.002]}),
+ n('eliteMammoth','Elite Mammoth','snow1',76,'elite','starsilverOre',{material:['frostPelt',1],aether:['azureAetherstone',0.35],modifier:['concentratedForce',.08],core:['groundSlam',.04]}),
+ n('yeti','Yeti','snow1',76,'normal','starsilverOre',{material:['frostPelt',0.45],aether:['azureAetherstone',0.12],modifier:['extraStrike',.01]}),
+ n('frostYeti','Frost Yeti','snow1',77,'normal','starsilverOre',{material:['frostPelt',0.5],aether:['azureAetherstone',0.12],modifier:['extraStrike',.01],core:['frostNova',.002]}),
+ n('eliteYeti','Elite Yeti','snow1',78,'elite','starsilverOre',{material:['frostPelt',1],aether:['azureAetherstone',0.35],modifier:['extraStrike',.08],core:['frostNova',.04]}),
+ n('elderMammoth','Elder Mammoth','snow1',79,'elite','starsilverOre',{material:['frostPelt',1],aether:['azureAetherstone',0.35],modifier:['expandedArea',.08],core:['frostNova',.04]}),
+ n('glacialElder','Glacial Elder','snow1',79,'elite','starsilverOre',{material:['frostPelt',1],aether:['azureAetherstone',0.35],modifier:['expandedArea',.08],core:['frostNova',.04]}),
+ n('ancientElder','Ancient Elder','snow1',80,'elite','starsilverOre',{material:['frostPelt',1],aether:['azureAetherstone',0.35],modifier:['expandedArea',.08],core:['frostNova',.04]}),
+ n('frostWolf','Frost Wolf','snow2',81,'normal','starsilverOre',{material:['frostPelt',0.45],aether:['violetAetherstone',0.12],modifier:['mobileCast',.01]}),
+ n('rimeWolf','Rime Wolf','snow2',82,'normal','starsilverOre',{material:['frostPelt',0.5],aether:['violetAetherstone',0.12],modifier:['mobileCast',.01],core:['dash',.002]}),
+ n('eliteFrostWolf','Elite Frost Wolf','snow2',84,'elite','starsilverOre',{material:['frostPelt',1],aether:['violetAetherstone',0.35],modifier:['mobileCast',.08],core:['dash',.04]}),
+ n('iceWraith','Ice Wraith','snow2',83,'normal','starsilverOre',{material:['rimeCrystal',0.45],aether:['violetAetherstone',0.12],modifier:['lingering',.01]}),
+ n('frostWraith','Frost Wraith','snow2',84,'normal','starsilverOre',{material:['rimeCrystal',0.5],aether:['violetAetherstone',0.12],modifier:['lingering',.01],core:['iceLance',.002]}),
+ n('eliteIceWraith','Elite Ice Wraith','snow2',86,'elite','starsilverOre',{material:['rimeCrystal',1],aether:['violetAetherstone',0.35],modifier:['lingering',.08],core:['iceLance',.04]}),
+ n('snowTroll','Snow Troll','snow2',86,'normal','starsilverOre',{material:['frostPelt',0.45],aether:['violetAetherstone',0.12],modifier:['extraStrike',.01]}),
+ n('iceTroll','Ice Troll','snow2',87,'normal','starsilverOre',{material:['frostPelt',0.5],aether:['violetAetherstone',0.12],modifier:['extraStrike',.01],core:['groundSlam',.002]}),
+ n('eliteSnowTroll','Elite Snow Troll','snow2',88,'elite','starsilverOre',{material:['frostPelt',1],aether:['violetAetherstone',0.35],modifier:['extraStrike',.08],core:['groundSlam',.04]}),
+ n('frostGiantJunior','Frost Giant Junior','snow2',90,'elite','starsilverOre',{material:['rimeCrystal',1],aether:['violetAetherstone',0.35],modifier:['concentratedForce',.08],core:['frostNova',.04]}),
+ n('bubbleCrab','Bubble Crab','underwater1',91,'normal','runegoldOre',{material:['abyssPearl',0.45],aether:['violetAetherstone',0.12],modifier:['chain',.01]}),
+ n('sandCrab','Sand Crab','underwater1',92,'normal','runegoldOre',{material:['abyssPearl',0.5],aether:['violetAetherstone',0.12],modifier:['chain',.01],core:['barrier',.002]}),
+ n('eliteBubbleCrab','Elite Bubble Crab','underwater1',93,'elite','runegoldOre',{material:['abyssPearl',1],aether:['violetAetherstone',0.35],modifier:['chain',.08],core:['barrier',.04]}),
+ n('pufferling','Pufferling','underwater1',92,'normal','runegoldOre',{material:['abyssPearl',0.45],aether:['violetAetherstone',0.12],modifier:['combustion',.01]}),
+ n('coralPuffer','Coral Puffer','underwater1',93,'normal','runegoldOre',{material:['abyssPearl',0.5],aether:['violetAetherstone',0.12],modifier:['combustion',.01],core:['blackHole',.002]}),
+ n('elitePufferling','Elite Pufferling','underwater1',94,'elite','runegoldOre',{material:['abyssPearl',1],aether:['violetAetherstone',0.35],modifier:['combustion',.08],core:['blackHole',.04]}),
+ n('jellyDrifter','Jelly Drifter','underwater1',94,'normal','runegoldOre',{material:['stormFeather',0.45],aether:['violetAetherstone',0.12],modifier:['overcharge',.01]}),
+ n('glowJelly','Glow Jelly','underwater1',95,'normal','runegoldOre',{material:['stormFeather',0.5],aether:['violetAetherstone',0.12],modifier:['overcharge',.01],core:['chainLightning',.002]}),
+ n('eliteJellyDrifter','Elite Jelly Drifter','underwater1',96,'elite','runegoldOre',{material:['stormFeather',1],aether:['violetAetherstone',0.35],modifier:['overcharge',.08],core:['chainLightning',.04]}),
+ n('coralCrabKnight','Coral Crab Knight','underwater1',97,'elite','runegoldOre',{material:['abyssPearl',1],aether:['violetAetherstone',0.35],modifier:['extraStrike',.08],core:['warCry',.04]}),
+ n('reefCrabKnight','Reef Crab Knight','underwater1',98,'elite','runegoldOre',{material:['abyssPearl',1],aether:['violetAetherstone',0.35],modifier:['extraStrike',.08],core:['warCry',.04]}),
+ n('crimsonCrabKnight','Crimson Crab Knight','underwater1',99,'elite','runegoldOre',{material:['abyssPearl',1],aether:['violetAetherstone',0.35],modifier:['extraStrike',.08],core:['warCry',.04]}),
+ n('mossClamKing','Moss Clam King','underwater1',100,'elite','runegoldOre',{material:['abyssPearl',1],aether:['violetAetherstone',0.35],modifier:['echo',.08],core:['barrier',.04]}),
+ n('emberClamKing','Ember Clam King','underwater1',100,'elite','runegoldOre',{material:['abyssPearl',1],aether:['violetAetherstone',0.35],modifier:['echo',.08],core:['barrier',.04]}),
+ n('pearlClamKing','Pearl Clam King','underwater1',100,'elite','runegoldOre',{material:['abyssPearl',1],aether:['violetAetherstone',0.35],modifier:['echo',.08],core:['barrier',.04]}),
+ n('squidling','Squidling','underwater2',101,'normal','runegoldOre',{material:['abyssPearl',0.45],aether:['violetAetherstone',0.12],modifier:['lingering',.01]}),
+ n('inkSquidling','Ink Squidling','underwater2',102,'normal','runegoldOre',{material:['abyssPearl',0.5],aether:['violetAetherstone',0.12],modifier:['lingering',.01],core:['blackHole',.002]}),
+ n('violetSquidling','Violet Squidling','underwater2',103,'normal','runegoldOre',{material:['abyssPearl',0.5],aether:['violetAetherstone',0.12],modifier:['lingering',.01]}),
+ n('eliteSquidling','Elite Squidling','underwater2',104,'elite','runegoldOre',{material:['abyssPearl',1],aether:['violetAetherstone',0.35],modifier:['lingering',.08],core:['blackHole',.04]}),
+ n('abyssEel','Abyss Eel','underwater2',104,'normal','runegoldOre',{material:['stormFeather',0.45],aether:['violetAetherstone',0.12],modifier:['chain',.01]}),
+ n('tideEel','Tide Eel','underwater2',105,'normal','runegoldOre',{material:['stormFeather',0.5],aether:['violetAetherstone',0.12],modifier:['chain',.01],core:['chainLightning',.002]}),
+ n('eliteAbyssEel','Elite Abyss Eel','underwater2',107,'elite','runegoldOre',{material:['stormFeather',1],aether:['violetAetherstone',0.35],modifier:['chain',.08],core:['chainLightning',.04]}),
+ n('abyssMermaid','Abyss Mermaid','underwater2',105,'normal','runegoldOre',{material:['stormFeather',0.45],aether:['violetAetherstone',0.12],modifier:['rapidCasting',.01]}),
+ n('duskMermaid','Dusk Mermaid','underwater2',106,'normal','runegoldOre',{material:['stormFeather',0.5],aether:['violetAetherstone',0.12],modifier:['rapidCasting',.01],core:['iceLance',.002]}),
+ n('kelpMermaid','Kelp Mermaid','underwater2',107,'normal','runegoldOre',{material:['stormFeather',0.5],aether:['violetAetherstone',0.12],modifier:['rapidCasting',.01]}),
+ n('abyssSiren','Abyss Siren','underwater2',108,'elite','runegoldOre',{material:['stormFeather',1],aether:['violetAetherstone',0.35],modifier:['rapidCasting',.08],core:['iceLance',.04]}),
+ n('abyssShark','Abyss Shark','underwater2',107,'normal','runegoldOre',{material:['abyssPearl',0.45],aether:['violetAetherstone',0.12],modifier:['execution',.01]}),
+ n('reefShark','Reef Shark','underwater2',108,'normal','runegoldOre',{material:['abyssPearl',0.5],aether:['violetAetherstone',0.12],modifier:['execution',.01],core:['bladeRush',.002]}),
+ n('eliteAbyssShark','Elite Abyss Shark','underwater2',109,'elite','runegoldOre',{material:['abyssPearl',1],aether:['violetAetherstone',0.35],modifier:['execution',.08],core:['bladeRush',.04]}),
+ n('stormRaven','Storm Raven','asgard1',111,'normal','runegoldOre',{material:['stormFeather',0.45],aether:['violetAetherstone',0.12],modifier:['overcharge',.01]}),
+ n('thunderRaven','Thunder Raven','asgard1',112,'normal','runegoldOre',{material:['stormFeather',0.5],aether:['violetAetherstone',0.12],modifier:['overcharge',.01],core:['chainLightning',.002]}),
+ n('eliteStormRaven','Elite Storm Raven','asgard1',113,'elite','runegoldOre',{material:['stormFeather',1],aether:['violetAetherstone',0.35],modifier:['overcharge',.08],core:['chainLightning',.04]}),
+ n('einherjar','Einherjar','asgard1',113,'normal','runegoldOre',{material:['stormFeather',0.45],aether:['violetAetherstone',0.12],modifier:['extraStrike',.01]}),
+ n('shieldEinherjar','Shield Einherjar','asgard1',114,'normal','runegoldOre',{material:['stormFeather',0.5],aether:['violetAetherstone',0.12],modifier:['extraStrike',.01],core:['warCry',.002]}),
+ n('eliteEinherjar','Elite Einherjar','asgard1',116,'elite','runegoldOre',{material:['stormFeather',1],aether:['violetAetherstone',0.35],modifier:['extraStrike',.08],core:['warCry',.04]}),
+ n('runeSentinel','Rune Sentinel','asgard1',116,'normal','runegoldOre',{material:['abyssPearl',0.45],aether:['violetAetherstone',0.12],modifier:['concentratedForce',.01]}),
+ n('stoneSentinel','Stone Sentinel','asgard1',117,'normal','runegoldOre',{material:['abyssPearl',0.5],aether:['violetAetherstone',0.12],modifier:['concentratedForce',.01],core:['barrier',.002]}),
+ n('eliteRuneSentinel','Elite Rune Sentinel','asgard1',118,'elite','runegoldOre',{material:['abyssPearl',1],aether:['violetAetherstone',0.35],modifier:['concentratedForce',.08],core:['barrier',.04]}),
+ n('valkyrie','Valkyrie','asgard1',118,'normal','runegoldOre',{material:['stormFeather',0.45],aether:['violetAetherstone',0.12],modifier:['mobileCast',.01]}),
+ n('shieldmaiden','Shieldmaiden','asgard1',119,'normal','runegoldOre',{material:['stormFeather',0.5],aether:['violetAetherstone',0.12],modifier:['mobileCast',.01],core:['bladeRush',.002]}),
+ n('eliteValkyrie','Elite Valkyrie','asgard1',120,'elite','runegoldOre',{material:['stormFeather',1],aether:['violetAetherstone',0.35],modifier:['mobileCast',.08],core:['bladeRush',.04]}),
+ n('fenrirPup','Fenrir Pup','asgard2',120,'normal','runegoldOre',{material:['stormFeather',0.45],aether:['violetAetherstone',0.12],modifier:['execution',.01]}),
+ n('shadowFenrirPup','Shadow Fenrir Pup','asgard2',120,'normal','runegoldOre',{material:['stormFeather',0.5],aether:['violetAetherstone',0.12],modifier:['execution',.01],core:['dash',.002]}),
+ n('eliteFenrirPup','Elite Fenrir Pup','asgard2',120,'elite','runegoldOre',{material:['stormFeather',1],aether:['violetAetherstone',0.35],modifier:['execution',.08],core:['dash',.04]}),
+ n('sleipnirSpawn','Sleipnir Spawn','asgard2',120,'normal','runegoldOre',{material:['stormFeather',0.45],aether:['violetAetherstone',0.12],modifier:['mobileCast',.01]}),
+ n('royalSleipnir','Royal Sleipnir','asgard2',120,'normal','runegoldOre',{material:['stormFeather',0.5],aether:['violetAetherstone',0.12],modifier:['mobileCast',.01],core:['blink',.002]}),
+ n('eliteSleipnirSpawn','Elite Sleipnir Spawn','asgard2',120,'elite','runegoldOre',{material:['stormFeather',1],aether:['violetAetherstone',0.35],modifier:['mobileCast',.08],core:['blink',.04]}),
+ n('goldenEinherjar','Golden Einherjar','asgard2',120,'normal','runegoldOre',{material:['stormFeather',0.45],aether:['violetAetherstone',0.12],modifier:['echo',.01]}),
+ n('gildedEinherjar','Gilded Einherjar','asgard2',120,'normal','runegoldOre',{material:['stormFeather',0.5],aether:['violetAetherstone',0.12],modifier:['echo',.01],core:['warCry',.002]}),
+ n('eliteGoldenEinherjar','Elite Golden Einherjar','asgard2',120,'elite','runegoldOre',{material:['stormFeather',1],aether:['violetAetherstone',0.35],modifier:['echo',.08],core:['warCry',.04]}),
+ n('runeColossus','Rune Colossus','asgard2',120,'normal','runegoldOre',{material:['abyssPearl',0.45],aether:['violetAetherstone',0.12],modifier:['expandedArea',.01]}),
+ n('graniteColossus','Granite Colossus','asgard2',120,'normal','runegoldOre',{material:['abyssPearl',0.5],aether:['violetAetherstone',0.12],modifier:['expandedArea',.01],core:['groundSlam',.002]}),
+ n('eliteRuneColossus','Elite Rune Colossus','asgard2',120,'elite','runegoldOre',{material:['abyssPearl',1],aether:['violetAetherstone',0.35],modifier:['expandedArea',.08],core:['groundSlam',.04]}),
+ n('valkyrieCaptain','Valkyrie Captain','asgard2',120,'elite','runegoldOre',{material:['stormFeather',1],aether:['violetAetherstone',0.35],modifier:['echo',.08],core:['thunderStorm',.04]}),
+ n('stormCaptain','Storm Captain','asgard2',120,'elite','runegoldOre',{material:['stormFeather',1],aether:['violetAetherstone',0.35],modifier:['echo',.08],core:['thunderStorm',.04]}),
+ n('skyCaptain','Sky Captain','asgard2',120,'elite','runegoldOre',{material:['stormFeather',1],aether:['violetAetherstone',0.35],modifier:['echo',.08],core:['thunderStorm',.04]}),
+ n('iceTrollKing','Grimhollow, the Ice Troll King','snow1',80,'boss','starsilverOre',{aether:['azureAetherstone',.45],modifier:['concentratedForce',.20],core:['groundSlam',.10]}),
+ n('frostGiantLord','Ymirax, the Frost Giant','snow2',90,'boss','starsilverOre',{aether:['violetAetherstone',.45],modifier:['expandedArea',.20],core:['frostNova',.10]}),
+ n('kraken','Kraken of the Reef','underwater1',100,'boss','runegoldOre',{aether:['violetAetherstone',0.45],modifier:['lingering',.20],core:['blackHole',.10]}),
+ n('kingTriton','King Triton','underwater2',110,'boss','runegoldOre',{aether:['violetAetherstone',0.45],modifier:['echo',.20],core:['iceLance',.10]}),
+ n('thor','Thor, the Thunderer','asgard1',120,'boss','runegoldOre',{aether:['violetAetherstone',0.45],modifier:['overcharge',.20],core:['thunderStorm',.10]}),
+ n('odin','Odin, the Allfather','asgard2',120,'boss','runegoldOre',{aether:['violetAetherstone',0.45],modifier:['echo',.20],core:['chainLightning',.10]}),
 ].map(x=>[x.id,x]));

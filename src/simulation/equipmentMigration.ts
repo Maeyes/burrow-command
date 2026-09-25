@@ -1,4 +1,5 @@
 import type { CharacterStateV2, EquipmentInstanceStateV2 } from './character';
+import { normalizeMasteryLoadout } from './masteryLoadout';
 
 type LegacyEquipmentInstance = EquipmentInstanceStateV2 & {refine?:number;enhancementGrowth?:unknown};
 
@@ -30,8 +31,9 @@ export function normalizeCharacterStateV2(state:CharacterStateV2):CharacterState
   const legacy=equipment.instances[id] as LegacyEquipmentInstance|undefined;
   if(legacy?.refine!==undefined)refinementBySlot[slot]=Math.max(0,Math.min(15,Math.floor(legacy.refine)));
  }
- return{
+ const next={
   ...state,
+  masteryLoadout:state.masteryLoadout??{passive:[],active:{}},
   unlockedMaps:(Array.isArray(state.unlockedMaps)?state.unlockedMaps:['forest1']).map(legacyMapId),
   currentMapId:legacyMapId(state.currentMapId||'forest1'),
   mapIdVersion:2,
@@ -42,5 +44,7 @@ export function normalizeCharacterStateV2(state:CharacterStateV2):CharacterState
    refinementBySlot,
    instances,
   },
- };
+ } as CharacterStateV2;
+ next.masteryLoadout=normalizeMasteryLoadout(next);
+ return next;
 }

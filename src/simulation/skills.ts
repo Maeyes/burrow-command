@@ -22,6 +22,8 @@ export interface SkillDefinitionV2 {
   targeting?: 'target'|'selfArea'|'targetArea'|'groundArea';
   movementDistance?: number;
   healMaxHpFraction?: number;
+  barrierMaxHpFraction?: number;
+  durationMs?: number;
   compatibleWeaponFamilies?: CombatWeaponFamily[];
   auto?: {
     canAutoUse: boolean;
@@ -38,7 +40,7 @@ export const SKILLS_V2: Record<string, SkillDefinitionV2> = {
   meteorStorm:{id:'meteorStorm',targeting:'groundArea',range:260,radius:125,name:'Meteor Storm',kind:'active',scaling:'magicalAttack',coefficient:1.5,hitCount:3,defenseType:'mdef',canCrit:true,accuracy:'normal',element:'fire',cooldownMs:8000,auto:{canAutoUse:true,minimumEnemyCount:4,minimumExpectedTargets:3}},
   dash:{id:'dash',name:'Dash',kind:'movement',movementDistance:130,cooldownMs:3500,auto:{canAutoUse:true}},
   blink:{id:'blink',name:'Blink',kind:'movement',movementDistance:190,cooldownMs:5000,auto:{canAutoUse:true}},
-  barrier:{id:'barrier',name:'Barrier',kind:'active',cooldownMs:12000,auto:{canAutoUse:true,reserveForEliteBoss:true}},
+  barrier:{id:'barrier',name:'Barrier',kind:'active',barrierMaxHpFraction:.15,durationMs:5000,cooldownMs:12000,auto:{canAutoUse:true,reserveForEliteBoss:true}},
   warCry:{id:'warCry',name:'War Cry',kind:'active',cooldownMs:12000,auto:{canAutoUse:true,minimumEnemyCount:2}},
   frostNova:{id:'frostNova',targeting:'selfArea',radius:100,name:'Frost Nova',kind:'active',scaling:'magicalAttack',coefficient:1.2,hitCount:1,defenseType:'mdef',canCrit:true,accuracy:'normal',element:'cold',cooldownMs:6500,auto:{canAutoUse:true,minimumEnemyCount:2}},
   chainLightning:{id:'chainLightning',targeting:'targetArea',range:220,radius:125,name:'Chain Lightning',kind:'active',scaling:'magicalAttack',coefficient:1.45,hitCount:1,defenseType:'mdef',canCrit:true,accuracy:'normal',element:'lightning',cooldownMs:4500,auto:{canAutoUse:true,minimumEnemyCount:2}},
@@ -74,3 +76,10 @@ export const SKILLS_V2: Record<string, SkillDefinitionV2> = {
   gravityPulse:{id:'gravityPulse',name:'Gravity Pulse',kind:'weapon',targeting:'selfArea',radius:115,scaling:'magicalAttack',coefficient:2.25,hitCount:2,defenseType:'mdef',canCrit:true,accuracy:'normal',element:'neutral',cooldownMs:7500,compatibleWeaponFamilies:['swordShield'],auto:{canAutoUse:true,minimumEnemyCount:2}},
   astralDominion:{id:'astralDominion',name:'Astral Dominion',kind:'weapon',targeting:'selfArea',radius:145,scaling:'magicalAttack',coefficient:3.95,hitCount:5,defenseType:'mdef',canCrit:true,accuracy:'normal',element:'neutral',cooldownMs:19000,compatibleWeaponFamilies:['swordShield'],auto:{canAutoUse:true,reserveForEliteBoss:true}},
 };
+
+/** SP per pressed Skill Core cast: 2 SP per second of cooldown, minimum 4. Weapon skills and movement are free. */
+export const SP_COST_PER_COOLDOWN_SECOND=2;
+export function skillSpCostV2(skill:{kind:string;cooldownMs?:number}):number{
+ if(skill.kind!=='active')return 0;
+ return Math.max(4,Math.round((skill.cooldownMs??0)/1000*SP_COST_PER_COOLDOWN_SECOND));
+}

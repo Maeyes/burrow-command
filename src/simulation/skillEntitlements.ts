@@ -5,7 +5,8 @@ export interface SkillEntitlementsV2 {
   active: readonly string[];
   movement?: string;
   passive: readonly string[];
-  weaponSkills: readonly string[];
+  /** Mastery on-hit loadout slots: index 0/1/2 = mastery Lv10/Lv20/Lv30. */
+  weaponSkills: readonly [string?,string?,string?];
   modifiersByActive: Readonly<Record<string,readonly string[]>>;
 }
 
@@ -20,12 +21,15 @@ export const WEAPON_SKILLS_BY_FAMILY_V2: Readonly<Record<CombatWeaponFamily, rea
   swordShield: ['radiantBurst', 'gravityPulse', 'astralDominion'],
 };
 
-export function skillEntitlementsForCharacter(state: CharacterStateV2, weaponFamily: CombatWeaponFamily): SkillEntitlementsV2 {
-  // Weapon Mastery grants the family's three active weapon skills at Lv10/20/30.
-  // Passive/mechanical mastery milestones remain separate bonuses and continue through Lv50.
-  const masteryLevel = state.weaponMastery[weaponFamily]?.level ?? 1;
-  const unlockedCount = masteryLevel >= 30 ? 3 : masteryLevel >= 20 ? 2 : masteryLevel >= 10 ? 1 : 0;
-  const weaponSkills = WEAPON_SKILLS_BY_FAMILY_V2[weaponFamily].slice(0, unlockedCount);
+export function skillEntitlementsForCharacter(state: CharacterStateV2, _weaponFamily?: CombatWeaponFamily): SkillEntitlementsV2 {
+  // Mastery actives are build loadout choices, not "everything unlocked on the equipped weapon".
+  // Slots are fixed by mastery band so only one Lv10, one Lv20 and one Lv30 on-hit skill can be installed.
+  const levels=[10,20,30] as const;
+  const weaponSkills=levels.map((level,index)=>{
+    const skillId=state.masteryLoadout?.active?.[level];if(!skillId)return undefined;
+    const family=(Object.keys(WEAPON_SKILLS_BY_FAMILY_V2) as CombatWeaponFamily[]).find(f=>WEAPON_SKILLS_BY_FAMILY_V2[f]?.[index]===skillId);
+    return family&&(state.weaponMastery[family]?.level??1)>=level?skillId:undefined;
+  }) as [string?,string?,string?];
   return {
     active: state.skills.active.filter((id): id is string => Boolean(id)),
     movement: state.skills.movement,

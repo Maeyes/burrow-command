@@ -4,12 +4,12 @@ export type InventoryItemCategoryV2='Crafting Mat'|'Upgrading Mat'|'Blueprint'|'
 export interface InventoryItemMetaV2 { id:string; category:InventoryItemCategoryV2; tags:string[]; }
 
 const crafting=new Set([
- 'livingMoss','brutalSpore','duneRunnerClaw','cactusSpine','djinnEssence','sunscarabCarapace','goblinIronScrap','cursedBone','drakeScale','magmaCore',
- 'copperOre','ironOre','moonstoneShard','silverOre','mithrilOre','obsidianOre','bruteSpore','ancientRootHeart','duneMawFang','sunforgeCore','leaderEmblem',
+ 'livingMoss','brutalSpore','duneRunnerClaw','cactusSpine','djinnEssence','sunscarabCarapace','goblinIronScrap','cursedBone','drakeScale','magmaCore','rimeCrystal','stormFeather','frostPelt','abyssPearl',
+ 'copperOre','ironOre','moonstoneShard','silverOre','mithrilOre','obsidianOre','starsilverOre','runegoldOre','bruteSpore','ancientRootHeart','duneMawFang','sunforgeCore','leaderEmblem',
  // Legacy saves may still contain these removed resources. Keep their semantic tag so they never fall into Misc.
  'beastPelt','pelt','hide','fang','core'
 ]);
-const upgrading=new Set(['verdantAetherstone','azureAetherstone','violetAetherstone','astraliteStone','refineProtectionLv1','refineProtectionLv2','optionStone','reoptionStone']);
+const upgrading=new Set(['stoneFragment','verdantAetherstone','azureAetherstone','violetAetherstone','astraliteStone','refineProtectionLv1','refineProtectionLv2','optionStone','reoptionStone']);
 const modifiers=new Set(['lifeDrain','lingering','expandedArea','execution','rapidCasting','mobileCast','combustion','echo','overcharge','chain','extraStrike','concentratedForce']);
 
 export function inventoryItemMeta(id:string):InventoryItemMetaV2{

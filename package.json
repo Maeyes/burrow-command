@@ -2,7 +2,7 @@
   "name": "bunny-world",
   "private": true,
   "version": "0.2.0",
-  "description": "Bunny World V2 — 2D isometric RO-like RPG with authoritative simulation",
+  "description": "Bunny World V2 \u00e2\u20ac\u201d 2D isometric RO-like RPG with authoritative simulation",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,9 @@
     "icons:sync": "node tools/sync-icons.mjs",
     "terrain:pack": "node tools/pack-pixellab-terrain.mjs",
     "terrain:import": "node tools/import-isometric-terrain.mjs",
-    "terrain:validate": "node tools/import-isometric-terrain.mjs --validate-only"
+    "terrain:validate": "node tools/import-isometric-terrain.mjs --validate-only",
+    "test:ui": "node tools/ui-smoke.mjs",
+    "balance": "npx tsx tools/balance-sim.ts"
   },
   "dependencies": {},
   "devDependencies": {

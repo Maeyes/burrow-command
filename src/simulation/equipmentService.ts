@@ -13,7 +13,14 @@ export type EquipmentCommandV2=
  |{type:'refine';slot:string;protectedAttempt?:boolean}
  |{type:'addOption';equipmentId:string}
  |{type:'reoption';equipmentId:string;lockedIndexes:number[]}
- |{type:'dismantle';equipmentId:string};
+ |{type:'dismantle';equipmentId:string}
+ |{type:'craftProtection';level:1|2;qty?:number};
+
+/** Refine protection crafting: fragments come from dismantling gear. */
+export const PROTECTION_RECIPES_V2={
+ 1:{inputId:'stoneFragment',inputQty:10,gold:500,outputId:'refineProtectionLv1'},
+ 2:{inputId:'refineProtectionLv1',inputQty:10,gold:5000,outputId:'refineProtectionLv2'},
+} as const;
 
 export interface EquipmentCommandResultV2{state:CharacterStateV2;createdEquipmentId?:string;refineSuccess?:boolean;granted?:Record<string,number>}
 let nextEquipmentSequence=1;
@@ -78,6 +85,11 @@ export function applyEquipmentCommand(state:CharacterStateV2,command:EquipmentCo
   const x=equipment(state,command.equipmentId);const locked=new Set(command.lockedIndexes);if(locked.size>=x.affixes.length)throw new Error('cannot-lock-all-affixes');
   let next=spend(state,0,{reoptionStone:reoptionStoneCost(locked.size)});const used=new Set(x.affixes.filter((_,i)=>locked.has(i)));const affixes=x.affixes.map((a,i)=>{if(locked.has(i))return a;const rolled=randomAffix(rng,used);used.add(rolled);return rolled});
   next=withInstance(next,{...x,affixes});return{state:next};
+ }
+ if(command.type==='craftProtection'){
+  // Lv1 from dismantle fragments; Lv2 from ten Lv1 (see PROTECTION_RECIPES_V2).
+  const r=PROTECTION_RECIPES_V2[command.level],qty=Math.max(1,Math.floor(command.qty??1));if(!r)throw new Error('invalid-protection-level');
+  let next=spend(state,r.gold*qty,{[r.inputId]:r.inputQty*qty});const granted={[r.outputId]:qty};next=grant(next,granted);return{state:next,granted};
  }
  const x=equipment(state,command.equipmentId);if(Object.values(state.equipment.equippedBySlot).includes(x.id))throw new Error('cannot-dismantle-equipped');
  const granted:Record<string,number>={stoneFragment:dismantleFragments(x.rarity as EquipmentRarity)};const protection=dismantleProtectionLv1(x.rarity as EquipmentRarity,rng());if(protection)granted.refineProtectionLv1=protection;
