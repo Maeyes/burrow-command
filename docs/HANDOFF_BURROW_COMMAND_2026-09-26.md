@@ -14,6 +14,9 @@ A small single-player prototype on the Dimraeth engine: a bunny squad defends it
   Each extra bunny of a class costs +20%.
 - **Win:** survive 5 nights (night 5 has the forest boss mid-wave). **Lose:** hall HP 0.
 - Downed bunnies wake up at dawn; everyone is fully healed at dawn (anti death-spiral).
+- **Archer towers** (`TOWER`): 40G + 8 materials, max 6, placed by clicking inside the dashed ring
+  (170–520 from the hall, 80 apart). They shoot like the hall; night raiders within 150 knock them
+  down first. *Repair* heals the hall first, then towers. Dev hook: `window.__warrenDev.placeTower(x, y)`.
 
 ## Files
 | File | Role |
@@ -79,10 +82,12 @@ road patch in `scenes/custom.js#autoStairs`) and 14 editor props (`OBJECT_TYPES`
 `engine/world.js`, `libOf()` in `engine/sprites.js`). See `art-test/dimraeth-slice/ENGINE.md` §11.
 
 ## Known issues / next steps
+0. Balance with towers: the bot (buys, upgrades, repairs, builds a tower per day) now wins with the hall
+   at ~95%. Consider a difficulty select (Normal/Hard) rather than nerfing towers.
 1. Narrow screens: shop and squad panels cover a lot of the view. Make them collapsible.
 2. Staff/mage class is missing (no baked Blessed staff attack; use the code slash like `game.js`).
 3. Proposed roadmap (agreed with the user):
-   - **A. Single-player depth:** buildings (archer tower first, walls, traps) paid with materials,
+   - **A. Single-player depth:** buildings (archer tower ✅ done; walls, traps next) paid with materials,
      class skills from `SKILLS_V2`, named bunnies with levels, night ambience.
    - **B. Content:** more biomes (desert, snow, magma rosters already exist), a save.
    - **C. Leaderboard:** nights survived / kills (Supabase or similar).

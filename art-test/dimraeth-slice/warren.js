@@ -2,7 +2,7 @@
 // Day: bunnies farm the field around a flag and carry loot home. Night: waves attack the burrow.
 // Gold only comes from kills. Materials upgrade a class. Downed bunnies recover at dawn.
 // Terrain, Blessed Bunny, monster art and FX are the Dimraeth engine's; the rules live here.
-import { boot, setRuntimeActors, setRuntimeActorUpdater, setRuntimePlayerVisual, setRuntimePlayerControl, setRuntimeClickHandler, canRuntimeActorStand, runtimeWalkHeight, resolveRuntimeActor } from './engine/runtime.js';
+import { projectRuntimePoint, boot, setRuntimeActors, setRuntimeActorUpdater, setRuntimePlayerVisual, setRuntimePlayerControl, setRuntimeClickHandler, canRuntimeActorStand, runtimeWalkHeight, resolveRuntimeActor } from './engine/runtime.js';
 import { emptyMap, sceneFromMap } from './scenes/custom.js';
 import { findPath, canWalkStraight } from './combat/nav.js';
 import { getRoster, monsterPresentation } from './combat/rosters.js';
@@ -11,6 +11,8 @@ import { createSkillFx, BASIC_ATTACK_FX } from './combat/skillfx.js';
 import { createFloaters } from './combat/floaters.js';
 import { combatFX } from './combat/fx.js';
 import { combatSFX } from './combat/sfx.js';
+import { towerSprite } from './engine/sprites.js';
+import * as PAL from './engine/palettes.js';
 
 // ---------- rules ----------
 const CLASSES = {
@@ -24,6 +26,8 @@ const BURROW_MAX = 500, REPAIR_HP = 60, REPAIR_COST = 12, REVIVE_COST = 15;
 const UPGRADE = [null, { mats: 6, gold: 20 }, { mats: 14, gold: 45 }, { mats: 26, gold: 90 }]; // to tier 1..3, +30% each
 const MATS = { wood: 'ไม้', hide: 'หนัง', ore: 'แร่' };
 const HALL = { dmg: 9, cd: 1, range: 300 };
+// archer towers: built with gold + materials around the warren; raiders knock them down on the way in
+const TOWER = { gold: 40, mats: 8, hp: 220, dmg: 8, cd: 1.1, range: 260, max: 6, buildR: 520, gap: 80 };
 const T = 64, CENTER = { x: 20 * T, y: 20 * T }, BASE_R = 190;
 
 // ---------- map: a clearing with the warren in the middle, forest all around ----------
@@ -87,7 +91,7 @@ await Promise.all([...normals, ...elites, bossId].filter(Boolean).map(artFor));
 const S = {
   gold: 20, mats: { wood: 0, hide: 0, ore: 0 }, tier: { guard: 0, archer: 0, scout: 0, brute: 0 },
   burrow: BURROW_MAX, day: 1, night: false, clock: 0, flag: { x: CENTER.x + 520, y: CENTER.y - 200 }, speed: 1, over: null,
-  units: [], monsters: [], waveLeft: 0, waveTimer: 0, kills: 0, time: 0, events: [],
+  units: [], monsters: [], towers: [], building: false, waveLeft: 0, waveTimer: 0, kills: 0, time: 0, events: [],
 };
 const later = (sec, fn) => S.events.push({ at: S.time + sec, fn }); // game-clock timer (respects speed/pause)
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -129,6 +133,43 @@ function separate(list, r) {
     const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy); if (d >= r || d < .01) continue;
     const push = (r - d) / 2 / d; a.x -= dx * push; a.y -= dy * push; b.x += dx * push; b.y += dy * push;
   }
+}
+
+const matCount = () => S.mats.wood + S.mats.hide + S.mats.ore;
+function spendMats(n) { for (const k in MATS) { const take = Math.min(n, S.mats[k]); S.mats[k] -= take; n -= take; } }
+
+// ---------- archer towers ----------
+let towerArt = null; // built on first use (needs the engine's render scale)
+function placeTower(x, y) {
+  if (S.towers.length >= TOWER.max) return toast(`สร้างได้สูงสุด ${TOWER.max} ป้อม`);
+  if (S.gold < TOWER.gold || matCount() < TOWER.mats) return toast(`ต้องใช้ ${TOWER.gold}G + ของ ${TOWER.mats} ชิ้น`);
+  if (dist({ x, y }, CENTER) > TOWER.buildR) return toast('สร้างได้เฉพาะในวงสีเหลืองรอบโพรง');
+  if (dist({ x, y }, CENTER) < 170 || S.towers.some(t => dist(t, { x, y }) < TOWER.gap) || !standable(x, y)) return toast('ตรงนี้สร้างไม่ได้');
+  S.gold -= TOWER.gold; spendMats(TOWER.mats);
+  towerArt ??= towerSprite(28, 62, PAL.RED);
+  const t = { x, y, hp: TOWER.hp, maxHp: TOWER.hp, cd: 0 };
+  t.actor = {
+    kind: 'actor', x: x - 14, y: y - 14, z: 0, r: 4, shadow: false, ox: towerArt.ox, oy: towerArt.oy, getImage: () => towerArt.img,
+    get dead() { return t.hp <= 0; },
+    drawOverlay(g, { x: sx, y: sy }) { const w = 40, q = t.hp / t.maxHp; g.fillStyle = 'rgba(10,12,12,.85)'; g.fillRect(sx - w / 2, sy - 118, w, 5); g.fillStyle = q > .5 ? '#7ee38a' : q > .25 ? '#ffc94a' : '#ff5a4a'; g.fillRect(sx - w / 2 + 1, sy - 117, (w - 2) * q, 3); },
+  };
+  S.towers.push(t); S.building = false;
+  skillFx?.pillar(x, y, { color: '#ffe27a' }); skillFx?.burst(x, y, { color: '#d9c7a8', count: 20, up: 60 }); combatSFX.playLevelUp({ volume: .35 });
+  toast('สร้างป้อมธนูแล้ว!'); renderUi();
+}
+function updateTowers(dt) {
+  for (const t of S.towers) {
+    t.cd -= dt; if (t.cd > 0) continue;
+    const m = nearestMonster(t, TOWER.range); if (!m) continue;
+    t.cd = TOWER.cd;
+    skillFx?.play('shotArrow', { from: { x: t.x, y: t.y }, to: { x: m.x, y: m.y } });
+    later(.22, () => { if (m.dead) return; m.hp -= TOWER.dmg; floaters?.text(m.x, m.y, TOWER.dmg, { color: '#bfe3ff', size: 13 }); combatFX.playHitSpark(m.x, m.y, { visualScale: m.actor.visualScale }); if (m.hp <= 0) killMonster(m, null); });
+  }
+}
+function hurtTower(t, dmg) {
+  if (t.hp <= 0) return;
+  t.hp -= dmg; floaters?.text(t.x, t.y, `-${Math.round(dmg)}`, { color: '#ff9a4a', size: 13, lift: 90 });
+  if (t.hp <= 0) { t.hp = 0; combatFX.playBossDeath(t.x, t.y, { visualScale: 1 }); combatSFX.playDeath({ volume: .6 }); toast('ป้อมธนูพังแล้ว!'); S.towers = S.towers.filter(x => x !== t); renderUi(); }
 }
 
 // ---------- bunnies ----------
@@ -282,7 +323,14 @@ function updateMonster(m, dt) {
   let target = m.aggro && !m.aggro.down && dist(m, m.aggro) < 420 ? m.aggro : nearestUnit(m, m.night ? 180 : 150);
   if (!m.night && !target && dist(m, m.home) > 60) { moveToward(m, m.home.x, m.home.y, m.speed * .6, dt); m.left = screenLeft(m.home.x - m.x, m.home.y - m.y); return; }
   if (!m.night && target && dist(target, m.home) > 480) { m.aggro = null; target = null; }
-  if (!target && m.night) { // go for the burrow hall
+  if (!target && m.night) { // a tower in the way gets knocked down first, then the burrow hall
+    const tw = S.towers.filter(t => t.hp > 0 && dist(m, t) < 150).sort((a, b) => dist(m, a) - dist(m, b))[0];
+    if (tw) {
+      m.left = screenLeft(tw.x - m.x, tw.y - m.y);
+      if (dist(m, tw) > 42) moveToward(m, tw.x, tw.y, m.speed, dt, 38);
+      else if (m.cd <= 0) { m.cd = 1.3; m.lunge = performance.now(); m.lungeTo = { x: tw.x, y: tw.y }; later(.18, () => { if (!m.dead) hurtTower(tw, m.atk * .7); }); }
+      lunge(m); return;
+    }
     if (dist(m, CENTER) > 175 && (m.stuck ?? 0) < 1.5) { moveToward(m, CENTER.x, CENTER.y, m.speed, dt, 150); m.left = screenLeft(CENTER.x - m.x, CENTER.y - m.y); }
     else if (m.cd <= 0) { m.cd = 1.3; S.burrow -= m.atk * .6; floaters?.text(CENTER.x, CENTER.y, `-${Math.round(m.atk * .6)}`, { color: '#ff9a4a', size: 15, lift: 90 }); m.lunge = performance.now(); combatFX.playTackle(m.x, m.y, { visualScale: m.actor.visualScale }); renderUi(); }
     lunge(m); return;
@@ -349,6 +397,7 @@ function tick(dt) {
   // the burrow hall has an archer loft: it shoots the nearest raider, day or night
   S.hallCd = (S.hallCd ?? 0) - dt;
   if (S.hallCd <= 0) { const m = nearestMonster(CENTER, HALL.range); if (m) { S.hallCd = HALL.cd; const from = { x: CENTER.x, y: CENTER.y }; skillFx?.play('shotArrow', { from, to: { x: m.x, y: m.y } }); later(.22, () => { if (m.dead) return; m.hp -= HALL.dmg; floaters?.text(m.x, m.y, HALL.dmg, { color: '#bfe3ff', size: 13 }); combatFX.playHitSpark(m.x, m.y, { visualScale: m.actor.visualScale }); if (m.hp <= 0) killMonster(m, null); }); } }
+  updateTowers(dt);
   S.units.forEach((u, i) => updateUnit(u, dt, i));
   for (const m of S.monsters) updateMonster(m, dt);
   separate(S.units, 26); separate(S.monsters.filter(m => !m.dead), 30);
@@ -358,7 +407,7 @@ function tick(dt) {
 
 // ---------- camera: WASD / arrows / drag, the runtime player is an invisible camera rig ----------
 const keys = new Set(), cam = { x: CENTER.x + 60, y: CENTER.y + 60 };
-addEventListener('keydown', e => { keys.add(e.code); if (e.code === 'Space') { e.preventDefault(); cam.x = CENTER.x + 60; cam.y = CENTER.y + 60; } });
+addEventListener('keydown', e => { keys.add(e.code); if (e.code === 'Escape' && S.building) { S.building = false; renderUi(); } if (e.code === 'Space') { e.preventDefault(); cam.x = CENTER.x + 60; cam.y = CENTER.y + 60; } });
 addEventListener('keyup', e => keys.delete(e.code));
 function moveCamera(dt) {
   let sx = 0, sy = 0;
@@ -381,7 +430,9 @@ function renderUi() {
       <button class="up" data-up="${k}" ${!up || S.gold < up.gold || mats < up.mats ? 'disabled' : ''}>${up ? `อัปเกรด ★${t + 1} · ${up.mats} ของ + ${up.gold}G` : 'สูงสุดแล้ว'}</button></div>`;
   }).join('');
   const downs = S.units.filter(u => u.down).length;
-  $('repair').disabled = S.gold < REPAIR_COST || S.burrow >= BURROW_MAX; $('repair').textContent = `🔧 ซ่อมโพรง +${REPAIR_HP} (${REPAIR_COST}G)`;
+  $('repair').disabled = S.gold < REPAIR_COST || (S.burrow >= BURROW_MAX && S.towers.every(t => t.hp >= t.maxHp)); $('repair').textContent = `🔧 ซ่อม +${REPAIR_HP} (${REPAIR_COST}G)`;
+  $('build').disabled = !S.building && (S.towers.length >= TOWER.max || S.gold < TOWER.gold || matCount() < TOWER.mats); $('build').classList.toggle('on', S.building);
+  $('build').textContent = S.building ? '✖ ยกเลิกการสร้าง' : `🏹 ป้อมธนู ${S.towers.length}/${TOWER.max} (${TOWER.gold}G + ${TOWER.mats} ของ)`;
   $('revive').disabled = !downs || S.gold < REVIVE_COST; $('revive').textContent = `💖 ปลุกกระต่าย (${REVIVE_COST}G)${downs ? ` · ล้ม ${downs}` : ''}`;
   $('squad').innerHTML = S.units.map(u => `<button data-unit="${u.id}" class="${u.down ? 'down' : ''} ${u.stance}" title="คลิกสลับ ฟาร์ม/เฝ้าโพรง">${CLASSES[u.cls].icon}<small>${u.down ? 'ล้ม' : u.stance === 'farm' ? 'ฟาร์ม' : 'เฝ้า'}</small></button>`).join('');
 }
@@ -396,8 +447,13 @@ document.body.addEventListener('click', e => {
   if (b.dataset.buy) recruit(b.dataset.buy);
   else if (b.dataset.up) { const k = b.dataset.up, up = UPGRADE[S.tier[k] + 1]; let need = up.mats; S.gold -= up.gold; for (const m in MATS) { const take = Math.min(need, S.mats[m]); S.mats[m] -= take; need -= take; } S.tier[k]++; for (const u of S.units) if (u.cls === k) { const st = statsOf(k); u.hp += st.maxHp - u.maxHp; Object.assign(u, st); skillFx?.pillar(u.x, u.y, { color: '#ffe27a' }); } combatSFX.playLevelUp(); toast(`${CLASSES[k].name} อัปเกรดเป็น ★${S.tier[k]}`); renderUi(); }
   else if (b.dataset.unit) { const u = S.units.find(x => x.id === +b.dataset.unit); if (u && !u.down) { u.stance = u.stance === 'farm' ? 'guard' : 'farm'; renderUi(); } }
-  else if (b.id === 'repair') { S.gold -= REPAIR_COST; S.burrow = Math.min(BURROW_MAX, S.burrow + REPAIR_HP); skillFx?.burst(CENTER.x, CENTER.y, { color: '#ffe27a', count: 18, up: 90 }); renderUi(); }
+  else if (b.id === 'repair') { // hall first, whatever is left goes to damaged towers
+    S.gold -= REPAIR_COST; let left = REPAIR_HP; const add = Math.min(left, BURROW_MAX - S.burrow); S.burrow += add; left -= add;
+    for (const t of S.towers) { const a = Math.min(left, t.maxHp - t.hp); t.hp += a; left -= a; if (a) skillFx?.burst(t.x, t.y, { color: '#ffe27a', count: 10, up: 60 }); }
+    skillFx?.burst(CENTER.x, CENTER.y, { color: '#ffe27a', count: 18, up: 90 }); renderUi();
+  }
   else if (b.id === 'revive') { const u = S.units.find(x => x.down); if (u) { S.gold -= REVIVE_COST; u.down = false; u.hp = Math.round(u.maxHp * .6); skillFx?.pillar(u.x, u.y, { color: '#ffd6ec' }); renderUi(); } }
+  else if (b.id === 'build') { S.building = !S.building; if (S.building) toast('คลิกพื้นในวงสีเหลืองเพื่อวางป้อม'); renderUi(); }
   else if (b.id === 'speed') { S.speed = S.speed === 1 ? 2 : 1; b.textContent = `⏩ x${S.speed}`; }
   else if (b.id === 'skip' && !S.night) S.clock = DAY_S - .1;
   else if (b.id === 'again') location.reload();
@@ -408,12 +464,19 @@ const blank = document.createElement('canvas'); blank.width = blank.height = 1;
 const flagActor = { kind: 'actor', get x() { return S.flag.x; }, get y() { return S.flag.y; }, z: 0, r: 4, shadow: false, getImage: () => blank,
   drawOverlay(g, { x, y, time }) { if (S.night) return; g.strokeStyle = '#3a2616'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - 46); g.stroke(); const wave = Math.sin(time * 6) * 2; g.fillStyle = '#ff6fa8'; g.beginPath(); g.moveTo(x, y - 46); g.lineTo(x + 22, y - 40 + wave); g.lineTo(x, y - 33); g.fill(); g.strokeStyle = 'rgba(255,111,168,.5)'; g.beginPath(); g.ellipse(x, y, 60, 30, 0, 0, Math.PI * 2); g.stroke(); } };
 const hallActor = { kind: 'actor', x: CENTER.x + 40, y: CENTER.y + 40, z: 0, r: 4, shadow: false, getImage: () => blank,
-  drawOverlay(g, { x, y }) { const w = 110, q = S.burrow / BURROW_MAX; g.fillStyle = 'rgba(10,12,12,.85)'; g.fillRect(x - w / 2, y - 150, w, 7); g.fillStyle = q > .5 ? '#7ee38a' : q > .25 ? '#ffc94a' : '#ff5a4a'; g.fillRect(x - w / 2 + 1, y - 149, (w - 2) * q, 5); g.font = 'bold 11px system-ui'; g.textAlign = 'center'; g.fillStyle = '#fff4cf'; g.fillText('โพรงกระต่าย', x, y - 156); } };
+  drawOverlay(g, { x, y }) { if (S.building) drawBuildRing(g); const w = 110, q = S.burrow / BURROW_MAX; g.fillStyle = 'rgba(10,12,12,.85)'; g.fillRect(x - w / 2, y - 150, w, 7); g.fillStyle = q > .5 ? '#7ee38a' : q > .25 ? '#ffc94a' : '#ff5a4a'; g.fillRect(x - w / 2 + 1, y - 149, (w - 2) * q, 5); g.font = 'bold 11px system-ui'; g.textAlign = 'center'; g.fillStyle = '#fff4cf'; g.fillText('โพรงกระต่าย', x, y - 156); } };
 
+function drawBuildRing(g) { // the build radius as an iso ellipse around the hall
+  const z = runtimeWalkHeight(CENTER.x, CENTER.y) ?? 0, c = projectRuntimePoint(CENTER.x, CENTER.y, z), e = projectRuntimePoint(CENTER.x + TOWER.buildR, CENTER.y - TOWER.buildR, z);
+  const rx = Math.abs(e.x - c.x);
+  g.save(); g.setLineDash([8, 6]); g.strokeStyle = 'rgba(255,214,90,.85)'; g.lineWidth = 2; g.beginPath(); g.ellipse(c.x, c.y, rx, rx / 2, 0, 0, Math.PI * 2); g.stroke();
+  g.fillStyle = 'rgba(255,214,90,.07)'; g.fill(); g.restore();
+}
 let skillFx = null, floaters = null;
 setRuntimePlayerVisual(() => ({ image: null }));
 setRuntimeClickHandler(hit => {
   if (S.over || !hit || hit.idx < 0) return;
+  if (S.building) return placeTower(hit.x, hit.y);
   if (S.night) return toast('กลางคืนกระต่ายเฝ้าโพรง ย้ายธงไม่ได้');
   if (!standable(hit.x, hit.y)) return toast('ปักธงตรงนั้นไม่ได้');
   S.flag = { x: hit.x, y: hit.y }; skillFx?.burst(hit.x, hit.y, { color: '#ff9fcf', count: 10, up: 30 });
@@ -423,7 +486,7 @@ setRuntimeActorUpdater(({ player }) => {
   const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;
   setRuntimePlayerControl(true); moveCamera(dt); player.x = cam.x; player.y = cam.y;
   tick(dt); combatFX.update(dt * S.speed);
-  setRuntimeActors([...S.units.map(u => u.actor ??= unitActor(u)), ...S.monsters.filter(m => !m.dead).map(m => m.actor), flagActor, hallActor, ...combatFX.getRuntimeActors()]);
+  setRuntimeActors([...S.units.map(u => u.actor ??= unitActor(u)), ...S.monsters.filter(m => !m.dead).map(m => m.actor), ...S.towers.map(t => t.actor), flagActor, hallActor, ...combatFX.getRuntimeActors()]);
   skillFx?.update(dt); skillFx?.draw(); floaters?.update(dt); floaters?.draw(); syncClock();
 });
 skillFx = createSkillFx(canvas); floaters = createFloaters(canvas);
@@ -432,6 +495,6 @@ renderUi();
 await boot(scene, { canvasEl: canvas, loadingEl: $('loading'), playerSprites: null, worldScale: 1.45 });
 { const l = $('loading'); if (l) l.hidden = true; }
 banner('วันที่ 1', 'ส่งกระต่ายออกไปฟาร์ม · คลิกพื้นเพื่อย้ายธง 🚩');
-window.__warren = S;
+window.__warren = S; window.__warrenDev = { placeTower, renderUi }; // dev hooks
 window.__warrenStep = // dev: fast-forward the simulation (balance tests)
   sec => { for (let t = 0; t < sec && !S.over; t += 1 / 30) { tick(1 / 30); combatFX.update(1 / 30); } renderUi(); };

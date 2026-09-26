@@ -32,6 +32,7 @@
   .up{font-size:10px;padding:4px;background:#2b2618;border-color:#6a5a33}
   #side{right:10px;bottom:10px;padding:10px;width:230px;display:flex;flex-direction:column;gap:6px}
   #squad{display:flex;flex-wrap:wrap;gap:4px}
+  #build.on{background:#5a4418;border-color:#ffd45c}
   #squad button{width:44px;height:44px;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px}
   #squad small{font-size:9px}#squad .guard{border-color:#6c9bd6;background:#1f2a3a}#squad .down{border-color:#a04848;background:#3a1f1f}
   .row{display:flex;gap:6px}.row button{flex:1}
@@ -51,10 +52,11 @@
   <div class="res"><span>🪙 <b id="gold">0</b></span><span>🪵 <b id="m-wood">0</b></span><span>🦴 <b id="m-hide">0</b></span><span>⛏ <b id="m-ore">0</b></span></div>
   <div id="hall"><small>โพรงกระต่าย <span id="burrow-t"></span></small><div><div id="burrow"></div></div></div>
 </div>
-<div id="help" class="panel"><b>Burrow Command</b> · ต้นแบบ<br>☀️ กลางวัน: กระต่ายออกฟาร์มรอบ 🚩 แล้วแบกของกลับโพรง<br>🌙 กลางคืน: มอนบุก ป้องกันโพรงให้รอด 5 คืน<br><b>คลิกพื้น</b> ย้ายธง · <b>WASD</b> เลื่อนกล้อง · <b>Space</b> กลับโพรง</div>
+<div id="help" class="panel"><b>Burrow Command</b> · ต้นแบบ<br>☀️ กลางวัน: กระต่ายออกฟาร์มรอบ 🚩 แล้วแบกของกลับโพรง<br>🌙 กลางคืน: มอนบุก ป้องกันโพรงให้รอด 5 คืน<br><b>คลิกพื้น</b> ย้ายธง · 🏹 สร้างป้อมรอบโพรง (Esc ยกเลิก) · <b>WASD</b> เลื่อนกล้อง · <b>Space</b> กลับโพรง</div>
 <div id="shopbox" class="panel"><h3>จ้างกระต่าย (เงินได้จากการฆ่ามอนเท่านั้น)</h3><div id="shop"></div></div>
 <div id="side" class="panel">
   <h3>หน่วย (คลิก = สลับ ฟาร์ม/เฝ้า)</h3><div id="squad"></div>
+  <div class="row"><button id="build"></button></div>
   <div class="row"><button id="repair"></button></div>
   <div class="row"><button id="revive"></button></div>
   <div class="row"><button id="speed">⏩ x1</button><button id="skip">🌙 เข้าคืนเลย</button></div>
