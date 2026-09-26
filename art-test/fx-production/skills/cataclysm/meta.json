@@ -1,0 +1,7 @@
+{
+ "frames": 9,
+ "cell": 128,
+ "source": "cataclysm.png",
+ "mode": "burst",
+ "tool": "fx_animate.py"
+}
