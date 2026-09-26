@@ -1,0 +1,1 @@
+var e={frames:9,cell:128,source:`gravityPulse.png`,mode:`pulseIn`,tool:`fx_animate.py`};export{e as default};

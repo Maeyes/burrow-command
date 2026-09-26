@@ -1,0 +1,1 @@
+var e={frames:9,cell:128,source:`astralVolley.png`,mode:`fall`,tool:`fx_animate.py`};export{e as default};

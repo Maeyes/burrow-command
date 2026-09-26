@@ -1,0 +1,1 @@
+var e={frames:9,cell:96,source:`fx/runtime/ground slam/Animate_this_ground_impact_eff.png`};export{e as default};

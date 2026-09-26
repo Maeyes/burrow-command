@@ -1,0 +1,1 @@
+var e={frames:9,cell:96,source:`fx/runtime/Animate_this_Meteor_Storm_effe-spritesheet/Animate_this_Meteor_Storm_effe.png`};export{e as default};

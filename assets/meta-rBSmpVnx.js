@@ -1,0 +1,1 @@
+var e={frames:9,cell:112,source:`fx/runtime/Create_a_single_Black_Hole_ski-spritesheet/Create_a_single_Black_Hole_ski.png`};export{e as default};

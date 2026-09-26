@@ -1,0 +1,1 @@
+var e={frames:9,cell:128,source:`vanguardTempest.png`,mode:`spin`,tool:`fx_animate.py`};export{e as default};

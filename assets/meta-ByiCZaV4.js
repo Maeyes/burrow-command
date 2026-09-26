@@ -1,0 +1,1 @@
+var e={frames:9,cell:128,source:`cleavingStrike.png`,mode:`sweepY`,tool:`fx_animate.py`};export{e as default};

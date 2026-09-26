@@ -1,0 +1,1 @@
+var e={frames:9,cell:128,source:`piercingVolley.png`,mode:`projectile`,tool:`fx_animate.py`};export{e as default};

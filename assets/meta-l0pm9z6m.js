@@ -1,0 +1,1 @@
+var e={frames:9,cell:128,source:`crescentBreak.png`,mode:`sweepAngle`,tool:`fx_animate.py`};export{e as default};

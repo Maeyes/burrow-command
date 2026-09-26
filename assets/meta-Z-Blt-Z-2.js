@@ -1,0 +1,1 @@
+var e={frames:9,cell:96,animJob:`f18c8fe3-2285-486f-a1c4-a64f8415ac89`};export{e as default};
