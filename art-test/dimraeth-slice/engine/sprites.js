@@ -785,6 +785,9 @@ export function pebbleSprite(seed, ramp) {
 
 // ---------- shared libraries (built once) ----------
 export const LIB = {};
+let MAKE = null;
+// library by key, built on first use (editor props, or biome flora placed outside its biome)
+export function libOf(key) { if (!LIB[key] && MAKE?.[key]) LIB[key] = MAKE[key](); return LIB[key]; }
 // Always builds the base (forest) set - towns, camps and planters use it - plus whatever the
 // active biome kit asks for.
 export function buildLibraries(kit = null) {
@@ -804,9 +807,8 @@ export function buildLibraries(kit = null) {
   LIB.reed = n(4, i => reedSprite(900 + i));
   LIB.crop = n(4, i => bushSprite(300 + i, S(11 + (i % 2) * 2), P.CROP));
   LIB.lily = n(3, i => bushSprite(500 + i, S(9 + i * 2), P.CROP));
-  if (!kit) return;
-  const want = new Set(['palm', kit.trees.a, kit.trees.b, ...kit.trees.accent, kit.bush, kit.flowerBush, kit.rock, kit.tuft, kit.tuftDark, kit.reed, kit.edgeTrees].filter(Boolean));
-  const make = {
+  const want = new Set(kit ? ['palm', kit.trees.a, kit.trees.b, ...kit.trees.accent, kit.bush, kit.flowerBush, kit.rock, kit.tuft, kit.tuftDark, kit.reed, kit.edgeTrees].filter(Boolean) : []);
+  const make = MAKE = {
     palm: () => n(5, i => palmSprite(1000 + i, S(90 + (i % 3) * 18), P.PALM, P.PALMBARK)),
     cactus: () => n(5, i => cactusSprite(1100 + i, S(34 + (i % 3) * 14), P.CACTUS)),
     cactusFlower: () => n(3, i => cactusSprite(1150 + i, S(40 + i * 10), P.CACTUS, ['#f06a8a', '#f6d25a', '#ff9ab8'][i])),
@@ -844,6 +846,15 @@ export function buildLibraries(kit = null) {
     goldBush: () => n(5, i => bushSprite(2700 + i, S(20 + (i % 3) * 7), P.GOLDLEAF, ['#ffffff', '#fff4bc'])),
     marbleRock: () => n(5, i => rockSprite(2750 + i, S(16 + i * 6), P.MARBLE)),
     paleTuft: () => n(8, i => tuftSprite(2800 + i, i & 1, P.PALEGRASS)),
+    // editor props (built on first use, any biome)
+    mushroom: () => n(5, i => mushroomSprite(3000 + i, S(22 + (i % 3) * 12), [P.CAP_RED, P.CAP_BROWN, P.CAP_RED, P.CAP_BLUE, P.CAP_BROWN][i])),
+    fern: () => n(4, i => fernSprite(3050 + i, S(22 + (i % 2) * 8))),
+    flowers: () => n(4, i => flowerPatchSprite(3100 + i, [['#e8627a', '#f4d35e', '#f2f0e8'], ['#b9a4f0', '#f4efe0'], ['#f6d25a', '#ff9a4a'], ['#e89ab8', '#ffffff', '#8ac8ff']][i])),
+    stump: () => n(3, i => stumpSprite(3150 + i, 10 + i * 2, 8 + i * 2)),
+    signpost: () => n(2, i => signpostSprite(3200 + i)),
+    hay: () => n(2, i => haySprite(3250 + i)),
+    cart: () => n(2, i => cartSprite(3300 + i, i ? P.PALM : P.STRAW)),
+    well: () => [wellSprite()],
   };
   for (const key of want) if (!LIB[key] && make[key]) LIB[key] = make[key]();
 }
@@ -1072,4 +1083,159 @@ export function palaceSprite(W = 256, D = 208) {
     { spr: dm, x: W / 2, y: D / 2, z: 10 + hallH + 5 },
     { spr: tFront, x: W, y: D, z: 10 },
   ]);
+}
+
+// ---------- editor props (village & wild) ----------
+// Tree stump: bark cylinder with growth rings on top and a flared root collar.
+export function stumpSprite(seed, R = 12, h = 10) {
+  const cut = rng(seed)() * 3;
+  return cylinderSprite([
+    { r: R + 3, z0: 0, z1: 2.5, wall: (lit, arc) => P.BARK[clamp(1 + Math.round(lit * 1.3) + (((arc + 40) % 9) < 3 ? 0 : -1), 0, 3)] },
+    { r: R, z0: 0, z1: h + cut, wall: (lit, arc, hz, px, py) => {
+      let l = 1 + Math.round(lit * 1.4) + (((arc + 40) % 4) < 1 ? -1 : 0);
+      if (hash2(px, py * 3) > .9) l--;
+      return P.BARK[clamp(l, 0, 3)];
+    }, top: (rr, x, y) => (rr > R - 2 ? P.BARK[2] : (rr + vnoise(x * .2, y * .2) * 1.5) % 3.2 < 1 ? P.WOOD[2] : P.WOOD[4]) },
+  ], R + 3);
+}
+// Giant mushroom: pale stem, domed cap with white spots.
+export function mushroomSprite(seed, size, cap = P.CAP_RED) {
+  const r = rng(seed), w = Math.round(size * 1.3) + 4, h = Math.round(size * 1.35) + 4, cx = w / 2, ground = h - 2;
+  const lv = new Int8Array(w * h).fill(-1), kind = new Uint8Array(w * h);
+  const stemH = size * .72, capY = ground - stemH, capR = size * .6, capH = size * .42;
+  paintColumn(lv, kind, w, cx, capY, ground, y => size * .13 + (y > ground - 4 ? (y - ground + 4) * .6 : 0), P.STEM.length, 2);
+  for (let y = Math.floor(capY - capH); y <= capY + 2; y++) for (let x = 0; x < w; x++) {
+    const u = (x + .5 - cx) / capR, v = (capY - y) / capH;
+    if (v < -.15 || u * u + v * v > 1) continue;
+    const nz = Math.sqrt(Math.max(0, 1 - u * u - v * v));
+    let s = -u * .55 + v * .35 + nz * .45 - .2 + (vnoise(x * .4 + seed, y * .4) - .5) * .3;
+    if (v < .05) s = -.8; // shaded rim underside
+    lv[y * w + x] = clamp(Math.round((s * .5 + .5) * (cap.length - 1) + bayer(x, y) * .9), 0, cap.length - 1); kind[y * w + x] = 1;
+  }
+  outline(lv, kind, w, h, 1, cap.length); outline(lv, kind, w, h, 2, P.STEM.length);
+  const c = levelsToCanvas(w, h, lv, (i, l) => (kind[i] === 2 ? P.STEM[l] : cap[l])), g = c.getContext('2d');
+  for (let i = 0; i < 5 + size / 8; i++) {
+    const a = (r() - .5) * 2.4, d = .3 + r() * .55, x = Math.round(cx + Math.sin(a) * capR * d), y = Math.round(capY - capH * (.35 + r() * .5) * Math.cos(a * .6));
+    if (lv[y * w + x] < 1 || kind[y * w + x] !== 1) continue;
+    const s2 = r() < .5 ? 2 : 3; g.fillStyle = '#f6efe2'; g.fillRect(x, y, s2, s2 - 1); g.fillStyle = '#d8ccbc'; g.fillRect(x, y + s2 - 2, s2, 1);
+  }
+  return { img: c, ox: Math.round(cx), oy: ground, canopyR: capR };
+}
+// Low flower patch: leafy stems with bright heads.
+export function flowerPatchSprite(seed, cols) {
+  const r = rng(seed), w = Math.round(30 * K), h = Math.round(16 * K);
+  const c = makeCanvas(w, h), g = c.getContext('2d');
+  const heads = [];
+  for (let b = 0; b < 40 * K; b++) {
+    const a = r() * Math.PI * 2, d = Math.sqrt(r()), bx = Math.round(w / 2 + Math.cos(a) * d * (w / 2 - 3)), by = Math.round(h - 3 - (1 + Math.sin(a)) * d * 2.5 * K);
+    const len = Math.round((2 + r() * 5) * K);
+    for (let k = 0; k < len; k++) { g.fillStyle = `rgb(${P.BUSH[clamp(1 + Math.floor(k / len * 4), 0, 5)]})`; g.fillRect(bx + (k > len / 2 && b & 1 ? 1 : 0), by - k, 1, 1); }
+    if (r() < .55) heads.push([bx, by - len, cols[Math.floor(r() * cols.length)]]);
+  }
+  heads.sort((p, q) => p[1] - q[1]);
+  for (const [x, y, col] of heads) { g.fillStyle = col; g.fillRect(x - 1, y - 1, 3, 2); g.fillRect(x, y - 2, 1, 1); g.fillStyle = '#fff4c0'; g.fillRect(x, y - 1, 1, 1); }
+  return { img: c, ox: Math.round(w / 2), oy: h - 2 };
+}
+// Fern: arched fronds (dark rachis + paired leaflets that shrink toward the tip), fanning from the ground.
+export function fernSprite(seed, size, ramp = P.BUSH) {
+  const r = rng(seed), w = Math.round(size * 2.2), h = Math.round(size * 1.2) + 3, cx = w / 2, ground = h - 2;
+  const c = makeCanvas(w, h), g = c.getContext('2d');
+  const put = (x, y, l) => { if (x < 0 || y < 0 || x >= w || y >= h) return; g.fillStyle = `rgb(${ramp[clamp(l, 0, ramp.length - 1)]})`; g.fillRect(Math.round(x), Math.round(y), 1, 1); };
+  const nF = 7 + Math.floor(r() * 3), fronds = [];
+  for (let f = 0; f < nF; f++) fronds.push({ a: Math.PI * (1.1 + f / (nF - 1) * .8) + (r() - .5) * .18, len: size * (.62 + r() * .3), back: f % 2 === 0 });
+  fronds.sort((p, q) => (q.back - p.back)); // back fronds first (darker), front ones over them
+  for (const fr of fronds) {
+    const steps = Math.round(fr.len * 1.4), dark = fr.back ? -1 : 0;
+    let px = cx, py = ground - 1;
+    for (let k = 0; k <= steps; k++) {
+      const t = k / steps, ang = fr.a + t * t * .9 * Math.sign(Math.cos(fr.a) || 1) * .6;
+      const x = cx + Math.cos(fr.a) * fr.len * t * 1.1, y = ground - 1 + Math.sin(fr.a) * fr.len * t * 1.3 + t * t * fr.len * (.35 + Math.abs(Math.cos(fr.a)) * .5);
+      const leaf = Math.sin(Math.min(1, t * 1.3) * Math.PI) * size * .13 + .6, lit = Math.cos(fr.a) < 0 ? 1 : 0;
+      if (k % 2 === 0 && t > .12) for (let q = 1; q <= leaf; q++) { // leaflets: one each side, angled forward
+        put(x - q * .5, y - q, 3 + lit + dark + (q > leaf - 1 ? 1 : 0));
+        put(x + q * .5, y + q * .6, 2 + lit + dark);
+      }
+      put(x, y, 1 + dark); px = x; py = y;
+    }
+  }
+  return { img: c, ox: Math.round(cx), oy: ground };
+}
+// Stone well with water, two posts, a little shingle roof and a bucket.
+export function wellSprite() {
+  const R = 22;
+  const base = cylinderSprite([
+    { r: R, z0: 0, z1: 20, wall: bandStone(P.WSTONE, 6, 11), top: (rr) => (rr >= R - 5 ? (rr > R - 1.5 ? P.WSTONE[4] : P.WSTONE[3]) : null) },
+    { r: R - 5, z0: 8, z1: 20, inner: true, wall: bandStone(P.WSTONE, 6, 11) },
+    { r: R - 5, z0: 8, z1: 8, top: (rr, x, y, px, py) => P.WATER[clamp(1 + Math.round(vnoise(x * .2, y * .2) * 2 + bayer(px, py) * .6), 0, 5)] },
+  ], R);
+  const post = (x, y, hgt) => [
+    { O: [x, y + 4, 0], A: [4, 0, 0], B: [0, 0, hgt], color: () => P.WOOD[2] },
+    { O: [x + 4, y, 0], A: [0, 4, 0], B: [0, 0, hgt], color: () => P.WOOD[1] },
+  ];
+  const roofCol = k => (u, v, lu, lv, px, py) => shadeCol(P.RED[clamp(2 + (Math.floor(v / 4) & 1) - (v % 4 < .9 ? 1 : 0) + (hash2(Math.floor(u / 5), Math.floor(v / 4)) > .8 ? 1 : 0), 0, 4)], k);
+  // posts stand on the rim at the back-left and front-right of the ring (local frame: ring centre at R,R)
+  const back = rasterFaces([...post(R - 2, -1, 52), { O: [R, 0, 50], A: [0, R * 2, 0], B: [0, 0, 3], color: () => P.WOOD[3] }]);
+  const front = rasterFaces([...post(R - 2, R * 2 - 3, 52)]);
+  const roof = rasterFaces([
+    { O: [R - 14, -8, 50], A: [0, R * 2 + 16, 0], B: [14, 0, 14], color: roofCol(.85) },
+    { O: [R, -8, 64], A: [0, R * 2 + 16, 0], B: [14, 0, -14], color: roofCol(1.1) },
+  ]);
+  const bucket = cylinderSprite([{ r: 4, z0: 0, z1: 6, wall: (lit) => P.WOOD[clamp(2 + Math.round(lit * 1.5), 0, 4)], top: (rr) => (rr > 3 ? P.WOOD[1] : P.WATER[3]) }], 4);
+  return composeSprites([
+    { spr: back, x: -R, y: -R, z: 0 }, { spr: base, x: 0, y: 0, z: 0 }, { spr: bucket, x: R * .55, y: R * .55, z: 20 },
+    { spr: front, x: -R, y: -R, z: 0 }, { spr: roof, x: -R, y: -R, z: 0 },
+  ]);
+}
+// Signpost: one post, two arrow boards pointing different ways.
+export function signpostSprite(seed) {
+  const d1 = rng(seed)() < .5 ? 1 : -1, BL = 32, BH = 11;
+  const board = (k) => (u, v, lu, lv, px, py) => {
+    if (v < 1.2 || v > lv - 1.2) return shadeCol(P.WOOD[1], k);
+    if (Math.abs(v - lv / 2) < .6 && u > lu * .25 && u < lu * .7 && hash2(Math.floor(u / 2), 1) > .35) return shadeCol(P.WOOD[0], k); // carved lettering
+    return shadeCol(P.WOOD[clamp((v % 4 < .8 ? 2 : 3) + (hash2(px, py) > .92 ? 1 : 0), 0, 4)], k);
+  };
+  const arrow = (dir) => (u, v) => { const tip = dir > 0 ? 1 - u : u; return tip > .2 || Math.abs(v - .5) <= tip / .2 * .5; };
+  return rasterFaces([
+    { O: [2.5, -BL / 2 + 2, 22], A: [0, BL, 0], B: [0, 0, BH], color: board(.78), clip: arrow(-d1) },
+    { O: [-2.5, 2.5, 0], A: [5, 0, 0], B: [0, 0, 48], color: () => P.WOOD[2] },
+    { O: [2.5, -2.5, 0], A: [0, 5, 0], B: [0, 0, 48], color: () => P.WOOD[1] },
+    { O: [-2.5, -2.5, 48], A: [5, 0, 0], B: [0, 5, 0], color: () => P.WOOD[3] },
+    { O: [-BL / 2 + 2, 2.6, 34], A: [BL, 0, 0], B: [0, 0, BH], color: board(1.08), clip: arrow(d1) },
+  ]);
+}
+// Hand cart: plank bed heaped with a load, two spoked wheels, shafts. Local origin = bed back corner.
+export function cartSprite(seed, load = P.STRAW) {
+  const L = 44, D = 24, Z = 14, Hs = 8, WR = 13;
+  const wheel = (k) => (u, v, lu, lv) => { // u,v in screen px: work in face fractions so the rim stays round
+    const x = (u / lu - .5) * 2, y = (v / lv - .5) * 2, rr = Math.hypot(x, y);
+    if (rr > 1) return null;
+    if (rr > .9) return shadeCol(P.STONE[1], k);             // iron tyre
+    if (rr > .72) return shadeCol(P.WOOD[y < 0 ? 3 : 2], k); // felloe, lit on top
+    if (rr < .22) return shadeCol(rr < .12 ? P.STONE[3] : P.WOOD[1], k);
+    return Math.abs(Math.sin(Math.atan2(y, x) * 3)) < .3 ? shadeCol(P.WOOD[2], k) : null;
+  };
+  const heap = (u, v, lu, lv, px, py) => load[clamp(1 + Math.round(vnoise(px * .3, py * .3) * 2.4 + bayer(px, py) * .7), 0, load.length - 1)];
+  return rasterFaces([
+    { O: [L / 2 - WR, -1, Z - WR], A: [WR * 2, 0, 0], B: [0, 0, WR * 2], color: wheel(.7) },
+    { O: [0, 0, Z], A: [L, 0, 0], B: [0, D, 0], color: plankColor(1.15, seed) },
+    { O: [3, 3, Z + Hs + 3], A: [L - 6, 0, 0], B: [0, D - 6, 0], color: heap },
+    { O: [3, D - 3, Z], A: [L - 6, 0, 0], B: [0, 0, Hs + 3], color: heap },
+    { O: [L - 3, 3, Z], A: [0, D - 6, 0], B: [0, 0, Hs + 3], color: (u, v, lu, lv, px, py) => shadeCol(heap(u, v, lu, lv, px, py), .78) },
+    { O: [L, 0, Z], A: [0, D, 0], B: [0, 0, Hs], color: plankColor(.72, seed + 1) },
+    { O: [0, D, Z], A: [L, 0, 0], B: [0, 0, Hs], color: plankColor(1, seed + 2) },
+    { O: [L, 1, Z + 2], A: [22, 0, -8], B: [0, 3, 0], color: () => P.WOOD[3] }, // shafts
+    { O: [L, D - 4, Z + 2], A: [22, 0, -8], B: [0, 3, 0], color: () => P.WOOD[3] },
+    { O: [L / 2 - WR, D + 1, Z - WR], A: [WR * 2, 0, 0], B: [0, 0, WR * 2], color: wheel(1) },
+  ]);
+}
+// Hay: stacked straw bales tied with twine.
+export function haySprite(seed) {
+  const off = Math.round(rng(seed)() * 6);
+  const straw = (k) => (u, v, lu, lv, px, py) => {
+    if (Math.abs(u - lu * .3) < .8 || Math.abs(u - lu * .7) < .8) return shadeCol(P.WOOD[1], k);
+    const l = 2 + Math.round((vnoise(u * .9, v * .25 + px * .01) - .5) * 3 + bayer(px, py) * .8);
+    return shadeCol(P.STRAW[clamp(l, 0, 5)], k);
+  };
+  const bale = (x, y, z) => boxFaces(x, y, z, 30, 18, 14, straw(1), straw(.74), straw(1.15));
+  return rasterFaces([...bale(0, 0, 0), ...bale(off, 20, 0), ...bale(4, 9, 14)]);
 }

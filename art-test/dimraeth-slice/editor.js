@@ -28,7 +28,7 @@ function saveDraft() { try { localStorage.setItem('bw-map-draft', JSON.stringify
 let stairCells = new Uint8Array(N * N), bridgeCells = new Uint8Array(N * N), settled = null;
 function derive() {
   settled = settleWater(level, water, N); // how the game will level water painted along cliffs
-  const { taken } = autoStairs(level, road, water, N, CELL, slopeStyleOf(map)); stairCells = taken;
+  const { taken } = autoStairs(level.slice(), road, water, N, CELL, slopeStyleOf(map)); stairCells = taken;
   bridgeCells = bridge;
 }
 unpack();
@@ -72,6 +72,8 @@ function buildToolbar() {
   }
   $('objBar').style.display = tool === 'obj' ? 'flex' : 'none';
   $('houseOpts').style.display = tool === 'obj' && objType === 'house' ? 'flex' : 'none';
+  $('lineOpts').style.display = tool === 'obj' && (objType === 'fence' || objType === 'log') ? 'flex' : 'none';
+  $('lenWrap').style.display = objType === 'fence' ? '' : 'none';
   $('portalOpts').style.display = tool === 'obj' && objType === 'portal' && selectedPortal ? 'flex' : 'none';
 }
 $('objType').innerHTML = Object.entries(OBJECT_TYPES).map(([k, v]) => `<option value="${k}">${v.label}</option>`).join('');
@@ -136,7 +138,7 @@ function draw() {
       else if (fallHid && ((px + py) & 3) === 0) c = [230, 60, 60];
     }
     if (bridgeCells[k]) c = edgeOf(bridge, k, i, j) ? WOOD[1] : (Math.floor(x / 6) & 1) ? wood : WOOD[2];
-    if (stairCells[k]) { const st = slopeStyleOf(map); c = st === 'ramp' ? K.dirt[(Math.floor((x + y) / 9) & 1) ? 3 : 2] : st === 'wood' ? WOOD[(Math.floor((x + y) / 7) & 1) ? 3 : 1] : (Math.floor((x + y) / 7) & 1) ? stairC : COBBLE[2]; }
+    if (stairCells[k]) { const st = slopeStyleOf(map); c = st === 'ramp' || st === 'slope' ? K.dirt[(Math.floor((x + y) / 9) & 1) ? 3 : 2] : st === 'wood' ? WOOD[(Math.floor((x + y) / 7) & 1) ? 3 : 1] : (Math.floor((x + y) / 7) & 1) ? stairC : COBBLE[2]; }
     const tx = x / T, ty = y / T, gl = (Math.abs(tx - Math.round(tx)) < .03 || Math.abs(ty - Math.round(ty)) < .03) ? .88 : 1;
     const shade = 1 + L * .06;
     d[o] = c[0] * gl * shade; d[o + 1] = c[1] * gl * shade; d[o + 2] = c[2] * gl * shade; d[o + 3] = 255;
@@ -153,6 +155,13 @@ function draw() {
       [[-hw, -hd], [hw, -hd], [hw, hd], [-hw, hd]].forEach(([dx, dy], n) => { const [a, b] = toScreen(ob.x * T + dx, ob.y * T + dy); n ? ctx.lineTo(a, b) : ctx.moveTo(a, b); });
       ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#fff'; ctx.font = 'bold 10px system-ui'; ctx.textAlign = 'center'; ctx.fillText('⌂' + (ob.floors > 1 ? ob.floors : ''), sx, sy + 4);
+      continue;
+    }
+    if (ob.type === 'fence' || ob.type === 'log') { // draw as a line along its axis
+      const L = (ob.type === 'fence' ? (ob.len || 3) : .9) * T / 2, [ax, ay] = ob.axis === 'y' ? [0, L] : [L, 0];
+      const [a1, b1] = toScreen(ob.x * T - ax, ob.y * T - ay), [a2, b2] = toScreen(ob.x * T + ax, ob.y * T + ay);
+      ctx.strokeStyle = '#120e08'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(a1, b1); ctx.lineTo(a2, b2); ctx.stroke();
+      ctx.strokeStyle = def.color; ctx.lineWidth = 3; ctx.stroke();
       continue;
     }
     const rr = Math.max(3, def.r * T * E * .6);
@@ -213,6 +222,8 @@ canvas.addEventListener('pointerdown', e => {
     if (hit) { if(hit.type==='portal'){selectedPortal=hit;syncPortalForm();}else selectedPortal=null; drag = { ob: hit }; canvas.setPointerCapture(e.pointerId); return; }
     const ob = { type: objType, x: +(x / T).toFixed(2), y: +(y / T).toFixed(2) };
     if (objType === 'house') { ob.roof = $('roof').value; ob.floors = +$('floors').value; ob.ridge = $('ridge').value; }
+    if (objType === 'fence' || objType === 'log') ob.axis = $('axis').value;
+    if (objType === 'fence') ob.len = +$('flen').value;
     if (objType === 'pillar') ob.broken = Math.random() < .4;
     if (objType === 'portal') { ob.id=''; ob.to=''; ob.toPortal=''; selectedPortal=ob; }
     map.objects.push(ob); if(objType==='portal')syncPortalForm(); draw(); saveDraft(); return;

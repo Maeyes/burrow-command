@@ -69,3 +69,8 @@ export const PALEGRASS = pal(['#7a8a4a', '#94a45a', '#aebe6c', '#c6d282', '#dae4
 // undersea palace (mother-of-pearl walls, teal glow)
 export const PEARL = pal(['#3e4a6a', '#5a6a8e', '#7e92b2', '#a6bcd4', '#cfe0ee', '#f2f8fc']);
 export const SEAGLOW = pal(['#0e4a52', '#127a7a', '#20a8a0', '#48d4c4', '#9af4e4', '#e0fff8']);
+// editor props
+export const CAP_RED = pal(['#3e0e12', '#6a1a1c', '#9a2a26', '#c84232', '#e8664a', '#f89878']);
+export const CAP_BROWN = pal(['#2e1c12', '#4a2e1c', '#6c4428', '#8e6038', '#b08050', '#d0a670']);
+export const CAP_BLUE = pal(['#101e4a', '#1a3272', '#2a4ea0', '#3e74cc', '#68a4ea', '#a8d4ff']);
+export const STEM = pal(['#6a5e4e', '#9a8c76', '#c2b49a', '#e0d4bc', '#f4ecdc']);

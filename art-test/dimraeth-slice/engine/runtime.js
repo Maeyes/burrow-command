@@ -707,7 +707,7 @@ export function teardown(){
   if(typeof window!=='undefined')delete window.__slice;
 }
 
-const TERRAIN_CACHE_VERSION='ground-v1';
+const TERRAIN_CACHE_VERSION='ground-v6';
 function cacheDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open('bunny-world-terrain',1);req.onupgradeneeded=()=>req.result.createObjectStore('ground');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
 async function readGroundCache(key){
   if(!key||typeof indexedDB==='undefined')return null;

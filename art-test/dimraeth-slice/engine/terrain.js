@@ -17,7 +17,7 @@ const BIO = () => B;
 export const C = 16;                         // cell size (world units)
 const GX0 = -2560, GY0 = -2560, N = 512;     // grid origin & size (covers everything the camera can see)
 export const MAT = { GROUND: 0, STAIR: 1, WATER: 2 };
-export const STAIR_STYLE = { stone: 0, ramp: 1, wood: 2 };
+export const STAIR_STYLE = { stone: 0, ramp: 1, wood: 2, slope: 3 };
 export const GROUND = { x0: -1540, x1: 1540, y0: -280, y1: 1640 }; // baked ground canvas, absolute screen px (scaled by K in buildTerrain)
 const GROUND_DESIGN = { ...GROUND };
 
@@ -29,6 +29,14 @@ export function buildTerrain(scene) {
   const Hh = new Float32Array(N * N), M = new Uint8Array(N * N), riser = new Uint8Array(N * N); // riser: 1 = +x face, 2 = +y face
   // stair look per cell: 0 stone steps, 1 earth ramp, 2 wooden steps; axis: 1 climbs along x, 2 along y
   const ST = new Uint8Array(N * N), SAX = new Uint8Array(N * N);
+  // smooth slopes (ramp + its graded shoulders): per cell surface h = max(S0 + GXs*lx + GYs*ly, FL),
+  // lx/ly = local coords 0..C inside the cell. FL is the untouched ground under a shoulder.
+  const SL = new Uint8Array(N * N), S0 = new Float32Array(N * N), GXs = new Float32Array(N * N), GYs = new Float32Array(N * N), FL = new Float32Array(N * N).fill(-1e9);
+  const setPlane = (k, i, j, f, gx, gy, floor) => {
+    const x0 = GX0 + i * C, y0 = GY0 + j * C;
+    SL[k] = 1; S0[k] = f(x0, y0); GXs[k] = gx; GYs[k] = gy; FL[k] = floor;
+    Hh[k] = Math.max(S0[k] + (gx + gy) * C / 2, floor);
+  };
   const baseH = t.height || (() => 0);
   for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) Hh[j * N + i] = baseH(GX0 + (i + .5) * C, GY0 + (j + .5) * C);
   // stairs: one step per cell row, climbing toward -x or -y
@@ -37,6 +45,33 @@ export function buildTerrain(scene) {
     // '+x'/'+y' climb away from the viewer, so only the step tops and side walls show.
     const alongY = s.dir === '-y' || s.dir === '+y', up = s.dir[0] === '+';
     const n = Math.round((alongY ? s.y1 - s.y0 : s.x1 - s.x0) / C), step = (s.to - s.from) / (n + 1);
+    const style = STAIR_STYLE[s.style || B.stairStyle || 'stone'] ?? 0;
+    if (style === 3) { // smooth slope: continuous height from `from` at the low end to `to` at the high end
+      const len = alongY ? s.y1 - s.y0 : s.x1 - s.x0, gA = (s.to - s.from) / len * (up ? 1 : -1);
+      const A0 = alongY ? s.y0 : s.x0, A1 = alongY ? s.y1 : s.x1, L0 = alongY ? s.x0 : s.y0, L1 = alongY ? s.x1 : s.y1;
+      const rampH = a => s.from + (s.to - s.from) * clamp(up ? (a - A0) / len : (A1 - a) / len, 0, 1);
+      // shoulders: earth graded down from the ramp edge to the ground at slope KS, instead of a sheer wall
+      const SW = Math.min((s.to - s.from) / .45, 80), KS = (s.to - s.from) / SW; // at most 5 cells wide; tall ramps get steeper shoulders
+      const gAx = alongY ? 0 : gA, gAy = alongY ? gA : 0;
+      for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+        const cx = GX0 + (i + .5) * C, cy = GY0 + (j + .5) * C, a = alongY ? cy : cx, l = alongY ? cx : cy;
+        if (a < A0 || a > A1 || l < L0 - SW || l > L1 + SW) continue;
+        const k = j * N + i;
+        if (l >= L0 && l <= L1) { // ramp surface
+          setPlane(k, i, j, (x, y) => rampH(alongY ? y : x), gAx, gAy, -1e9);
+          M[k] = MAT.STAIR; riser[k] = 0; ST[k] = 3; SAX[k] = alongY ? 2 : 1;
+          continue;
+        }
+        if (M[k] === MAT.STAIR || SL[k]) continue;
+        const side = l < L0 ? 1 : -1, edge = l < L0 ? L0 : L1; // lateral gradient: rises toward the ramp
+        const f = (x, y) => rampH(alongY ? y : x) - KS * Math.abs((alongY ? x : y) - edge);
+        const lg = KS * side, gx = alongY ? lg : gA, gy = alongY ? gA : lg;
+        const x0 = GX0 + i * C, y0 = GY0 + j * C, peak = Math.max(f(x0, y0), f(x0 + C, y0), f(x0, y0 + C), f(x0 + C, y0 + C));
+        if (peak <= Hh[k] + .5) continue; // ground already higher than the embankment here
+        setPlane(k, i, j, f, gx, gy, Hh[k]);
+      }
+      continue;
+    }
     for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
       const x = GX0 + (i + .5) * C, y = GY0 + (j + .5) * C;
       if (!inRect(x, y, s)) continue;
@@ -107,21 +142,26 @@ export function buildTerrain(scene) {
     WS.lights.push({ x: GX0 + (i + .5) * C, y: GY0 + (j + .5) * C, z: Hh[idx] + 4, r: 120, col: [255, 110, 40], a: .7, flick: true, glow: true });
   }
   let zMax = 0, zMin = 0;
-  for (let k = 0; k < N * N; k++) { zMax = Math.max(zMax, Hh[k]); zMin = Math.min(zMin, Hh[k]); }
+  for (let k = 0; k < N * N; k++) {
+    if (SL[k] && M[k] === MAT.WATER) SL[k] = 0; // a river/lake painted over a shoulder wins
+    const top = SL[k] ? Hh[k] + (Math.abs(GXs[k]) + Math.abs(GYs[k])) * C / 2 : Hh[k]; zMax = Math.max(zMax, top); zMin = Math.min(zMin, Hh[k]);
+  }
+  // exact surface height (smooth slopes are linear inside their cell)
+  const surf = (k, x, y) => SL[k] ? Math.max(S0[k] + GXs[k] * (x - GX0 - (k % N) * C) + GYs[k] * (y - GY0 - Math.floor(k / N) * C), FL[k]) : Hh[k];
   const cellIdx = (x, y) => {
     const i = Math.floor((x - GX0) / C), j = Math.floor((y - GY0) / C);
     return i < 0 || j < 0 || i >= N || j >= N ? -1 : j * N + i;
   };
   const T0 = {
-    Hh, M, riser, wdist, foam, falls, zMax, zMin, cellIdx, LQ, ST, SAX,
-    heightAt: (x, y) => { const k = cellIdx(x, y); return k < 0 ? 0 : Hh[k]; },
+    Hh, M, riser, wdist, foam, falls, zMax, zMin, cellIdx, LQ, ST, SAX, SL, S0, GXs, GYs, FL,
+    heightAt: (x, y) => { const k = cellIdx(x, y); return k < 0 ? 0 : surf(k, x, y); },
     matAt: (x, y) => { const k = cellIdx(x, y); return k < 0 ? MAT.GROUND : M[k]; },
   };
   // walkable height (null = blocked by water). Bridges override.
   T0.walkHeight = (x, y) => {
     for (const b of WS.bridges) if (inRect(x, y, b)) return b.z;
     const k = cellIdx(x, y); if (k < 0) return 0;
-    return M[k] === MAT.WATER ? null : Hh[k];
+    return M[k] === MAT.WATER ? null : surf(k, x, y);
   };
   // ray pick: visible surface under screen pixel (absolute screen coords)
   T0.pick = (sx, sy) => { const r = castRay(T0, sx, sy); return r; };
@@ -131,16 +171,25 @@ export function buildTerrain(scene) {
 // One pixel ray: start above the highest terrain and walk down-back through the cells.
 // Returns { z, face: 0 top | 1 (+x face) | 2 (+y face), idx, prev, x, y }.
 function castRay(T0, sx, sy) {
-  const { Hh } = T0;
+  const { Hh, SL, S0, GXs, GYs, FL } = T0;
   sx /= K; sy /= K; // screen px -> design px
   const a = sx + 2 * sy, b = 2 * sy - sx;
   let z = T0.zMax + 2, x = a + 2 * z, y = b + 2 * z;
   let ci = Math.floor((x - GX0) / C), cj = Math.floor((y - GY0) / C), side = 0, prev = -1;
   for (let guard = 0; guard < 400; guard++) {
     if (ci < 0 || cj < 0 || ci >= N || cj >= N) return { z: 0, face: 0, idx: -1, prev: -1, x: a, y: b };
-    const idx = cj * N + ci, h = Hh[idx];
+    const idx = cj * N + ci, lx = x - (GX0 + ci * C), ly = y - (GY0 + cj * C), dz = Math.min(lx, ly) / 2, zExit = z - dz;
+    if (SL[idx]) { // smooth slope / shoulder: intersect the ray with max(tilted plane, floor)
+      const gs = GXs[idx] + GYs[idx], p0 = S0[idx] + GXs[idx] * lx + GYs[idx] * ly, hIn = Math.max(p0, FL[idx]);
+      if (hIn >= z && side) return { z, face: 0, idx, prev, x, y }; // steep back-facing plane: still read it as ground
+      const den = 1 - 2 * gs, sp = den > 1e-4 ? (z - p0) / den : Infinity, s = Math.min(sp, z - FL[idx]); // ray: z-s, plane: p0-2*gs*s
+      if (s <= dz) { const h = z - s; return { z: h, face: 0, idx, prev, x: a + 2 * h, y: b + 2 * h }; }
+      x -= 2 * dz; y -= 2 * dz; z = zExit; prev = idx;
+      if (lx < ly) { ci--; side = 1; } else if (ly < lx) { cj--; side = 2; } else { ci--; cj--; side = 1; }
+      continue;
+    }
+    const h = Hh[idx];
     if (h >= z && side) return { z, face: side, idx, prev, x, y };
-    const lx = x - (GX0 + ci * C), ly = y - (GY0 + cj * C), dz = Math.min(lx, ly) / 2, zExit = z - dz;
     if (h >= zExit) return { z: h, face: 0, idx, prev, x: a + 2 * h, y: b + 2 * h };
     x -= 2 * dz; y -= 2 * dz; z = zExit; prev = idx;
     if (lx < ly) { ci--; side = 1; } else if (ly < lx) { cj--; side = 2; } else { ci--; cj--; side = 1; }
@@ -430,8 +479,8 @@ function rampTopColor(tx, ty, cx0, cy0, idx, px, py, F) {
   // lateral distance to the ramp side (cells across the climb that are not ramp)
   const lat = ax === 2 ? tx - cx0 : ty - cy0, step = ax === 2 ? 1 : 512;
   const sideA = M[idx - step] !== MAT.STAIR, sideB = M[idx + step] !== MAT.STAIR;
-  const edge = Math.min(sideA ? lat : 99, sideB ? C - lat : 99) + (vnoise(tx * .08, ty * .08) - .5) * 8;
-  if (edge < 4) return groundColor(tx, ty, px, py, F); // turf on the shoulders
+  const edge = Math.min(sideA ? lat : 99, sideB ? C - lat : 99) + (vnoise(tx * .08, ty * .08) - .5) * 10 + (vnoise(tx * .3, ty * .3) - .5) * 5;
+  if (edge < (T0.ST[idx] === 3 ? 9 : 4)) return groundColor(tx, ty, px, py, F); // turf on the shoulders
   let l = 2 + Math.round((vnoise(tx * .05, ty * .05) - .5) * 1.6 + bayer(px, py) * .8);
   if (edge < 7) l--;
   if (hash2(px * 3, py * 5) > .97) l = 4; // pebbles
@@ -525,7 +574,8 @@ export async function bakeGround(progress) {
         if (m === MAT.WATER) { const lv = T0.LQ[hit.idx]; col = fallColor(e, hgt, tall, px, py, lv); fallPix.push(px, py, Math.round(hgt), Math.round(tall), Math.round(e), lv); }
         else if (m === MAT.STAIR) {
           const st = T0.ST[hit.idx], isRiser = riser[hit.idx] === hit.face;
-          if (st === 1) col = isRiser ? rampRiserColor(hit.face, e, hgt, tall, px, py) : naturalCliff(hit.face, e, hgt, tall, px, py);
+          if (st === 3) col = naturalCliff(hit.face, e, hgt, tall, px, py);
+          else if (st === 1) col = isRiser ? rampRiserColor(hit.face, e, hgt, tall, px, py) : naturalCliff(hit.face, e, hgt, tall, px, py);
           else if (st === 2) col = isRiser ? woodRiserColor(hit.face, e, hgt, tall, px, py) : (tall < 20 ? P.WOOD[1] : cliffColor(hit.face, e, hgt, tall, px, py));
           else col = isRiser ? riserColor(hit.face, e, hgt, tall, px, py) : cliffColor(hit.face, e, hgt, tall, px, py);
         }
@@ -539,7 +589,7 @@ export async function bakeGround(progress) {
           if (hash2(px * 7, py * 3) > .985) waterPix.push(px, py, T0.LQ[hit.idx]);
         } else if (m === MAT.STAIR) {
           const st = T0.ST[hit.idx];
-          col = st === 1 ? rampTopColor(tx, ty, cx0, cy0, hit.idx, px, py, sample(px, py + h * K)) : st === 2 ? woodTopColor(tx, ty, cx0, cy0, hit.idx, px, py) : stairTopColor(tx, ty, cx0, cy0, riser[hit.idx], px, py);
+          col = st === 1 || st === 3 ? rampTopColor(tx, ty, cx0, cy0, hit.idx, px, py, sample(px, py + h * K)) : st === 2 ? woodTopColor(tx, ty, cx0, cy0, hit.idx, px, py) : stairTopColor(tx, ty, cx0, cy0, riser[hit.idx], px, py);
         }
         else {
           col = groundColor(tx, ty, px, py, sample(px, py + h * K));
@@ -551,6 +601,8 @@ export async function bakeGround(progress) {
           } else if ((Hh[idx - 1] < h - 12 && tx - cx0 < 1.6) || (Hh[idx - 512] < h - 12 && ty - cy0 < 1.6)) col = B.ground[0];
           else if ((M[idx - 1] === MAT.WATER && tx - cx0 < 4) || (M[idx - 512] === MAT.WATER && ty - cy0 < 4) || (M[idx + 1] === MAT.WATER && cx0 + C - tx < 3) || (M[idx + 512] === MAT.WATER && cy0 + C - ty < 3)) shade = .78;
         }
+        // slopes: lit when facing the sun (-x, a little -y), darker facing away, so inclines read as 3D
+        if (T0.SL[hit.idx]) { const k = clamp(1 + T0.GXs[hit.idx] * .75 + T0.GYs[hit.idx] * .35, .72, 1.25); col = [Math.min(255, col[0] * k), Math.min(255, col[1] * k), Math.min(255, col[2] * k)]; }
         // cast shadow from higher terrain (sun from -x) and contact AO under faces
         const reach = 40 + vnoise(ty * .02, h * .1) * 50;
         for (let dd = 12; dd <= reach; dd += 12) if (H(tx - dd, ty) > h + 14) { shade = Math.min(shade, .62); break; }

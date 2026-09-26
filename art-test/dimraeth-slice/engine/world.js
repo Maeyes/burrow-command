@@ -3,13 +3,26 @@
 // roads and facades readable.
 import { K, T, S, hash2, fbm, rng, inRect, isoX, isoY } from './util.js';
 import * as SP from './sprites.js';
-import { LIB } from './sprites.js';
+import { LIB, libOf } from './sprites.js';
 import * as P from './palettes.js';
 import { WS } from './state.js';
 import { MAT, GROUND, pavedAt, pathDist, forestDensity } from './terrain.js';
 import { biomeOf } from './biomes.js';
 const pick = (lib, r) => lib[Math.floor(r() * lib.length)];
 
+// editor props drawn from sprite libraries. box = [half x, half y] footprint for depth sort + collider,
+// dx/dy = where the sprite's local origin sits relative to the placed point.
+const PROPS = {
+  stump: { lib: 'stump', col: 11 },
+  mushroom: { lib: 'mushroom', col: 9 },
+  flowers: { lib: 'flowers', shadow: false },
+  fern: { lib: 'fern', shadow: false },
+  coral: { lib: 'coral', col: 10 },
+  well: { lib: 'well', box: [24, 24], col: 1 },
+  signpost: { lib: 'signpost', col: 5 },
+  cart: { lib: 'cart', box: [34, 14], dx: -22, dy: -12, col: 1 },
+  hay: { lib: 'hay', box: [18, 20], dx: -17, dy: -19, col: 1 },
+};
 const boxOfItem = c => ({ x0: c.x, x1: c.x + c.w, y0: c.y, y1: c.y + c.d });
 const H = (x, y) => WS.terrain.heightAt(x, y);
 const matAt = (x, y) => WS.terrain.matAt(x, y);
@@ -175,6 +188,7 @@ export function placeStructures() {
     WS.shadows.push({ x: c.x + c.w / 2, y: c.y + c.d / 2, z, dx: 10, dy: 3, rx: 16, ry: 7 });
   });
   (SC.logs || []).forEach((l, i) => { addBoxed(SP.logSprite(l.w, l.d, l.h, 700 + i), l.x, l.y, H(l.x, l.y), boxOfItem(l)); WS.colliders.push({ type: 'b', ...boxOfItem(l) }); });
+  for (const f of SC.fences || []) fenceRun(f.ax, f.ay, f.bx, f.by, null, H(f.ax, f.ay));
   (SC.benches || []).forEach(bn => {
     const z = H(bn.x, bn.y);
     addBoxed(SP.benchSprite(bn.w, bn.d, bn.h), bn.x, bn.y, z, boxOfItem(bn));
@@ -212,6 +226,14 @@ export function placeStructures() {
       for (const [lx, ly] of [[x0 + W / 2, y0 + D + 20], [x0 + W + 20, y0 + D / 2]]) WS.lights.push({ x: lx, y: ly, z: z + 30, r: 150, col, a: .55, flick: false });
       continue;
     }
+    else if (PROPS[p.type]) {
+      const def = PROPS[p.type], lib = libOf(def.lib), spr = lib[(p.seed || 0) % lib.length], x = p.x + (def.dx || 0), y = p.y + (def.dy || 0);
+      if (def.box) addBoxed(spr, x, y, z, { x0: p.x - def.box[0], x1: p.x + def.box[0], y0: p.y - def.box[1], y1: p.y + def.box[1] });
+      else addSprite(spr, x, y, z, { box: 8 });
+      if (def.col) WS.colliders.push(def.box ? { type: 'b', x0: p.x - def.box[0], x1: p.x + def.box[0], y0: p.y - def.box[1], y1: p.y + def.box[1] } : { type: 'c', x: p.x, y: p.y, r: def.col });
+      if (def.shadow !== false) { const rw = spr.img.width / K; WS.shadows.push({ x: p.x, y: p.y, z, dx: 6, dy: 2, rx: rw * .4, ry: rw * .18 }); }
+      continue;
+    }
     else if (p.type === 'rubble') { const spr = LIB.rock[(p.seed || 0) % LIB.rock.length]; addSprite(spr, p.x, p.y, z, { box: 8 }); continue; }
     addBoxed(s, p.x, p.y, z, box);
     WS.shadows.push({ x: (box.x0 + box.x1) / 2, y: (box.y0 + box.y1) / 2, z, dx: 14, dy: 4, rx: (box.x1 - box.x0) * .6, ry: 8 });
@@ -230,7 +252,7 @@ export function placeStructures() {
       continue;
     }
     const roll = tr();
-    if (t.kind && LIB[t.kind]) { placeTree(LIB[t.kind][Math.floor(tr() * LIB[t.kind].length)], t.x, t.y, z, true); continue; }
+    if (t.kind && libOf(t.kind)) { placeTree(LIB[t.kind][Math.floor(tr() * LIB[t.kind].length)], t.x, t.y, z, true); continue; }
     const spr = t.pine ? LIB.pine[Math.floor(tr() * LIB.pine.length)] : roll < .12 ? LIB.autumn[Math.floor(tr() * LIB.autumn.length)] : roll < .24 ? LIB.blossom[Math.floor(tr() * LIB.blossom.length)] : LIB.broad[Math.floor(tr() * 4)];
     placeTree(spr, t.x, t.y, z, !!t.pine);
   }

@@ -8,7 +8,7 @@ const R = pal;
 export const BIOMES = {
   forest: {
     cliffStyle: 'natural',
-    stairStyle: 'ramp',
+    stairStyle: 'slope',
     treeDensity: 1,
     ground: P.GRASS, dirt: P.DIRT, cliff: P.CLIFF, moss: P.BUSH, liquid: P.RIVER, foam: P.FOAM,
     trees: { a: 'broad', b: 'pine', accent: ['autumn', 'blossom'] }, bush: 'bush', flowerBush: 'flowerBush', rock: 'rock', tuft: 'tuft', tuftDark: 'tuftDark', reed: 'reed',
@@ -17,7 +17,7 @@ export const BIOMES = {
     particles: 'leaf',
   },
   desert: {
-    stairStyle: 'ramp',
+    stairStyle: 'slope',
     ground: R(['#8a5a32', '#a8703e', '#c28a4e', '#d6a563', '#e6bd7c', '#f2d49a']),
     dirt: R(['#6e4a2c', '#8c5e36', '#a87444', '#c08a52', '#d8a66a']),
     cliff: R(['#5a3422', '#74442a', '#8e5634', '#a86a40', '#c2824e', '#d89c62']),
@@ -30,7 +30,7 @@ export const BIOMES = {
   },
   snow: {
     cliffStyle: 'natural',
-    stairStyle: 'ramp',
+    stairStyle: 'slope',
     ground: R(['#8a9eb4', '#a4b8cc', '#bccee0', '#d2e0ee', '#e6f0f8', '#f8fcff']),
     dirt: R(['#5c6878', '#74808e', '#8c98a6', '#a6b0bc', '#c0c8d2']),
     cliff: R(['#2c3444', '#3c4658', '#4e5a6e', '#647286', '#7e8ca0', '#9aa8ba']),
@@ -43,7 +43,7 @@ export const BIOMES = {
   },
   mine: {
     cliffStyle: 'natural',
-    stairStyle: 'wood',
+    stairStyle: 'slope',
     ground: R(['#2a221c', '#3a2e24', '#4a3a2c', '#5c4a38', '#6e5a44', '#826c52']),
     dirt: R(['#1e1814', '#2c241c', '#3c3026', '#4e3e30', '#62503e']),
     cliff: R(['#141218', '#201c24', '#2e2832', '#3e3642', '#504652', '#645866']),
@@ -55,7 +55,7 @@ export const BIOMES = {
     particles: 'dust', edgeTrees: 'stalagmite',
   },
   magma: {
-    stairStyle: 'ramp',
+    stairStyle: 'slope',
     ground: R(['#141216', '#1f1b20', '#2a2429', '#372e33', '#463a3e', '#584a4a']),
     dirt: R(['#3a1a12', '#5a2414', '#7a3418', '#9a4a20', '#b8642c']),
     cliff: R(['#100c10', '#1c1418', '#2a1c20', '#3a262a', '#4c3034', '#603c3e']),
@@ -68,7 +68,7 @@ export const BIOMES = {
   },
   underwater: {
     cliffStyle: 'natural',
-    stairStyle: 'ramp',
+    stairStyle: 'slope',
     ground: R(['#3c5a6a', '#4e7078', '#62868a', '#7a9c98', '#94b2a6', '#b0c8b4']),
     dirt: R(['#34485a', '#445a6a', '#56707c', '#6c868e', '#869ea2']),
     cliff: R(['#18283a', '#22384c', '#2e4a60', '#3c5e74', '#4e7488', '#648c9e']),

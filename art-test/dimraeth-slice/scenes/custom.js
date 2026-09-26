@@ -36,7 +36,29 @@ export const OBJECT_TYPES = {
   palace: { label: 'วังใต้ทะเล', r: 2.4, color: '#e05a7c' },
   portal: { label: 'Portal', r: .8, color: '#78c8ff' },
   monster: { label: 'จุดเกิดมอน', r: .5, color: '#ff5a5a' },
+  // wild
+  pine: { label: 'ต้นสน', r: .45, color: '#1e4b36' },
+  stump: { label: 'ตอไม้', r: .25, color: '#5a3b24' },
+  log: { label: 'ท่อนไม้ล้ม', r: .5, color: '#7a5231', opts: { axis: 'x' } },
+  mushroom: { label: 'เห็ดยักษ์', r: .35, color: '#c84232' },
+  flowers: { label: 'ดงดอกไม้', r: .3, color: '#e89ab8' },
+  fern: { label: 'กอเฟิร์น', r: .3, color: '#4d853a' },
+  cactus: { label: 'กระบองเพชร', r: .3, color: '#468252' },
+  coral: { label: 'ปะการัง', r: .35, color: '#e05a7c' },
+  // village
+  fence: { label: 'รั้วไม้', r: .3, color: '#ad7a47', opts: { axis: 'x', len: 3 } },
+  well: { label: 'บ่อน้ำ', r: .5, color: '#9a8f7f' },
+  signpost: { label: 'ป้ายบอกทาง', r: .2, color: '#8c5c34' },
+  stall: { label: 'แผงตลาด', r: .6, color: '#d8483c' },
+  cart: { label: 'เกวียน', r: .55, color: '#6b4427' },
+  hay: { label: 'กองฟาง', r: .45, color: '#d4b25c' },
 };
+const STALL_LOOKS = [
+  { goods: ['#d8483c', '#f0a53a', '#9fd05a'], cloth: ['#b8322a', '#efe3c8'] },
+  { goods: ['#e8c25a', '#b07a3c', '#e8e0d0'], cloth: ['#2f7a4a', '#efe3c8'] },
+  { goods: ['#8a5ad8', '#d85a9a', '#5ab4d8'], cloth: ['#6a3a9a', '#efe3c8'] },
+  { goods: ['#f4d35e', '#e8627a', '#f2f0e8'], cloth: ['#2b4c8a', '#efe3c8'] },
+];
 
 export function emptyMap(name = 'untitled', biome = 'forest') {
   const z = '0'.repeat(MAP_N * MAP_N);
@@ -73,8 +95,17 @@ const decode = (str, n) => (str ? Uint8Array.from(str, c => c.charCodeAt(0) - 48
 // Where a road crosses from one terrain level to a higher one, build a stairway on the lower side.
 // Returns engine stairs [{x0,x1,y0,y1,dir,from,to}] in world units, and the cells they occupy.
 export function autoStairs(level, road, water, n, cell, style = 'stone') {
-  const stairs = [], taken = new Uint8Array(n * n);
-  const STEP = style === 'ramp' ? 4.5 : 7; // px per step (player can climb 12); ramps are longer and gentler
+  const stairs = [], taken = new Uint8Array(n * n), cands = [];
+  // connected road patches: one painted road crossing one terrace edge = one slope
+  const comp = new Int32Array(n * n).fill(-1);
+  for (let k = 0, id = 0; k < n * n; k++) {
+    if (!road[k] || comp[k] >= 0) continue;
+    const q = [k]; comp[k] = id;
+    while (q.length) { const c = q.pop(), i = c % n; for (const nb of [i > 0 ? c - 1 : -1, i < n - 1 ? c + 1 : -1, c - n, c + n]) if (nb >= 0 && nb < n * n && road[nb] && comp[nb] < 0) { comp[nb] = id; q.push(nb); } }
+    id++;
+  }
+  const STEP = style === 'slope' ? 5.5 : style === 'ramp' ? 4.5 : 7; // px per step (player can climb 12); ramps are longer and gentler
+  const MIN_W = style === 'slope' ? 10 : 1; // smooth slopes are at least ~3 characters wide (10 cells = 160 px)
   // scan boundaries in 4 directions; a run of adjacent road cells along the boundary = one stairway
   const dirs = [[1, 0, '-x'], [-1, 0, '+x'], [0, 1, '-y'], [0, -1, '+y']]; // (di,dj) points from HIGH cell to LOW cell
   for (const [di, dj, dir] of dirs) {
@@ -90,16 +121,50 @@ export function autoStairs(level, road, water, n, cell, style = 'stone') {
         if (!road[h2] || !road[l2] || level[h2] !== level[hi] || level[l2] !== level[lo]) break;
         run.push([a, b]);
       }
-      run.forEach(([a, b]) => { seen[b * n + a] = 1; });
       const from = level[lo] * LEVEL_H, to = level[hi] * LEVEL_H, len = Math.max(2, Math.ceil((to - from) / STEP) - 1);
+      // widen short runs sideways along the same cliff edge, alternating ends, so the slope is roomy
+      // The slope must top out on the real upper terrace: the edge may wander by a few cells, so look
+      // up to MIN_W cells into the high side (a diagonal edge) for level[hi]; the gap is filled up to it.
+      const fills = [], run0 = run.length;
+      const edgeOk = (a, b, commit) => {
+        if (a < 1 || b < 1 || a >= n - 1 || b >= n - 1) return false;
+        for (let t = 0; t <= len + 1; t++) { const q = (b + dj * t) * n + (a + di * t); if (q < 0 || q >= n * n || water[q]) return false; }
+        for (let t = 0; t <= MIN_W; t++) {
+          const qa = a - di * t, qb = b - dj * t; if (qa < 0 || qb < 0 || qa >= n || qb >= n) return false;
+          const q = qb * n + qa;
+          if (water[q] || level[q] > level[hi]) return false;
+          if (level[q] === level[hi]) { if (commit) for (let u = 0; u < t; u++) fills.push((b - dj * u) * n + (a - di * u)); return true; }
+        }
+        return false;
+      };
+      for (let t = 0; run.length < MIN_W && t < MIN_W * 2; t++) {
+        const [ea, eb] = t & 1 ? run[0] : run[run.length - 1], sg = t & 1 ? -1 : 1, a = ea + si * sg, b = eb + sj * sg;
+        if (edgeOk(a, b, false)) { edgeOk(a, b, true); t & 1 ? run.unshift([a, b]) : run.push([a, b]); }
+      }
+      run.forEach(([a, b]) => { seen[b * n + a] = 1; });
       const [ai, aj] = run[0], [bi, bj] = run[run.length - 1];
       // stair cells: on the low side, starting at the boundary and running `len` cells away from the cliff
       let x0, x1, y0, y1;
       if (di) { const bx = di > 0 ? ai + 1 : ai; x0 = di > 0 ? bx : bx - len; x1 = x0 + len; y0 = Math.min(aj, bj); y1 = Math.max(aj, bj) + 1; }
       else { const by = dj > 0 ? aj + 1 : aj; y0 = dj > 0 ? by : by - len; y1 = y0 + len; x0 = Math.min(ai, bi); x1 = Math.max(ai, bi) + 1; }
-      stairs.push({ x0: x0 * cell, x1: x1 * cell, y0: y0 * cell, y1: y1 * cell, dir, from, to, style });
-      for (let b = y0; b < y1; b++) for (let a = x0; a < x1; a++) if (a >= 0 && b >= 0 && a < n && b < n) taken[b * n + a] = 1;
+      let roadIn = 0; // how much of the painted road this slope actually carries
+      for (let b = y0; b < y1; b++) for (let a = x0; a < x1; a++) if (a >= 0 && b >= 0 && a < n && b < n && road[b * n + a]) roadIn++;
+      cands.push({ key: `${comp[hi]}:${level[lo]}:${level[hi]}`, s: { x0: x0 * cell, x1: x1 * cell, y0: y0 * cell, y1: y1 * cell, dir, from, to, style }, r: [x0, x1, y0, y1], fills, w: roadIn * 4 + run0, hiL: level[hi] });
     }
+  }
+  // A wide road over a jagged edge finds several crossings at one spot. Keep the widest (then the
+  // tallest) and drop any later one that would overlap a slope already placed.
+  cands.sort((p, q) => q.w - p.w || (q.s.to - q.s.from) - (p.s.to - p.s.from));
+  const done = new Set();
+  for (const c of cands) {
+    if (style === 'slope' && done.has(c.key)) continue;
+    const [x0, x1, y0, y1] = c.r;
+    let hit = 0;
+    for (let b = y0; b < y1; b++) for (let a = x0; a < x1; a++) if (a >= 0 && b >= 0 && a < n && b < n && taken[b * n + a]) hit++;
+    if (hit) continue;
+    stairs.push(c.s); done.add(c.key);
+    for (const q of c.fills) level[q] = c.hiL;
+    for (let b = y0; b < y1; b++) for (let a = x0; a < x1; a++) if (a >= 0 && b >= 0 && a < n && b < n) taken[b * n + a] = 1;
   }
   return { stairs, taken };
 }
@@ -166,7 +231,7 @@ export function bridgesFromMask(mask, water, n, cell) {
 }
 
 // how a road climbs a terrace: 'auto' follows the biome (forest = earth ramp, mine = wooden steps, city = stone stairs…)
-export const SLOPE_STYLES = { auto: 'อัตโนมัติตามธีม', ramp: 'ทางลาดดิน', stone: 'บันไดหิน', wood: 'บันไดไม้' };
+export const SLOPE_STYLES = { auto: 'อัตโนมัติตามธีม', slope: 'เนินลาดเรียบ (กว้าง)', ramp: 'ทางลาดดิน', stone: 'บันไดหิน', wood: 'บันไดไม้' };
 export const slopeStyleOf = data => (data.slopeStyle && data.slopeStyle !== 'auto' ? data.slopeStyle : biomeOf({ biome: data.biome }).stairStyle || 'stone');
 
 export function sceneFromMap(data, opts = {}) {
@@ -213,7 +278,7 @@ export function sceneFromMap(data, opts = {}) {
     baseDensity: (x, y) => FOREST_DENSITY[forest[idx(x, y)]] ?? -1, bareByDefault: true, noEdgeForest: true,
     densNoise: .6, worn: 1, cliffStyle: data.cliffStyle,
     treePathClear: 56, canopyClear: 72, // keep painted roads and houses readable under tree crowns
-    trees: [], props: [], lanterns: [], camps: [], logs: [], crates: [], barrels: [], buildings: [], portals: [],
+    trees: [], props: [], lanterns: [], camps: [], logs: [], crates: [], barrels: [], buildings: [], portals: [], stalls: [], fences: [],
     gameplay: { mapId: data.name, spawnPoints: [] },
   };
   for (const o of data.objects || []) {
@@ -229,6 +294,13 @@ export function sceneFromMap(data, opts = {}) {
       case 'crate': scene.crates.push({ x: p.x - 11, y: p.y - 11, w: 22, d: 22, h: 18 }); break;
       case 'barrel': scene.barrels.push(p); break;
       case 'portal': scene.portals.push({ ...p, id:o.id||'', to:o.to||'', toPortal:o.toPortal||'', col: [120, 200, 255] }); break;
+      case 'pine': scene.trees.push({ ...p, kind: scene.biome === 'snow' ? 'snowPine' : 'pine' }); break;
+      case 'cactus': scene.trees.push({ ...p, kind: 'cactus' }); break;
+      case 'log': scene.logs.push(o.axis === 'y' ? { x: p.x - 8, y: p.y - 28, w: 16, d: 56, h: 14 } : { x: p.x - 28, y: p.y - 8, w: 56, d: 16, h: 14 }); break;
+      case 'stall': scene.stalls.push({ x: p.x - 26, y: p.y - 13, ...STALL_LOOKS[Math.round(o.x * 7 + o.y * 13) % STALL_LOOKS.length] }); break;
+      case 'fence': { const L = (o.len || 3) * T / 2; scene.fences.push(o.axis === 'y' ? { ax: p.x, ay: p.y - L, bx: p.x, by: p.y + L } : { ax: p.x - L, ay: p.y, bx: p.x + L, by: p.y }); break; }
+      case 'stump': case 'mushroom': case 'flowers': case 'fern': case 'coral': case 'well': case 'signpost': case 'cart': case 'hay':
+        scene.props.push({ type: o.type, ...p, seed: Math.round(o.x * 7 + o.y * 13), r: OBJECT_TYPES[o.type].r * T * .8 }); break;
       case 'monster': scene.gameplay.spawnPoints.push({ ...p, pool: o.pool || null }); break;
       case 'house': {
         const floors = clamp(o.floors || 1, 1, 3), w = (o.w || 3.5) * T, d = (o.d || 2.75) * T;
