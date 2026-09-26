@@ -395,6 +395,141 @@
     .bc-batch-summary span:last-child{grid-column:1/-1}
   }
 
+  /* Portrait mobile layout is additive: desktop rules above remain untouched. */
+  #mobileDock,#mobileDrawerScrim,#mobileTowerMoveNotice,#mobileReset,.mobile-drawer-head,.mobile-village-shortcuts{display:none}
+  @media (max-width:760px), (max-height:500px) and (pointer:coarse){
+    :root{--mobile-dock-height:66px}
+    html,body{width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
+    #wrap{inset:0;overflow:hidden;display:block;contain:layout paint}
+    /* Keep the engine's native 1280x720 aspect. Cropping the sides preserves pixel
+       geometry; drag or pinch to inspect areas outside the portrait viewport. */
+    #scene{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+      width:calc(100dvh * 16 / 9);height:100dvh;min-width:100vw;max-width:none;max-height:none;
+      aspect-ratio:16/9;image-rendering:pixelated;touch-action:none}
+    #worldLabels{z-index:12}
+    .bc-world-label{font-size:10px;min-height:32px;padding:5px 6px;max-width:112px;
+      overflow:hidden;text-overflow:ellipsis;white-space:normal;justify-content:center;text-align:center}
+    #top{top:calc(env(safe-area-inset-top,0px) + 6px);left:8px;right:8px;transform:none;
+      display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;
+      box-sizing:border-box;width:auto;padding:8px 10px;white-space:normal;border-radius:11px;
+      background:rgba(14,23,17,.94);z-index:21}
+    #clock{grid-column:1;grid-row:1;width:auto;min-width:0;line-height:1.3}
+    #top b{font-size:13px}#clock #wave{display:block;font-size:10px;line-height:1.25}
+    #timer{font-size:11px}
+    #clock>div{margin-top:3px;height:5px}
+    #top .res{grid-column:2;grid-row:1;gap:8px;align-self:start;white-space:nowrap}
+    #top .res span{gap:3px;font-size:11px}
+    #hall{grid-column:1/-1;grid-row:2;width:auto}
+    #hall small{display:block;font-size:10px}
+    #hall div{height:5px;margin-top:2px}
+    #help{display:none}
+    #mobileDock{display:grid;position:fixed;z-index:39;left:0;right:0;bottom:0;
+      grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;
+      height:calc(var(--mobile-dock-height) + env(safe-area-inset-bottom,0px));
+      padding:5px 6px calc(5px + env(safe-area-inset-bottom,0px));
+      box-sizing:border-box;border-top:1px solid #849970;
+      background:linear-gradient(180deg,rgba(31,47,34,.96),rgba(12,22,16,.98));
+      box-shadow:0 -4px 24px #0009}
+    #mobileDock button{min-width:0;min-height:52px;border-radius:10px;display:flex;
+      flex-direction:column;align-items:center;justify-content:center;gap:2px;
+      padding:4px 2px;font-size:10px;font-weight:700;line-height:1.2;
+      touch-action:manipulation;border-color:#5f7954}
+    #mobileDock button span{font-size:23px;line-height:1}
+    #mobileDock button[aria-pressed=true]{background:#4b5d36;border-color:#eac27e;color:#ffe7ab}
+    #mobileTowerMoveNotice:not([hidden]){display:flex;position:fixed;z-index:40;
+      left:10px;right:10px;bottom:calc(var(--mobile-dock-height) + 12px + env(safe-area-inset-bottom,0px));
+      gap:9px;align-items:center;justify-content:space-between;box-sizing:border-box;
+      border:1px solid #d6b87c;border-radius:12px;background:rgba(55,42,23,.97);
+      box-shadow:0 5px 22px #000b;padding:11px 13px;font-size:12px;color:#ffe9af}
+    #mobileTowerMoveNotice button{flex:none;min-height:44px;padding:8px 12px;border-color:#e3b970;background:#51412a}
+    #mobileDrawerScrim:not([hidden]){display:block;position:fixed;inset:0;bottom:calc(var(--mobile-dock-height) + env(safe-area-inset-bottom,0px));z-index:36;
+      background:rgba(4,9,6,.62);backdrop-filter:blur(2px)}
+    #side,#shopbox{left:0;right:0;bottom:calc(var(--mobile-dock-height) + env(safe-area-inset-bottom,0px));
+      top:auto;transform:translateY(calc(100% + 115px));visibility:hidden;
+      transition:transform .22s ease,visibility .22s;
+      pointer-events:none;box-sizing:border-box;
+      width:100%;max-width:none;max-height:min(67dvh,640px);
+      padding:12px 14px;z-index:38;background:#19281e;border-radius:18px 18px 0 0;
+      border:1px solid #849970;box-shadow:0 -10px 30px #000b;overflow-y:auto}
+    body[data-mobile-drawer=village] #side,
+    body[data-mobile-drawer=recruit] #shopbox{
+      transform:translateY(0);visibility:visible;pointer-events:auto}
+    .mobile-drawer-head{display:flex;align-items:center;justify-content:space-between;
+      gap:8px;position:sticky;top:-12px;z-index:2;background:#19281e;
+      padding:4px 0 10px;font-size:16px;color:#fce3a2}
+    .mobile-drawer-head button{min-width:44px;min-height:42px;font-size:18px}
+    .mobile-village-shortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:7px;margin:5px 0 12px}
+    .mobile-village-shortcuts button{min-width:0;min-height:45px}
+    #shop{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+    #shop .buy{min-height:56px}
+    #recruitDetails>summary{min-height:36px}
+    #side>h3{display:none}
+    #side .bc-quick-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+    #side .bc-quick{min-height:47px;padding:8px;font-size:11px}
+    #squad{max-height:170px;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+    #side .row button,#side #gateControls button{min-height:44px;white-space:normal}
+    #mobileReset{display:block;width:100%;min-height:44px;margin-top:10px;background:#39221f;border-color:#744b43;color:#edc1ae}
+    #gateControls button{font-size:11px}
+    #modalScrim{background:rgba(3,7,6,.63)}
+    .bc-modal,#forgePanel,#heroPanel,#itemDetailPanel,#hallPanel,
+    #blacksmithPanel,#resourcePanel,#sellPanel{
+      position:fixed;top:auto;left:0;right:0;bottom:0;transform:none;
+      box-sizing:border-box;width:100%;max-width:none;
+      height:min(86dvh,900px);max-height:calc(100dvh - env(safe-area-inset-top,0px) - 14px);
+      padding:0 0 env(safe-area-inset-bottom,0px);margin:0;
+      border-radius:18px 18px 0 0;box-shadow:0 -12px 44px #000c}
+    #heroPanel{height:min(91dvh,1000px)}
+    #itemDetailPanel{height:auto;max-height:88dvh;z-index:56}
+    #hallPanel,#blacksmithPanel,#resourcePanel,#sellPanel{height:auto;max-height:85dvh}
+    .bc-modal-header{position:relative;padding:13px 15px}
+    .bc-modal-header::before{content:'';position:absolute;top:4px;left:calc(50% - 21px);
+      width:42px;height:4px;border-radius:4px;background:#819781}
+    .bc-modal-header h2{font-size:17px}
+    .bc-modal-header button,.bc-modal-header [data-modal-close]{min-width:44px;min-height:44px}
+    .bc-modal-body{padding:12px;overflow-y:auto;overscroll-behavior:contain}
+    .bc-modal button{min-height:42px}
+    .bc-inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+    .bc-recipe-list{grid-template-columns:minmax(0,1fr)}
+    .bc-hero-layout{grid-template-columns:94px minmax(0,1fr)}
+    .bc-hero-roster{padding:6px}
+    .bc-hero-main{padding:8px}
+    .bc-armory-body{padding:9px}
+    .bc-armory-slots{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+    .bc-armory-slot{padding:7px;min-height:85px}
+    .bc-armory-work,.bc-armory-detail,.bc-armory-results{padding:9px;margin:9px 0}
+    .bc-armory-recipes{grid-template-columns:minmax(0,1fr)}
+    .bc-armory-primary button{min-width:0;width:100%}
+    .bc-tower-layout{grid-template-columns:1fr}
+    .bc-tower-portrait{min-height:78px;padding:9px}
+    .bc-tower-big-icon{width:52px;height:52px}
+    .bc-sale-footer{flex-wrap:wrap}
+    .bc-sale-footer button{min-height:44px}
+    .bc-item-preview{gap:9px}
+    .bc-item-show{width:83px;height:83px}
+    .bc-item-art{width:74px!important;height:74px!important}
+    #toast{top:calc(env(safe-area-inset-top,0px) + 100px);max-width:calc(100vw - 36px);
+      box-sizing:border-box;text-align:center}
+    #towerMoveNotice{position:sticky;top:0;z-index:2}
+  }
+  @media (max-height:500px) and (orientation:landscape) and (pointer:coarse){
+    :root{--mobile-dock-height:54px}
+    #scene{position:absolute;top:50%;left:50%;width:100vw;height:auto;min-width:0;
+      max-height:none;transform:translate(-50%,-50%)}
+    #top{top:4px;right:auto;left:6px;width:min(365px,48vw);
+      grid-template-columns:minmax(0,1fr) auto;padding:5px 8px}
+    #hall{display:none}
+    #mobileDock{left:auto;width:min(400px,55vw);height:calc(54px + env(safe-area-inset-bottom,0px))}
+    #mobileDock button{min-height:42px}
+    #side,#shopbox{left:auto;right:0;bottom:calc(54px + env(safe-area-inset-bottom,0px));
+      width:min(450px,80vw);max-height:calc(100dvh - 65px)}
+    .bc-modal,#forgePanel,#heroPanel,#itemDetailPanel,#hallPanel,
+    #blacksmithPanel,#resourcePanel,#sellPanel{
+      left:50%;right:auto;top:50%;bottom:auto;transform:translate(-50%,-50%);
+      width:min(680px,calc(100vw - 20px));height:calc(100dvh - 14px);
+      max-height:none;border-radius:15px;padding-bottom:0}
+  }
+
 </style>
 </head>
 <body>
@@ -405,8 +540,13 @@
   <div id="hall"><small>โพรงกระต่าย <span id="burrow-t"></span></small><div><div id="burrow"></div></div></div>
 </div>
 <div id="help" class="panel"><b>Burrow Command</b> · กระต่ายฟาร์มอัตโนมัติรอบหมู่บ้าน · เพดาน Hero Lv = บ้าน × 3<br>🧱 เสริมฐานด้วยวัตถุดิบได้ตั้งแต่วันแรก · อัป Warren Level ด้วยวัตถุดิบหลังชนะบอสเวฟ 5<br>🌙 กลางคืน: Elite มีโอกาสมากขึ้นตามเวฟ · แพ้แล้วกลับมาสู้เวฟเดิมได้ · ซ่อมด้วย Gold ตอนกลางวัน<br>🏹 คลิกป้อมเพื่อจ้าง Archer / Mage อัป HP หรือย้ายตำแหน่ง · 🏠 คลิกโพรงเพื่อใช้ Heal (กลางวัน/คืน อย่างละครั้ง)<br>⚒ โรงตีเหล็กเพิ่มโอกาส Rarity สูง · 📦 โรงผลิตสร้าง Gold/วัตถุดิบต่อวินาที · 🛒 คลิกรถเข็นเพื่อขายของส่วนเกิน<br>🛡 รั้วรอบบ้าน: สร้างรั้วไม้ 15×15 ช่อง · อัปเกรดเป็นกำแพงหินโดยไม่ขยายพื้นที่ · ซ่อมด้วยปุ่มซ่อมทั้งหมด<br><b>WASD</b> เลื่อนกล้อง · <b>Space</b> กลับโพรง<br><button id="reset">เริ่มหมู่บ้านใหม่</button></div>
-<div id="shopbox" class="panel"><details id="recruitDetails" open><summary>จ้างกระต่าย <small id="recruitSummary">0/7</small></summary><div id="shop" aria-label="รายชื่อกระต่ายที่จ้างได้"></div></details></div>
+<div id="shopbox" class="panel"><div class="mobile-drawer-head"><b>🐰 จ้างกระต่าย</b><button type="button" data-mobile-close aria-label="ปิดหน้าจ้างกระต่าย">✕</button></div><details id="recruitDetails" open><summary>จ้างกระต่าย <small id="recruitSummary">0/7</small></summary><div id="shop" aria-label="รายชื่อกระต่ายที่จ้างได้"></div></details></div>
 <div id="side" class="panel">
+  <div class="mobile-drawer-head"><b>🏠 จัดการหมู่บ้าน</b><button type="button" data-mobile-close aria-label="ปิดหน้าจัดการหมู่บ้าน">✕</button></div>
+  <div class="mobile-village-shortcuts" aria-label="อาคารและตลาด">
+    <button type="button" data-world="hall">🏠 โพรง</button><button type="button" data-world="blacksmith">⚒ โรงตีเหล็ก</button>
+    <button type="button" data-world="resource">📦 โรงผลิต</button><button type="button" data-world="sell">🛒 Quick Sell</button>
+  </div>
   <h3>จัดการหมู่บ้าน</h3>
   <div class="bc-quick-actions">
     <button id="heroOpen" class="bc-quick"><span data-ui-icon="gear">🐰</span> Class Armory</button>
@@ -426,7 +566,17 @@
   <div class="row"><button id="repair"></button><button id="repairAll"></button></div>
   <div class="row"><button id="revive"></button></div>
   <div class="row"><button id="speed">⏩ x1</button><button id="skip">🌙 เข้าคืนเลย</button></div>
+  <button id="mobileReset" type="button">⚠ เริ่มหมู่บ้านใหม่</button>
 </div>
+<div id="mobileDrawerScrim" hidden></div>
+<nav id="mobileDock" aria-label="เมนูสำหรับมือถือ">
+  <button type="button" data-mobile-open="hero" aria-label="กระต่ายและอุปกรณ์" aria-pressed="false"><span aria-hidden="true">🐰</span>กระต่าย</button>
+  <button type="button" data-mobile-open="village" aria-label="หมู่บ้านและสิ่งก่อสร้าง" aria-pressed="false"><span aria-hidden="true">🏠</span>หมู่บ้าน</button>
+  <button type="button" data-mobile-open="recruit" aria-label="จ้างกระต่าย" aria-pressed="false"><span aria-hidden="true">➕</span>จ้าง</button>
+  <button type="button" data-mobile-open="craft" aria-label="คราฟต์อุปกรณ์" aria-pressed="false"><span aria-hidden="true">⚒</span>คราฟต์</button>
+  <button type="button" data-mobile-open="sell" aria-label="Quick Sell ขายของ" aria-pressed="false"><span aria-hidden="true">🛒</span>ขาย</button>
+</nav>
+<div id="mobileTowerMoveNotice" hidden role="status"><span>📍 แตะพื้นเพื่อย้ายป้อม · ลากแผนที่เพื่อหาจุดวาง</span><button id="mobileCancelTowerMove" type="button">ยกเลิก</button></div>
 <div id="modalScrim" hidden></div>
 <div id="forgePanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="โรงตีเหล็ก"></div>
 <div id="heroPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="จัดการกระต่าย"></div>

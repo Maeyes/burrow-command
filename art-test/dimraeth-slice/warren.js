@@ -5,7 +5,7 @@
 // losing a night is a setback, not game over, and the same wave comes back until it is beaten.
 // Each warren level has 5 waves (5 = boss); beating the boss unlocks the warren upgrade.
 // Terrain, Blessed Bunny, monster art and FX are the Dimraeth engine's; the rules live here.
-import { setRuntimeZoomRange, projectRuntimePoint, boot, setRuntimeActors, setRuntimeActorUpdater, setRuntimePlayerVisual, setRuntimePlayerControl, setRuntimeClickHandler, runtimePointerHit, canRuntimeActorStand, runtimeWalkHeight, resolveRuntimeActor } from './engine/runtime.js';
+import { setRuntimeZoomRange, getRuntimeZoom, setRuntimeZoom, projectRuntimePoint, boot, setRuntimeActors, setRuntimeActorUpdater, setRuntimePlayerVisual, setRuntimePlayerControl, setRuntimeClickHandler, runtimePointerHit, canRuntimeActorStand, runtimeWalkHeight, resolveRuntimeActor } from './engine/runtime.js';
 import { emptyMap, sceneFromMap } from './scenes/custom.js';
 import { findPath, canWalkStraight } from './combat/nav.js';
 import { getRoster, monsterPresentation } from './combat/rosters.js';
@@ -19,6 +19,7 @@ import { biomeOf } from './engine/biomes.js';
 import { fenceRun } from './engine/world.js';
 import {PERIMETER_TIERS,perimeterTier,nextPerimeterTier,perimeterFootprint,perimeterBlueprint,perimeterHealth,perimeterMid,nearestPerimeterSection,normalizeGateSelections,toggleGateSelection,gateShouldClose,MAX_CLOSED_GATES,GATE_SIDES} from './warren-perimeter.js';
 import { WS } from './engine/state.js';
+import { K } from './engine/util.js';
 import * as PAL from './engine/palettes.js';
 import { CLASS_FAMILIES, LEGACY_SAVE_KEY, SAVE_KEY, bunnyName, expRequired, giveBunnyExp, migrateSave, monsterLoot, addInventory, craftMaterialCount, spendCraftMaterials, defaultBuilds, unlockedTier, minLevelForTier, buildFor, buildCombatBonus, availableRecipes, canCraft, craftGear, craftBatch, enhanceGear, enhanceAll, refineGear, dismantleGear, dismantleSelection, setGearLock, recommendations, grantClassMastery, unlockClassMastery, unlockedMastery, classProgress, defaultProgress, defaultMastery, scaledWarrenGold, shouldDepositLootDirectly, autoEquipBuild, equipBuildItem, equippedGearIds, gearSlot, EQUIPMENT_MASTER_V2, EQUIPMENT_RARITY_STAT_MULTIPLIER, MAX_FIELD_PER_CLASS, fieldSquadCap, fieldClassCap, FIELD_SQUAD_GATES, CLASS_IDS, GEAR_SLOTS, PRIOR_SAVE_KEY, defaultAutoDismantleSettings, settleBatchCraft, constructionMaterialCount, spendConstructionMaterials, warrenConstructionCost, fortificationCost, fortificationCap, fortificationHpBonus, repairAllQuote, repairEverything, CONSTRUCTION_MATERIAL_IDS, constructionRefund } from './warren-progression.js';
 import { inventoryItemMeta } from '../../src/simulation/itemTagsV2.ts';
@@ -789,7 +790,7 @@ function tick(dt) {
   if (S.over) return;
   // Let players manage the forge, inventory and hero builds without losing precious daylight.
   // Nighttime combat still advances if they inspect a panel, but changes remain locked.
-  if (!S.night && (S.modal || S.itemDetailId)) return;
+  if (!S.night && (S.modal || S.itemDetailId || mobileDrawer)) return;
   dt *= S.speed; S.clock += dt; S.time += dt;
   if (S.events.length) { const due = S.events.filter(e => e.at <= S.time); S.events = S.events.filter(e => e.at > S.time); for (const e of due) e.fn(); }
   if (!S.night) {
@@ -825,6 +826,7 @@ addEventListener('keydown', e => {
   if(e.code==='Escape'&&S.movingTower>=0){S.movingTower=-1;S.towerMoveHover=null;renderUi();return;}
   if(e.code==='Escape'&&S.itemDetailId){S.itemDetailId=null;S.itemProtect=false;renderUi();return;}
   if(e.code==='Escape'&&S.modal){S.modal=null;renderUi();return;}
+  if(e.code==='Escape'&&mobileDrawer){closeMobileDrawer();syncMobileControls();return;}
   if(e.code==='Escape'&&S.building){S.building=false;renderUi();return;}
   if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
   keys.add(e.code);
@@ -873,6 +875,42 @@ function completeArmoryCraft(order){
 
 // ---------- UI ----------
 const $ = id => document.getElementById(id);
+const mobileLayout=matchMedia('(max-width:760px), (max-height:500px) and (pointer:coarse)');
+let mobileDrawer=null;
+function closeMobileDrawer(){
+ mobileDrawer=null;
+ document.body.removeAttribute('data-mobile-drawer');
+ $('mobileDrawerScrim').hidden=true;
+ $('side').inert=mobileLayout.matches;
+ $('shopbox').inert=mobileLayout.matches;
+ for(const b of document.querySelectorAll('#mobileDock [data-mobile-open]'))b.setAttribute('aria-pressed','false');
+}
+function syncMobileControls(){
+ if(S.modal&&mobileDrawer)closeMobileDrawer();
+ const mobile=mobileLayout.matches;
+ $('side').inert=mobile&&mobileDrawer!=='village';
+ $('shopbox').inert=mobile&&mobileDrawer!=='recruit';
+ $('mobileDrawerScrim').hidden=!mobileDrawer||!mobile;
+ for(const b of document.querySelectorAll('#mobileDock [data-mobile-open]')){
+  const type=b.dataset.mobileOpen,selected=type===mobileDrawer||(S.modal==='hero'&&(type==='hero'&&S.armoryTab!=='craft'||type==='craft'&&S.armoryTab==='craft'))||(S.modal==='sell'&&type==='sell');
+  b.setAttribute('aria-pressed',mobile&&selected?'true':'false');
+ }
+}
+function openMobileView(type){
+ if(!mobileLayout.matches)return;
+ if(type==='village'||type==='recruit'){
+  S.modal=null;S.itemDetailId=null;mobileDrawer=type;
+  document.body.dataset.mobileDrawer=type;
+ }else{
+  closeMobileDrawer();
+  if(type==='hero'||type==='craft'){
+   S.armoryTab=type==='craft'?'craft':'inventory';S.modal='hero';
+  }else if(type==='sell'){S.sellConfirm=false;S.modal='sell';}
+ }
+ renderUi();
+}
+$('mobileDrawerScrim').addEventListener('click',()=>{closeMobileDrawer();syncMobileControls();});
+mobileLayout.addEventListener('change',()=>{setRuntimeZoomRange(mobileLayout.matches?.26:.45,1.3);if(!mobileLayout.matches){setRuntimeZoom(getRuntimeZoom());closeMobileDrawer();}syncMobileControls();});
 for(const target of document.querySelectorAll('[data-ui-icon]'))target.innerHTML=gameIcon(target.dataset.uiIcon,'ui',target.textContent);
 function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => el.classList.remove('on'), 2200); }
 function banner(title, sub) { const el = $('banner'); el.innerHTML = `<b>${title}</b><span>${sub}</span>`; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); }
@@ -944,8 +982,10 @@ function renderUi() {
   const detail=$('itemDetailPanel');detail.hidden=!S.itemDetailId||S.modal==='hero';
   if(S.itemDetailId){if(S.gear.some(i=>i.id===S.itemDetailId)&&S.modal!=='hero')detail.innerHTML=renderItemDetailHtml(S,S.itemDetailId,CLASSES);else if(!S.gear.some(i=>i.id===S.itemDetailId)){detail.hidden=true;S.itemDetailId=null;}}
   $('modalScrim').hidden=!S.modal&&!S.itemDetailId;
+  syncMobileControls();
   $('forgeOpen').disabled=S.night;
   $('towerMoveNotice').hidden=S.movingTower<0;
+  $('mobileTowerMoveNotice').hidden=S.movingTower<0||!mobileLayout.matches;
   canvas.classList.toggle('tower-move',S.movingTower>=0);
   $('masteryOpen').disabled=false;
   syncClock();
@@ -962,6 +1002,9 @@ function syncClock() {
 }
 document.body.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
+  if(b.dataset.mobileOpen){openMobileView(b.dataset.mobileOpen);return;}
+  if(b.hasAttribute('data-mobile-close')){closeMobileDrawer();syncMobileControls();return;}
+  if(b.id==='mobileReset'){$('reset').click();return;}
   if(b.dataset.buy)recruit(b.dataset.buy);
   else if(b.id==='forgeOpen'){S.modal='blacksmith';renderUi();}
   else if(b.dataset.world){
@@ -980,7 +1023,7 @@ document.body.addEventListener('click', e => {
     if(quote){save();renderUi();toast('ขาย '+quote.quantity+' ชิ้น · รับ '+quote.gold+' Gold');}
     else{renderUi();toast('ไม่มีของส่วนเกินที่ขายได้');}
   }
-  else if(b.id==='cancelTowerMove'){S.movingTower=-1;S.towerMoveHover=null;renderUi();}
+  else if(b.id==='cancelTowerMove'||b.id==='mobileCancelTowerMove'){S.movingTower=-1;S.towerMoveHover=null;renderUi();}
   else if(b.hasAttribute('data-tower-move'))beginTowerMove();
   else if(b.hasAttribute('data-forge-upgrade'))upgradeForgeBuilding();
   else if(b.hasAttribute('data-resource-upgrade'))upgradeResourceBuilding();
@@ -1269,7 +1312,7 @@ function updateWorldLabels(){
 setRuntimePlayerVisual(() => ({ image: null }));
 canvas.addEventListener('pointermove',e=>{if(S.movingTower>=0){const hit=runtimePointerHit(e);S.towerMoveHover=hit&&hit.idx>=0?{x:hit.x,y:hit.y}:null;}});
 canvas.addEventListener('pointerleave',()=>{S.towerMoveHover=null;});
-setRuntimeClickHandler((hit,e) => {
+const onWorldTap=(hit,e) => {
   if (S.over || S.modal || S.itemDetailId || !hit || hit.idx < 0) return;
   if(S.movingTower>=0){relocateTower(S.movingTower,hit.x,hit.y);return;}
   const tower=S.towers.findIndex(t=>dist(t,hit)<64);
@@ -1279,7 +1322,54 @@ setRuntimeClickHandler((hit,e) => {
   if(dist(RESOURCE_POS,hit)<104){S.modal='resource';renderUi();return;}
   if(dist(FORGE_POS,hit)<104){S.modal='blacksmith';renderUi();return;}
   if(dist(CENTER,hit)<110){S.modal='hall';renderUi();return;}
+};
+setRuntimeClickHandler(onWorldTap);
+// Touch-only gestures. The desktop mouse/wheel handlers in runtime.js are unchanged;
+// intercept touch pointerdown before runtime's click handler and dispatch a tap on release.
+const mobilePointers=new Map();
+let pinchStart=null;
+canvas.addEventListener('pointerdown',e=>{
+ if(!mobileLayout.matches||e.pointerType!=='touch')return;
+ e.preventDefault();e.stopImmediatePropagation();
+ canvas.setPointerCapture?.(e.pointerId);
+ mobilePointers.set(e.pointerId,{x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,moved:mobilePointers.size>0});
+ if(mobilePointers.size===2){
+  const [a,b]=[...mobilePointers.values()];
+  a.moved=true;b.moved=true;
+  pinchStart={distance:Math.hypot(a.x-b.x,a.y-b.y),zoom:getRuntimeZoom()};
+ }
+},{capture:true});
+canvas.addEventListener('pointermove',e=>{
+ const p=mobilePointers.get(e.pointerId);if(!p)return;
+ e.preventDefault();
+ const dx=e.clientX-p.x,dy=e.clientY-p.y;
+ p.x=e.clientX;p.y=e.clientY;
+ if(mobilePointers.size>=2){
+  for(const v of mobilePointers.values())v.moved=true;
+  if(mobilePointers.size===2&&pinchStart?.distance>0){
+   const [a,b]=[...mobilePointers.values()];
+   setRuntimeZoom(pinchStart.zoom*Math.hypot(a.x-b.x,a.y-b.y)/pinchStart.distance);
+  }
+  return;
+ }
+ if(Math.hypot(p.x-p.startX,p.y-p.startY)>9)p.moved=true;
+ if(!p.moved)return;
+ const rect=canvas.getBoundingClientRect(),zoom=getRuntimeZoom();
+ const sx=-dx*canvas.width/rect.width/zoom,sy=-dy*canvas.height/rect.height/zoom;
+ cam.x+=(sx+2*sy)/K;cam.y+=(2*sy-sx)/K;
+ cam.x=Math.max(200,Math.min(2360,cam.x));cam.y=Math.max(200,Math.min(2360,cam.y));
 });
+function finishMobilePointer(e,cancel=false){
+ const p=mobilePointers.get(e.pointerId);if(!p)return;
+ e.preventDefault();
+ const tap=!cancel&&!p.moved&&mobilePointers.size===1&&Math.hypot(e.clientX-p.startX,e.clientY-p.startY)<10;
+ mobilePointers.delete(e.pointerId);
+ if(mobilePointers.size<2)pinchStart=null;
+ // A remaining finger after pinching must never generate an accidental building tap.
+ if(tap)onWorldTap(runtimePointerHit(e),e);
+}
+canvas.addEventListener('pointerup',e=>finishMobilePointer(e));
+canvas.addEventListener('pointercancel',e=>finishMobilePointer(e,true));
 let last = performance.now();
 setRuntimeActorUpdater(({ player }) => {
   const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;
@@ -1292,8 +1382,8 @@ skillFx = createSkillFx(canvas); floaters = createFloaters(canvas);
 const resumed = load();
 if (!resumed) { recruit('guard', true); recruit('archer', true); }
 renderUi();
-setRuntimeZoomRange(.45, 1.3); // wheel: zoom out to watch the whole clearing
-await boot(scene, { canvasEl: canvas, loadingEl: $('loading'), playerSprites: null, worldScale: 1.45, zoom: .62 });
+setRuntimeZoomRange(mobileLayout.matches ? .26 : .45, 1.3); // portrait can pinch farther out to see the whole village
+await boot(scene, { canvasEl: canvas, loadingEl: $('loading'), playerSprites: null, worldScale: 1.45, zoom: mobileLayout.matches ? .45 : .62 });
 // Authored fences restore after world placement; live fences use exactly the same engine primitives.
 for(const fence of S.fences)installFence(fence);
 // Hover/focus shows the NEXT automatic perimeter's actual footprint, without extra controls.

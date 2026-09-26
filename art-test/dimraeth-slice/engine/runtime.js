@@ -62,6 +62,9 @@ let canvas, ctx, player, cam, dusk = false, time = 0, t0 = 0, rafId = 0;
 let bootListeners=[];
 let zoomMin=.7,zoomMax=1.8; // wheel-zoom range; pages can widen it (setRuntimeZoomRange)
 export function setRuntimeZoomRange(min,max){zoomMin=min;zoomMax=max;}
+// Touch UIs use these controls for pinch zoom without synthesizing wheel events.
+export function getRuntimeZoom(){return viewZoom;}
+export function setRuntimeZoom(value){if(Number.isFinite(value))viewZoom=Math.max(zoomMin,Math.min(zoomMax,value));return viewZoom;}
 let viewZoom=1,worldVisualScale=1,playerVisualScale=1,playerVisualGetter=null,externalPlayerControl=false,minimapZoom=1,debugTraversal=false;
 const keys = new Set(), sprites = {}, particles = [];
 
