@@ -58,9 +58,9 @@ for (const m of Object.values(MONSTERS_V2)) {
   addItem(l.core?.itemId, 'monster-loot');
 }
 Object.keys(SKILL_MODIFIERS_V2).forEach(id => addItem(id, 'modifier'));
-['astraliteStone', 'optionStone', 'reoptionStone', 'refineProtectionLv1', 'refineProtectionLv2', 'stoneFragment', 'verdantAetherstone', 'azureAetherstone', 'violetAetherstone', 'sunforgeCore', 'leaderEmblem']
+['coreShard', 'modShard', 'astraliteStone', 'optionStone', 'reoptionStone', 'refineProtectionLv1', 'refineProtectionLv2', 'stoneFragment', 'verdantAetherstone', 'azureAetherstone', 'violetAetherstone', 'sunforgeCore', 'leaderEmblem']
   .forEach(id => addItem(id, 'itemTagsV2'));
-for (let t = 1; t <= 5; t++) addItem(`tier${t}Blueprint`, 'itemTagsV2');
+for (let t = 1; t <= 6; t++) addItem(`tier${t}Blueprint`, 'itemTagsV2');
 
 const itemIds = [], itemSkipped = [];
 for (const [id, source] of itemCandidates) {

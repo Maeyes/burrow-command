@@ -5,7 +5,7 @@ import { WEAPON_MASTERY_MILESTONES } from '../../../src/simulation/masteryMilest
 import { inventoryItemMeta } from '../../../src/simulation/itemTagsV2.ts';
 import { SKILLS_V2, skillSpCostV2 } from '../../../src/simulation/skills.ts';
 import { SKILL_MODIFIERS_V2, stackedSkillModifierFraction } from '../../../src/simulation/skillModifiersV2.ts';
-import { skillItemUpgradeQuote, skillUpgradeKind, availableSkillUpgradeCopies, equippedSkillItemCount, movementSkillDistanceBonus, skillCoreDamageMultiplier } from '../../../src/simulation/skillCoreService.ts';
+import { SHARD_EXCHANGE_COST, shardIdFor, skillItemDiscovered, modsForSlot, skillItemUpgradeQuote, skillUpgradeKind, availableSkillUpgradeCopies, equippedSkillItemCount, movementSkillDistanceBonus, skillCoreDamageMultiplier } from '../../../src/simulation/skillCoreService.ts';
 import { WEAPON_SKILLS_BY_FAMILY_V2 } from '../../../src/simulation/skillEntitlements.ts';
 import { WEAPON_PROC_RULES_V2 } from '../../../src/simulation/engine.ts';
 import { MASTERY_ACTIVE_LEVELS, MASTERY_PASSIVE_SLOTS, masteryPassiveSlotCapacity } from '../../../src/simulation/masteryLoadout.ts';
@@ -15,8 +15,27 @@ import { bindDetailModalClose, showUiError } from './shared.js';
 export const masteryUi={selected:null,milestone:null};
 export const MASTERY_NAMES={greatsword:'Greatsword',dagger:'Dagger',axe:'Axe',hammer:'Hammer',bow:'Bow',staff:'Staff',swordShield:'Sword + Shield'};
 export const MASTERY_GLYPHS={greatsword:'⚔',dagger:'†',axe:'🪓',hammer:'🔨',bow:'🏹',staff:'✦',swordShield:'🛡'};
-export const MASTERY_MILESTONE_NAMES={cleave:'Cleave',cleaveII:'Cleave II',wideCleave:'Wide Cleave',cleaveIII:'Cleave III',perfectCleave:'Perfect Cleave',doubleAttack:'Double Attack',doubleAttackII:'Double Attack II',precisionFollowup:'Precision Follow-up',criticalFollowup:'Critical Follow-up',doubleAttackIII:'Double Attack III',heavyBlow:'Heavy Blow',heavyBlowII:'Heavy Blow II',armorBreak:'Armor Break',heavyBlowIII:'Heavy Blow III',crushingArmorBreak:'Crushing Armor Break',crushingImpact:'Crushing Impact',crushingImpactII:'Crushing Impact II',concussion:'Concussion',crushingImpactIII:'Crushing Impact III',shockwave:'Shockwave',multiShot:'Multi Shot',multiShotII:'Multi Shot II',eagleEye:'Eagle Eye',piercingArrow:'Piercing Arrow',multiShotIII:'Multi Shot III',concentration:'Concentration',mobileCasting:'Mobile Casting',flowCasting:'Flow Casting',coreEcho:'Core Echo',perfectCasting:'Perfect Casting',guard:'Guard',firmGuard:'Firm Guard',counterGuard:'Counter Guard',perfectGuard:'Perfect Guard',aegisMastery:'Aegis Mastery'};
+export const MASTERY_MILESTONE_NAMES={cleave:'Cleave',cleaveII:'Cleave II',wideCleave:'Wide Cleave',cleaveIII:'Cleave III',perfectCleave:'Perfect Cleave',doubleAttack:'Double Attack',doubleAttackII:'Double Attack II',precisionFollowup:'Relentless',criticalFollowup:'Critical Follow-up',doubleAttackIII:'Double Attack III',heavyBlow:'Heavy Blow',heavyBlowII:'Heavy Blow II',armorBreak:'Armor Break',heavyBlowIII:'Heavy Blow III',crushingArmorBreak:'Crushing Armor Break',crushingImpact:'Crushing Impact',crushingImpactII:'Crushing Impact II',concussion:'Concussion',crushingImpactIII:'Crushing Impact III',shockwave:'Shockwave',multiShot:'Multi Shot',multiShotII:'Multi Shot II',eagleEye:'Eagle Eye',piercingArrow:'Piercing Arrow',multiShotIII:'Multi Shot III',concentration:'Spell Chain',mobileCasting:'Spell Chain II',flowCasting:'Cascade',coreEcho:'Resonance',perfectCasting:'Arcane Surge',guard:'Guard',firmGuard:'Firm Guard',counterGuard:'Counter Guard',perfectGuard:'Perfect Guard',aegisMastery:'Aegis Mastery'};
 export const skillsHubUi={tab:'skills'};
+/** Whether a Skill Mod does anything for this core (mods belong to the slot, so a swap can leave one idle). */
+export function modAppliesTo(modId,coreId){
+ const s=SKILLS_V2[coreId];if(!s)return false;
+ const damage=Boolean(s.scaling),support=['barrier','healingPulse','valkyriesCall'].includes(coreId),area=Boolean(s.targeting?.endsWith('Area'));
+ switch(modId){
+  case 'combustion':return damage&&(s.element==='fire');
+  case 'overcharge':return damage&&(s.element==='lightning'||coreId==='ragnarok');
+  case 'concentratedForce':return damage&&!area;
+  case 'chain':return damage&&area;
+  case 'expandedArea':return (damage&&area)||coreId==='barrier'||coreId==='valkyriesCall';
+  case 'mobileCast':return damage&&Boolean(s.range);
+  case 'rapidCasting':return true;
+  case 'lingering':case 'bloodPrice':return damage||support;
+  case 'execution':case 'echo':return damage||coreId==='barrier'||coreId==='healingPulse';
+  case 'lifeDrain':return damage||coreId==='barrier';
+  case 'extraStrike':return damage;
+  default:return true;
+ }
+}
 export function skillLabel(id){return id?String(id).replace(/([A-Z])/g,' $1').replace(/^./,x=>x.toUpperCase()):'Empty'}
 export function coreRarity(id){return id?(sim.character.skills.coreRarity?.[id]??'normal'):'normal'}
 export function coreRarityIndex(id){return ['normal','good','rare','epic','legend','mythic','whiteAscended'].indexOf(coreRarity(id))}
@@ -40,6 +59,13 @@ const CORE_SKILL_DESCRIPTIONS={
   lightningField:'Strike a selected ground area with repeated lightning hits.',
   flameTrail:'Damage enemies around the caster with repeated fire hits.',
   warCry:'Utility Skill Core. It currently has no authored damage component.',
+  tidalWave:'Send a cold wave at the target area: knocks enemies back and slows them by 30% for 2.5s.',
+  abyssalGrasp:'Abyssal tendrils pull nearby enemies into a pile, then crush them over 3 hits.',
+  siphonSoul:'Drain one enemy over 3 hits and heal for 25% of the damage dealt.',
+  mjolnirStrike:'A single, massive lightning hammer blow. The strongest single hit among Skill Cores.',
+  thorsJudgement:"Mark one enemy for 4s. When the mark ends, it takes 30% of all HP it lost during the mark as bonus damage.",
+  valkyriesCall:"For 8s: +25% attack speed and +15% damage on attacks and skills.",
+  ragnarok:'Six waves of fire and lightning on a ground area. Benefits from both Combustion and Overcharge.',
 };
 export function skillDetailHtml(id){
  const s=SKILLS_V2[id];if(!s)return '<p>Skill data unavailable.</p>';
@@ -131,7 +157,23 @@ export function renderWeaponMastery(target){
   target.querySelectorAll('[data-clear-mastery-passive-family]').forEach(b=>b.onclick=()=>{try{sim.masteryLoadoutCommand({type:'togglePassive',family:b.dataset.clearMasteryPassiveFamily,milestoneId:b.dataset.clearMasteryPassiveId});saveCharacter?.(sim.character);renderSkillsHub();}catch(e){showUiError(String(e?.message||e));}});
   target.querySelectorAll('[data-clear-mastery-active]').forEach(b=>b.onclick=()=>{try{sim.masteryLoadoutCommand({type:'unequipActive',level:Number(b.dataset.clearMasteryActive)});saveCharacter?.(sim.character);renderSkillsHub();}catch(e){showUiError(String(e?.message||e));}});
 }
-export function showSkillCorePicker(slot){const c=sim.character,modal=document.getElementById('equipment-detail-modal'),equipped=new Set(c.skills.active.filter(Boolean)),owned=Object.entries(c.inventory).filter(([id,q])=>q>0&&inventoryItemMeta(id).tags.includes('skill-core')&&SKILLS_V2[id]?.kind!=='movement'&&!equipped.has(id));modal.innerHTML=`<button class="rpg-modal-close">×</button><div class="equipment-detail-card"><div class="skill-picker-head"><strong>INSTALL SKILL CORE ${slot+1}</strong></div><div class="skill-picker-list">${owned.length?owned.map(([id,q])=>`<button data-pick-core="${id}"><b>${iconHtml(id,'skill','')}${SKILLS_V2[id]?.name||skillLabel(id)}</b><small>OWNED ×${q}</small>${skillDetailHtml(id)}</button>`).join(''):'<p>No Skill Core available.</p>'}</div></div>`;modal.hidden=false;bindDetailModalClose(modal);modal.querySelectorAll('[data-pick-core]').forEach(b=>b.onclick=()=>{sim.skillCoreCommand({type:'equipCore',coreId:b.dataset.pickCore,slot});saveCharacter?.(sim.character);modal.hidden=true;renderSkillsHub();syncHotbar();});}
+/** Shard panel in every picker: salvage spare copies (not installed) and buy back discovered items. */
+function appendShardExchange(modal,filter,reopen){
+ const c=sim.character,ids=Object.keys(c.inventory).filter(id=>filter(id)&&skillItemDiscovered(c,id));
+ const spare=ids.filter(id=>availableSkillUpgradeCopies(c,id)>0),missing=ids.filter(id=>(c.inventory[id]??0)<1);
+ const shardId=shardIdFor(ids[0]??'')??(filter('lifeDrain')?'modShard':'coreShard'),shards=c.inventory[shardId]??0;
+ const label=id=>`${iconHtml(id,SKILL_MODIFIERS_V2[id]?'item':'skill','')} ${SKILL_MODIFIERS_V2[id]?.name||SKILLS_V2[id]?.name||skillLabel(id)}`;
+ const box=document.createElement('div');box.className='skill-shard-box';
+ box.innerHTML=`<strong>${iconHtml(shardId,'item','◆')} ${shardId==='modShard'?'MOD':'CORE'} SHARDS: ${shards}</strong>
+  <small>SALVAGE SPARE COPIES (installed copies are kept)</small>
+  ${spare.length?spare.map(id=>{const n=availableSkillUpgradeCopies(c,id);return `<div class="shard-row"><span>${label(id)} <em>×${n}</em></span><button class="bw-btn" data-salvage-pick="${id}" data-qty="1">SALVAGE 1</button><button class="bw-btn" data-salvage-pick="${id}" data-qty="${n}">ALL</button></div>`;}).join(''):'<p class="bw-note">No spare copies.</p>'}
+  ${missing.length?`<small>EXCHANGE ${SHARD_EXCHANGE_COST} SHARDS → 1 COPY</small>`+missing.map(id=>`<button class="bw-btn" data-exchange-pick="${id}" ${shards>=SHARD_EXCHANGE_COST?'':'disabled'}>${label(id)}</button>`).join(''):''}`;
+ modal.querySelector('.equipment-detail-card').appendChild(box);
+ const run=command=>{try{sim.skillCoreCommand(command);saveCharacter?.(sim.character);reopen();}catch(e){showUiError(String(e?.message||e));}};
+ box.querySelectorAll('[data-salvage-pick]').forEach(b=>b.onclick=()=>run({type:'salvageSkillItem',itemId:b.dataset.salvagePick,qty:Number(b.dataset.qty)}));
+ box.querySelectorAll('[data-exchange-pick]').forEach(b=>b.onclick=()=>run({type:'exchangeShards',itemId:b.dataset.exchangePick}));
+}
+export function showSkillCorePicker(slot){const c=sim.character,modal=document.getElementById('equipment-detail-modal'),equipped=new Set(c.skills.active.filter(Boolean)),owned=Object.entries(c.inventory).filter(([id,q])=>q>0&&inventoryItemMeta(id).tags.includes('skill-core')&&SKILLS_V2[id]?.kind!=='movement'&&!equipped.has(id));modal.innerHTML=`<button class="rpg-modal-close">×</button><div class="equipment-detail-card"><div class="skill-picker-head"><strong>INSTALL SKILL CORE ${slot+1}</strong></div><div class="skill-picker-list">${owned.length?owned.map(([id,q])=>`<button data-pick-core="${id}"><b>${iconHtml(id,'skill','')}${SKILLS_V2[id]?.name||skillLabel(id)}</b><small>OWNED ×${q}</small>${skillDetailHtml(id)}</button>`).join(''):'<p>No Skill Core available.</p>'}</div></div>`;modal.hidden=false;bindDetailModalClose(modal);appendShardExchange(modal,id=>{const k=SKILLS_V2[id]?.kind;return k==='active'||k==='passive';},()=>showSkillCorePicker(slot));modal.querySelectorAll('[data-pick-core]').forEach(b=>b.onclick=()=>{sim.skillCoreCommand({type:'equipCore',coreId:b.dataset.pickCore,slot});saveCharacter?.(sim.character);modal.hidden=true;renderSkillsHub();syncHotbar();});}
 function duplicateModPreview(coreId,modSlot,id){
   const mods=sim.character.skills.modifiersByActive?.[coreId]??[],other=mods[modSlot===0?1:0];
   if(other!==id)return '';
@@ -145,7 +187,7 @@ export function showSkillModPicker(coreId,modSlot){
  const existing=c.skills.modifiersByActive?.[coreId]?.[modSlot];
  const owned=Object.entries(c.inventory).filter(([id,q])=>q>0&&inventoryItemMeta(id).tags.includes('skill-modifier')&&(availableSkillUpgradeCopies(c,id)>0||existing===id));
  modal.innerHTML=`<button class="rpg-modal-close">×</button><div class="equipment-detail-card"><div class="skill-picker-head"><strong>INSTALL SKILL MOD ${modSlot+1}</strong><small>Duplicate Mods scale their own percentages multiplicatively. Equipped copies are reserved.</small></div><div class="skill-picker-list">${owned.map(([id,q])=>`<button data-pick-mod="${id}"><b>${iconHtml(id,'item','')}${SKILL_MODIFIERS_V2[id]?.name||skillLabel(id)}</b><small>AVAILABLE ×${availableSkillUpgradeCopies(c,id)}${existing===id?' · INSTALLED':''}</small><p>${SKILL_MODIFIERS_V2[id]?.description||''}</p>${duplicateModPreview(coreId,modSlot,id)}</button>`).join('')||'<p>No available Skill Mod copies.</p>'}</div></div>`;
- modal.hidden=false;bindDetailModalClose(modal);
+ modal.hidden=false;bindDetailModalClose(modal);appendShardExchange(modal,id=>Boolean(SKILL_MODIFIERS_V2[id]),()=>showSkillModPicker(coreId,modSlot));
  modal.querySelectorAll('[data-pick-mod]').forEach(b=>b.onclick=()=>{try{
   sim.skillCoreCommand({type:'equipModifier',coreId,modifierId:b.dataset.pickMod,modSlot});
   saveCharacter?.(sim.character);modal.hidden=true;renderSkillsHub();syncHotbar();
@@ -155,7 +197,7 @@ function showMovementCorePicker(){
  const c=sim.character,modal=document.getElementById('equipment-detail-modal');
  const owned=Object.entries(c.inventory).filter(([id,q])=>q>0&&SKILLS_V2[id]?.kind==='movement');
  modal.innerHTML=`<button class="rpg-modal-close">×</button><div class="equipment-detail-card"><div class="skill-picker-head"><strong>INSTALL MOVEMENT CORE</strong></div><div class="skill-picker-list">${owned.map(([id,q])=>`<button data-pick-movement="${id}"><b>${iconHtml(id,'skill','➤')}${SKILLS_V2[id].name}</b><small>OWNED ×${q}</small>${skillDetailHtml(id)}</button>`).join('')||'<p>No Movement Core available.</p>'}</div></div>`;
- modal.hidden=false;bindDetailModalClose(modal);
+ modal.hidden=false;bindDetailModalClose(modal);appendShardExchange(modal,id=>SKILLS_V2[id]?.kind==='movement',showMovementCorePicker);
  modal.querySelectorAll('[data-pick-movement]').forEach(b=>b.onclick=()=>{try{
   sim.skillCoreCommand({type:'equipMovementCore',coreId:b.dataset.pickMovement});
   saveCharacter?.(sim.character);modal.hidden=true;renderSkillsHub();syncHotbar();
@@ -165,11 +207,11 @@ function showSkillUpgrade(id,kind=skillUpgradeKind(id),context={},feedback=''){
  const c=sim.character,modal=document.getElementById('equipment-detail-modal'),quote=skillItemUpgradeQuote(c,id),rarity=coreRarity(id);
  if(!kind)return;
  const owned=c.inventory[id]??0,held=equippedSkillItemCount(c,id),available=availableSkillUpgradeCopies(c,id);
- const enoughItems=Boolean(quote&&available>=quote.duplicateQty),enoughGold=Boolean(quote&&c.gold>=quote.gold),canUpgrade=enoughItems&&enoughGold;
+ const enoughItems=Boolean(quote&&quote.shardsOwned>=quote.shardsNeeded),enoughGold=Boolean(quote&&c.gold>=quote.gold),canUpgrade=enoughItems&&enoughGold;
  const title=kind==='modifier'?'SKILL MOD':kind==='movement'?'MOVEMENT CORE':'SKILL CORE';
  const name=kind==='modifier'?(SKILL_MODIFIERS_V2[id]?.name||skillLabel(id)):(SKILLS_V2[id]?.name||skillLabel(id));
  const progress=quote?(kind==='movement'
-   ?`<span>TRAVEL <b>${quote.currentDistance} → ${quote.nextDistance}</b></span><small>+1 travel distance on successful upgrade</small>`
+   ?`<span>TRAVEL <b>${quote.currentDistance} → ${quote.nextDistance}</b></span><small>+${quote.nextDistance-quote.currentDistance} travel distance on successful upgrade</small>`
    :kind==='modifier'
    ?`<span>MOD EFFECT <b>×${quote.currentEffectMultiplier.toFixed(2)} → ×${quote.nextEffectMultiplier.toFixed(2)}</b></span><small>All authored modifier percentages scale with rarity</small>`
    :`<span>CORE DMG <b>+${Math.round(quote.currentDamageBonus*100)}% → +${Math.round(quote.nextDamageBonus*100)}%</b></span><small>Only applicable to damage-dealing Skill Cores</small>`)
@@ -179,9 +221,11 @@ function showSkillUpgrade(id,kind=skillUpgradeKind(id),context={},feedback=''){
    :skillDetailHtml(id);
  const change=context.coreId!==undefined
   ?'<button class="bw-btn" data-change-mod>CHANGE MOD</button>'
-  :kind==='movement'?'<button class="bw-btn" data-change-movement>CHANGE MOVEMENT</button>':'';
+  :kind==='movement'?'<button class="bw-btn" data-change-movement>CHANGE MOVEMENT</button>'
+  :kind==='core'&&sim.character.skills.active.includes(id)?'<button class="bw-btn" data-change-core>CHANGE CORE</button>':'';
  const required=quote?.duplicateQty??0;
- const needLabel=!enoughItems?'NOT ENOUGH DUPLICATES':!enoughGold?'NOT ENOUGH GOLD':'UPGRADE';
+ const shardId=shardIdFor(id),shards=c.inventory[shardId]??0,shardName=shardId==='modShard'?'MOD SHARD':'CORE SHARD';
+ const needLabel=!enoughItems?'NOT ENOUGH DUPLICATES / SHARDS':!enoughGold?'NOT ENOUGH GOLD':'UPGRADE';
  modal.innerHTML=`<button class="rpg-modal-close" aria-label="Close">×</button>
  <div class="equipment-detail-card skill-core-upgrade skill-upgrade-card core-rarity-${rarity}">
   <div class="craft-success-heading">UPGRADE ${title}</div>
@@ -200,10 +244,15 @@ function showSkillUpgrade(id,kind=skillUpgradeKind(id),context={},feedback=''){
     ${quote?`<div class="skill-upgrade-target"><strong>${quote.current.toUpperCase()} → ${quote.next.toUpperCase()}</strong><span>SUCCESS ${Math.round(quote.successRate*100)}%</span></div>
      <div class="skill-upgrade-costs">
       <div class="skill-upgrade-cost ${enoughItems?'enough':'short'}"><span>${iconHtml(id,kind==='modifier'?'item':'skill','✦')} DUPLICATE ${title}</span><strong>${available} / ${required}</strong><small>Owned: ${owned} · Reserved: ${held} (installed copies not counted)</small></div>
+      ${quote.shardsNeeded>0?`<div class="skill-upgrade-cost ${enoughItems?'enough':'short'}"><span>${shardName} (2 per missing duplicate)</span><strong>${quote.shardsOwned} / ${quote.shardsNeeded}</strong></div>`:''}
       <div class="skill-upgrade-cost ${enoughGold?'enough':'short'}"><span>GOLD</span><strong>${c.gold.toLocaleString()} / ${quote.gold.toLocaleString()}</strong></div>
      </div><button class="craft-button" data-upgrade-item ${canUpgrade?'':'disabled'}>${canUpgrade?'UPGRADE · '+quote.gold.toLocaleString()+' G':needLabel}</button>
-     <p class="bw-note">On failure, Gold and duplicates are consumed; the equipped item and its rarity remain unchanged.</p>`
+     <p class="bw-note">On failure, Gold, duplicates and shards are consumed; the equipped item and its rarity remain unchanged.</p>`
      :'<p class="skill-upgrade-max">MAX RARITY — no further upgrades</p>'}
+    <div class="skill-shard-box"><strong>${iconHtml(shardId,'item','◆')} ${shardName}S: ${shards}</strong>
+     <button class="bw-btn" data-salvage-item ${available>0?'':'disabled'}>SALVAGE 1 SPARE → +1 SHARD</button>
+     <button class="bw-btn" data-exchange-item ${shards>=SHARD_EXCHANGE_COST?'':'disabled'}>EXCHANGE ${SHARD_EXCHANGE_COST} SHARDS → +1 COPY</button>
+    </div>
     ${change}
    </div>
   </div>
@@ -215,33 +264,37 @@ function showSkillUpgrade(id,kind=skillUpgradeKind(id),context={},feedback=''){
   const updated=coreRarity(id),result=updated===rarity?'UPGRADE FAILED — resources consumed':'UPGRADE SUCCESS — '+updated.toUpperCase();
   showSkillUpgrade(id,kind,context,result);renderSkillsHub();syncHotbar();
  }catch(e){showUiError(String(e?.message||e));showSkillUpgrade(id,kind,context);}});
+ const shardAction=(command,msg)=>{try{sim.skillCoreCommand(command);saveCharacter?.(sim.character);showSkillUpgrade(id,kind,context,msg);renderSkillsHub();}catch(e){showUiError(String(e?.message||e));}};
+ modal.querySelector('[data-salvage-item]')?.addEventListener('click',()=>shardAction({type:'salvageSkillItem',itemId:id},'SALVAGED — +1 '+shardName));
+ modal.querySelector('[data-exchange-item]')?.addEventListener('click',()=>shardAction({type:'exchangeShards',itemId:id},'EXCHANGED — +1 COPY'));
  modal.querySelector('[data-change-mod]')?.addEventListener('click',()=>showSkillModPicker(context.coreId,context.modSlot));
  modal.querySelector('[data-change-movement]')?.addEventListener('click',showMovementCorePicker);
+ modal.querySelector('[data-change-core]')?.addEventListener('click',()=>showSkillCorePicker(sim.character.skills.active.indexOf(id)));
 }
 export function showSkillCoreUpgrade(coreId){return showSkillUpgrade(coreId,'core');}
 export function renderSkillsWindow(target){
  const s=sim.character.skills;
  target.innerHTML=`<div class="skill-core-shell"><div class="skill-core-head"><strong>SKILL CORE LOADOUT</strong><span>3 CORE · 2 MOD EACH</span></div>
   <div class="skill-core-list">${[0,1,2].map(i=>{
-   const core=s.active[i],mods=core?(s.modifiersByActive[core]||[]).slice(0,2):[];
+   const core=s.active[i],mods=modsForSlot(sim.character,i).slice(0,2);
    return `<section class="skill-core-card">
     <button class="skill-core-main ${!core?'empty':'core-rarity-'+coreRarity(core)}" data-core-slot="${i}">
       <div class="skill-core-icon">${core?iconHtml(core,'skill','✦'):'＋'}</div>
       <div><small>CORE ${i+1}</small><strong>${skillLabel(core)}</strong>${core?`<em>DMG +${coreDamageBonus(core)}% · UPGRADE</em>`:''}</div>
     </button>
     <div class="skill-core-arrow">➜</div>
-    <div class="skill-mods">${[0,1].map(j=>`<button class="skill-mod ${!mods[j]?'empty':'core-rarity-'+coreRarity(mods[j])}" data-mod-slot="${j}" data-mod-core="${core||''}" ${!core?'disabled':''}>
-      <span>${iconHtml(mods[j],'item','◆')}</span><div><small>MOD ${j+1}</small><b>${skillLabel(mods[j])}</b>${mods[j]?`<em>Effect +${coreDamageBonus(mods[j])}% · UPGRADE</em>`:''}</div></button>`).join('')}</div>
+    <div class="skill-mods">${[0,1].map(j=>`<button class="skill-mod ${!mods[j]?'empty':'core-rarity-'+coreRarity(mods[j])} ${mods[j]&&!modAppliesTo(mods[j],core)?'mod-inactive':''}" title="${mods[j]&&!modAppliesTo(mods[j],core)?'No effect on this core':''}" data-mod-slot="${j}" data-mod-core="${core||''}" ${!core?'disabled':''}>
+      <span>${iconHtml(mods[j],'item','◆')}</span><div><small>MOD ${j+1}</small><b>${skillLabel(mods[j])}</b>${mods[j]?(modAppliesTo(mods[j],core)?`<em>Effect +${coreDamageBonus(mods[j])}% · UPGRADE</em>`:`<em class="mod-warn">${core?'NO EFFECT ON THIS CORE':'PARKED · INSTALL A CORE'}</em>`):''}</div></button>`).join('')}</div>
     ${core?`<div class="skill-core-inline-detail">${skillDetailHtml(core)}</div>`:''}
    </section>`;
   }).join('')}</div>
-  <div class="movement-slot-wrap"><small>MOVEMENT</small>
-   <button class="movement-skill-tile ${!s.movement?'empty':'core-rarity-'+coreRarity(s.movement)}" data-movement-slot>
-    <span>${s.movement?iconHtml(s.movement,'skill','➤'):'＋'}</span>
-    <b>${skillLabel(s.movement)}</b>
-    <small>${s.movement?`TRAVEL ${(SKILLS_V2[s.movement]?.movementDistance??0)+movementSkillDistanceBonus(sim.character,s.movement)} · UPGRADE`:'INSTALL MOVEMENT CORE'}</small>
+  <section class="skill-core-card movement-core-card">
+   <button class="skill-core-main ${!s.movement?'empty':'core-rarity-'+coreRarity(s.movement)}" data-movement-slot>
+    <div class="skill-core-icon">${s.movement?iconHtml(s.movement,'skill','➤'):'＋'}</div>
+    <div><small>MOVEMENT</small><strong>${s.movement?skillLabel(s.movement):'Empty'}</strong><em>${s.movement?`TRAVEL ${(SKILLS_V2[s.movement]?.movementDistance??0)+movementSkillDistanceBonus(sim.character,s.movement)} · UPGRADE`:'INSTALL MOVEMENT CORE'}</em></div>
    </button>
-  </div></div>`;
+  </section>
+</div>`;
  target.querySelectorAll('[data-core-slot]').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.coreSlot),core=sim.character.skills.active[i];core?showSkillCoreUpgrade(core):showSkillCorePicker(i);});
  target.querySelectorAll('[data-mod-slot]').forEach(b=>b.onclick=()=>{
   const id=b.dataset.modCore,slot=Number(b.dataset.modSlot),mod=sim.character.skills.modifiersByActive?.[id]?.[slot];

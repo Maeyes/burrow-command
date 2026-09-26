@@ -7,7 +7,9 @@ import { sceneFromMap } from './scenes/custom.js';
 import valleyScene from './scenes/valley.js';
 import { chooseRosterId, getRoster, monsterPresentation } from './combat/rosters.js';
 import { renderMonsterIndex } from './combat/monsterIndex.js';
-import { createFloaters, lootTierForChance } from './combat/floaters.js';
+import { createFloaters, lootTierForChance, LOOT_COLORS } from './combat/floaters.js';
+import { createSkillFx, FX_SPECS, BASIC_ATTACK_FX } from './combat/skillfx.js';
+import { openCharacterWindow } from './ui/status.js';
 import { MONSTERS_V2 } from '../../src/simulation/monsterDataV2.ts';
 import { UNIVERSAL_ORE_CHANCE, UNIVERSAL_ASTRALITE_CHANCE } from '../../src/simulation/loot.ts';
 import { mapTitleV2 } from '../../src/simulation/mapNames.ts';
@@ -34,7 +36,7 @@ import { WEAPON_PROC_RULES_V2 } from '../../src/simulation/engine.ts';
 import { nextAutoSkillCommand } from '../../src/simulation/auto.ts';
 import { beginHeroAttack, cancelHeroAttack, createHeroAttackPlayback, updateHeroAttackPlayback } from '../iso-arena-draft/heroCombat.js';
 import { prettyItem, showUiError } from './ui/shared.js';
-import { syncHotbar, syncHotbarCooldowns, pulseHotbarSkill } from './ui/skills.js';
+import { syncHotbar, syncHotbarCooldowns, pulseHotbarSkill, MASTERY_NAMES } from './ui/skills.js';
 import { bindProductionUi } from './ui/windows.js';
 import { bindUiRuntime } from './ui/runtime.js';
 
@@ -155,7 +157,18 @@ function buildMainGround(){
 const onMainGround=p=>{if(!mainGround)return true;const i=Math.floor(p.x/GROUND_CELL),j=Math.floor(p.y/GROUND_CELL);return i>=0&&j>=0&&i<GROUND_N&&j<GROUND_N&&mainGround[j*GROUND_N+i]===1;};
 const canEngage=(a,b)=>{const za=runtimeWalkHeight(a.x,a.y),zb=runtimeWalkHeight(b.x,b.y);return za===null||zb===null||Math.abs(za-zb)<=SAME_LEVEL_Z;};
 // Random spot on the main ground, outside safe zones and away from the hero.
-function randomFieldPoint(hero,tries=60,taken=null,minGap=0){
+// Respawns land in a ring around the hero (out of sight, still close) so a hunting spot keeps its
+// density; only when the ring has no valid ground does it fall back to anywhere on the map.
+const RESPAWN_RING_MIN=340,RESPAWN_RING_MAX=760;
+function randomFieldPoint(hero,tries=60,taken=null,minGap=0,ring=false){
+  for(let i=0;ring&&hero&&i<tries;i++){
+    const a=Math.random()*Math.PI*2,r=RESPAWN_RING_MIN+Math.random()*(RESPAWN_RING_MAX-RESPAWN_RING_MIN);
+    const p={x:hero.x+Math.cos(a)*r,y:hero.y+Math.sin(a)*r};
+    if(p.x<48||p.y<48||p.x>MAP_PX-48||p.y>MAP_PX-48)continue;
+    if(!standable(p.x,p.y)||!onMainGround(p)||inSafeZone(p,60))continue;
+    if(taken&&taken.some(q=>Math.hypot(p.x-q.x,p.y-q.y)<minGap))continue;
+    return p;
+  }
   for(let i=0;i<tries;i++){
     const p={x:48+Math.random()*(MAP_PX-96),y:48+Math.random()*(MAP_PX-96)};
     if(!standable(p.x,p.y)||!onMainGround(p)||inSafeZone(p,60))continue;
@@ -170,7 +183,7 @@ const monsterViews=spots.map(([tx,ty,monsterType],i)=>{
   return{id:`${gameplayMapId}-m${i}`,monsterType,x:tx*64,y:ty*64,hp:1,maxHp:1,dead:false,elite:!!p?.elite,isBoss:!!p?.isBoss};
 });
 const playerView={x:scene.spawn.x,y:scene.spawn.y};
-const sim=new ArenaV2Adapter({zoneId:gameplayMapId,player:playerView,monsters:monsterViews,character:persistentCharacter,walkableContains:({x,y})=>{const z=runtimeWalkHeight(x,y);return z!==null&&canRuntimeActorStand(x,y,z);},safeZoneContains:p=>inSafeZone(p),monsterForbiddenContains:p=>inSafeZone(p,20)||!onMainGround(p),canEngage:(a,b)=>canEngage(a,b),respawnPointPicker:hero=>randomFieldPoint(hero),onReward:(reward,character,defeated)=>{persistentCharacter={...character,currentMapId:gameplayMapId};saveCharacter(persistentCharacter);combatSFX.playPickup();presentReward(reward,defeated);}});
+const sim=new ArenaV2Adapter({zoneId:gameplayMapId,player:playerView,monsters:monsterViews,character:persistentCharacter,walkableContains:({x,y})=>{const z=runtimeWalkHeight(x,y);return z!==null&&canRuntimeActorStand(x,y,z);},safeZoneContains:p=>inSafeZone(p),monsterForbiddenContains:p=>inSafeZone(p,20)||!onMainGround(p),canEngage:(a,b)=>canEngage(a,b),respawnPointPicker:hero=>randomFieldPoint(hero,60,null,0,true),onReward:(reward,character,defeated)=>{persistentCharacter={...character,currentMapId:gameplayMapId};saveCharacter(persistentCharacter);combatSFX.playPickup();presentReward(reward,defeated);}});
 bindUiRuntime({sim,saveCharacter,SAVE_KEY,gameplayMapId,pushRewardLine});
 const actors=monsterViews.map((view,i)=>{
   const p=presentations.get(view.monsterType);
@@ -267,6 +280,8 @@ setRuntimeActorUpdater(({dt,player})=>{
             // Every hand's strike gets its own hit sound/spark; follow-up hits (off-hand, double
             // attack) land 110ms apart so two-dagger swings read as two blows.
             const actor=actors.find(a=>a.view.id===target.id);
+            // Basic swing overlay (slash arc / arrow / bolt) for the equipped weapon family.
+            if(result?.accepted&&skillFx){const fam=authoritative.weaponFamily,fx=BASIC_ATTACK_FX[fam];if(fx)skillFx.play(fx,{from:{...authoritative.position},to:{...monster.position}});}
             result?.events?.filter(event=>event.type==='damageDealt'&&event.targetId===target.id&&event.sourceId===sim.playerId).forEach((event,k)=>setTimeout(()=>{combatSFX.playHit({critical:event.critical});combatFX.playHitSpark(target.x,target.y,{visualScale:actor?.visualScale??1});},k*110));
             presentCombatEvents(result?.events);
           }
@@ -287,36 +302,59 @@ setRuntimeActorUpdater(({dt,player})=>{
     if(a.attack&&!a.attack.clip&&!a.attack.fxDone&&k>TACKLE_DISTANCE*a.visualScale*.8){a.attack.fxDone=true;combatFX.playTackle(a.x,a.y,{visualScale:a.visualScale});}
   }
   setRuntimeActors([...actors,...combatFX.getRuntimeActors()]);
-  floaters?.update(dt);floaters?.draw();
+  // Barrier bubble stays on the hero while the shield has HP left.
+  {const bp=sim.simulation.world.players.get(sim.playerId);const on=bp&&(bp.barrierHp??0)>0&&(bp.barrierUntilMs??0)>sim.simulation.clock.nowMs;if(on&&skillFx&&(!barrierFx||barrierFx.age>=barrierFx.life-.05)){barrierFx=skillFx.play('barrier',{follow:()=>sim.simulation.world.players.get(sim.playerId)?.position});}if(!on&&barrierFx){skillFx.stop(barrierFx);barrierFx=null;}}
+  skillFx?.update(dt);skillFx?.draw();floaters?.update(dt);floaters?.draw();
   syncHud();syncDeathOverlay();
 });
 
 let deathUntil=0;
 function announceBoss(view){const log=document.getElementById('chat-log');if(!log)return;const p=document.createElement('p');p.className='system';p.textContent=`[World] ${presentations.get(view.monsterType)?.name??'A boss'} has appeared in ${mapTitleV2(gameplayMapId)}!`;log.append(p);log.scrollTop=log.scrollHeight;}
-function pushRewardLine(text){const feed=document.getElementById('reward-feed');if(!feed)return;const line=document.createElement('div');line.textContent=text;feed.prepend(line);setTimeout(()=>line.remove(),5000);while(feed.children.length>6)feed.lastElementChild?.remove();}
+function pushRewardLine(text,color){const feed=document.getElementById('reward-feed');if(!feed)return;const line=document.createElement('div');line.textContent=text;if(color)line.style.color=color;feed.prepend(line);setTimeout(()=>line.remove(),5000);while(feed.children.length>6)feed.lastElementChild?.remove();}
 function appendWorldChat(text,{system=false}={}){const log=document.getElementById('chat-log');if(!log)return;const line=document.createElement('p');line.textContent=text;if(system)line.className='system';log.appendChild(line);while(log.children.length>40)log.firstElementChild?.remove();log.scrollTop=log.scrollHeight;}
 // Loot and reward feed, as in the arena prototype: sparkles coloured by drop rarity + reward lines.
-let floaters=null;
+let floaters=null,skillFx=null,barrierFx=null;
 function lootChance(loot,id){if(!loot)return 1;if(id===loot.oreItemId)return UNIVERSAL_ORE_CHANCE;if(id==='astraliteStone')return UNIVERSAL_ASTRALITE_CHANCE;for(const r of [loot.material,loot.aetherstone,loot.modifier,loot.core,loot.blueprint,...(loot.equipmentDrops??[])])if(r?.itemId===id)return r.chance;return 1;}
 function presentReward(reward,defeated){
   const items=Object.entries(reward.loot?.items??{}).filter(([,q])=>q>0),loot=MONSTERS_V2[defeated?.monsterType]?.loot;
   if(defeated&&items.length)floaters?.loot(defeated.x,defeated.y,items.map(([id,q])=>({label:`${prettyItem(id)}${q>1?' ×'+q:''}`,tier:lootTierForChance(lootChance(loot,id))})));
-  for(const [id,q] of items)pushRewardLine(`ได้รับ ${prettyItem(id)} ${q} ea`);
-  if(reward.exp>0)pushRewardLine(`ได้รับ ${reward.exp} EXP`);
-  if(reward.loot?.gold>0)pushRewardLine(`ได้รับ ${reward.loot.gold} Gold`);
+  // Same rarity colour as the loot text that popped over the monster.
+  for(const [id,q] of items)pushRewardLine(`ได้รับ ${prettyItem(id)} ${q} ea`,LOOT_COLORS[lootTierForChance(lootChance(loot,id))]);
+  if(reward.exp>0)pushRewardLine(`ได้รับ ${reward.exp} EXP`,'#b8f28a');
+  if(reward.masteryXp>0)pushRewardLine(`ได้รับ ${reward.masteryXp} ${MASTERY_NAMES[reward.masteryFamily]??''} Mastery XP`,'#9fe8ff');
+  if(reward.loot?.gold>0)pushRewardLine(`ได้รับ ${reward.loot.gold} Gold`,LOOT_COLORS.gold);
 }
 // World FX belong to the scene layer, never to document.body above game windows.
 const worldFxRoot=document.getElementById('wrap');
 const skillFxLayer=document.createElement('div');skillFxLayer.className='skill-fx-layer';worldFxRoot.appendChild(skillFxLayer);
-const barrierAura=document.createElement('div');barrierAura.id='barrier-aura';barrierAura.hidden=true;barrierAura.innerHTML='<i></i><i></i>';worldFxRoot.appendChild(barrierAura);
-function pulseBarrierAura(){barrierAura.classList.remove('hit');void barrierAura.offsetWidth;barrierAura.classList.add('hit');}
-function showSkillCastFx(skillId,targetId){
-  const skill=SKILLS_V2[skillId];if(!skill)return;
-  const player=sim.simulation.world.players.get(sim.playerId),target=targetId?sim.simulation.world.monsters.get(targetId):null;
-  const pos=(skill.targeting==='target'||skill.targeting==='targetArea'||skill.targeting==='groundArea')&&target?target.position:player?.position;
-  const canvasEl=document.getElementById('scene');if(!pos||!canvasEl)return;
-  const p=projectRuntimePoint(pos.x,pos.y,runtimeWalkHeight(pos.x,pos.y)??0),rect=canvasEl.getBoundingClientRect(),x=rect.left+p.x*rect.width/canvasEl.width,y=rect.top+p.y*rect.height/canvasEl.height;
-  const fx=document.createElement('div');fx.className=`skill-cast-fx ${skill.element||'neutral'} ${skill.kind==='weapon'?'mastery':''} ${skillId==='barrier'?'barrier':''}`;fx.style.left=x+'px';fx.style.top=y+'px';skillFxLayer.appendChild(fx);setTimeout(()=>fx.remove(),650);
+// Skill FX: every core and weapon-mastery skill plays its PixelLab sheet (combat/skillfx.js);
+// area skills also get a ground ring for their radius.
+function showSkillCastFx(skillId,targetId,ground){
+  const skill=SKILLS_V2[skillId];if(!skill||!skillFx)return;
+  const player=sim.simulation.world.players.get(sim.playerId);if(!player)return;
+  const target=targetId?sim.simulation.world.monsters.get(targetId):null,self={...player.position};
+  const to=target?{...target.position}:ground?{...ground}:self;
+  if(FX_SPECS[skillId]){
+    const spec=FX_SPECS[skillId],attach=spec.kind==='attach';
+    skillFx.play(skillId,{from:self,to,radius:skill.radius??0,follow:attach?()=>sim.simulation.world.players.get(sim.playerId)?.position:null});
+    // Chain skills also strike the other monsters they hit.
+    if(skillId==='thunderStorm'||skillId==='arcCascade'){for(const m of sim.simulation.world.monsters.values())if(m.alive&&m!==target&&Math.hypot(m.position.x-to.x,m.position.y-to.y)<(skill.radius??0))skillFx.play(skillId,{from:self,to:{...m.position}});}
+  }
+  if(skill.radius&&(skill.targeting==='targetArea'||skill.targeting==='groundArea'))skillFx.ring(to.x,to.y,skill.radius,skill.element==='fire'?'#ff9b62':skill.element==='lightning'?'#9fd2ff':skill.element==='cold'?'#bff3ff':'#ffd27a');
+}
+// Dash/Blink: white bunny afterimages with a pink aura along the path.
+function playDashTrail(skillId,from,to){
+  if(!skillFx)return;
+  if(skillId==='blink'){
+    // Teleport, not a run: a puff at the start, a dotted arcane streak, then a bigger burst on arrival.
+    skillFx.play('blink',{from});
+    skillFx.burst(from.x,from.y,{color:'#b99cff',color2:'#e9e0ff',count:16,speed:55,up:18,life:.3,h:10,gravity:0});
+    const dots=8;for(let k=1;k<dots;k++)setTimeout(()=>{const t=k/dots;skillFx.burst(from.x+(to.x-from.x)*t,from.y+(to.y-from.y)*t,{color:'#9fd2ff',color2:'#ffffff',count:3,speed:18,up:14,life:.35,h:10,gravity:0});},k*14);
+    setTimeout(()=>{skillFx.play('blink',{from:to});skillFx.burst(to.x,to.y,{color:'#b99cff',color2:'#9fd2ff',count:22,speed:95,up:26,life:.45,h:10,gravity:60});},110);
+    return;
+  }
+  skillFx.burst(from.x,from.y,{color:'#d9c7a8',color2:'#fff0f8',count:12,speed:60,up:30,life:.45,h:4,gravity:120});
+  const steps=6;for(let k=0;k<steps;k++)setTimeout(()=>{const t=(k+1)/(steps+1),v=playerVisualNow();if(v)skillFx.ghost(v,from.x+(to.x-from.x)*t,from.y+(to.y-from.y)*t,{scale:v.scale??1,life:.28+k*.03});},k*18);
 }
 function skillRejectMessage(reason){
   return reason==='insufficient-sp'?'Not enough SP':reason==='skill-cooldown'?'Skill is on cooldown':reason==='out-of-range'?'Target is out of range':reason==='invalid-target'||reason==='ground-target-required'||reason==='no-targets'?'Select a valid target':reason==='incompatible-weapon'?'Wrong weapon for this Skill Core':reason||'Skill failed';
@@ -349,20 +387,27 @@ function tryAutoCoreSkill(simPlayer){
 
 function presentDamageText(event,stack=0){
   if(!floaters)return;
-  if(event.type==='healed'&&event.targetId===sim.playerId){const p=sim.simulation.world.players.get(sim.playerId)?.position;if(p)floaters.text(p.x,p.y,`+${event.amount}`,{color:'#70f59a',dx:30});return;}
+  if(event.type==='healed'&&event.targetId===sim.playerId){const p=sim.simulation.world.players.get(sim.playerId)?.position;if(p)floaters.text(p.x,p.y,`+${Math.round(event.amount)}`,{color:'#70f59a',dx:30});return;}
   if(event.type==='barrierApplied'&&event.entityId===sim.playerId){const p=sim.simulation.world.players.get(sim.playerId)?.position;if(p)floaters.text(p.x,p.y,`BARRIER +${event.amount}`,{color:'#f7fbff',size:15,lift:44});return;}
   if(event.type==='barrierAbsorbed'&&event.entityId===sim.playerId){const p=sim.simulation.world.players.get(sim.playerId)?.position;if(p)floaters.text(p.x,p.y,`-${event.amount}`,{color:'#ffffff',size:15,lift:34});return;}
   if(event.type!=='damageDealt')return;
   if(event.targetId===sim.playerId){if(event.amount<=0)return;const p=sim.simulation.world.players.get(sim.playerId)?.position;if(p)floaters.text(p.x,p.y,`-${event.amount}`,{color:'#ff6b5e',size:event.critical?17:14});return;}
   if(event.sourceId!==sim.playerId)return;
   const v=monsterViews.find(m=>m.id===event.targetId);if(!v)return;
-  const origin=event.effect?.origin,ability=event.effect?.ability,proc=origin==='MASTERY_PROC';
-  const label=proc?(ability==='multiShot'?'ADDITIONAL HIT!':ability==='cleave'?'CLEAVE!':String(ability||'').startsWith('doubleAttack')?'DOUBLE ATTACK!':SKILLS_V2[ability]?.name?`${SKILLS_V2[ability].name.toUpperCase()}!`:'MASTERY!'):'';
+  const origin=event.effect?.origin,ability=event.effect?.ability,echo=origin==='ECHO',proc=origin==='MASTERY_PROC'||echo;
+  const label=echo?(ability==='extraStrike'?'EXTRA STRIKE!':ability==='coreEcho'?'RESONANCE!':'ECHO!'):proc?(ability==='multiShot'?'ADDITIONAL HIT!':ability==='cleave'?'CLEAVE!':String(ability||'').startsWith('doubleAttack')?'DOUBLE ATTACK!':SKILLS_V2[ability]?.name?`${SKILLS_V2[ability].name.toUpperCase()}!`:'MASTERY!'):'';
   const text=event.critical?`${label||'CRITICAL!'} ★  ${event.amount}`:label?`${label}  ${event.amount}`:`${event.amount}`;
-  const show=()=>floaters.text(v.x,v.y,text,{color:event.critical?'#ffe36f':ability==='multiShot'?'#a98cff':proc?'#9fe8ff':'#ffffff',size:event.critical?19:proc?16:15,lift:(proc?46:event.critical?38:26)+stack*20});
+  const show=()=>floaters.text(v.x,v.y,text,{color:event.critical?'#ffe36f':echo?(ability==='extraStrike'?'#ffb35c':'#e59bff'):ability==='multiShot'?'#a98cff':proc?'#9fe8ff':'#ffffff',size:event.critical?19:proc?16:15,lift:(proc?46:event.critical?38:26)+stack*20});
   if(stack)setTimeout(show,stack*110);else show();
 }
-function presentCombatEvents(events){const hitsOn={};for(const event of events||[]){let stack=0;if(event.type==='damageDealt'&&event.sourceId===sim.playerId){stack=hitsOn[event.targetId]??0;hitsOn[event.targetId]=stack+1;}presentDamageText(event,stack);if(event.type==='barrierApplied'&&event.entityId===sim.playerId)pulseBarrierAura();if(event.type==='barrierAbsorbed'&&event.entityId===sim.playerId)pulseBarrierAura();if(event.type==='skillCast'&&event.sourceId===sim.playerId){combatSFX.playSkillCast(event.skillId);pulseHotbarSkill(event.skillId);showSkillCastFx(event.skillId,event.targetId);}if(event.type==='attackStarted'&&event.sourceId!==sim.playerId){const actor=actors.find(a=>a.view.id===event.sourceId),target=event.targetId===sim.playerId?sim.simulation.world.players.get(sim.playerId)?.position:null;if(actor&&target)beginMonsterAttack(actor,target);}if(event.type==='damageDealt'&&event.targetId===sim.playerId&&event.amount>0)blessedHero.hurt();if(event.type==='entityDefeated'&&event.entityId===sim.playerId){blessedHero.die();deathUntil=performance.now()+10000;const o=document.getElementById('death-overlay');if(o)o.hidden=false;combatSFX.playDeath();cancelCombat();}if(event.type==='entityRespawned'&&event.entityId!==sim.playerId){const v=monsterViews.find(x=>x.id===event.entityId);if(v?.isBoss)announceBoss(v);}if(event.type==='entityRespawned'&&event.entityId===sim.playerId){blessedHero.respawn();deathUntil=0;const o=document.getElementById('death-overlay');if(o)o.hidden=true;}if(event.type==='entityDefeated'&&event.entityId!==sim.playerId){combatSFX.playDeath({volume:0.5});const target=monsterViews.find(v=>v.id===event.entityId),actor=actors.find(a=>a.view.id===event.entityId);if(target){const fxOptions={visualScale:actor?.visualScale??1};target.isBoss?combatFX.playBossDeath(target.x,target.y,fxOptions):combatFX.playNormalDeath(target.x,target.y,fxOptions);}pushRewardLine('Monster defeated');}}}
+// Code FX for combat events: crit stars on monsters, BLOCK flash on the hero, respawn burst.
+function presentEventFx(event){
+  if(!skillFx)return;
+  if(event.type==='damageDealt'&&event.sourceId===sim.playerId&&event.critical){const m=sim.simulation.world.monsters.get(event.targetId);if(m)skillFx.burst(m.position.x,m.position.y,{color:'#ffe36f',color2:'#fff8d8',count:12,speed:120,up:70,life:.45,size:3,h:24});}
+  if(event.type==='damageDealt'&&event.targetId===sim.playerId&&event.blocked){const p=sim.simulation.world.players.get(sim.playerId)?.position;if(p){skillFx.burst(p.x,p.y,{color:'#cfe6ff',color2:'#ffffff',count:10,speed:90,up:40,life:.35,h:22});floaters?.text(p.x,p.y,'BLOCK',{color:'#9fd2ff',size:14,lift:44,dx:-26});}}
+  if(event.type==='entityRespawned'&&event.entityId===sim.playerId){const p=event.position;skillFx.pillar(p.x,p.y,{color:'#ffd6ec'});skillFx.burst(p.x,p.y,{color:'#ffffff',color2:'#ff9fcf',count:24,speed:110,up:90,life:.8});}
+}
+function presentCombatEvents(events){const hitsOn={};for(const event of events||[]){let stack=0;presentEventFx(event);if(event.type==='damageDealt'&&event.sourceId===sim.playerId){stack=hitsOn[event.targetId]??0;hitsOn[event.targetId]=stack+1;}presentDamageText(event,stack);if(event.type==='skillCast'&&event.sourceId===sim.playerId){combatSFX.playSkillCast(event.skillId);pulseHotbarSkill(event.skillId);showSkillCastFx(event.skillId,event.targetId);}if(event.type==='attackStarted'&&event.sourceId!==sim.playerId){const actor=actors.find(a=>a.view.id===event.sourceId),target=event.targetId===sim.playerId?sim.simulation.world.players.get(sim.playerId)?.position:null;if(actor&&target)beginMonsterAttack(actor,target);}if(event.type==='damageDealt'&&event.targetId===sim.playerId&&event.amount>0)blessedHero.hurt();if(event.type==='entityDefeated'&&event.entityId===sim.playerId){blessedHero.die();deathUntil=performance.now()+10000;const o=document.getElementById('death-overlay');if(o)o.hidden=false;combatSFX.playDeath();cancelCombat();}if(event.type==='entityRespawned'&&event.entityId!==sim.playerId){const v=monsterViews.find(x=>x.id===event.entityId);if(v?.isBoss)announceBoss(v);}if(event.type==='entityRespawned'&&event.entityId===sim.playerId){blessedHero.respawn();deathUntil=0;const o=document.getElementById('death-overlay');if(o)o.hidden=true;}if(event.type==='entityDefeated'&&event.entityId!==sim.playerId){combatSFX.playDeath({volume:0.5});const target=monsterViews.find(v=>v.id===event.entityId),actor=actors.find(a=>a.view.id===event.entityId);if(target){const fxOptions={visualScale:actor?.visualScale??1};target.isBoss?combatFX.playBossDeath(target.x,target.y,fxOptions):combatFX.playNormalDeath(target.x,target.y,fxOptions);}pushRewardLine('Monster defeated');}}}
 function syncDeathOverlay(){const o=document.getElementById('death-overlay'),v=document.getElementById('death-seconds'),ring=document.querySelector('.death-countdown .progress');if(!o||!v)return;if(!deathUntil){o.hidden=true;return;}const remain=Math.max(0,deathUntil-performance.now()),left=Math.ceil(remain/1000);v.textContent=String(left);if(ring)ring.style.strokeDashoffset=String(264*(1-remain/10000));if(remain<=0){deathUntil=0;o.hidden=true;}}
 function bindChat(){const input=document.getElementById('chat-input');if(!input)return;window.addEventListener('keydown',e=>{if(e.code!=='Enter')return;if(document.activeElement===input){e.preventDefault();e.stopImmediatePropagation();const msg=input.value.trim();if(msg){appendWorldChat(`Bunny: ${msg}`);input.value='';}input.blur();return;}if(e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement)return;e.preventDefault();e.stopImmediatePropagation();input.focus();},true);}
 bindChat();
@@ -371,7 +416,10 @@ bindChat();
 const weaponGauge=document.createElement('div');weaponGauge.id='weapon-gauge';weaponGauge.hidden=true;
 weaponGauge.style.cssText='position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;width:180px;height:8px;border-radius:4px;background:rgba(10,14,18,.8);border:1px solid #d9bd72;overflow:hidden;pointer-events:none';
 weaponGauge.innerHTML='<i style="display:block;height:100%;width:0;background:linear-gradient(90deg,#d9a441,#ffe08a)"></i>';document.body.appendChild(weaponGauge);
-function syncWeaponGauge(p){const ult=p?.skillEntitlements?.weaponSkills?.[2];weaponGauge.hidden=!ult;if(!ult)return;const g=p.weaponProc?.gauge??0;weaponGauge.title=`${SKILLS_V2[ult]?.name||ult}: ${g}/${WEAPON_PROC_RULES_V2.gaugeHits}`;weaponGauge.firstChild.style.width=`${100*g/WEAPON_PROC_RULES_V2.gaugeHits}%`;}
+function syncWeaponGauge(p){const ult=p?.skillEntitlements?.weaponSkills?.[2];
+  // The gauge is fixed above the HUD; hide it while any game window or modal is open so it never shows through.
+  const windowOpen=[...document.querySelectorAll('#game-window,#equipment-detail-modal,.equipment-panel')].some(el=>!el.hidden&&el.offsetParent!==null);
+  weaponGauge.hidden=!ult||windowOpen;if(weaponGauge.hidden)return;const g=p.weaponProc?.gauge??0;weaponGauge.title=`${SKILLS_V2[ult]?.name||ult}: ${g}/${WEAPON_PROC_RULES_V2.gaugeHits}`;weaponGauge.firstChild.style.width=`${100*g/WEAPON_PROC_RULES_V2.gaugeHits}%`;}
 function syncBarrierUi(p){
   const hpBar=document.querySelector('.player-hud .bar.hp');
   if(hpBar&&!hpBar.querySelector('.barrier-fill')){const fill=document.createElement('span');fill.className='barrier-fill';hpBar.appendChild(fill);}
@@ -379,11 +427,6 @@ function syncBarrierUi(p){
   const fill=hpBar?.querySelector('.barrier-fill');
   if(hpBar)hpBar.classList.toggle('barrier-active',active);
   if(fill)fill.style.width=active?`${100*(p.barrierHp??0)/Math.max(1,p.barrierMaxHp??1)}%`:'0%';
-  barrierAura.hidden=!active;
-  if(active&&window.__slice?.player){
-    const hero=window.__slice.player,canvasEl=document.getElementById('scene');
-    if(canvasEl){const point=projectRuntimePoint(hero.x,hero.y,hero.z??0),rect=canvasEl.getBoundingClientRect();barrierAura.style.left=(rect.left+point.x*rect.width/canvasEl.width)+'px';barrierAura.style.top=(rect.top+point.y*rect.height/canvasEl.height-22)+'px';}
-  }
 }
 function syncHud(){
   const ui=document.getElementById('game-ui');if(ui)ui.hidden=false;
@@ -392,7 +435,7 @@ function syncHud(){
   const width=(sel,v)=>{const el=document.querySelector(sel);if(el)el.style.width=`${Math.max(0,Math.min(100,v))}%`;};
   syncWeaponGauge(p);syncBarrierUi(p);syncHotbarCooldowns();
   set('#hero-name',(c.name||'Bunny').toUpperCase());set('#hero-level',`Lv. ${c.level}`);
-  if(c.level>lastKnownLevel){combatSFX.playLevelUp();lastKnownLevel=c.level;}
+  if(c.level>lastKnownLevel){combatSFX.playLevelUp();lastKnownLevel=c.level;const lp=sim.simulation.world.players.get(sim.playerId)?.position;if(lp&&skillFx){skillFx.pillar(lp.x,lp.y);skillFx.burst(lp.x,lp.y,{color:'#ffe27a',color2:'#fff8d8',count:22,speed:70,up:120,life:.9});floaters?.text(lp.x,lp.y,'LEVEL UP!',{color:'#ffe27a',size:20,lift:62,life:1.8});}}
   width('.player-hud .bar.hp i',p?.maxHp?(p.hp/p.maxHp)*100:0);width('.player-hud .bar.sp i',p?.maxSp?((p.sp??0)/p.maxSp)*100:0);
   width('.player-hud .bar.exp i',(c.exp/Math.max(1,expToNextLevelV2(c.level)))*100);
   const target=document.getElementById('target-hud');
@@ -410,13 +453,32 @@ syncHotbar();
 const warpPrompt=document.createElement('div');warpPrompt.id='warp-prompt';warpPrompt.hidden=true;warpPrompt.style.cssText='position:fixed;left:50%;bottom:110px;transform:translateX(-50%);z-index:50;padding:8px 14px;background:rgba(10,14,18,.9);border:1px solid #d9bd72;border-radius:6px;color:#fff4cf;font:600 14px system-ui;pointer-events:none';document.body.appendChild(warpPrompt);
 let nearbyPortal=null,zoneTransferBusy=false;
 function syncWarpPrompt(player){nearbyPortal=activePortalAt(scene,player);warpPrompt.hidden=!nearbyPortal;if(nearbyPortal)warpPrompt.textContent=`Warp to ${mapTitleV2(nearbyPortal.to)} [E]`;}
-async function performWarp(){if(zoneTransferBusy||!nearbyPortal||!window.__slice)return;zoneTransferBusy=true;cancelCombat();const result=await requestZoneTransfer({fromMap:gameplayMapId,portalId:nearbyPortal.id,scene,player:window.__slice.player});if(result.denied){showUiError(result.reason);zoneTransferBusy=false;return;}combatSFX.playWarp();persistentCharacter={...sim.character,currentMapId:result.map};saveCharacter(persistentCharacter);combatFX.teardown();setRuntimeActors([]);setRuntimeActorUpdater(null);teardown();const url=new URL(location.href);url.searchParams.set('map','forest-combat');if(import.meta.env.DEV)url.searchParams.set('file',result.map);else url.searchParams.delete('file');sessionStorage.setItem('bunny-world-zone-spawn',JSON.stringify(result.spawn));location.replace(url);}
+async function performWarp(){if(zoneTransferBusy||!nearbyPortal||!window.__slice)return;zoneTransferBusy=true;cancelCombat();const result=await requestZoneTransfer({fromMap:gameplayMapId,portalId:nearbyPortal.id,scene,player:window.__slice.player});if(result.denied){showUiError(result.reason);zoneTransferBusy=false;return;}combatSFX.playWarp();{const wp=window.__slice?.player;if(wp&&skillFx){skillFx.pillar(wp.x,wp.y,{color:'#9fefff',count:34});skillFx.burst(wp.x,wp.y,{color:'#dffbff',color2:'#7fdcff',count:26,speed:90,up:140,life:.8});}}persistentCharacter={...sim.character,currentMapId:result.map};saveCharacter(persistentCharacter);combatFX.teardown();setRuntimeActors([]);setRuntimeActorUpdater(null);teardown();const url=new URL(location.href);url.searchParams.set('map','forest-combat');if(import.meta.env.DEV)url.searchParams.set('file',result.map);else url.searchParams.delete('file');sessionStorage.setItem('bunny-world-zone-spawn',JSON.stringify(result.spawn));location.replace(url);}
 window.addEventListener('keydown',e=>{if((e.code==='KeyE'||e.code==='Enter')&&nearbyPortal){e.preventDefault();performWarp();}});
 document.querySelectorAll('[data-hotbar-slot]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.skillId;if(id)executeCoreSkill(id);}));
 window.addEventListener('keydown',e=>{if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement)return;const slot={Digit1:0,Digit2:1,Digit3:2}[e.code];if(slot===undefined)return;const id=document.querySelector(`[data-hotbar-slot="${slot}"]`)?.dataset.skillId;if(id){e.preventDefault();executeCoreSkill(id);}});
-document.querySelector('[data-hotbar-movement]')?.addEventListener('click',()=>{const id=sim.character.skills.movement;if(!id)return;try{sim.castSkill(id,undefined,undefined,{x:1,y:0});}catch(e){showUiError(String(e?.message||e));}});
-
-
+// Movement core (Dash/Blink) on SPACE and the hotbar button, toward where the hero faces.
+// Facing names are screen directions; iso screen (sx,sy) maps to world (sy+sx/2, sy-sx/2).
+const FACING_SCREEN={east:[1,0],'south-east':[1,1],south:[0,1],'south-west':[-1,1],west:[-1,0],'north-west':[-1,-1],north:[0,-1],'north-east':[1,-1]};
+function castMovementSkill(){
+  // Installed movement core (Dash/Blink) if any, otherwise the built-in dodge roll.
+  const id=sim.character.skills.movement;
+  const [sx,sy]=FACING_SCREEN[facing]||[1,0],wx=sy+sx/2,wy=sy-sx/2,len=Math.hypot(wx,wy)||1,dir={x:wx/len,y:wy/len};
+  const start=sim.simulation.world.players.get(sim.playerId)?.position;const from=start&&{...start};
+  const result=id?sim.castSkill(id,undefined,undefined,dir):sim.dodge(dir);
+  if(!result?.accepted){if(result?.reason&&result.reason!=='dodge-cooldown')showUiError(skillRejectMessage(result.reason));return;}
+  presentCombatEvents(result.events);syncHud();
+  // The runtime hero is what the camera follows and what syncs back into the sim each frame, so it
+  // must jump too — otherwise the next step pulls the sim player back to where the dash started.
+  const to=sim.simulation.world.players.get(sim.playerId)?.position,rp=window.__slice?.player;
+  if(to&&rp){rp.x=to.x;rp.y=to.y;rp.moving=false;rp.target=null;playerView.x=to.x;playerView.y=to.y;nav.clear();}
+  if(from&&to)playDashTrail(id||'dash',from,{...to});
+}
+function playerVisualNow(){const p=sim.simulation.world.players.get(sim.playerId);return blessedHero.visual({direction:facing,moving:true,running:true,weaponFamily:p?.weaponFamily??'dagger'});}
+document.querySelector('[data-hotbar-movement]')?.addEventListener('click',castMovementSkill);
+window.addEventListener('keydown',e=>{if(e.code!=='Space'||e.repeat||e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement)return;e.preventDefault();castMovementSkill();});
+// C = character status.
+window.addEventListener('keydown',e=>{if(e.code!=='KeyC'||e.repeat||e.ctrlKey||e.metaKey||e.target instanceof HTMLInputElement||e.target instanceof HTMLTextAreaElement)return;e.preventDefault();openCharacterWindow();});
 // ---- chasing: walk straight when the way is clear, otherwise follow an A* route ----
 function giveUpTarget(target){if(autoHunt.on)autoHunt.ban(target.id);nav.clear();cancelCombat();chaseStuck=0;}
 let chaseWindow=null,chaseForceNavUntil=0;
@@ -520,7 +582,12 @@ setRuntimeClickHandler((hit,e)=>{
 function cancelCombat(){combatTarget=null;lastTargetSample=null;cancelHeroAttack(playback);setRuntimePlayerControl(false);syncHud();}
 window.addEventListener('keydown',e=>{if(['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code)){nav.clear();if(resting)setResting(false);if(autoHunt.on){autoHunt.stop();syncHuntButton();}cancelCombat();}});
 const canvas=document.getElementById('scene');
-floaters=createFloaters(canvas);
+skillFx=createSkillFx(canvas);floaters=createFloaters(canvas);
+// Status overlays: frost on slowed mobs, stars on stunned ones, sparks on armor-broken ones.
+skillFx.setStatusSource(()=>{const now=sim.simulation.clock.nowMs,out=[];for(const m of sim.simulation.world.monsters.values()){if(!m.alive)continue;const slow=(m.slowUntilMs??0)>now,stun=(m.stunnedUntilMs??0)>now,armorBreak=(m.armorBreakUntilMs??0)>now;if(slow||stun||armorBreak)out.push({x:m.position.x,y:m.position.y,slow,stun,armorBreak});}return out;});
+// Warm FX the hero will use: equipped cores, weapon skills, basic swing, and the warp circles.
+{const c=sim.character,p=sim.simulation.world.players.get(sim.playerId);skillFx.preload([...(c.skills.active||[]),c.skills.movement,...(p?.skillEntitlements?.weaponSkills||[]),BASIC_ATTACK_FX[p?.weaponFamily],'warp']);
+ for(const portal of scene.portals||[])skillFx.play('warp',{from:{x:portal.x,y:portal.y}});}
 canvas.addEventListener('pointerdown',e=>{
   const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*canvas.width/rect.width,y=(e.clientY-rect.top)*canvas.height/rect.height;
   let hit=null,best=Infinity;
@@ -531,7 +598,7 @@ canvas.addEventListener('pointerdown',e=>{
   }else{clickHitMonster=false;}
 });
 
-window.__combat={sim,playback,actors,fx:combatFX,sfx:combatSFX,get floaters(){return floaters;},presentCombatEvents,rosterId,roster,mapId:gameplayMapId,routeId,get target(){return combatTarget;},requestZoneTransfer:performWarp};
+window.__combat={sim,playback,actors,fx:combatFX,get skillFx(){return skillFx;},showSkillCastFx,sfx:combatSFX,get floaters(){return floaters;},presentCombatEvents,rosterId,roster,mapId:gameplayMapId,routeId,get target(){return combatTarget;},requestZoneTransfer:performWarp};
 const pendingSpawn=(()=>{try{const v=JSON.parse(sessionStorage.getItem('bunny-world-zone-spawn')||'null');sessionStorage.removeItem('bunny-world-zone-spawn');return v;}catch{return null;}})();
 if(pendingSpawn){scene.spawn={x:pendingSpawn.x,y:pendingSpawn.y};playerView.x=pendingSpawn.x;playerView.y=pendingSpawn.y;}
 persistentCharacter={...sim.character,currentMapId:gameplayMapId};saveCharacter(persistentCharacter);

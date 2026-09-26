@@ -258,14 +258,6 @@ body.combat-mode .game-ui{z-index:30}
 .player-hud .bar.hp{position:relative}
 .player-hud .bar.hp .barrier-fill{position:absolute;z-index:2;left:0;top:0;height:100%;width:0;background:linear-gradient(90deg,rgba(255,255,255,.96),rgba(225,241,255,.78));box-shadow:0 0 7px rgba(235,247,255,.95);transition:width .08s linear;pointer-events:none}
 .player-hud .bar.hp.barrier-active{box-shadow:0 0 0 1px rgba(255,255,255,.9),0 0 8px rgba(220,241,255,.75)}
-#barrier-aura{position:fixed;z-index:17;width:78px;height:48px;transform:translate(-50%,-50%);border:2px solid rgba(246,252,255,.92);border-radius:50%;box-shadow:0 0 10px rgba(226,244,255,.75),inset 0 0 12px rgba(255,255,255,.22);pointer-events:none;animation:barrier-breathe 1.15s ease-in-out infinite}
-#barrier-aura[hidden]{display:none!important}
-#barrier-aura i{position:absolute;inset:5px;border:1px solid rgba(226,244,255,.62);border-radius:50%}
-#barrier-aura i+ i{inset:11px;border-color:rgba(255,255,255,.32)}
-#barrier-aura.hit{animation:barrier-hit .22s ease-out,barrier-breathe 1.15s .22s ease-in-out infinite}
-.skill-cast-fx.barrier{--skill-fx:#f6fbff;width:92px;height:48px;margin:-24px 0 0 -46px;border-width:3px;box-shadow:0 0 16px #eef9ff,0 0 30px rgba(210,235,255,.55),inset 0 0 16px rgba(255,255,255,.35)}
-@keyframes barrier-breathe{0%,100%{opacity:.72;transform:translate(-50%,-50%) scale(.96)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}}
-@keyframes barrier-hit{0%{filter:brightness(1);box-shadow:0 0 10px rgba(226,244,255,.75)}45%{filter:brightness(1.8);box-shadow:0 0 24px #fff,0 0 38px rgba(210,235,255,.9)}100%{filter:brightness(1)}}
 
 @media (max-width:800px){
  .mastery-loadout-strip{grid-template-columns:repeat(8,60px)}
@@ -473,3 +465,36 @@ body.combat-mode .game-ui{z-index:30}
  .bw-event-entrance-bonuses,.bw-event-entrance-footer{animation:none!important}
  .bw-event-entrance-burst,.bw-event-entrance-backdrop{display:none}
 }
+
+
+/* ---------- Skill loadout: grade colour lives on the icon frame, not the slot ---------- */
+.skill-core-main,.skill-core-main[class*=core-rarity-]{background:none;border:0!important;box-shadow:none!important;padding:0;color:inherit;font:inherit;text-align:left}
+.skill-core-main em{display:block;margin-top:3px;color:#9bc6ff;font:800 9px/1.2 ui-monospace,monospace;font-style:normal}
+.skill-mod>span{border:2px solid #56647a;border-radius:8px}
+.skill-core-main.core-rarity-normal .skill-core-icon,.skill-mod.core-rarity-normal>span{border-color:#56647a;box-shadow:0 0 10px #56647a66}
+.skill-core-main.core-rarity-good .skill-core-icon,.skill-mod.core-rarity-good>span{border-color:#59c878;box-shadow:0 0 10px #59c87866}
+.skill-core-main.core-rarity-rare .skill-core-icon,.skill-mod.core-rarity-rare>span{border-color:#58a6e8;box-shadow:0 0 10px #58a6e866}
+.skill-core-main.core-rarity-epic .skill-core-icon,.skill-mod.core-rarity-epic>span{border-color:#ad7be8;box-shadow:0 0 10px #ad7be866}
+.skill-core-main.core-rarity-legend .skill-core-icon,.skill-mod.core-rarity-legend>span{border-color:#e7a34a;box-shadow:0 0 10px #e7a34a66}
+.skill-core-main.core-rarity-mythic .skill-core-icon,.skill-mod.core-rarity-mythic>span{border-color:#ef7f68;box-shadow:0 0 10px #ef7f6866}
+.skill-core-main.core-rarity-whiteAscended .skill-core-icon,.skill-mod.core-rarity-whiteAscended>span{border-color:#f2df9b;box-shadow:0 0 10px #f2df9b66}
+.movement-core-card{grid-template-columns:1fr}
+.skill-shard-box{display:grid;gap:6px;margin:10px 0;padding:10px;border:1px solid #293d5d;border-radius:10px;background:#0b1422}
+.skill-shard-box strong{font:900 11px system-ui;color:#f0c76c}
+.skill-shard-box strong{display:flex;align-items:center;gap:6px}.skill-shard-box strong .pixel-icon{width:24px;height:24px}
+.skill-shard-box button{display:flex;align-items:center;justify-content:center;gap:6px}.skill-shard-box button .pixel-icon{width:20px;height:20px}
+.skill-shard-box small{font:800 9px system-ui;color:#7487a6;margin-top:4px}.shard-row{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center}.shard-row span{display:flex;align-items:center;gap:6px;font:800 11px system-ui;color:#dce8ff}.shard-row em{color:#9bc6ff;font-style:normal}.shard-row .pixel-icon{width:20px;height:20px}
+.rpg-item-tile.selected{outline:2px solid #f0c76c;outline-offset:-2px;background:#3a2e12}.rpg-item-tile.dim{opacity:.35}
+
+/* ---------- Character window: header, then Status (left) | Innate + Details (right) ---------- */
+.bw-status{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)!important;gap:12px;align-items:start}
+.bw-status>.bw-status-head{grid-column:1/-1}
+.bw-status-col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.bw-status-col>.bw-block{margin:0}
+.bw-status-col .bw-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}
+.bw-status-col .bw-respec{width:100%;font-size:11px;letter-spacing:.04em}
+.bw-status .bw-stat-grid.two{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.bw-status .bw-stat-grid.two>div{display:flex;justify-content:space-between;align-items:center;min-width:0}
+@media (max-width:720px){.bw-status{grid-template-columns:1fr!important}}
+.skill-mod.mod-inactive{opacity:.55;filter:grayscale(.7)}.skill-mod .mod-warn{color:#f0a060!important}
+.bw-enhance-all{width:100%;margin-top:10px}

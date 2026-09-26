@@ -3,7 +3,7 @@
 // red damage taken, green heals; loot pops in a colour by how rare the drop was.
 import { projectRuntimePoint, runtimeWalkHeight } from '../engine/runtime.js';
 
-const LOOT_COLORS = { white: '#f4f2e8', green: '#6ee787', blue: '#62b5ff', purple: '#c77dff', gold: '#ffd45c' };
+export const LOOT_COLORS = { white: '#f4f2e8', green: '#6ee787', blue: '#62b5ff', purple: '#c77dff', gold: '#ffd45c' };
 export const lootTierForChance = c => c >= .20 ? 'white' : c >= .10 ? 'green' : c >= .03 ? 'blue' : c >= .005 ? 'purple' : 'gold';
 
 export function createFloaters(sceneCanvas) {
