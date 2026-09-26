@@ -2,7 +2,20 @@
 
 Branch: `burrow-command` (from `maps-fix`). Live build: https://maeyes.github.io/burrow-command/
 
-## What it is
+## Phase 1 (done): persistent warren
+- Save `localStorage['burrow-command-save-v1']` at dawn, on warren upgrade, and on leaving by day.
+  "เริ่มหมู่บ้านใหม่" wipes it. `load()` rebuilds units/towers via `recruit(cls,true)` / `createTower()`.
+- No game over: `endNight(false)` leaves the hall at 20%, takes 20% gold, downs everyone; the same
+  wave returns. `S.wave` (1..5) only advances on a win; beating wave 5 sets `S.cleared` and enables
+  `upgradeWarren()`. After that, nights replay wave 4 until the upgrade.
+- Warren level caps: `hallMax()`, `squadMax()` (6+2L), `towerMax()` (2+L, max 6); `levelPower()` scales
+  waves, field monsters and rewards. The boss scales with `levelPower()` only.
+- View: starts at zoom .62 (wheel .45–1.3, `setRuntimeZoomRange` in engine/runtime.js; clicks now
+  undo the zoom). Red edge arrows show off-screen raiders (gold = boss).
+- Bot run: Lv 2 on day 6, Lv 3 on day 11, no lost nights; gold piles up past the caps (3k+ by Lv 3).
+  Phase 2 (items, forge) must be the gold/material sink.
+
+## What it is (original prototype)
 A small single-player prototype on the Dimraeth engine: a bunny squad defends its warren.
 - **Day (80 s):** bunnies in *farm* stance hunt around a pink flag (click ground to move it) and
   **carry** loot home. Loot counts only when delivered inside `BASE_R` of the burrow hall.

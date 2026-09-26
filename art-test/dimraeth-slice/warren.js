@@ -1,8 +1,11 @@
 // Burrow Command (prototype): a bunny squad defends its warren.
 // Day: bunnies farm the field around a flag and carry loot home. Night: waves attack the burrow.
 // Gold only comes from kills. Materials upgrade a class. Downed bunnies recover at dawn.
+// Progression (docs/BURROW_COMMAND_PROGRESSION_SPEC.md, phase 1): the warren is saved every dawn;
+// losing a night is a setback, not game over, and the same wave comes back until it is beaten.
+// Each warren level has 5 waves (5 = boss); beating the boss unlocks the warren upgrade.
 // Terrain, Blessed Bunny, monster art and FX are the Dimraeth engine's; the rules live here.
-import { projectRuntimePoint, boot, setRuntimeActors, setRuntimeActorUpdater, setRuntimePlayerVisual, setRuntimePlayerControl, setRuntimeClickHandler, canRuntimeActorStand, runtimeWalkHeight, resolveRuntimeActor } from './engine/runtime.js';
+import { setRuntimeZoomRange, projectRuntimePoint, boot, setRuntimeActors, setRuntimeActorUpdater, setRuntimePlayerVisual, setRuntimePlayerControl, setRuntimeClickHandler, canRuntimeActorStand, runtimeWalkHeight, resolveRuntimeActor } from './engine/runtime.js';
 import { emptyMap, sceneFromMap } from './scenes/custom.js';
 import { findPath, canWalkStraight } from './combat/nav.js';
 import { getRoster, monsterPresentation } from './combat/rosters.js';
@@ -21,8 +24,16 @@ const CLASSES = {
   scout: { name: 'หน่วยเร็ว', icon: '🗡', fam: 'dagger', cost: 35, hp: 90, atk: 6, range: 42, cd: .5, speed: 145, carry: 14, blurb: 'แบกของเยอะ วิ่งไว' },
   brute: { name: 'นักทุบ', icon: '🔨', fam: 'hammer', cost: 70, hp: 180, atk: 20, range: 50, cd: 1.5, speed: 82, carry: 8, splash: 70, blurb: 'ตีหมู่' },
 };
-const DAY_S = 80, NIGHT_S = 55, NIGHTS_TO_WIN = 5;
+const DAY_S = 80, NIGHT_S = 55, WAVES_PER_LEVEL = 5, SAVE_KEY = 'burrow-command-save-v1';
 const BURROW_MAX = 500, REPAIR_HP = 60, REPAIR_COST = 12, REVIVE_COST = 15;
+// warren level gates: hall HP, squad size, tower count; upgrading needs the level's boss beaten
+const LOSS = { hallLeft: .2, goldLost: .2 }; // after a lost night: hall left at 20% HP, 20% of banked gold gone
+const hallMax = () => BURROW_MAX + (S.warren - 1) * 80;
+const squadMax = () => 6 + S.warren * 2;
+const towerMax = () => Math.min(TOWER.max, 2 + S.warren);
+const warrenCost = () => ({ gold: 30 + S.warren * 50, mats: S.warren * 6 });
+// wave strength grows with the wave index inside a level and with the warren level
+const levelPower = () => 1 + (S.warren - 1) * .3;
 const UPGRADE = [null, { mats: 6, gold: 20 }, { mats: 14, gold: 45 }, { mats: 26, gold: 90 }]; // to tier 1..3, +30% each
 const MATS = { wood: 'ไม้', hide: 'หนัง', ore: 'แร่' };
 const HALL = { dmg: 9, cd: 1, range: 300 };
@@ -91,7 +102,8 @@ await Promise.all([...normals, ...elites, bossId].filter(Boolean).map(artFor));
 const S = {
   gold: 20, mats: { wood: 0, hide: 0, ore: 0 }, tier: { guard: 0, archer: 0, scout: 0, brute: 0 },
   burrow: BURROW_MAX, day: 1, night: false, clock: 0, flag: { x: CENTER.x + 520, y: CENTER.y - 200 }, speed: 1, over: null,
-  units: [], monsters: [], towers: [], building: false, waveLeft: 0, waveTimer: 0, kills: 0, time: 0, events: [],
+  warren: 1, wave: 1, cleared: false, // progress: warren level, wave index 1..5 (advances only on a win), boss beaten
+  units: [], monsters: [], towers: [], building: false, queue: [], waveTimer: 0, kills: 0, time: 0, events: [],
 };
 const later = (sec, fn) => S.events.push({ at: S.time + sec, fn }); // game-clock timer (respects speed/pause)
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -141,21 +153,24 @@ function spendMats(n) { for (const k in MATS) { const take = Math.min(n, S.mats[
 // ---------- archer towers ----------
 let towerArt = null; // built on first use (needs the engine's render scale)
 function placeTower(x, y) {
-  if (S.towers.length >= TOWER.max) return toast(`สร้างได้สูงสุด ${TOWER.max} ป้อม`);
+  if (S.towers.length >= towerMax()) return toast(`บ้าน Lv ${S.warren} สร้างได้ ${towerMax()} ป้อม · อัปบ้านเพื่อสร้างเพิ่ม`);
   if (S.gold < TOWER.gold || matCount() < TOWER.mats) return toast(`ต้องใช้ ${TOWER.gold}G + ของ ${TOWER.mats} ชิ้น`);
   if (dist({ x, y }, CENTER) > TOWER.buildR) return toast('สร้างได้เฉพาะในวงสีเหลืองรอบโพรง');
   if (dist({ x, y }, CENTER) < 170 || S.towers.some(t => dist(t, { x, y }) < TOWER.gap) || !standable(x, y)) return toast('ตรงนี้สร้างไม่ได้');
   S.gold -= TOWER.gold; spendMats(TOWER.mats);
+  createTower(x, y);
+  skillFx?.pillar(x, y, { color: '#ffe27a' }); skillFx?.burst(x, y, { color: '#d9c7a8', count: 20, up: 60 }); combatSFX.playLevelUp({ volume: .35 });
+  S.building = false; toast('สร้างป้อมธนูแล้ว!'); renderUi();
+}
+function createTower(x, y, hp = TOWER.hp) {
   towerArt ??= towerSprite(28, 62, PAL.RED);
-  const t = { x, y, hp: TOWER.hp, maxHp: TOWER.hp, cd: 0 };
+  const t = { x, y, hp, maxHp: TOWER.hp, cd: 0 };
   t.actor = {
     kind: 'actor', x: x - 14, y: y - 14, z: 0, r: 4, shadow: false, ox: towerArt.ox, oy: towerArt.oy, getImage: () => towerArt.img,
     get dead() { return t.hp <= 0; },
     drawOverlay(g, { x: sx, y: sy }) { const w = 40, q = t.hp / t.maxHp; g.fillStyle = 'rgba(10,12,12,.85)'; g.fillRect(sx - w / 2, sy - 118, w, 5); g.fillStyle = q > .5 ? '#7ee38a' : q > .25 ? '#ffc94a' : '#ff5a4a'; g.fillRect(sx - w / 2 + 1, sy - 117, (w - 2) * q, 3); },
   };
-  S.towers.push(t); S.building = false;
-  skillFx?.pillar(x, y, { color: '#ffe27a' }); skillFx?.burst(x, y, { color: '#d9c7a8', count: 20, up: 60 }); combatSFX.playLevelUp({ volume: .35 });
-  toast('สร้างป้อมธนูแล้ว!'); renderUi();
+  S.towers.push(t); return t;
 }
 function updateTowers(dt) {
   for (const t of S.towers) {
@@ -178,7 +193,9 @@ function statsOf(cls) { const c = CLASSES[cls], k = 1 + .3 * S.tier[cls]; return
 // each extra bunny of a class costs 20% more: a squad of one kind gets expensive
 const priceOf = cls => Math.round(CLASSES[cls].cost * (1 + .2 * S.units.filter(u => u.cls === cls).length));
 function recruit(cls, free = false) {
-  const c = CLASSES[cls], price = priceOf(cls); if (!free && S.gold < price) return toast('เงินไม่พอ');
+  const c = CLASSES[cls], price = priceOf(cls);
+  if (!free && S.units.length >= squadMax()) return toast(`บ้าน Lv ${S.warren} มีกระต่ายได้ ${squadMax()} ตัว · อัปบ้านเพื่อเพิ่ม`);
+  if (!free && S.gold < price) return toast('เงินไม่พอ');
   if (!free) S.gold -= price;
   const a = (unitSeq * 2.4) % (Math.PI * 2), st = statsOf(cls);
   const u = { id: ++unitSeq, cls, r: 12, x: CENTER.x + Math.cos(a) * 120, y: CENTER.y + 150 + Math.sin(a) * 40, hp: st.maxHp, ...st, stance: 'farm', carry: { gold: 0, wood: 0, hide: 0, ore: 0 }, cd: 0, atkUntil: 0, dir: 'south', moving: false, down: false };
@@ -223,7 +240,7 @@ function spawnMonster(type, x, y, { night = false, power = 1 } = {}) {
   const p = monsterArt.get(type); if (!p) return;
   const boss = !!p.isBoss, elite = !!p.elite;
   const hp = Math.round((boss ? 650 : elite ? 110 : 45) * power), atk = (boss ? 20 : elite ? 11 : 6) * power;
-  const m = { id: ++monSeq, type, p, r: boss ? 22 : 13, x, y, home: { x, y }, hp, maxHp: hp, atk, range: boss ? 70 : 38, cd: 1 + Math.random() * .5, speed: boss ? 60 : elite ? 72 : 78, night, boss, elite, left: false, dead: false, reward: boss ? 80 : elite ? 12 : 5 };
+  const m = { id: ++monSeq, type, p, r: boss ? 22 : 13, x, y, home: { x, y }, hp, maxHp: hp, atk, range: boss ? 70 : 38, cd: 1 + Math.random() * .5, speed: boss ? 60 : elite ? 72 : 78, night, boss, elite, left: false, dead: false, reward: Math.round((boss ? 80 : elite ? 12 : 5) * (1 + (S.warren - 1) * .25)) };
   m.actor = {
     kind: 'actor', get x() { return m.x + (m.lx ?? 0); }, get y() { return m.y + (m.ly ?? 0); }, z: 0, r: 12,
     visualScale: (boss ? 1.65 : elite ? 2.4 : 2) * (p.scale || 1),
@@ -351,13 +368,34 @@ function lunge(m) { // short hop toward the target so the attack reads
 // ---------- day / night ----------
 function startNight() {
   S.night = true; S.clock = 0;
-  const n = S.day, count = 2 + n * 3 + (n > 3 ? n - 3 : 0), power = 1 + (n - 1) * .22;
-  S.wave = []; for (let i = 0; i < count; i++) S.wave.push(Math.random() < .08 + n * .08 && elites.length ? elites[i % elites.length] : normals[i % normals.length]);
-  if (n === NIGHTS_TO_WIN && bossId) S.wave.splice(Math.floor(S.wave.length / 2), 0, bossId); // the boss comes mid-wave, not after it
-  S.wavePower = power; S.waveTimer = 0;
+  // once the level's boss is beaten the nights replay wave 4 (farmable) until the warren is upgraded
+  const n = S.cleared ? WAVES_PER_LEVEL - 1 : S.wave, boss = n === WAVES_PER_LEVEL && !S.cleared;
+  const count = 3 + n * 2 + (S.warren - 1) * 3, power = (1 + (n - 1) * .2) * levelPower();
+  S.queue = []; for (let i = 0; i < count; i++) S.queue.push(Math.random() < .08 + n * .08 + (S.warren - 1) * .04 && elites.length ? elites[i % elites.length] : normals[i % normals.length]);
+  if (boss && bossId) S.queue.splice(Math.floor(S.queue.length / 2), 0, bossId); // the boss comes mid-wave, not after it
+  S.nightWave = n; S.wavePower = power; S.waveTimer = 0;
   for (const m of S.monsters) if (!m.night) m.dead = true; // the field empties at dusk
-  window.__slice?.setDusk(true); banner(`คืนที่ ${n}`, n === NIGHTS_TO_WIN ? `คืนสุดท้าย! บอสมาด้วย · มอน ${S.wave.length} ตัว` : `มอนสเตอร์ ${S.wave.length} ตัวกำลังบุกโพรง!`);
+  window.__slice?.setDusk(true);
+  banner(`คืนที่ ${S.day} · เวฟ ${S.warren}-${n}`, boss ? `คืนบอส! ชนะแล้วอัปบ้านได้ · มอน ${S.queue.length} ตัว` : `มอนสเตอร์ ${S.queue.length} ตัวกำลังบุกโพรง!`);
   renderUi();
+}
+function endNight(won) {
+  for (const m of S.monsters) m.dead = true;
+  S.queue = [];
+  if (won) {
+    if (S.cleared) banner('รอดแล้ว!', 'บอสของเลเวลนี้แพ้ไปแล้ว · อัปบ้านเมื่อพร้อม 🏠');
+    else if (S.wave >= WAVES_PER_LEVEL) { S.cleared = true; banner('ชนะบอสแล้ว! 🎉', `อัปบ้านเป็น Lv ${S.warren + 1} ได้แล้ว`); }
+    else { S.wave++; banner('รอดแล้ว!', `คืนพรุ่งนี้ เวฟ ${S.warren}-${S.wave}`); }
+  } else {
+    // a lost night costs something, but the game goes on and the same wave comes back
+    const lost = Math.floor(S.gold * LOSS.goldLost);
+    S.gold -= lost; S.burrow = Math.round(hallMax() * LOSS.hallLeft);
+    for (const u of S.units) { u.down = true; u.hp = 0; u.moving = false; }
+    combatSFX.playDeath({ volume: .7 });
+    banner('โพรงแตก…', `เสีย ${lost}G · เช้านี้ซ่อมแล้วเตรียมตัว คืนนี้เวฟ ${S.warren}-${S.cleared ? WAVES_PER_LEVEL - 1 : S.wave} กลับมาอีก`);
+  }
+  S.pendingBanner = true;
+  startDay();
 }
 function startDay() {
   S.night = false; S.clock = 0; S.day++;
@@ -365,16 +403,37 @@ function startDay() {
   S.monsters = S.monsters.filter(m => !m.dead);
   for (const u of S.units) { if (u.down) { u.down = false; u.x = CENTER.x + (Math.random() - .5) * 120; u.y = CENTER.y + 150; } u.hp = u.maxHp; } // everyone wakes up rested
   window.__slice?.setDusk(false);
-  if (S.day > NIGHTS_TO_WIN) return endGame(true);
-  banner(`วันที่ ${S.day}`, 'ส่งกระต่ายออกไปฟาร์ม · คลิกพื้นเพื่อย้ายธง');
-  renderUi();
+  if (!S.pendingBanner) banner(`วันที่ ${S.day}`, 'ส่งกระต่ายออกไปฟาร์ม · คลิกพื้นเพื่อย้ายธง');
+  S.pendingBanner = false;
+  save(); renderUi();
 }
-function endGame(win) {
-  S.over = win ? 'win' : 'lose';
-  const el = document.getElementById('over'); el.hidden = false;
-  el.querySelector('h2').textContent = win ? 'โพรงรอดแล้ว! 🥕' : 'โพรงแตก…';
-  el.querySelector('p').textContent = win ? `รอดครบ ${NIGHTS_TO_WIN} คืน · ฆ่ามอน ${S.kills} ตัว · กระต่าย ${S.units.length} ตัว` : `อยู่รอดถึงคืนที่ ${S.day} · ฆ่ามอน ${S.kills} ตัว`;
+function upgradeWarren() {
+  const c = warrenCost();
+  if (!S.cleared || S.night || S.gold < c.gold || matCount() < c.mats) return;
+  S.gold -= c.gold; spendMats(c.mats);
+  const before = hallMax(); S.warren++; S.wave = 1; S.cleared = false; S.burrow += hallMax() - before;
+  skillFx?.pillar(CENTER.x, CENTER.y, { color: '#ffe27a', count: 40 }); skillFx?.burst(CENTER.x, CENTER.y, { color: '#ffe27a', color2: '#ffffff', count: 40, up: 160, life: 1 });
+  combatSFX.playLevelUp();
+  banner(`บ้าน Lv ${S.warren}! 🏠`, `กระต่าย ${squadMax()} ตัว · ป้อม ${towerMax()} ป้อม · โพรง ${hallMax()} HP · มอนแรงขึ้น`);
+  save(); renderUi();
 }
+
+// ---------- save / load (localStorage; versioned for later migrations) ----------
+function save() {
+  const data = { v: 1, gold: S.gold, mats: S.mats, tier: S.tier, burrow: S.burrow, warren: S.warren, wave: S.wave, cleared: S.cleared, day: S.day, kills: S.kills, flag: S.flag,
+    units: S.units.map(u => ({ cls: u.cls, stance: u.stance })), towers: S.towers.map(t => ({ x: t.x, y: t.y, hp: Math.round(t.hp) })) };
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch {}
+}
+function load() {
+  let d = null; try { d = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch {}
+  if (!d || d.v !== 1) return false;
+  Object.assign(S, { gold: d.gold, mats: { ...S.mats, ...d.mats }, tier: { ...S.tier, ...d.tier }, warren: d.warren, wave: d.wave, cleared: d.cleared, day: d.day, kills: d.kills ?? 0, flag: d.flag ?? S.flag });
+  S.burrow = Math.min(hallMax(), d.burrow);
+  for (const x of d.units) recruit(x.cls, true).stance = x.stance || 'farm';
+  for (const t of d.towers || []) createTower(t.x, t.y, t.hp);
+  return true;
+}
+addEventListener('beforeunload', () => { if (!S.night && !S.resetting) save(); }); // leaving by day keeps the day's shopping; leaving at night replays from dawn
 
 function tick(dt) {
   if (S.over) return;
@@ -382,17 +441,19 @@ function tick(dt) {
   if (S.events.length) { const due = S.events.filter(e => e.at <= S.time); S.events = S.events.filter(e => e.at > S.time); for (const e of due) e.fn(); }
   if (!S.night) {
     if (S.clock >= DAY_S) startNight();
-    const alive = S.monsters.filter(m => !m.dead && !m.night).length, cap = 10 + S.day * 2;
-    if (alive < cap && Math.random() < dt * 1.5) { const p = fieldPoint(); if (p) spawnMonster(Math.random() < .15 && elites.length ? elites[0] : normals[Math.floor(Math.random() * normals.length)], p.x, p.y, { power: 1 + (S.day - 1) * .12 }); }
+    const alive = S.monsters.filter(m => !m.dead && !m.night).length, cap = 12 + S.warren * 2;
+    if (alive < cap && Math.random() < dt * 1.5) { const p = fieldPoint(); if (p) spawnMonster(Math.random() < .15 && elites.length ? elites[0] : normals[Math.floor(Math.random() * normals.length)], p.x, p.y, { power: levelPower() * (1 + (S.wave - 1) * .06) }); }
   } else {
     S.waveTimer -= dt;
-    if (S.wave.length && S.waveTimer <= 0) {
-      S.waveTimer = 1.4 / Math.max(1, S.day * .5);
-      const e = edgePoints[Math.floor(Math.random() * 4)], type = S.wave.shift();
-      for (let t = 0; t < 10; t++) { const x = e.x + (Math.random() - .5) * 160, y = e.y + (Math.random() - .5) * 160; if (standable(x, y)) { spawnMonster(type, x, y, { night: true, power: S.wavePower }); break; } }
+    if (S.queue.length && S.waveTimer <= 0) {
+      S.waveTimer = 1.4 / Math.max(1, (S.nightWave + S.warren - 1) * .5);
+      const e = edgePoints[Math.floor(Math.random() * 4)], type = S.queue.shift();
+      // the boss scales with the warren level only, not with the wave index
+      for (let t = 0; t < 10; t++) { const x = e.x + (Math.random() - .5) * 160, y = e.y + (Math.random() - .5) * 160; if (standable(x, y)) { spawnMonster(type, x, y, { night: true, power: type === bossId ? levelPower() : S.wavePower }); break; } }
     }
     const left = S.monsters.some(m => m.night && !m.dead);
-    if ((S.clock >= NIGHT_S && !left) || (!S.wave.length && !left && S.clock > 8)) startDay();
+    if (S.burrow <= 0) endNight(false);
+    else if ((S.clock >= NIGHT_S && !left) || (!S.queue.length && !left && S.clock > 8)) endNight(true);
   }
   // the burrow hall has an archer loft: it shoots the nearest raider, day or night
   S.hallCd = (S.hallCd ?? 0) - dt;
@@ -402,7 +463,6 @@ function tick(dt) {
   for (const m of S.monsters) updateMonster(m, dt);
   separate(S.units, 26); separate(S.monsters.filter(m => !m.dead), 30);
   S.monsters = S.monsters.filter(m => !m.dead || performance.now() - (m.deadAt ??= performance.now()) < 50);
-  if (S.burrow <= 0) { S.burrow = 0; endGame(false); }
 }
 
 // ---------- camera: WASD / arrows / drag, the runtime player is an invisible camera rig ----------
@@ -414,7 +474,7 @@ function moveCamera(dt) {
   if (keys.has('KeyW') || keys.has('ArrowUp')) sy -= 1; if (keys.has('KeyS') || keys.has('ArrowDown')) sy += 1;
   if (keys.has('KeyA') || keys.has('ArrowLeft')) sx -= 1; if (keys.has('KeyD') || keys.has('ArrowRight')) sx += 1;
   if (sx || sy) { const v = 520 * dt; cam.x += (sx + 2 * sy) * v * .5; cam.y += (2 * sy - sx) * v * .5; }
-  cam.x = Math.max(300, Math.min(2260, cam.x)); cam.y = Math.max(300, Math.min(2260, cam.y));
+  cam.x = Math.max(200, Math.min(2360, cam.x)); cam.y = Math.max(200, Math.min(2360, cam.y));
 }
 
 // ---------- UI ----------
@@ -423,23 +483,28 @@ function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add(
 function banner(title, sub) { const el = $('banner'); el.innerHTML = `<b>${title}</b><span>${sub}</span>`; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); }
 function renderUi() {
   $('gold').textContent = S.gold; for (const k in MATS) $('m-' + k).textContent = S.mats[k];
-  $('burrow').style.width = `${100 * S.burrow / BURROW_MAX}%`; $('burrow-t').textContent = `${Math.ceil(S.burrow)} / ${BURROW_MAX}`;
+  $('burrow').style.width = `${100 * S.burrow / hallMax()}%`; $('burrow-t').textContent = `${Math.ceil(S.burrow)} / ${hallMax()}`;
   $('shop').innerHTML = Object.entries(CLASSES).map(([k, c]) => {
     const t = S.tier[k], up = UPGRADE[t + 1], mats = S.mats.wood + S.mats.hide + S.mats.ore;
     return `<div class="card"><button class="buy" data-buy="${k}" ${S.gold < priceOf(k) ? 'disabled' : ''}><i>${c.icon}</i><b>${c.name}</b><small>${c.blurb}</small><em>${priceOf(k)} G</em></button>
       <button class="up" data-up="${k}" ${!up || S.gold < up.gold || mats < up.mats ? 'disabled' : ''}>${up ? `อัปเกรด ★${t + 1} · ${up.mats} ของ + ${up.gold}G` : 'สูงสุดแล้ว'}</button></div>`;
   }).join('');
   const downs = S.units.filter(u => u.down).length;
-  $('repair').disabled = S.gold < REPAIR_COST || (S.burrow >= BURROW_MAX && S.towers.every(t => t.hp >= t.maxHp)); $('repair').textContent = `🔧 ซ่อม +${REPAIR_HP} (${REPAIR_COST}G)`;
-  $('build').disabled = !S.building && (S.towers.length >= TOWER.max || S.gold < TOWER.gold || matCount() < TOWER.mats); $('build').classList.toggle('on', S.building);
-  $('build').textContent = S.building ? '✖ ยกเลิกการสร้าง' : `🏹 ป้อมธนู ${S.towers.length}/${TOWER.max} (${TOWER.gold}G + ${TOWER.mats} ของ)`;
+  $('repair').disabled = S.gold < REPAIR_COST || (S.burrow >= hallMax() && S.towers.every(t => t.hp >= t.maxHp)); $('repair').textContent = `🔧 ซ่อม +${REPAIR_HP} (${REPAIR_COST}G)`;
+  $('build').disabled = !S.building && (S.towers.length >= towerMax() || S.gold < TOWER.gold || matCount() < TOWER.mats); $('build').classList.toggle('on', S.building);
+  $('build').textContent = S.building ? '✖ ยกเลิกการสร้าง' : `🏹 ป้อมธนู ${S.towers.length}/${towerMax()} (${TOWER.gold}G + ${TOWER.mats} ของ)`;
+  const wc = warrenCost();
+  $('upgrade').disabled = !S.cleared || S.night || S.gold < wc.gold || matCount() < wc.mats;
+  $('upgrade').textContent = S.cleared ? `🏠 อัปบ้าน → Lv ${S.warren + 1} (${wc.gold}G + ${wc.mats} ของ)` : `🏠 อัปบ้าน: ชนะบอสเวฟ ${S.warren}-${WAVES_PER_LEVEL} ก่อน`;
   $('revive').disabled = !downs || S.gold < REVIVE_COST; $('revive').textContent = `💖 ปลุกกระต่าย (${REVIVE_COST}G)${downs ? ` · ล้ม ${downs}` : ''}`;
   $('squad').innerHTML = S.units.map(u => `<button data-unit="${u.id}" class="${u.down ? 'down' : ''} ${u.stance}" title="คลิกสลับ ฟาร์ม/เฝ้าโพรง">${CLASSES[u.cls].icon}<small>${u.down ? 'ล้ม' : u.stance === 'farm' ? 'ฟาร์ม' : 'เฝ้า'}</small></button>`).join('');
+  syncClock();
 }
 function syncClock() {
   const total = S.night ? NIGHT_S : DAY_S, left = Math.max(0, Math.ceil(total - S.clock));
   $('phase').textContent = S.night ? `🌙 คืนที่ ${S.day}` : `☀️ วันที่ ${S.day}`;
-  $('timer').textContent = S.night ? `เหลือมอน ${S.wave.length + S.monsters.filter(m => m.night && !m.dead).length}` : `ค่ำใน ${left}s`;
+  $('timer').textContent = S.night ? `เหลือมอน ${S.queue.length + S.monsters.filter(m => m.night && !m.dead).length}` : `ค่ำใน ${left}s`;
+  $('wave').textContent = `🏠 Lv ${S.warren} · เวฟ ${S.warren}-${S.cleared ? `${WAVES_PER_LEVEL} ✓` : S.wave}`;
   $('clockbar').style.width = `${100 * Math.min(1, S.clock / total)}%`; $('clockbar').className = S.night ? 'night' : '';
 }
 document.body.addEventListener('click', e => {
@@ -448,7 +513,7 @@ document.body.addEventListener('click', e => {
   else if (b.dataset.up) { const k = b.dataset.up, up = UPGRADE[S.tier[k] + 1]; let need = up.mats; S.gold -= up.gold; for (const m in MATS) { const take = Math.min(need, S.mats[m]); S.mats[m] -= take; need -= take; } S.tier[k]++; for (const u of S.units) if (u.cls === k) { const st = statsOf(k); u.hp += st.maxHp - u.maxHp; Object.assign(u, st); skillFx?.pillar(u.x, u.y, { color: '#ffe27a' }); } combatSFX.playLevelUp(); toast(`${CLASSES[k].name} อัปเกรดเป็น ★${S.tier[k]}`); renderUi(); }
   else if (b.dataset.unit) { const u = S.units.find(x => x.id === +b.dataset.unit); if (u && !u.down) { u.stance = u.stance === 'farm' ? 'guard' : 'farm'; renderUi(); } }
   else if (b.id === 'repair') { // hall first, whatever is left goes to damaged towers
-    S.gold -= REPAIR_COST; let left = REPAIR_HP; const add = Math.min(left, BURROW_MAX - S.burrow); S.burrow += add; left -= add;
+    S.gold -= REPAIR_COST; let left = REPAIR_HP; const add = Math.min(left, hallMax() - S.burrow); S.burrow += add; left -= add;
     for (const t of S.towers) { const a = Math.min(left, t.maxHp - t.hp); t.hp += a; left -= a; if (a) skillFx?.burst(t.x, t.y, { color: '#ffe27a', count: 10, up: 60 }); }
     skillFx?.burst(CENTER.x, CENTER.y, { color: '#ffe27a', count: 18, up: 90 }); renderUi();
   }
@@ -456,7 +521,8 @@ document.body.addEventListener('click', e => {
   else if (b.id === 'build') { S.building = !S.building; if (S.building) toast('คลิกพื้นในวงสีเหลืองเพื่อวางป้อม'); renderUi(); }
   else if (b.id === 'speed') { S.speed = S.speed === 1 ? 2 : 1; b.textContent = `⏩ x${S.speed}`; }
   else if (b.id === 'skip' && !S.night) S.clock = DAY_S - .1;
-  else if (b.id === 'again') location.reload();
+  else if (b.id === 'upgrade') upgradeWarren();
+  else if (b.id === 'reset' && confirm('เริ่มหมู่บ้านใหม่? เซฟเดิมจะหายทั้งหมด')) { try { localStorage.removeItem(SAVE_KEY); } catch {} S.resetting = true; location.reload(); }
 });
 
 // ---------- world objects: farm flag + burrow hall HP ----------
@@ -464,7 +530,7 @@ const blank = document.createElement('canvas'); blank.width = blank.height = 1;
 const flagActor = { kind: 'actor', get x() { return S.flag.x; }, get y() { return S.flag.y; }, z: 0, r: 4, shadow: false, getImage: () => blank,
   drawOverlay(g, { x, y, time }) { if (S.night) return; g.strokeStyle = '#3a2616'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - 46); g.stroke(); const wave = Math.sin(time * 6) * 2; g.fillStyle = '#ff6fa8'; g.beginPath(); g.moveTo(x, y - 46); g.lineTo(x + 22, y - 40 + wave); g.lineTo(x, y - 33); g.fill(); g.strokeStyle = 'rgba(255,111,168,.5)'; g.beginPath(); g.ellipse(x, y, 60, 30, 0, 0, Math.PI * 2); g.stroke(); } };
 const hallActor = { kind: 'actor', x: CENTER.x + 40, y: CENTER.y + 40, z: 0, r: 4, shadow: false, getImage: () => blank,
-  drawOverlay(g, { x, y }) { if (S.building) drawBuildRing(g); const w = 110, q = S.burrow / BURROW_MAX; g.fillStyle = 'rgba(10,12,12,.85)'; g.fillRect(x - w / 2, y - 150, w, 7); g.fillStyle = q > .5 ? '#7ee38a' : q > .25 ? '#ffc94a' : '#ff5a4a'; g.fillRect(x - w / 2 + 1, y - 149, (w - 2) * q, 5); g.font = 'bold 11px system-ui'; g.textAlign = 'center'; g.fillStyle = '#fff4cf'; g.fillText('โพรงกระต่าย', x, y - 156); } };
+  drawOverlay(g, { x, y }) { if (S.building) drawBuildRing(g); const w = 110, q = S.burrow / hallMax(); g.fillStyle = 'rgba(10,12,12,.85)'; g.fillRect(x - w / 2, y - 150, w, 7); g.fillStyle = q > .5 ? '#7ee38a' : q > .25 ? '#ffc94a' : '#ff5a4a'; g.fillRect(x - w / 2 + 1, y - 149, (w - 2) * q, 5); g.font = 'bold 11px system-ui'; g.textAlign = 'center'; g.fillStyle = '#fff4cf'; g.fillText(`โพรงกระต่าย Lv ${S.warren}`, x, y - 156); } };
 
 function drawBuildRing(g) { // the build radius as an iso ellipse around the hall
   const z = runtimeWalkHeight(CENTER.x, CENTER.y) ?? 0, c = projectRuntimePoint(CENTER.x, CENTER.y, z), e = projectRuntimePoint(CENTER.x + TOWER.buildR, CENTER.y - TOWER.buildR, z);
@@ -472,7 +538,35 @@ function drawBuildRing(g) { // the build radius as an iso ellipse around the hal
   g.save(); g.setLineDash([8, 6]); g.strokeStyle = 'rgba(255,214,90,.85)'; g.lineWidth = 2; g.beginPath(); g.ellipse(c.x, c.y, rx, rx / 2, 0, 0, Math.PI * 2); g.stroke();
   g.fillStyle = 'rgba(255,214,90,.07)'; g.fill(); g.restore();
 }
-let skillFx = null, floaters = null;
+let skillFx = null, floaters = null, edgeLayer = null;
+function drawEdgeArrows() {
+  if (!edgeLayer) { edgeLayer = document.createElement('canvas'); edgeLayer.style.cssText = 'position:absolute;pointer-events:none;z-index:6;background:transparent!important'; canvas.after(edgeLayer); }
+  const L = edgeLayer, r = canvas.getBoundingClientRect(), pr = canvas.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
+  if (L.width !== canvas.width || L.height !== canvas.height) { L.width = canvas.width; L.height = canvas.height; }
+  Object.assign(L.style, { left: `${r.left - pr.left}px`, top: `${r.top - pr.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+  const g = L.getContext('2d'), W = L.width, H = L.height, pad = 26;
+  g.clearRect(0, 0, W, H);
+  if (!S.night) return;
+  // bucket off-screen raiders by the edge direction they are in, so a wave shows as a few arrows
+  const groups = new Map();
+  for (const m of S.monsters) {
+    if (m.dead || !m.night) continue;
+    const p = projectRuntimePoint(m.x, m.y, runtimeWalkHeight(m.x, m.y) ?? 0);
+    if (p.x > pad && p.x < W - pad && p.y > pad && p.y < H - pad) continue;
+    const a = Math.atan2(p.y - H / 2, p.x - W / 2), key = Math.round(a / (Math.PI / 8));
+    const gr = groups.get(key) ?? { a: 0, n: 0, boss: false }; gr.a += a; gr.n++; gr.boss ||= m.boss; groups.set(key, gr);
+  }
+  const t = performance.now() / 1000;
+  for (const gr of groups.values()) {
+    const a = gr.a / gr.n, dx = Math.cos(a), dy = Math.sin(a);
+    const k = Math.min((W / 2 - pad) / Math.abs(dx || 1e-6), (H / 2 - pad) / Math.abs(dy || 1e-6)), x = W / 2 + dx * k, y = H / 2 + dy * k;
+    g.save(); g.translate(x, y); g.rotate(a); g.globalAlpha = .75 + Math.sin(t * 6) * .25;
+    g.fillStyle = gr.boss ? '#ffd45c' : '#ff5a4a'; g.strokeStyle = 'rgba(20,6,4,.9)'; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(14, 0); g.lineTo(-10, -12); g.lineTo(-4, 0); g.lineTo(-10, 12); g.closePath(); g.stroke(); g.fill();
+    g.rotate(-a); g.globalAlpha = 1; g.font = 'bold 13px system-ui'; g.textAlign = 'center'; g.lineWidth = 3; g.strokeText(gr.boss ? `บอส +${gr.n}` : gr.n, -dx * 24, -dy * 24 + 4); g.fillStyle = '#fff'; g.fillText(gr.boss ? `บอส +${gr.n}` : gr.n, -dx * 24, -dy * 24 + 4);
+    g.restore();
+  }
+}
 setRuntimePlayerVisual(() => ({ image: null }));
 setRuntimeClickHandler(hit => {
   if (S.over || !hit || hit.idx < 0) return;
@@ -487,14 +581,16 @@ setRuntimeActorUpdater(({ player }) => {
   setRuntimePlayerControl(true); moveCamera(dt); player.x = cam.x; player.y = cam.y;
   tick(dt); combatFX.update(dt * S.speed);
   setRuntimeActors([...S.units.map(u => u.actor ??= unitActor(u)), ...S.monsters.filter(m => !m.dead).map(m => m.actor), ...S.towers.map(t => t.actor), flagActor, hallActor, ...combatFX.getRuntimeActors()]);
-  skillFx?.update(dt); skillFx?.draw(); floaters?.update(dt); floaters?.draw(); syncClock();
+  skillFx?.update(dt); skillFx?.draw(); floaters?.update(dt); floaters?.draw(); drawEdgeArrows(); syncClock();
 });
 skillFx = createSkillFx(canvas); floaters = createFloaters(canvas);
-recruit('guard', true); recruit('archer', true);
+const resumed = load();
+if (!resumed) { recruit('guard', true); recruit('archer', true); }
 renderUi();
-await boot(scene, { canvasEl: canvas, loadingEl: $('loading'), playerSprites: null, worldScale: 1.45 });
+setRuntimeZoomRange(.45, 1.3); // wheel: zoom out to watch the whole clearing
+await boot(scene, { canvasEl: canvas, loadingEl: $('loading'), playerSprites: null, worldScale: 1.45, zoom: .62 });
 { const l = $('loading'); if (l) l.hidden = true; }
-banner('วันที่ 1', 'ส่งกระต่ายออกไปฟาร์ม · คลิกพื้นเพื่อย้ายธง 🚩');
-window.__warren = S; window.__warrenDev = { placeTower, renderUi }; // dev hooks
+banner(resumed ? `กลับมาแล้ว · วันที่ ${S.day}` : 'วันที่ 1', resumed ? `บ้าน Lv ${S.warren} · เวฟ ${S.warren}-${S.wave}` : 'ส่งกระต่ายออกไปฟาร์ม · คลิกพื้นเพื่อย้ายธง 🚩');
+window.__warren = S; window.__warrenDev = { placeTower, renderUi, save, upgradeWarren }; // dev hooks
 window.__warrenStep = // dev: fast-forward the simulation (balance tests)
   sec => { for (let t = 0; t < sec && !S.over; t += 1 / 30) { tick(1 / 30); combatFX.update(1 / 30); } renderUi(); };

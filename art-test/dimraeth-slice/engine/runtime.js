@@ -54,6 +54,8 @@ export function setRuntimePlayerControl(active=false){externalPlayerControl=Bool
 
 let canvas, ctx, player, cam, dusk = false, time = 0, t0 = 0, rafId = 0;
 let bootListeners=[];
+let zoomMin=.7,zoomMax=1.8; // wheel-zoom range; pages can widen it (setRuntimeZoomRange)
+export function setRuntimeZoomRange(min,max){zoomMin=min;zoomMax=max;}
 let viewZoom=1,worldVisualScale=1,playerVisualScale=1,playerVisualGetter=null,externalPlayerControl=false,minimapZoom=1,debugTraversal=false;
 const keys = new Set(), sprites = {}, particles = [];
 
@@ -753,7 +755,7 @@ export function renderHosted({cameraX,cameraY,screenCenterY=H/2,playerEntity=nul
 export async function boot(scene, { canvasEl, loadingEl, playerSprites = null, zoom = 1, worldScale = 1, renderScale, playerScale = 1 }) {
   // worldScale used to upscale the finished ground image (blurry/uneven pixels). It is now a
   // native render scale: terrain and sprites are generated at that size. Hero/actors keep their own scale.
-  viewZoom=Math.max(.5,Math.min(2,zoom));worldVisualScale=1;playerVisualScale=Math.max(.5,Math.min(1.5,playerScale));
+  viewZoom=Math.max(.4,Math.min(2,zoom));worldVisualScale=1;playerVisualScale=Math.max(.5,Math.min(1.5,playerScale));
   const {bakeMs}=await prepare(scene,{canvasEl,loadingEl,renderScale:renderScale??scene.renderScale??worldScale});
   if(playerSprites)await Promise.all(DIRS.map(d => new Promise((res, rej) => { const i = new Image(); i.onload = () => { sprites[d] = i; res(); }; i.onerror = rej; i.src = `${playerSprites}${d}.png`; })));
   const z0 = WS.terrain.walkHeight(scene.spawn.x, scene.spawn.y) ?? 0;
@@ -762,8 +764,8 @@ export async function boot(scene, { canvasEl, loadingEl, playerSprites = null, z
   loadingEl?.remove();
   const onKeyDown=e=>{keys.add(e.code);if(e.code==='KeyL')dusk=!dusk;if(e.code==='F3'){debugTraversal=!debugTraversal;e.preventDefault();}if(e.code==='KeyH'){const h=document.getElementById('hud');if(h)h.hidden=!h.hidden;}if(e.code.startsWith('Arrow'))e.preventDefault();};
   const onKeyUp=e=>keys.delete(e.code);
-  const onWheel=e=>{const factor=e.deltaY<0?1.1:1/1.1;viewZoom=Math.max(.7,Math.min(1.8,viewZoom*factor));e.preventDefault();};
-  const onPointer=e=>{const r=canvas.getBoundingClientRect(),mx=(e.clientX-r.left)*W/r.width,my=(e.clientY-r.top)*H/r.height,hit=WS.terrain.pick(mx-W/2+cam.x,my-H/2+cam.y);if(clickHandler){clickHandler(hit,e);return;}player.target={x:hit.x,y:hit.y};};
+  const onWheel=e=>{const factor=e.deltaY<0?1.1:1/1.1;viewZoom=Math.max(zoomMin,Math.min(zoomMax,viewZoom*factor));e.preventDefault();};
+  const onPointer=e=>{const r=canvas.getBoundingClientRect(),mx=(e.clientX-r.left)*W/r.width,my=(e.clientY-r.top)*H/r.height,hit=WS.terrain.pick((mx-W/2)/viewZoom+cam.x,(my-H/2)/viewZoom+cam.y);if(clickHandler){clickHandler(hit,e);return;}player.target={x:hit.x,y:hit.y};};
   window.addEventListener('keydown',onKeyDown);window.addEventListener('keyup',onKeyUp);canvas.addEventListener('wheel',onWheel,{passive:false});canvas.addEventListener('pointerdown',onPointer);
   bootListeners=[[window,'keydown',onKeyDown],[window,'keyup',onKeyUp],[canvas,'wheel',onWheel,{passive:false}],[canvas,'pointerdown',onPointer]];
   window.__slice = { WS, player, cam, actors, setRuntimeActors, setRuntimeActorUpdater, terrain:WS.terrain, projectRuntimePoint, canRuntimeActorStand, bakeMs, setDusk: v => { dusk = v; } };
