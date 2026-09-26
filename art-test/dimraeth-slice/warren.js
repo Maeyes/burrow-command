@@ -40,6 +40,9 @@ const HALL = { dmg: 9, cd: 1, range: 300 };
 // archer towers: built with gold + materials around the warren; raiders knock them down on the way in
 const TOWER = { gold: 40, mats: 8, hp: 220, dmg: 8, cd: 1.1, range: 260, max: 6, buildR: 520, gap: 80 };
 const T = 64, CENTER = { x: 20 * T, y: 20 * T }, BASE_R = 190;
+const HUNT_R = 330; // farm bunnies hunt monsters within this radius of the hunting flag
+// defenders stand on a ring around the hall, one sector each: melee outside, ranged inside
+const RING = { melee: 235, ranged: 175, zone: 250 };
 
 // ---------- map: a clearing with the warren in the middle, forest all around ----------
 function buildMap() {
@@ -101,7 +104,7 @@ await Promise.all([...normals, ...elites, bossId].filter(Boolean).map(artFor));
 // ---------- state ----------
 const S = {
   gold: 20, mats: { wood: 0, hide: 0, ore: 0 }, tier: { guard: 0, archer: 0, scout: 0, brute: 0 },
-  burrow: BURROW_MAX, day: 1, night: false, clock: 0, flag: { x: CENTER.x + 520, y: CENTER.y - 200 }, speed: 1, over: null,
+  burrow: BURROW_MAX, day: 1, night: false, clock: 0, flag: { x: CENTER.x + 160, y: CENTER.y - 440 }, speed: 1, over: null,
   warren: 1, wave: 1, cleared: false, // progress: warren level, wave index 1..5 (advances only on a win), boss beaten
   units: [], monsters: [], towers: [], building: false, queue: [], waveTimer: 0, kills: 0, time: 0, events: [],
 };
@@ -312,26 +315,49 @@ function hurtUnit(u, dmg, from) {
 function nearestMonster(p, maxD, filter = () => true) { let b = null, bd = maxD; for (const m of S.monsters) { if (m.dead || !filter(m)) continue; const d = dist(p, m); if (d < bd) { bd = d; b = m; } } return b; }
 function nearestUnit(p, maxD) { let b = null, bd = maxD; for (const u of S.units) { if (u.down) continue; const d = dist(p, u); if (d < bd) { bd = d; b = u; } } return b; }
 
+function ringPost(u) {
+  const ring = S.units.filter(x => !x.down && (S.night || x.stance === 'guard'));
+  const i = Math.max(0, ring.indexOf(u)), a = i / Math.max(1, ring.length) * Math.PI * 2 + .4, r = CLASSES[u.cls].range > 100 ? RING.ranged : RING.melee;
+  return { x: CENTER.x + Math.cos(a) * r, y: CENTER.y + Math.sin(a) * r };
+}
+function farmSpot(u) { // idle farmers spread around the flag instead of piling on it
+  const farmers = S.units.filter(x => !x.down && x.stance === 'farm'), i = Math.max(0, farmers.indexOf(u)), a = i / Math.max(1, farmers.length) * Math.PI * 2;
+  return { x: S.flag.x + Math.cos(a) * 110, y: S.flag.y + Math.sin(a) * 110 };
+}
+// pick a target, preferring monsters nobody else is already on (claims are counted per tick)
+function pickTarget(u, from, maxD, filter) {
+  let best = null, bs = Infinity;
+  for (const m of S.monsters) {
+    if (m.dead || !filter(m) || dist(from, m) > maxD) continue;
+    const sc = dist(u, m) + (m.claims ?? 0) * 140;
+    if (sc < bs) { bs = sc; best = m; }
+  }
+  if (best) best.claims = (best.claims ?? 0) + 1;
+  return best;
+}
 function updateUnit(u, dt, i) {
   if (u.down) return;
   u.cd -= dt;
   const c = CLASSES[u.cls], atHome = dist(u, CENTER) < BASE_R;
   if (atHome && carried(u)) deposit(u);
   if (atHome && !S.night && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * .08 * dt); // rest in the warren
-  const post = { x: CENTER.x + Math.cos(i * 2.1) * (c.range > 100 ? 90 : 150), y: CENTER.y + Math.sin(i * 2.1) * (c.range > 100 ? 90 : 150) };
+  const holdsRing = S.night || u.stance === 'guard', post = holdsRing ? ringPost(u) : { x: CENTER.x + (u.id % 5 - 2) * 30, y: CENTER.y + 150 };
   let target = null, goal = null;
   const dusk = !S.night && S.clock > DAY_S - 7;
-  if (S.night) target = nearestMonster(u, 280) || nearestMonster(CENTER, 330);
-  else if (u.stance === 'guard') target = nearestMonster(CENTER, 300);
+  if (holdsRing) {
+    // defend your own sector first; help the nearest fight only if nothing comes your way
+    target = pickTarget(u, post, RING.zone, () => true) || (dist(u, post) < 320 ? pickTarget(u, CENTER, 330, () => true) : null);
+    if (target && dist(target, post) > RING.zone + 140 && dist(target, CENTER) > 200) target = null; // don't get dragged away from the ring
+  }
   else if (dusk || carried(u) >= c.carry) goal = post; // bag full / evening: go home
-  else target = nearestMonster(u, 9999, m => !m.night && dist(m, S.flag) < 460) || nearestMonster(u, 220, m => !m.night);
+  else target = pickTarget(u, S.flag, HUNT_R, m => !m.night) || pickTarget(u, u, 220, m => !m.night);
   if (target) {
     const d = dist(u, target);
     if (d <= c.range) { u.moving = false; if (u.cd <= 0) strike(u, target); }
     else moveToward(u, target.x, target.y, c.speed, dt, c.range * .8);
     return;
   }
-  if (!goal) goal = S.night || u.stance === 'guard' ? post : { x: S.flag.x + Math.cos(u.id * 1.7) * 70, y: S.flag.y + Math.sin(u.id * 1.7) * 70 };
+  if (!goal) goal = holdsRing ? post : farmSpot(u);
   if (moveToward(u, goal.x, goal.y, c.speed * (S.night ? 1.2 : 1), dt, 12)) u.moving = false;
 }
 function updateMonster(m, dt) {
@@ -403,7 +429,7 @@ function startDay() {
   S.monsters = S.monsters.filter(m => !m.dead);
   for (const u of S.units) { if (u.down) { u.down = false; u.x = CENTER.x + (Math.random() - .5) * 120; u.y = CENTER.y + 150; } u.hp = u.maxHp; } // everyone wakes up rested
   window.__slice?.setDusk(false);
-  if (!S.pendingBanner) banner(`วันที่ ${S.day}`, 'ส่งกระต่ายออกไปฟาร์ม · คลิกพื้นเพื่อย้ายธง');
+  if (!S.pendingBanner) banner(`วันที่ ${S.day}`, 'กระต่ายออกล่ารอบจุดล่า 🚩 · คลิกพื้นเพื่อย้าย');
   S.pendingBanner = false;
   save(); renderUi();
 }
@@ -459,9 +485,10 @@ function tick(dt) {
   S.hallCd = (S.hallCd ?? 0) - dt;
   if (S.hallCd <= 0) { const m = nearestMonster(CENTER, HALL.range); if (m) { S.hallCd = HALL.cd; const from = { x: CENTER.x, y: CENTER.y }; skillFx?.play('shotArrow', { from, to: { x: m.x, y: m.y } }); later(.22, () => { if (m.dead) return; m.hp -= HALL.dmg; floaters?.text(m.x, m.y, HALL.dmg, { color: '#bfe3ff', size: 13 }); combatFX.playHitSpark(m.x, m.y, { visualScale: m.actor.visualScale }); if (m.hp <= 0) killMonster(m, null); }); } }
   updateTowers(dt);
+  for (const m of S.monsters) m.claims = 0;
   S.units.forEach((u, i) => updateUnit(u, dt, i));
   for (const m of S.monsters) updateMonster(m, dt);
-  separate(S.units, 26); separate(S.monsters.filter(m => !m.dead), 30);
+  separate(S.units, 32); separate(S.monsters.filter(m => !m.dead), 30);
   S.monsters = S.monsters.filter(m => !m.dead || performance.now() - (m.deadAt ??= performance.now()) < 50);
 }
 
@@ -497,7 +524,7 @@ function renderUi() {
   $('upgrade').disabled = !S.cleared || S.night || S.gold < wc.gold || matCount() < wc.mats;
   $('upgrade').textContent = S.cleared ? `🏠 อัปบ้าน → Lv ${S.warren + 1} (${wc.gold}G + ${wc.mats} ของ)` : `🏠 อัปบ้าน: ชนะบอสเวฟ ${S.warren}-${WAVES_PER_LEVEL} ก่อน`;
   $('revive').disabled = !downs || S.gold < REVIVE_COST; $('revive').textContent = `💖 ปลุกกระต่าย (${REVIVE_COST}G)${downs ? ` · ล้ม ${downs}` : ''}`;
-  $('squad').innerHTML = S.units.map(u => `<button data-unit="${u.id}" class="${u.down ? 'down' : ''} ${u.stance}" title="คลิกสลับ ฟาร์ม/เฝ้าโพรง">${CLASSES[u.cls].icon}<small>${u.down ? 'ล้ม' : u.stance === 'farm' ? 'ฟาร์ม' : 'เฝ้า'}</small></button>`).join('');
+  $('squad').innerHTML = S.units.map(u => `<button data-unit="${u.id}" class="${u.down ? 'down' : ''} ${u.stance}" title="คลิกสลับ: ออกล่า (ไปที่จุดล่า 🚩) / เฝ้าบ้าน (ยืนรอบโพรง)">${CLASSES[u.cls].icon}<small>${u.down ? 'ล้ม' : u.stance === 'farm' ? 'ออกล่า' : 'เฝ้าบ้าน'}</small></button>`).join('');
   syncClock();
 }
 function syncClock() {
@@ -528,7 +555,12 @@ document.body.addEventListener('click', e => {
 // ---------- world objects: farm flag + burrow hall HP ----------
 const blank = document.createElement('canvas'); blank.width = blank.height = 1;
 const flagActor = { kind: 'actor', get x() { return S.flag.x; }, get y() { return S.flag.y; }, z: 0, r: 4, shadow: false, getImage: () => blank,
-  drawOverlay(g, { x, y, time }) { if (S.night) return; g.strokeStyle = '#3a2616'; g.lineWidth = 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - 46); g.stroke(); const wave = Math.sin(time * 6) * 2; g.fillStyle = '#ff6fa8'; g.beginPath(); g.moveTo(x, y - 46); g.lineTo(x + 22, y - 40 + wave); g.lineTo(x, y - 33); g.fill(); g.strokeStyle = 'rgba(255,111,168,.5)'; g.beginPath(); g.ellipse(x, y, 60, 30, 0, 0, Math.PI * 2); g.stroke(); } };
+  drawOverlay(g, { x, y, time }) {
+    if (S.night || !S.units.some(u => u.stance === 'farm')) return;
+    g.strokeStyle = '#3a2616'; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y); g.lineTo(x, y - 70); g.stroke();
+    const wave = Math.sin(time * 6) * 3; g.fillStyle = '#ff6fa8'; g.strokeStyle = '#5a1030'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(x, y - 70); g.lineTo(x + 34, y - 60 + wave); g.lineTo(x, y - 50); g.closePath(); g.fill(); g.stroke();
+  } };
 const hallActor = { kind: 'actor', x: CENTER.x + 40, y: CENTER.y + 40, z: 0, r: 4, shadow: false, getImage: () => blank,
   drawOverlay(g, { x, y }) { if (S.building) drawBuildRing(g); const w = 110, q = S.burrow / hallMax(); g.fillStyle = 'rgba(10,12,12,.85)'; g.fillRect(x - w / 2, y - 150, w, 7); g.fillStyle = q > .5 ? '#7ee38a' : q > .25 ? '#ffc94a' : '#ff5a4a'; g.fillRect(x - w / 2 + 1, y - 149, (w - 2) * q, 5); g.font = 'bold 11px system-ui'; g.textAlign = 'center'; g.fillStyle = '#fff4cf'; g.fillText(`โพรงกระต่าย Lv ${S.warren}`, x, y - 156); } };
 
@@ -546,6 +578,14 @@ function drawEdgeArrows() {
   Object.assign(L.style, { left: `${r.left - pr.left}px`, top: `${r.top - pr.top}px`, width: `${r.width}px`, height: `${r.height}px` });
   const g = L.getContext('2d'), W = L.width, H = L.height, pad = 26;
   g.clearRect(0, 0, W, H);
+  if (!S.night && S.units.some(u => u.stance === 'farm')) {
+    const z = runtimeWalkHeight(S.flag.x, S.flag.y) ?? 0, c = projectRuntimePoint(S.flag.x, S.flag.y, z), e = projectRuntimePoint(S.flag.x + HUNT_R, S.flag.y - HUNT_R, z);
+    const rx = Math.abs(e.x - c.x);
+    g.save(); g.setLineDash([12, 8]); g.lineWidth = 2.5; g.strokeStyle = 'rgba(255,111,168,.85)'; g.fillStyle = 'rgba(255,111,168,.08)';
+    g.beginPath(); g.ellipse(c.x, c.y, rx, rx / 2, 0, 0, Math.PI * 2); g.fill(); g.stroke(); g.restore();
+    g.font = 'bold 15px system-ui'; g.textAlign = 'center'; g.lineWidth = 4; g.strokeStyle = 'rgba(30,8,18,.9)'; g.fillStyle = '#ffd0e4';
+    g.strokeText('จุดล่า 🚩', c.x, c.y + 22); g.fillText('จุดล่า 🚩', c.x, c.y + 22);
+  }
   if (!S.night) return;
   // bucket off-screen raiders by the edge direction they are in, so a wave shows as a few arrows
   const groups = new Map();
@@ -573,7 +613,7 @@ setRuntimeClickHandler(hit => {
   if (S.building) return placeTower(hit.x, hit.y);
   if (S.night) return toast('กลางคืนกระต่ายเฝ้าโพรง ย้ายธงไม่ได้');
   if (!standable(hit.x, hit.y)) return toast('ปักธงตรงนั้นไม่ได้');
-  S.flag = { x: hit.x, y: hit.y }; skillFx?.burst(hit.x, hit.y, { color: '#ff9fcf', count: 10, up: 30 });
+  S.flag = { x: hit.x, y: hit.y }; skillFx?.burst(hit.x, hit.y, { color: '#ff9fcf', count: 10, up: 30 }); toast('ย้ายจุดล่าแล้ว · กระต่ายสายฟาร์มจะไปล่ามอนในวงสีชมพู');
 });
 let last = performance.now();
 setRuntimeActorUpdater(({ player }) => {
@@ -590,7 +630,7 @@ renderUi();
 setRuntimeZoomRange(.45, 1.3); // wheel: zoom out to watch the whole clearing
 await boot(scene, { canvasEl: canvas, loadingEl: $('loading'), playerSprites: null, worldScale: 1.45, zoom: .62 });
 { const l = $('loading'); if (l) l.hidden = true; }
-banner(resumed ? `กลับมาแล้ว · วันที่ ${S.day}` : 'วันที่ 1', resumed ? `บ้าน Lv ${S.warren} · เวฟ ${S.warren}-${S.wave}` : 'ส่งกระต่ายออกไปฟาร์ม · คลิกพื้นเพื่อย้ายธง 🚩');
+banner(resumed ? `กลับมาแล้ว · วันที่ ${S.day}` : 'วันที่ 1', resumed ? `บ้าน Lv ${S.warren} · เวฟ ${S.warren}-${S.wave}` : 'กระต่าย "ออกล่า" ไปล่ามอนในวงชมพูรอบธง 🚩 · คลิกพื้นเพื่อย้ายจุดล่า');
 window.__warren = S; window.__warrenDev = { placeTower, renderUi, save, upgradeWarren }; // dev hooks
 window.__warrenStep = // dev: fast-forward the simulation (balance tests)
   sec => { for (let t = 0; t < sec && !S.over; t += 1 / 30) { tick(1 / 30); combatFX.update(1 / 30); } renderUi(); };
