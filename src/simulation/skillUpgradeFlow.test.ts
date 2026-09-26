@@ -7,6 +7,27 @@ import {
  movementSkillDistanceBonus,skillCoreDamageMultiplier,skillItemUpgradeQuote,skillUpgradeKind
 } from './skillCoreService';
 
+describe('Skill shards',()=>{
+ it('salvages only spare copies and pays missing duplicates with 2 shards each',()=>{
+  let c=createInitialCharacterV2('shard');c.inventory.fireball=1;c.inventory.iceLance=2;c.gold=1e6;
+  c=applySkillCoreCommand(c,{type:'equipCore',coreId:'fireball',slot:0});
+  expect(()=>applySkillCoreCommand(c,{type:'salvageSkillItem',itemId:'fireball'})).toThrow('skill-item-not-spare');
+  c=applySkillCoreCommand(c,{type:'salvageSkillItem',itemId:'iceLance',qty:2});
+  expect(c.inventory.coreShard).toBe(2);
+  c.inventory.fireball=2; // 1 spare duplicate + 2 shards cover the 2 duplicates needed
+  expect(skillItemUpgradeQuote(c,'fireball')).toMatchObject({useDuplicates:1,shardsNeeded:2,shardsOwned:2});
+  c=applySkillCoreCommand(c,{type:'upgradeCore',coreId:'fireball'},()=>0);
+  expect(c.inventory).toMatchObject({fireball:1,coreShard:0});
+  expect(c.skills.coreRarity?.fireball).toBe('good');
+ });
+ it('exchanges 3 shards for any discovered item only',()=>{
+  let c=createInitialCharacterV2('ex');c.inventory.modShard=3;c.inventory.echo=0;
+  expect(()=>applySkillCoreCommand(c,{type:'exchangeShards',itemId:'chain'})).toThrow('skill-item-not-discovered');
+  c=applySkillCoreCommand(c,{type:'exchangeShards',itemId:'echo'});
+  expect(c.inventory).toMatchObject({echo:1,modShard:0});
+ });
+});
+
 describe('Shared Skill Core / Mod / Movement upgrades',()=>{
  it('excludes the installed core from upgrade materials and consumes only spare copies',()=>{
   let c=createInitialCharacterV2('core');c.inventory.fireball=1;c.gold=10000;
@@ -52,20 +73,20 @@ describe('Shared Skill Core / Mod / Movement upgrades',()=>{
   expect(c.inventory.lingering).toBe(2);
   expect(c.skills.modifiersByActive.fireball).toEqual(['lingering','lingering']);
  });
- it('moves one world unit farther for each successful Movement Core tier and persists across refresh',()=>{
+ it('moves MOVEMENT_DISTANCE_PER_RARITY farther for each successful Movement Core tier and persists across refresh',()=>{
   let c=createInitialCharacterV2('movement');c.inventory.dash=3;c.gold=10000;
   c=applySkillCoreCommand(c,{type:'equipMovementCore',coreId:'dash'});
-  expect(skillItemUpgradeQuote(c,'dash')).toMatchObject({kind:'movement',duplicateQty:2,reserved:1,availableDuplicates:2,currentDistance:130,nextDistance:131});
+  expect(skillItemUpgradeQuote(c,'dash')).toMatchObject({kind:'movement',duplicateQty:2,reserved:1,availableDuplicates:2,currentDistance:130,nextDistance:145});
   c=applySkillCoreCommand(c,{type:'upgradeMovementCore',coreId:'dash'},()=>0);
   expect(c.skills.coreRarity?.dash).toBe('good');
   expect(c.inventory.dash).toBe(1);
-  expect(movementSkillDistanceBonus(c,'dash')).toBe(1);
+  expect(movementSkillDistanceBonus(c,'dash')).toBe(15);
   const saved=normalizeCharacterStateV2(JSON.parse(JSON.stringify(c)));
   const a=new ArenaV2Adapter({zoneId:'forest1',player:{x:0,y:0},monsters:[],character:saved});
-  expect(a.simulation.world.players.get(a.playerId)?.movementSkillDistanceBonuses?.dash).toBe(1);
+  expect(a.simulation.world.players.get(a.playerId)?.movementSkillDistanceBonuses?.dash).toBe(15);
   const cast=a.castSkill('dash',undefined,undefined,{x:1,y:0});
   expect(cast.accepted).toBe(true);
-  expect(a.simulation.world.players.get(a.playerId)?.position.x).toBe(131);
+  expect(a.simulation.world.players.get(a.playerId)?.position.x).toBe(145);
  });
  it('preserves upgraded Movement distance on large maps and stops at authored obstacles',()=>{
   let c=createInitialCharacterV2('world-distance');c.inventory.dash=3;c.gold=10000;
@@ -73,7 +94,7 @@ describe('Shared Skill Core / Mod / Movement upgrades',()=>{
   c=applySkillCoreCommand(c,{type:'upgradeMovementCore',coreId:'dash'},()=>0);
   const open=new ArenaV2Adapter({zoneId:'forest1',player:{x:4000,y:4000},monsters:[],character:c,walkableContains:()=>true});
   expect(open.castSkill('dash',undefined,undefined,{x:1,y:0}).accepted).toBe(true);
-  expect(open.simulation.world.players.get(open.playerId)?.position.x).toBe(4131);
+  expect(open.simulation.world.players.get(open.playerId)?.position.x).toBe(4145);
   const wall=new ArenaV2Adapter({zoneId:'forest1',player:{x:4000,y:4000},monsters:[],character:c,walkableContains:pos=>pos.x<=4050});
   expect(wall.castSkill('dash',undefined,undefined,{x:1,y:0}).accepted).toBe(true);
   const landed=wall.simulation.world.players.get(wall.playerId)!.position.x;
@@ -91,7 +112,7 @@ describe('Shared Skill Core / Mod / Movement upgrades',()=>{
   expect(c.skills.coreRarity?.blink).toBe('good');
   expect(c.inventory.blink).toBe(1);
   expect(c.gold).toBe(0);
-  expect(movementSkillDistanceBonus(c,'blink')).toBe(1);
+  expect(movementSkillDistanceBonus(c,'blink')).toBe(15);
  });
  it('rejects wrong upgrade category and max-rarity upgrades',()=>{
   let c=createInitialCharacterV2('max');c.inventory.fireball=3;c.gold=1000000;
@@ -103,5 +124,25 @@ describe('Shared Skill Core / Mod / Movement upgrades',()=>{
   c.skills.coreRarity={fireball:'whiteAscended'};
   expect(skillItemUpgradeQuote(c,'fireball')).toBeNull();
   expect(()=>applySkillCoreCommand(c,{type:'upgradeCore',coreId:'fireball'})).toThrow('skill-item-max-rarity');
+ });
+});
+
+describe('Skill Mods belong to the core slot',()=>{
+ it('keeps a slot\'s mods when its core is swapped, unequipped or moved',()=>{
+  let c=createInitialCharacterV2('slot');Object.assign(c.inventory,{fireball:1,iceLance:1,chainLightning:1,combustion:1,echo:1});
+  c=applySkillCoreCommand(c,{type:'equipCore',coreId:'fireball',slot:0});
+  c=applySkillCoreCommand(c,{type:'equipModifier',coreId:'fireball',modifierId:'combustion',modSlot:0});
+  c=applySkillCoreCommand(c,{type:'equipModifier',coreId:'fireball',modifierId:'echo',modSlot:1});
+  c=applySkillCoreCommand(c,{type:'equipCore',coreId:'iceLance',slot:0}); // swap in place
+  expect(c.skills.modifiersByActive.iceLance).toEqual(['combustion','echo']);
+  expect(c.skills.modifiersByActive.fireball).toBeUndefined();
+  c=applySkillCoreCommand(c,{type:'unequipCore',slot:0}); // parked on the empty slot
+  expect(c.skills.slotMods?.[0]).toEqual(['combustion','echo']);
+  expect(equippedSkillItemCount(c,'echo')).toBe(1);
+  c=applySkillCoreCommand(c,{type:'equipCore',coreId:'chainLightning',slot:0});
+  expect(c.skills.modifiersByActive.chainLightning).toEqual(['combustion','echo']);
+  c=applySkillCoreCommand(c,{type:'equipCore',coreId:'chainLightning',slot:2}); // move: mods stay on slot 0
+  expect(c.skills.slotMods?.[0]).toEqual(['combustion','echo']);
+  expect(c.skills.modifiersByActive.chainLightning).toEqual([]);
  });
 });

@@ -11,7 +11,7 @@ export const WEAPON_MASTERY_MILESTONES:Record<CombatWeaponFamily,MasteryMileston
  dagger:[
   {level:10,id:'doubleAttack',kind:'mechanic',description:'Basic Attack has 20% chance to add one 100% follow-up hit.'},
   {level:20,id:'doubleAttackII',kind:'upgrade',description:'Double Attack chance increases to 25%.'},
-  {level:30,id:'precisionFollowup',kind:'utility',description:'Double Attack follow-up gains HIT +20.'},
+  {level:30,id:'precisionFollowup',kind:'utility',description:'Relentless: each Double Attack follow-up cuts Dagger weapon-skill cooldowns by 0.4s and charges the Lv30 gauge by 1.'},
   {level:40,id:'criticalFollowup',kind:'upgrade',description:'Double Attack follow-up can Crit using normal CRI.'},
   {level:50,id:'doubleAttackIII',kind:'capstone',description:'Double Attack chance increases to 30%.'},
  ],
@@ -37,11 +37,11 @@ export const WEAPON_MASTERY_MILESTONES:Record<CombatWeaponFamily,MasteryMileston
   {level:50,id:'multiShotIII',kind:'capstone',description:'Multi Shot chance becomes 25% and secondary damage 75%.'},
  ],
  staff:[
-  {level:10,id:'concentration',kind:'mechanic',description:'Taking damage does not interrupt casting.'},
-  {level:20,id:'mobileCasting',kind:'utility',description:'Can move while casting with a movement-speed penalty.'},
-  {level:30,id:'flowCasting',kind:'upgrade',description:'Reduces the Mobile Casting movement penalty.'},
-  {level:40,id:'coreEcho',kind:'mechanic',description:'Skill Core effects have 10% chance to Echo at 50% effectiveness; Echo is terminal.'},
-  {level:50,id:'perfectCasting',kind:'capstone',description:'Move at normal speed while casting.'},
+  {level:10,id:'concentration',kind:'mechanic',description:'Spell Chain: casting a Skill Core has 25% chance to also fire a ready Staff weapon skill at the target.'},
+  {level:20,id:'mobileCasting',kind:'upgrade',description:'Spell Chain II: Spell Chain chance increases to 35%.'},
+  {level:30,id:'flowCasting',kind:'mechanic',description:'Cascade: a Spell Chain has 20% chance to also cast another ready Skill Core for free (no SP). Cascaded cores do not chain again.'},
+  {level:40,id:'coreEcho',kind:'mechanic',description:'Resonance: Skill Core hits have 10% chance to Echo at 50%. Any Echo (this or the Echo Mod) resets that core’s cooldown (once per 3s).'},
+  {level:50,id:'perfectCasting',kind:'capstone',description:'Arcane Surge: casting 3 different Skill Cores within 6s grants 5s where Spell Chain always triggers.'},
  ],
  swordShield:[
   {level:10,id:'guard',kind:'mechanic',description:'Block Chance +8%; successful Blocks reduce incoming damage by 50% with a shield.'},

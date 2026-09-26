@@ -23,7 +23,7 @@ export interface EffectMeta { origin:EffectOrigin; echoDepth:number; sourceCoreI
 
 export type CombatEvent =
   | { type: 'attackMissed'; sourceId: EntityId; targetId: EntityId }
-  | { type: 'damageDealt'; sourceId: EntityId; targetId: EntityId; amount: number; critical: boolean; effect?:EffectMeta }
+  | { type: 'damageDealt'; sourceId: EntityId; targetId: EntityId; amount: number; critical: boolean; effect?:EffectMeta; blocked?: boolean }
   | { type: 'attackStarted'; sourceId: EntityId; targetId: EntityId; abilityId: string }
   | { type: 'entityDefeated'; entityId: EntityId; killerId?: EntityId }
   | { type: 'entityRespawned'; entityId: EntityId; position: Vec2 }

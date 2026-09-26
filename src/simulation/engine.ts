@@ -13,7 +13,7 @@ import { skillEntitlementReason } from './skillEntitlements';
 import { stackedSkillModifierFraction } from './skillModifiersV2';
 import type { EffectMeta } from './contracts';
 const skillCoreEffect=(id:string):EffectMeta=>({origin:'SKILL_CORE',echoDepth:0,sourceCoreId:id});
-const echoEffect=(e:EffectMeta):EffectMeta=>({origin:'ECHO',echoDepth:e.echoDepth+1,sourceCoreId:e.sourceCoreId});
+const echoEffect=(e:EffectMeta,ability='echo'):EffectMeta=>({origin:'ECHO',echoDepth:e.echoDepth+1,sourceCoreId:e.sourceCoreId,ability});
 
 export type RandomFn = () => number;
 
@@ -24,13 +24,13 @@ const ARENA_BOUNDS={minX:-1206,maxX:1206,minY:-1076,maxY:1276};
 function clampArenaPosition(p:{x:number;y:number}){return{x:Math.max(ARENA_BOUNDS.minX,Math.min(ARENA_BOUNDS.maxX,p.x)),y:Math.max(ARENA_BOUNDS.minY,Math.min(ARENA_BOUNDS.maxY,p.y))}}
 
 export const MASTERY_COMBAT_V2={
- doubleAttack:{chance20:.20,chance50:.30,hitBonus30:20},
+ doubleAttack:{chance20:.20,chance50:.30,relentlessCdrMs:400},
  cleave:{range:72,wideRange:90},
  heavyBlow:{chance10:.15,chance20:.20,chance40:.25,armorBreakMs:3000},
  hammer:{chance10:.10,chance20:.15,chance40:.20,stunMs:500,slowPercent:.20,slowMs:2000,shockwaveRadius:85,knockback:28},
  guard:{block10:.08,block40:.12,baseMitigation:.50,firmGuardBonus:.20,maxBlockChance:.35,counter30:.20,guardedReduction:.10,guardedMs:2000,noShieldScale:.25},
  bow:{multi10:.15,multi20:.20,multi50:.25,secondary10:.50,secondary50:.75,range30:1.10,defIgnore40:.10},
- staff:{echoChance:.10,echoEffect:.50,mobileMoveScale:.60,flowMoveScale:.80},
+ staff:{echoChance:.10,echoEffect:.50,chain10:.25,chain20:.35,cascade30:.20,resonanceIcdMs:3000,surgeWindowMs:6000,surgeMs:5000},
 } as const;
 /** Off-hand strikes land for 60% of a main-hand hit (they still roll their own hit and crit). */
 export const OFFHAND_DAMAGE_SCALE=.6;
@@ -99,6 +99,7 @@ export class BunnySimulation implements AuthoritativeSimulation {
     }
     for(const monster of this.world.monsters.values()){
       if(!monster.alive)continue;
+      if(monster.judgementUntilMs!==undefined&&monster.judgementUntilMs<=this._clock.nowMs){const lost=Math.max(0,(monster.judgementHp??monster.hp)-monster.hp),blast=Math.min(monster.hp,Math.round(lost*.30)),source=monster.judgementSourceId;monster.judgementUntilMs=monster.judgementHp=monster.judgementSourceId=undefined;if(blast>0&&source){monster.hp-=blast;events.push({type:'damageDealt',sourceId:source,targetId:monster.id,amount:blast,critical:false,effect:skillCoreEffect('thorsJudgement')});if(monster.hp<=0){monster.alive=false;events.push({type:'entityDefeated',entityId:monster.id,killerId:source});continue;}}}
       if((monster.stunnedUntilMs??0)>this._clock.nowMs)continue;
       if((monster.armorBreakUntilMs??0)<=this._clock.nowMs){monster.armorBreakPercent=undefined;monster.armorBreakUntilMs=undefined;}
       if((monster.slowUntilMs??0)<=this._clock.nowMs){monster.slowPercent=undefined;monster.slowUntilMs=undefined;}
@@ -203,7 +204,7 @@ export class BunnySimulation implements AuthoritativeSimulation {
   private healFromWeaponInnate(player:PlayerEntity,actualDamage:number,events:SimulationEvent[],scale=1):void{
     const rate=player.innatePhysicalLifeSteal??0;
     if(rate<=0||actualDamage<=0||!player.alive)return;
-    const amount=Math.min(Math.round(actualDamage*rate*scale),Math.max(0,player.maxHp-player.hp));
+    const amount=Math.min(Math.round(actualDamage*rate*scale),Math.max(0,Math.floor(player.maxHp-player.hp)));
     if(amount<=0)return;
     player.hp+=amount;
     events.push({type:'healed',sourceId:player.id,targetId:player.id,amount});
@@ -218,7 +219,7 @@ export class BunnySimulation implements AuthoritativeSimulation {
     if (!this.canEngage(player.position, target.position)) return this.reject('unreachable-target');
     target.targetPlayerId=player.id; player.lastCombatAtMs=this._clock.nowMs;
     if (this._clock.nowMs < player.nextBasicAttackAtMs) return this.reject('attack-cooldown');
-    const aps=attacksPerSecond(aspd(player.stats,player.equipmentAspd));
+    const aps=attacksPerSecond(aspd(player.stats,player.equipmentAspd))*((player.valkyrieUntilMs??0)>this._clock.nowMs?1.25:1);
     player.nextBasicAttackAtMs=this._clock.nowMs+1000/aps;
     const events:SimulationEvent[]=[{type:'attackStarted',sourceId:player.id,targetId:target.id,abilityId:'basicAttack'}];
 
@@ -233,7 +234,7 @@ export class BunnySimulation implements AuthoritativeSimulation {
       if(this.random()>=hitChance(hit(player.stats,player.hitBonus+hitBonus),enemy.flee)){events.push({type:'attackMissed',sourceId:player.id,targetId:enemy.id});return;}
       const baseDefense=magic?enemy.mdef:enemy.def;const armorBreak=(enemy.armorBreakUntilMs??0)>this._clock.nowMs?(enemy.armorBreakPercent??0):0;
       const defense=baseDefense*(1-armorBreak)*(1-pierce);
-      let damage=Math.max(1,Math.round(damageAfterDefense(attackRaw(),defense,player.stats.level)*scale*(enemy.hp/enemy.maxHp<.30?(player.executeDamageMultiplier??1):1)));
+      let damage=Math.max(1,Math.round(damageAfterDefense(attackRaw(),defense,player.stats.level)*scale*((player.valkyrieUntilMs??0)>this._clock.nowMs?1.15:1)*(enemy.hp/enemy.maxHp<.30?(player.executeDamageMultiplier??1):1)));
       const critical=canCrit&&this.random()<critChance;if(critical)damage=Math.max(1,Math.round(damage*BASE_CRIT_DAMAGE*(player.critDamageMultiplier??1)));
       const actualDamage=Math.min(enemy.hp,damage);
       enemy.hp=Math.max(0,enemy.hp-damage);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:damage,critical,effect:(ability==='basicAttack'||ability==='offhandAttack')?{origin:'PRIMARY',echoDepth:0}:{origin:'MASTERY_PROC',echoDepth:0,ability}});
@@ -258,11 +259,13 @@ export class BunnySimulation implements AuthoritativeSimulation {
     // Each selected milestone contributes its own piece; higher milestones no longer become globally active just because mastery level is high.
     const doubleChance=hasMasteryPassive(player,'dagger','doubleAttackIII') ? .30 : hasMasteryPassive(player,'dagger','doubleAttackII') ? .25 : daggerAny ? .20 : 0;
     const precisionFollowup=hasMasteryPassive(player,'dagger','precisionFollowup'),criticalFollowup=hasMasteryPassive(player,'dagger','criticalFollowup');
-    if(doubleChance&&this.random()<doubleChance)hitOne(target,1,precisionFollowup?20:0,criticalFollowup,'doubleAttack');
+    // Relentless (id kept as precisionFollowup for saves): follow-ups speed up weapon-skill procs.
+    const relentless=()=>{if(!precisionFollowup)return;const st=player.weaponProc??={hits:0,gauge:0,readyAtMs:{}};for(const id in st.readyAtMs)st.readyAtMs[id]-=MASTERY_COMBAT_V2.doubleAttack.relentlessCdrMs;st.gauge=Math.min(WEAPON_PROC_RULES_V2.gaugeHits,st.gauge+1);};
+    if(doubleChance&&this.random()<doubleChance){hitOne(target,1,0,criticalFollowup,'doubleAttack');relentless();}
     if(player.hasOffhandWeaponEquipped&&target.alive&&doubleChance&&this.random()<doubleChance){
       const mainAtk=player.weaponAtk,mainMatk=player.weaponMatk;
       player.weaponAtk=player.offhandWeaponAtk??0;player.weaponMatk=player.offhandWeaponMatk??0;
-      hitOne(target,OFFHAND_DAMAGE_SCALE,precisionFollowup?20:0,criticalFollowup,'doubleAttackOffhand');
+      hitOne(target,OFFHAND_DAMAGE_SCALE,0,criticalFollowup,'doubleAttackOffhand');relentless();
       player.weaponAtk=mainAtk;player.weaponMatk=mainMatk;
     }
 
@@ -296,7 +299,7 @@ export class BunnySimulation implements AuthoritativeSimulation {
     return this.accept(events);
   }
 
-  private castSkill(player: PlayerEntity, skillId: string, targetId?: EntityId, ground?: Readonly<{x:number;y:number}>, direction?: Readonly<{x:number;y:number}>, fromProc=false): CommandResult {
+  private castSkill(player: PlayerEntity, skillId: string, targetId?: EntityId, ground?: Readonly<{x:number;y:number}>, direction?: Readonly<{x:number;y:number}>, fromProc=false, chained=false): CommandResult {
     const skill=SKILLS_V2[skillId];if(!skill)return this.reject('unknown-skill');
     if(skill.kind==='weapon'&&!fromProc)return this.reject('weapon-skill-triggers-on-attack');
     const entitlementReason=skillEntitlementReason(player.skillEntitlements,skillId,skill.kind);if(entitlementReason)return this.reject(entitlementReason);
@@ -310,8 +313,14 @@ export class BunnySimulation implements AuthoritativeSimulation {
     const modIds=player.skillEntitlements.modifiersByActive?.[skillId]??[];
     const hasMod=(id:string)=>modIds.includes(id);
     const modPct=(id:string,base:number)=>stackedSkillModifierFraction(modIds,id,base*(player.skillModifierMultipliers?.[id]??1));
-    if(skillId==='barrier'){const fraction=skill.barrierMaxHpFraction??.15,durationMs=skill.durationMs??5000,max=Math.max(1,Math.round(player.maxHp*fraction));player.barrierHp=max;player.barrierMaxHp=max;player.barrierUntilMs=this._clock.nowMs+durationMs;events.push({type:'barrierApplied',entityId:player.id,amount:max,durationMs});this.startSkillCooldown(player,skill,events);return this.accept(events);}
-    if(skillId==='healingPulse'){const heal=Math.max(1,Math.round(player.maxHp*(skill.healMaxHpFraction??.2)*(player.healingMultiplier??1)));const actual=Math.min(heal,player.maxHp-player.hp);player.hp+=actual;if(actual>0)events.push({type:'healed',sourceId:player.id,targetId:player.id,amount:actual});if(actual>0&&staffEcho&&this.random()<MASTERY_COMBAT_V2.staff.echoChance){const amount=Math.min(Math.max(1,Math.round(actual*MASTERY_COMBAT_V2.staff.echoEffect)),player.maxHp-player.hp);player.hp+=amount;if(amount>0)events.push({type:'healed',sourceId:player.id,targetId:player.id,amount});}this.startSkillCooldown(player,skill,events);return this.accept(events);}
+    // Defensive Skill Mods: Barrier / Healing Pulse / Valkyrie's Call reinterpret the damage mods.
+    const lowHp=player.hp/player.maxHp<.35;
+    const supportScale=(1+modPct('lingering',.20))*(1+modPct('bloodPrice',.40))*(lowHp?1+modPct('execution',.40):1);
+    const supportDuration=1+modPct('expandedArea',.25);
+    if((skillId==='barrier'||skillId==='healingPulse'||skillId==='valkyriesCall')&&hasMod('bloodPrice')){const cost=Math.min(player.hp-1,Math.round(player.maxHp*.03));if(cost>0){player.hp-=cost;events.push({type:'damageDealt',sourceId:player.id,targetId:player.id,amount:cost,critical:false});}}
+    if(skillId==='barrier'){const fraction=skill.barrierMaxHpFraction??.15,durationMs=Math.round((skill.durationMs??5000)*supportDuration);let max=Math.max(1,Math.round(player.maxHp*fraction*supportScale));if(hasMod('echo')&&this.random()<modPct('echo',.30))max=Math.round(max*1.5);player.barrierHp=max;player.barrierMaxHp=max;player.barrierUntilMs=this._clock.nowMs+durationMs;player.barrierBreakHeal=hasMod('lifeDrain')?Math.round(max*modPct('lifeDrain',.30)):0;events.push({type:'barrierApplied',entityId:player.id,amount:max,durationMs});this.startSkillCooldown(player,skill,events);return this.accept(events);}
+    if(skillId==='healingPulse'){let heal=Math.max(1,Math.round(player.maxHp*(skill.healMaxHpFraction??.2)*(player.healingMultiplier??1)*supportScale));if(hasMod('echo')&&this.random()<modPct('echo',.30))heal=Math.round(heal*1.5);const actual=Math.min(heal,Math.floor(player.maxHp-player.hp));player.hp+=actual;if(actual>0)events.push({type:'healed',sourceId:player.id,targetId:player.id,amount:actual});if(actual>0&&staffEcho&&this.random()<MASTERY_COMBAT_V2.staff.echoChance){const amount=Math.min(Math.max(1,Math.round(actual*MASTERY_COMBAT_V2.staff.echoEffect)),Math.floor(player.maxHp-player.hp));player.hp+=amount;if(amount>0)events.push({type:'healed',sourceId:player.id,targetId:player.id,amount});}this.startSkillCooldown(player,skill,events);return this.accept(events);}
+    if(skillId==='valkyriesCall'){player.valkyrieUntilMs=this._clock.nowMs+Math.round((skill.durationMs??8000)*supportDuration*(1+modPct('lingering',.20)));this.startSkillCooldown(player,skill,events);return this.accept(events);}
     if(!skill.scaling||!skill.coefficient){this.startSkillCooldown(player,skill,events);return this.accept(events);}
     const target=targetId?entityById(this.world,targetId):undefined;let center=player.position;
     const effectiveRange=(skill.range??player.attackRange)*(1+modPct('mobileCast',.20));
@@ -321,15 +330,57 @@ export class BunnySimulation implements AuthoritativeSimulation {
     else if(skill.targeting==='targetArea'){if(!target||target.kind!=='monster'||!target.alive)return this.reject('invalid-target');if(distance(player.position,target.position)>effectiveRange)return this.reject('out-of-range');center=target.position;}
     else if(skill.targeting!=='selfArea'){if(!target||target.kind!=='monster'||!target.alive)return this.reject('invalid-target');if(distance(player.position,target.position)>effectiveRange)return this.reject('out-of-range');}
     const targets=skill.targeting?.endsWith('Area')?[...this.world.monsters.values()].filter(m=>m.alive&&distance(center,m.position)<=effectiveRadius):target&&target.kind==='monster'?[target]:[];if(!targets.length)return this.reject('no-targets');
-    if(skillId==='blackHole'){for(const enemy of targets){const dx=center.x-enemy.position.x,dy=center.y-enemy.position.y,len=Math.hypot(dx,dy);if(len>18){const pull=Math.min(len-18,Math.max(36,len*.72));enemy.position={x:enemy.position.x+dx/len*pull,y:enemy.position.y+dy/len*pull};events.push({type:'positionChanged',entityId:enemy.id,position:{...enemy.position}});}}}
+    if(skillId==='blackHole'||skillId==='abyssalGrasp'){for(const enemy of targets){const dx=center.x-enemy.position.x,dy=center.y-enemy.position.y,len=Math.hypot(dx,dy);if(len>18){const pull=Math.min(len-18,Math.max(36,len*.72));enemy.position={x:enemy.position.x+dx/len*pull,y:enemy.position.y+dy/len*pull};events.push({type:'positionChanged',entityId:enemy.id,position:{...enemy.position}});}}}
+    if(hasMod('bloodPrice')){const cost=Math.min(player.hp-1,Math.round(player.maxHp*.03));if(cost>0){player.hp-=cost;events.push({type:'damageDealt',sourceId:player.id,targetId:player.id,amount:cost,critical:false});}}
+    if(skillId==='thorsJudgement')for(const enemy of targets){enemy.judgementUntilMs=this._clock.nowMs+(skill.durationMs??4000);enemy.judgementHp=enemy.hp;enemy.judgementSourceId=player.id;}
+    if(skillId==='tidalWave')for(const enemy of targets){const d=normalized({x:enemy.position.x-player.position.x,y:enemy.position.y-player.position.y});enemy.position={x:enemy.position.x+d.x*45,y:enemy.position.y+d.y*45};enemy.slowPercent=.30;enemy.slowUntilMs=this._clock.nowMs+2500;events.push({type:'positionChanged',entityId:enemy.id,position:{...enemy.position}});}
     const scaling=skill.scaling==='magicalAttack'?magicalAttack(player.stats,player.weaponMatk):physicalAttack(player.stats,player.weaponFamily as PhysicalWeaponFamily,player.weaponAtk)*(player.innatePhysicalAttackMultiplier??1);const hitCount=Math.max(1,skill.hitCount??1);
-    const damageScale=(player.skillCoreDamageMultipliers?.[skillId]??1)*(skill.kind==='weapon'?(player.weaponSkillDamageMultiplier??1):(player.coreSkillDamageMultiplier??1))*(1+modPct('lingering',.20))*(1+modPct('chain',.10))*(1+(skill.element==='fire'?modPct('combustion',.30):0))*(1+(skill.element==='lightning'?modPct('overcharge',.30):0))*(1+(!skill.targeting?.endsWith('Area')?modPct('concentratedForce',.35):0));
+    const damageScale=(player.skillCoreDamageMultipliers?.[skillId]??1)*(skill.kind==='weapon'?(player.weaponSkillDamageMultiplier??1):(player.coreSkillDamageMultiplier??1))*(1+modPct('lingering',.20))*(1+modPct('chain',.10))*(1+(skill.element==='fire'?modPct('combustion',.30):0))*(1+(skill.element==='lightning'||skillId==='ragnarok'?modPct('overcharge',.30):0))*(1+modPct('bloodPrice',.40))*((player.valkyrieUntilMs??0)>this._clock.nowMs?1.15:1)*(1+(!skill.targeting?.endsWith('Area')?modPct('concentratedForce',.35):0));
     const elementScale=skill.element&&skill.element!=='physical'?(player.elementDamageMultiplier??1):1;
     const rawPerHit=(scaling*skill.coefficient+(skill.flatPower??0))*damageScale*elementScale/hitCount;
     // AoE heals at full value on the first successfully hit enemy; each later target contributes half.
-    let lifestealTargetsHit=0;
-    for(const enemy of targets){enemy.targetPlayerId=player.id;if(skill.accuracy!=='alwaysHit'&&this.random()>=hitChance(hit(player.stats,player.hitBonus),enemy.flee)){events.push({type:'attackMissed',sourceId:player.id,targetId:enemy.id});continue;}const innateLifestealScale=skill.targeting?.endsWith('Area')&&lifestealTargetsHit++>0?.5:1;const defense=skill.defenseType==='ignore'?0:skill.defenseType==='mdef'?enemy.mdef:enemy.def*(1-(skill.scaling==='physicalAttack'?(player.innatePhysicalArmorPenetration??0):0));for(let i=0;i<hitCount&&enemy.alive;i++){let damage=damageAfterDefense(rawPerHit,defense,player.stats.level);if(enemy.hp/enemy.maxHp<.30)damage=Math.max(1,Math.round(damage*(1+modPct('execution',.25))*(player.executeDamageMultiplier??1)));const critical=Boolean(skill.canCrit)&&this.random()<Math.min(.7,(1+player.stats.luk*.3+player.critBonusPercent)/100);if(critical)damage=Math.max(1,Math.round(damage*BASE_CRIT_DAMAGE*(player.critDamageMultiplier??1)));const actualDamage=Math.min(enemy.hp,damage);enemy.hp=Math.max(0,enemy.hp-damage);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:damage,critical,effect:coreMeta});if(skill.scaling==='physicalAttack')this.healFromWeaponInnate(player,actualDamage,events,innateLifestealScale);if(hasMod('lifeDrain')&&damage>0){const heal=Math.min(Math.max(1,Math.round(damage*modPct('lifeDrain',.05))),player.maxHp-player.hp);player.hp+=heal;if(heal>0)events.push({type:'healed',sourceId:player.id,targetId:player.id,amount:heal});}if(enemy.alive&&(hasMod('echo')||hasMod('extraStrike'))&&this.random()<Math.max(modPct('echo',.20),modPct('extraStrike',.20))){const bonusScale=Math.max(modPct('echo',.50),modPct('extraStrike',.50));const bonus=Math.max(1,Math.round(damage*bonusScale));enemy.hp=Math.max(0,enemy.hp-bonus);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:bonus,critical:false,effect:echoEffect(coreMeta)});}if(enemy.alive&&staffEcho&&this.random()<MASTERY_COMBAT_V2.staff.echoChance){const echoDamage=Math.max(1,Math.round(damage*MASTERY_COMBAT_V2.staff.echoEffect));enemy.hp=Math.max(0,enemy.hp-echoDamage);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:echoDamage,critical:false,effect:echoEffect(coreMeta)});}if(enemy.hp===0){enemy.alive=false;events.push({type:'entityDefeated',entityId:enemy.id,killerId:player.id});}}}
-    this.startSkillCooldown(player,skill,events);return this.accept(events);
+    let lifestealTargetsHit=0,echoFired=false;
+    for(const enemy of targets){enemy.targetPlayerId=player.id;if(skill.accuracy!=='alwaysHit'&&this.random()>=hitChance(hit(player.stats,player.hitBonus),enemy.flee)){events.push({type:'attackMissed',sourceId:player.id,targetId:enemy.id});continue;}const innateLifestealScale=skill.targeting?.endsWith('Area')&&lifestealTargetsHit++>0?.5:1;const defense=skill.defenseType==='ignore'?0:skill.defenseType==='mdef'?enemy.mdef:enemy.def*(1-(skill.scaling==='physicalAttack'?(player.innatePhysicalArmorPenetration??0):0));for(let i=0;i<hitCount&&enemy.alive;i++){let damage=damageAfterDefense(rawPerHit,defense,player.stats.level);if(enemy.hp/enemy.maxHp<.35)damage=Math.max(1,Math.round(damage*(1+modPct('execution',.40))*(player.executeDamageMultiplier??1)));const critical=Boolean(skill.canCrit)&&this.random()<Math.min(.7,(1+player.stats.luk*.3+player.critBonusPercent)/100);if(critical)damage=Math.max(1,Math.round(damage*BASE_CRIT_DAMAGE*(player.critDamageMultiplier??1)));const actualDamage=Math.min(enemy.hp,damage);enemy.hp=Math.max(0,enemy.hp-damage);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:damage,critical,effect:coreMeta});if(skill.scaling==='physicalAttack')this.healFromWeaponInnate(player,actualDamage,events,innateLifestealScale);if(skillId==='siphonSoul'&&damage>0){const heal=Math.min(Math.max(1,Math.round(damage*.25)),Math.floor(player.maxHp-player.hp));player.hp+=heal;if(heal>0)events.push({type:'healed',sourceId:player.id,targetId:player.id,amount:heal});}if(hasMod('lifeDrain')&&damage>0){const heal=Math.min(Math.max(1,Math.round(damage*modPct('lifeDrain',.12))),Math.floor(player.maxHp-player.hp));player.hp+=heal;if(heal>0)events.push({type:'healed',sourceId:player.id,targetId:player.id,amount:heal});}for(const extraMod of ['echo','extraStrike'] as const){if(enemy.alive&&hasMod(extraMod)&&this.random()<modPct(extraMod,.30)){const bonus=Math.max(1,Math.round(damage*modPct(extraMod,.50)));enemy.hp=Math.max(0,enemy.hp-bonus);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:bonus,critical:false,effect:echoEffect(coreMeta,extraMod)});if(extraMod==='echo')echoFired=true;}}if(enemy.alive&&staffEcho&&this.random()<MASTERY_COMBAT_V2.staff.echoChance){const echoDamage=Math.max(1,Math.round(damage*MASTERY_COMBAT_V2.staff.echoEffect));enemy.hp=Math.max(0,enemy.hp-echoDamage);events.push({type:'damageDealt',sourceId:player.id,targetId:enemy.id,amount:echoDamage,critical:false,effect:echoEffect(coreMeta,'coreEcho')});echoFired=true;}if(enemy.hp===0){enemy.alive=false;events.push({type:'entityDefeated',entityId:enemy.id,killerId:player.id});}}}
+    this.startSkillCooldown(player,skill,events,chained);
+    if(skill.kind!=='weapon')this.afterCoreCast(player,skillId,targetId,chained,echoFired,events);
+    return this.accept(events);
+  }
+
+  /**
+   * Staff mastery (ids kept from the old casting passives so saves carry over):
+   * concentration=Spell Chain, mobileCasting=Spell Chain II, flowCasting=Cascade,
+   * coreEcho=Resonance, perfectCasting=Arcane Surge. Chains go one step deep: a core cast by
+   * Cascade never starts another Spell Chain.
+   */
+  private afterCoreCast(player:PlayerEntity,coreId:string,targetId:EntityId|undefined,chained:boolean,echoFired:boolean,events:SimulationEvent[]):void{
+    if(player.weaponFamily!=='staff'||!player.alive)return;
+    const now=this._clock.nowMs,S=MASTERY_COMBAT_V2.staff;
+    if(echoFired&&hasMasteryPassive(player,'staff','coreEcho')&&now>=(player.resonanceReadyAtMs??0)){
+      player.cooldowns[coreId]=now;player.resonanceReadyAtMs=now+S.resonanceIcdMs;
+      events.push({type:'cooldownStarted',entityId:player.id,abilityId:coreId,durationMs:0});
+    }
+    if(chained)return;
+    if(hasMasteryPassive(player,'staff','perfectCasting')){
+      const recent=(player.surgeCasts??[]).filter(x=>now-x.at<=S.surgeWindowMs&&x.id!==coreId);recent.push({id:coreId,at:now});player.surgeCasts=recent;
+      if(new Set(recent.map(x=>x.id)).size>=3){player.arcaneSurgeUntilMs=now+S.surgeMs;player.surgeCasts=[];}
+    }
+    const surging=(player.arcaneSurgeUntilMs??0)>now;
+    const chance=surging?1:hasMasteryPassive(player,'staff','mobileCasting')?S.chain20:hasMasteryPassive(player,'staff','concentration')?S.chain10:0;
+    if(!chance||this.random()>=chance)return;
+    let target=targetId?this.world.monsters.get(targetId):undefined;
+    if(!target?.alive)target=[...this.world.monsters.values()].filter(m=>m.alive&&distance(m.position,player.position)<=280).sort((a,b)=>distance(a.position,player.position)-distance(b.position,player.position))[0];
+    if(!target)return;
+    const st=player.weaponProc??={hits:0,gauge:0,readyAtMs:{}};
+    const ready=player.skillEntitlements.weaponSkills.filter((id):id is string=>typeof id==='string'&&now>=(st.readyAtMs[id]??0));
+    const weaponSkill=ready[Math.floor(this.random()*ready.length)];if(!weaponSkill)return;
+    const res=this.castSkill(player,weaponSkill,target.id,target.position,undefined,true);if(!res.accepted)return;
+    st.readyAtMs[weaponSkill]=now+(SKILLS_V2[weaponSkill]?.cooldownMs??0)*WEAPON_PROC_RULES_V2.cooldownFloor;
+    events.push(...res.events.map(e=>e.type==='damageDealt'&&e.effect?{...e,effect:{...e.effect,ability:e.effect.ability??weaponSkill}}:e));
+    if(!hasMasteryPassive(player,'staff','flowCasting')||this.random()>=S.cascade30)return;
+    const cores=player.skillEntitlements.active.filter((id):id is string=>typeof id==='string').filter(id=>id!==coreId&&now>=(player.cooldowns[id]??0)&&Boolean(SKILLS_V2[id]?.scaling));
+    const core=cores[Math.floor(this.random()*cores.length)];if(!core)return;
+    const coreRes=this.castSkill(player,core,target.id,target.position,undefined,true,true);
+    if(coreRes.accepted)events.push(...coreRes.events);
   }
 
   private dodge(player: PlayerEntity, direction: Readonly<{x:number;y:number}>): CommandResult {
@@ -348,9 +399,9 @@ export class BunnySimulation implements AuthoritativeSimulation {
     ]);
   }
 
-  private startSkillCooldown(player: PlayerEntity, skill: SkillDefinitionV2, events: SimulationEvent[]): void {
+  private startSkillCooldown(player: PlayerEntity, skill: SkillDefinitionV2, events: SimulationEvent[], free=false): void {
     if(skill.kind==='weapon')return;
-    const spCost=Math.round(skillSpCostV2(skill)*(player.skillCostMultiplier??1));if(spCost>0&&player.sp!==undefined)player.sp=Math.max(0,player.sp-spCost);
+    const spCost=free?0:Math.round(skillSpCostV2(skill)*(player.skillCostMultiplier??1));if(spCost>0&&player.sp!==undefined)player.sp=Math.max(0,player.sp-spCost);
     const modIds=player.skillEntitlements.modifiersByActive?.[skill.id]??[];
     const rapidReduction=stackedSkillModifierFraction(modIds,'rapidCasting',.20);
     const durationMs = Math.round((skill.cooldownMs ?? 0)*(1-rapidReduction)*(player.coreCooldownMultiplier??1));
@@ -387,11 +438,11 @@ export class BunnySimulation implements AuthoritativeSimulation {
       const critical = this.random() < monster.critChance;
       if (critical) damage = Math.max(1, Math.round(damage * BASE_CRIT_DAMAGE));
       if((target.barrierUntilMs??0)<=this._clock.nowMs){target.barrierHp=0;target.barrierMaxHp=0;}
-      if((target.barrierHp??0)>0){const absorbed=Math.min(damage,target.barrierHp??0);target.barrierHp=Math.max(0,(target.barrierHp??0)-absorbed);damage-=absorbed;events.push({type:'barrierAbsorbed',entityId:target.id,amount:absorbed,remaining:target.barrierHp??0});}
+      if((target.barrierHp??0)>0){const absorbed=Math.min(damage,target.barrierHp??0);target.barrierHp=Math.max(0,(target.barrierHp??0)-absorbed);damage-=absorbed;events.push({type:'barrierAbsorbed',entityId:target.id,amount:absorbed,remaining:target.barrierHp??0});if(target.barrierHp===0&&(target.barrierBreakHeal??0)>0){const heal=Math.min(target.barrierBreakHeal??0,Math.floor(target.maxHp-target.hp));target.barrierBreakHeal=0;target.hp+=heal;if(heal>0)events.push({type:'healed',sourceId:target.id,targetId:target.id,amount:heal});}}
       target.hp = Math.max(0, target.hp - damage);
       if(blocked&&hasMasteryPassive(target,'swordShield','aegisMastery'))target.guardedUntilMs=this._clock.nowMs+MASTERY_COMBAT_V2.guard.guardedMs;
       if(blocked&&hasMasteryPassive(target,'swordShield','counterGuard')&&this.random()<MASTERY_COMBAT_V2.guard.counter30*shieldScale&&monster.alive){const raw=physicalAttack(target.stats,target.weaponFamily as PhysicalWeaponFamily,target.weaponAtk);const counter=damageAfterDefense(raw,monster.def,target.stats.level);monster.hp=Math.max(0,monster.hp-counter);events.push({type:'damageDealt',sourceId:target.id,targetId:monster.id,amount:counter,critical:false});if(monster.hp===0){monster.alive=false;events.push({type:'entityDefeated',entityId:monster.id,killerId:target.id});}}
-      events.push({ type: 'damageDealt', sourceId: monster.id, targetId: target.id, amount: damage, critical });
+      events.push({ type: 'damageDealt', sourceId: monster.id, targetId: target.id, amount: damage, critical, ...(blocked?{blocked:true}:{}) });
       if (target.hp === 0) {
         target.alive = false;
         events.push({ type: 'entityDefeated', entityId: target.id, killerId: monster.id });

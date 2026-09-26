@@ -26,7 +26,10 @@ describe('equipment lifecycle service',()=>{
  it('refinement failure respects safe floors and protection',()=>{
   let s=funded();const c=applyEquipmentCommand(s,{type:'craft',recipe},()=>0);s=applyEquipmentCommand(c.state,{type:'equip',equipmentId:c.createdEquipmentId!}).state;
   s={...s,equipment:{...s.equipment,refinementBySlot:{main:9}}};expect(applyEquipmentCommand(s,{type:'refine',slot:'main'},()=>.99).state.equipment.refinementBySlot.main).toBe(9);
-  s={...s,equipment:{...s.equipment,refinementBySlot:{main:8}}};expect(applyEquipmentCommand(s,{type:'refine',slot:'main'},()=>.99).state.equipment.refinementBySlot.main).toBe(7);
+  // A failed roll drops one level only when the second roll lands under 50%.
+  const seq=(...v:number[])=>{let i=0;return()=>v[Math.min(i++,v.length-1)];};
+  s={...s,equipment:{...s.equipment,refinementBySlot:{main:8}}};expect(applyEquipmentCommand(s,{type:'refine',slot:'main'},seq(.99,.10)).state.equipment.refinementBySlot.main).toBe(7);
+  expect(applyEquipmentCommand(s,{type:'refine',slot:'main'},seq(.99,.60)).state.equipment.refinementBySlot.main).toBe(8);
   expect(applyEquipmentCommand(s,{type:'refine',slot:'main',protectedAttempt:true},()=>.99).state.equipment.refinementBySlot.main).toBe(8);
  });
  it('gear swapping cannot transfer or reset progression between slots',()=>{

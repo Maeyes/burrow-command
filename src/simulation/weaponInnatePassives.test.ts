@@ -31,7 +31,7 @@ describe('weapon innate passives',()=>{
    hammer:{hpMultiplier:1.06,defMultiplier:1.03},
    greatsword:{physicalAtkMultiplier:1.05},
    swordShield:{physicalAtkMultiplier:1.035,blockChanceBonus:0},
-   staff:{matkMultiplier:1.05},
+   staff:{matkMultiplier:1.08,coreCooldownMultiplier:.92},
    axe:{physicalArmorPenetration:.10,physicalLifeSteal:.02},
    bow:{physicalAtkMultiplier:1.05,hitBonus:5},
   };
@@ -64,7 +64,7 @@ describe('weapon innate passives',()=>{
   expect(weaponInnateBonuses(s)).toMatchObject({hasShieldEquipped:false,physicalAtkMultiplier:1.035,blockChanceBonus:0});
   equip(s,'main','sporewoodWand');
   equip(s,'offhand','t1Shield');
-  expect(weaponInnateBonuses(s)).toMatchObject({family:'staff',matkMultiplier:1.05,hasShieldEquipped:true,blockChanceBonus:.05});
+  expect(weaponInnateBonuses(s)).toMatchObject({family:'staff',matkMultiplier:1.08,coreCooldownMultiplier:.92,hasShieldEquipped:true,blockChanceBonus:.05});
  });
  it('recognizes all six tiers of shield and offhand dagger, without granting the pair to two-handed weapons',()=>{
   for(let tier=1;tier<=6;tier++){

@@ -25,6 +25,10 @@ export interface PlayerEntity extends BaseEntity {
   weaponFamily: CombatWeaponFamily;
   /** Weapon-skill proc state (see WEAPON_PROC_RULES_V2 in engine.ts). */
   weaponProc?: { hits: number; gauge: number; readyAtMs: Record<string, number> };
+  /** Staff mastery runtime: Resonance cooldown-reset ICD and Arcane Surge tracking. */
+  resonanceReadyAtMs?: number;
+  surgeCasts?: { id: string; at: number }[];
+  arcaneSurgeUntilMs?: number;
   weaponAtk: number;
   weaponMatk: number;
   /** Authoritative offhand weapon contribution, kept separate so dual-wield strikes do not double-count it in the main-hand hit. */
@@ -84,6 +88,10 @@ export interface PlayerEntity extends BaseEntity {
   barrierHp?: number;
   barrierMaxHp?: number;
   barrierUntilMs?: number;
+  /** Valkyrie's Call: +25% attack speed and +15% damage until this time. */
+  valkyrieUntilMs?: number;
+  /** Life Drain on Barrier: HP restored when the current Barrier is broken by damage. */
+  barrierBreakHeal?: number;
 }
 
 export interface MonsterEntity extends BaseEntity {
@@ -115,6 +123,10 @@ export interface MonsterEntity extends BaseEntity {
   stunnedUntilMs?: number;
   slowPercent?: number;
   slowUntilMs?: number;
+  /** Thor's Judgement: when the mark ends, 30% of HP lost since the mark detonates. */
+  judgementUntilMs?: number;
+  judgementHp?: number;
+  judgementSourceId?: EntityId;
   armorBreakPercent?: number;
   armorBreakUntilMs?: number;
 }

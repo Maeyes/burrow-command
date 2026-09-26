@@ -12,7 +12,7 @@ import { applyEquipmentCommand, type EquipmentCommandV2, type EquipmentCommandRe
 import { grantLootWithEquipment } from './equipmentLoot';
 import { applySkillCoreCommand, skillCoreDamageMultiplier, movementSkillDistanceBonus, type SkillCoreCommandV2 } from './skillCoreService';
 import { applyMasteryLoadoutCommand, masteryPassiveKeys, type MasteryLoadoutCommandV2 } from './masteryLoadout';
-import { allocateCharacterStatsV2, createInitialCharacterV2 } from './character';
+import { allocateCharacterStatsV2,resetCharacterStatsV2, createInitialCharacterV2 } from './character';
 import type { SimulationCommand, SimulationEvent, Vec2 } from './contracts';
 import { createContributionLedger, recordContribution, type ContributionLedger } from './contribution';
 import { nextAutoCommand, type ControlMode } from './auto';
@@ -71,8 +71,8 @@ export interface ArenaV2AdapterOptions {
  * inventory and mastery never sync inward from presentation.
  */
 const BASE_MOVE_SPEED=180,BASE_DODGE_COOLDOWN_MS=1200;
-function gearHooks(gear:ReturnType<typeof equipmentCombatTotals>){
-  return{weaponSkillDamageMultiplier:gear.weaponSkillDamageMultiplier,coreSkillDamageMultiplier:gear.coreSkillDamageMultiplier,coreCooldownMultiplier:gear.coreCooldownMultiplier,
+function gearHooks(gear:ReturnType<typeof equipmentCombatTotals>,innate?:{coreCooldownMultiplier:number}){
+  return{weaponSkillDamageMultiplier:gear.weaponSkillDamageMultiplier,coreSkillDamageMultiplier:gear.coreSkillDamageMultiplier,coreCooldownMultiplier:gear.coreCooldownMultiplier*(innate?.coreCooldownMultiplier??1),
     damageTakenMultiplier:gear.damageTakenMultiplier,lastStandDamageTakenMultiplier:gear.lastStandDamageTakenMultiplier,executeDamageMultiplier:gear.executeDamageMultiplier,weaponProcChanceBonus:gear.weaponProcChanceBonus};
 }
 
@@ -141,6 +141,7 @@ export class ArenaV2Adapter {
     const next=allocateCharacterStatsV2(this.characterState,allocation);if(next===this.characterState)return false;
     this.characterState=next;this.refreshPlayerBuild();this.syncPresentation();return true;
   }
+  resetStats(){this.characterState=resetCharacterStatsV2(this.characterState);this.refreshPlayerBuild();this.syncPresentation();}
   setGmEventMultipliers(next:Partial<GmEventMultipliersV2>){this.gmEventMultipliers={...this.gmEventMultipliers,...next};}
   getGmEventMultipliers():Readonly<GmEventMultipliersV2>{return this.gmEventMultipliers;}
   equipmentCommand(command:EquipmentCommandV2):EquipmentCommandResultV2{
@@ -308,7 +309,7 @@ export class ArenaV2Adapter {
     const gear=equipmentCombatTotals(this.characterState);const innate=weaponInnateBonuses(this.characterState);const hpFraction=player.maxHp>0?player.hp/player.maxHp:1;
     player.stats=this.characterState.stats;
     const mainId=this.characterState.equipment.equippedBySlot.main;const mainItem=mainId?this.characterState.equipment.instances[mainId]:undefined;const equippedFamily=mainItem?EQUIPMENT_MASTER_V2[mainItem.templateId]?.weaponFamily:undefined;if(equippedFamily){player.weaponFamily=equippedFamily;this.weaponFamily=equippedFamily;}
-    player.attackRange=player.weaponFamily==='bow'?420:58;
+    player.attackRange=player.weaponFamily==='bow'?420:player.weaponFamily==='staff'?180:58;
     const physicalStatus=player.weaponFamily==='bow'?rangedStatusAtk(player.stats):meleeStatusAtk(player.stats);
     const magicalStatus=magicalAttack(player.stats,0);
     const offhand=this.offhandWeaponContribution();
@@ -318,7 +319,7 @@ export class ArenaV2Adapter {
     const vitDefense=Math.floor(player.stats.vit/2);
     player.equipmentDef=Math.max(0,Math.round((35+gear.equipmentDef+vitDefense)*gear.defMultiplier*innate.defMultiplier-vitDefense));
     player.equipmentMdef=Math.max(0,Math.round((25+gear.equipmentMdef)*gear.mdefMultiplier));
-    player.hitBonus=gear.hitBonus+innate.hitBonus;player.fleeBonus=gear.fleeBonus;Object.assign(player,gearHooks(gear),innateHooks(innate));player.critDamageMultiplier=gear.critDamageMultiplier+innate.critDamageBonus;player.moveSpeed=BASE_MOVE_SPEED*gear.moveSpeedMultiplier;player.dodgeCooldownMs=BASE_DODGE_COOLDOWN_MS*gear.dodgeCooldownMultiplier;
+    player.hitBonus=gear.hitBonus+innate.hitBonus;player.fleeBonus=gear.fleeBonus;Object.assign(player,gearHooks(gear,innate),innateHooks(innate));player.critDamageMultiplier=gear.critDamageMultiplier+innate.critDamageBonus;player.moveSpeed=BASE_MOVE_SPEED*gear.moveSpeedMultiplier;player.dodgeCooldownMs=BASE_DODGE_COOLDOWN_MS*gear.dodgeCooldownMultiplier;
     player.critBonusPercent=gear.critBonusPercent+innate.critBonus;player.equipmentAspd=3+gear.equipmentAspd+innate.aspdBonus;
     player.maxHp=Math.max(1,Math.round(maxHp(player.stats,gear.equipmentMaxHp)*gear.maxHpMultiplier*innate.hpMultiplier));
     const spFraction=(player.maxSp??1)>0?(player.sp??player.maxSp??1)/(player.maxSp??1):1;
@@ -363,7 +364,7 @@ export class ArenaV2Adapter {
     const resolvedMaxSp=Math.max(1,Math.round((40+stats.level*4+stats.int*3+gear.masterMaxSp)*gear.maxSpMultiplier));
     return{id:this.playerId,kind:'player',position:{x:view.x,y:view.y},hp:view.hp??resolvedMaxHp,maxHp:view.maxHp??resolvedMaxHp,alive:true,sp:view.sp??resolvedMaxSp,maxSp:view.maxSp??resolvedMaxSp,spRecoveryMultiplier:gear.spRecoveryMultiplier,healingMultiplier:gear.healingMultiplier,skillCostMultiplier:gear.skillCostMultiplier,
       stats,weaponFamily:family,weaponAtk,weaponMatk,offhandWeaponAtk,offhandWeaponMatk,hasOffhandWeaponEquipped:offhand.equipped,equipmentDef,equipmentMdef,hitBonus:gear.hitBonus+innate.hitBonus,fleeBonus:gear.fleeBonus,
-      critBonusPercent:gear.critBonusPercent+innate.critBonus,equipmentAspd:3+gear.equipmentAspd+innate.aspdBonus,castSpeed:gear.castSpeed,critDamageMultiplier:gear.critDamageMultiplier+innate.critDamageBonus,elementDamageMultiplier:gear.elementDamageMultiplier,attackRange:family==='bow'?420:58,moveSpeed:BASE_MOVE_SPEED*gear.moveSpeedMultiplier,dodgeDistance:90,dodgeCooldownMs:BASE_DODGE_COOLDOWN_MS*gear.dodgeCooldownMultiplier,...gearHooks(gear),...innateHooks(innate),nextDodgeAtMs:0,
+      critBonusPercent:gear.critBonusPercent+innate.critBonus,equipmentAspd:3+gear.equipmentAspd+innate.aspdBonus,castSpeed:gear.castSpeed,critDamageMultiplier:gear.critDamageMultiplier+innate.critDamageBonus,elementDamageMultiplier:gear.elementDamageMultiplier,attackRange:family==='bow'?420:family==='staff'?180:58,moveSpeed:BASE_MOVE_SPEED*gear.moveSpeedMultiplier,dodgeDistance:90,dodgeCooldownMs:BASE_DODGE_COOLDOWN_MS*gear.dodgeCooldownMultiplier,...gearHooks(gear,innate),...innateHooks(innate),nextDodgeAtMs:0,
       lastClientSequence:0,nextBasicAttackAtMs:0,cooldowns:{},skillEntitlements:skillEntitlementsForCharacter(this.characterState,family),skillCoreDamageMultipliers:Object.fromEntries(this.characterState.skills.active.filter(Boolean).map(id=>[id!,skillCoreDamageMultiplier(this.characterState,id!)])),
       skillModifierMultipliers:Object.fromEntries(Object.values(this.characterState.skills.modifiersByActive??{}).flat().filter(Boolean).map(id=>[id,skillCoreDamageMultiplier(this.characterState,id)])),movementSkillDistanceBonuses:this.characterState.skills.movement?{[this.characterState.skills.movement]:movementSkillDistanceBonus(this.characterState,this.characterState.skills.movement)}:{},
       masteryPassives:masteryPassiveKeys(this.characterState),hasShieldEquipped:innate.hasShieldEquipped,shieldBlockChanceBonus:innate.hasShieldEquipped?gear.shieldBlockChanceBonus:0};

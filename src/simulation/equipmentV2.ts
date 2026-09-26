@@ -29,10 +29,13 @@ export function protectionRequirement(target:number):{id:'refineProtectionLv1'|'
  if(target>=11&&target<=15)return{id:'refineProtectionLv2',qty:target===15?4:target===14?2:1}; return null;
 }
 function safeFloor(level:number):number{let f=0;for(const x of REFINE_SAFE_FLOORS)if(x<=level)f=x;return f}
-export function resolveRefinement(current:number,rng:number,protectedAttempt=false):{success:boolean;level:number;astralite:number;protection:ReturnType<typeof protectionRequirement>}{
+/** A failed refine drops one level only half the time (still never below the safe floor). */
+export const REFINE_FAIL_DROP_CHANCE=.5;
+export function resolveRefinement(current:number,rng:number,protectedAttempt=false,dropRoll=0):{success:boolean;level:number;astralite:number;protection:ReturnType<typeof protectionRequirement>;dropped:boolean}{
  if(current<0||current>=15)throw new Error('invalid-refine-level');const target=current+1;const protection=protectedAttempt?protectionRequirement(target):null;
- const success=rng<REFINE_SUCCESS[current]; if(success)return{success:true,level:target,astralite:astraliteCost(target),protection};
- return{success:false,level:protectedAttempt?current:Math.max(safeFloor(current),current-1),astralite:astraliteCost(target),protection};
+ const success=rng<REFINE_SUCCESS[current]; if(success)return{success:true,level:target,astralite:astraliteCost(target),protection,dropped:false};
+ const level=protectedAttempt||dropRoll>=REFINE_FAIL_DROP_CHANCE?current:Math.max(safeFloor(current),current-1);
+ return{success:false,level,astralite:astraliteCost(target),protection,dropped:level<current};
 }
 export function masterRefinementBonus(refines:number[]):MasterRefinementBonusV2{
  const qualifying=(n:number)=>refines.filter(x=>x>=n).length>=6;

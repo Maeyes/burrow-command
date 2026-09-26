@@ -10,6 +10,7 @@ export type EquipmentCommandV2=
  |{type:'equip';equipmentId:string;targetSlot?:string}
  |{type:'unequip';slot:string}
  |{type:'enhance';slot:string}
+ |{type:'enhanceAll'}
  |{type:'refine';slot:string;protectedAttempt?:boolean}
  |{type:'addOption';equipmentId:string}
  |{type:'reoption';equipmentId:string;lockedIndexes:number[]}
@@ -22,7 +23,9 @@ export const PROTECTION_RECIPES_V2={
  2:{inputId:'refineProtectionLv1',inputQty:10,gold:5000,outputId:'refineProtectionLv2'},
 } as const;
 
-export interface EquipmentCommandResultV2{state:CharacterStateV2;createdEquipmentId?:string;refineSuccess?:boolean;granted?:Record<string,number>}
+export interface EquipmentCommandResultV2{state:CharacterStateV2;createdEquipmentId?:string;refineSuccess?:boolean;granted?:Record<string,number>;
+ /** enhanceAll: levels gained per slot and Gold spent. */
+ enhanced?:Record<string,number>;goldSpent?:number}
 let nextEquipmentSequence=1;
 function uid(state:CharacterStateV2,templateId:string){let id='';do{id=`eq-${templateId}-${nextEquipmentSequence++}`}while(state.equipment.instances[id]);return id}
 function equipment(state:CharacterStateV2,id:string){const x=state.equipment.instances[id];if(!x)throw new Error('equipment-not-found');return x}
@@ -63,6 +66,20 @@ export function applyEquipmentCommand(state:CharacterStateV2,command:EquipmentCo
   if(!state.equipment.equippedBySlot[command.slot])throw new Error('empty-slot');
   return{state:{...state,equipment:{...state.equipment,equippedBySlot:{...state.equipment.equippedBySlot,[command.slot]:null}}}};
  }
+ if(command.type==='enhanceAll'){
+  // QoL: raise every equipped slot as far as stones/Gold/hero level allow, always the lowest slot first
+  // so resources spread evenly instead of maxing one piece.
+  let next=state;const enhanced:Record<string,number>={},stuck=new Set<string>();
+  for(;;){
+   const slots=Object.keys(next.equipment.equippedBySlot).filter(slot=>next.equipment.equippedBySlot[slot]&&!stuck.has(slot));
+   if(!slots.length)break;
+   slots.sort((a,b)=>(next.equipment.enhancementBySlot[a]??0)-(next.equipment.enhancementBySlot[b]??0));
+   const slot=slots[0];
+   try{next=applyEquipmentCommand(next,{type:'enhance',slot},rng).state;enhanced[slot]=(enhanced[slot]??0)+1;}catch{stuck.add(slot);}
+  }
+  if(!Object.keys(enhanced).length)throw new Error('nothing-to-enhance');
+  return{state:next,enhanced,goldSpent:state.gold-next.gold};
+ }
  if(command.type==='enhance'){
   const id=state.equipment.equippedBySlot[command.slot];if(!id)throw new Error('empty-slot');
   const x=equipment(state,id);const current=state.equipment.enhancementBySlot[command.slot]??0;const nextLevel=current+1;
@@ -72,7 +89,7 @@ export function applyEquipmentCommand(state:CharacterStateV2,command:EquipmentCo
  }
  if(command.type==='refine'){
   const id=state.equipment.equippedBySlot[command.slot];if(!id)throw new Error('empty-slot');
-  const current=state.equipment.refinementBySlot[command.slot]??0;const result=resolveRefinement(current,rng(),!!command.protectedAttempt);
+  const current=state.equipment.refinementBySlot[command.slot]??0;const result=resolveRefinement(current,rng(),!!command.protectedAttempt,rng());
   const cost:Record<string,number>={astraliteStone:result.astralite};if(result.protection)cost[result.protection.id]=result.protection.qty;
   const next=spend(state,0,cost);
   return{state:{...next,equipment:{...next.equipment,refinementBySlot:{...next.equipment.refinementBySlot,[command.slot]:result.level}}},refineSuccess:result.success};

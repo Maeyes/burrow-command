@@ -10,7 +10,7 @@ export const WEAPON_INNATE_DESCRIPTIONS:Record<WeaponFamilyV2,string>={
  hammer:'Max HP +6%, DEF +3%.',
  greatsword:'Physical ATK +5%.',
  swordShield:'Physical ATK +3.5% (70% of the Greatsword innate bonus).',
- staff:'MATK +5%.',
+ staff:'MATK +8%, Skill Core cooldown -8%.',
  axe:'Ignore 10% physical DEF; heal for 2% of physical damage dealt (half rate on secondary AoE targets).',
  bow:'Ranged ATK +5%, HIT +5.',
 };
@@ -29,6 +29,7 @@ export interface WeaponInnateBonusesV2 {
  hitBonus:number;
  blockChanceBonus:number;
  physicalArmorPenetration:number;
+ coreCooldownMultiplier:number;
  physicalLifeSteal:number;
 }
 
@@ -67,7 +68,7 @@ export function weaponInnateBonuses(state:Readonly<CharacterStateV2>):WeaponInna
   family,dualDagger,hasShieldEquipped,
   aspdBonus:0,critBonus:0,critDamageBonus:0,
   hpMultiplier:1,defMultiplier:1,physicalAtkMultiplier:1,matkMultiplier:1,
-  hitBonus:0,blockChanceBonus:hasShieldEquipped?.05:0,physicalArmorPenetration:0,physicalLifeSteal:0,
+  hitBonus:0,blockChanceBonus:hasShieldEquipped?.05:0,physicalArmorPenetration:0,physicalLifeSteal:0,coreCooldownMultiplier:1,
  };
  switch(family){
   case 'dagger':{
@@ -77,7 +78,7 @@ export function weaponInnateBonuses(state:Readonly<CharacterStateV2>):WeaponInna
   case 'hammer':return{...base,hpMultiplier:1.06,defMultiplier:1.03};
   case 'greatsword':return{...base,physicalAtkMultiplier:1.05};
   case 'swordShield':return{...base,physicalAtkMultiplier:1.035};
-  case 'staff':return{...base,matkMultiplier:1.05};
+  case 'staff':return{...base,matkMultiplier:1.08,coreCooldownMultiplier:.92};
   case 'axe':return{...base,physicalArmorPenetration:.10,physicalLifeSteal:.02};
   case 'bow':return{...base,physicalAtkMultiplier:1.05,hitBonus:5};
   default:return base;

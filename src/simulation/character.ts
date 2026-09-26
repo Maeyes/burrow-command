@@ -10,6 +10,8 @@ export interface SkillLoadoutV2 {
   movement?: string;
   passive: [string?, string?];
   modifiersByActive: Record<string, string[]>;
+  /** Mods parked on an empty core slot (0/1/2). Mods belong to the slot: swapping the core keeps them. */
+  slotMods?: [string[]?, string[]?, string[]?];
   /** Upgrade rarity per Skill Core, Skill Mod or Movement Core ID. Missing = normal. */
   coreRarity?: Record<string, 'normal'|'good'|'rare'|'epic'|'legend'|'mythic'|'whiteAscended'>;
 }
@@ -86,6 +88,18 @@ export function allocateCharacterStatsV2(state:CharacterStateV2, allocation:Part
  for(const key of keys){const amount=Math.max(0,Math.floor(allocation[key]??0));spent+=amount;stats[key]+=amount;}
  if(spent<=0||spent>state.unspentStatPoints)return state;
  return{...state,unspentStatPoints:state.unspentStatPoints-spent,stats};
+}
+
+/** Stat reset for switching builds: every allocated point returns; costs Gold scaled by level. */
+export function statResetCostV2(level:number):number{return Math.max(0,Math.round(level*level*20));}
+export function resetCharacterStatsV2(state:CharacterStateV2):CharacterStateV2{
+ const keys=['str','agi','vit','int','dex','luk'] as const;
+ const refund=keys.reduce((n,k)=>n+Math.max(0,state.stats[k]-1),0);
+ if(refund<=0)throw new Error('nothing-to-reset');
+ const cost=statResetCostV2(state.level);
+ if(state.gold<cost)throw new Error('not-enough-gold');
+ const stats={...state.stats};for(const k of keys)stats[k]=1;
+ return{...state,gold:state.gold-cost,unspentStatPoints:state.unspentStatPoints+refund,stats};
 }
 
 export function expToNextLevelV2(level: number): number {

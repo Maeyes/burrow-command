@@ -9,13 +9,13 @@ const crafting=new Set([
  // Legacy saves may still contain these removed resources. Keep their semantic tag so they never fall into Misc.
  'beastPelt','pelt','hide','fang','core'
 ]);
-const upgrading=new Set(['stoneFragment','verdantAetherstone','azureAetherstone','violetAetherstone','astraliteStone','refineProtectionLv1','refineProtectionLv2','optionStone','reoptionStone']);
-const modifiers=new Set(['lifeDrain','lingering','expandedArea','execution','rapidCasting','mobileCast','combustion','echo','overcharge','chain','extraStrike','concentratedForce']);
+const upgrading=new Set(['stoneFragment','verdantAetherstone','azureAetherstone','violetAetherstone','astraliteStone','refineProtectionLv1','refineProtectionLv2','optionStone','reoptionStone','coreShard','modShard']);
+const modifiers=new Set(['lifeDrain','lingering','expandedArea','execution','rapidCasting','mobileCast','combustion','echo','overcharge','chain','extraStrike','concentratedForce','bloodPrice']);
 
 export function inventoryItemMeta(id:string):InventoryItemMetaV2{
  const skill=SKILLS_V2[id];
  if(skill&&skill.kind!=='weapon')return{id,category:'Skill Core',tags:['skill-core',skill.kind]};
- if(/^tier[1-5]Blueprint$/.test(id))return{id,category:'Blueprint',tags:['blueprint','crafting']};
+ if(/^tier[1-6]Blueprint$/.test(id))return{id,category:'Blueprint',tags:['blueprint','crafting']};
  if(crafting.has(id))return{id,category:'Crafting Mat',tags:['crafting-material']};
  if(upgrading.has(id))return{id,category:'Upgrading Mat',tags:['upgrade-material']};
  if(modifiers.has(id))return{id,category:'Skill Core',tags:['skill-modifier']};

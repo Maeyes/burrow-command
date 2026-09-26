@@ -35,7 +35,8 @@ export function skillEntitlementsForCharacter(state: CharacterStateV2, _weaponFa
     movement: state.skills.movement,
     passive: state.skills.passive.filter((id): id is string => Boolean(id)),
     weaponSkills,
-    modifiersByActive: state.skills.modifiersByActive,
+    // Only installed cores carry mods into combat (stale keys from old saves are ignored).
+    modifiersByActive: Object.fromEntries(state.skills.active.filter((id): id is string => Boolean(id)).map(id=>[id,state.skills.modifiersByActive?.[id]??[]])),
   };
 }
 
