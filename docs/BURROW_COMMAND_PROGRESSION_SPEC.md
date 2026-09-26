@@ -57,14 +57,32 @@ Later: new themes (steampunk / techno / robots, per friend feedback) need new Pi
 - Recruit price still rises per extra bunny of a class.
 
 ## 5. Classes, builds, gear, mastery, cores (shared per class)
-Classes: ผู้พิทักษ์ (swordShield), นักธนู (bow), หน่วยเร็ว (dagger), นักทุบ (hammer),
-**นักบวช (staff, new: heals and supports)**.
+Classes are weapon families: ผู้พิทักษ์ (swordShield), นักธนู (bow), หน่วยเร็ว (dagger),
+นักทุบ (hammer), **นักเวท (staff, new)**. There is no separate priest class: healing is a mage
+**specialization** (same bunny art and staff, so a separate class would look identical in the field).
 
+- **Builds = class + specialization.** "+ บิลด์ใหม่" → pick the main class → pick a specialization
+  from a dropdown. The default build of every class is its attack spec.
+
+| Class | Specializations (starting set) |
+|---|---|
+| นักเวท (staff) | 🔥 Fire (AoE / burn) · ❄️ Ice (slow) · ⚡ Lightning (chains) · ✨ **Support** (heal + shield allies around = the "priest") |
+| ผู้พิทักษ์ | 🛡 Tank · 💚 Support (team shield) |
+| นักธนู | 🎯 Single-target · 🌧 Spread |
+| นักทุบ / หน่วยเร็ว | Attack · Control (stun / slow) |
+
+  A specialization decides which skill cores its slots accept (e.g. Support: Healing Pulse, Barrier,
+  Valkyrie's Call; Fire: Fireball, Meteor…; Lightning: Thunder Storm, Arc Cascade…; Ice: frost skills)
+  and what the auto-cast AI prioritises (Support heals the lowest-HP ally first).
+- **Reading the field:** every bunny shows a coloured aura under its feet and a spec icon over its
+  head (fire red, ice blue, lightning yellow, support green/white). No new bunny art needed.
+- A true priest class would need new Blessed Bunny animations (robe, heal cast) via PixelLab; only
+  worth it later.
 - **Gear is per class build, not per bunny.** Equip once and every bunny on that build uses it.
   Slots: **weapon** (the class's family), **armor**, **accessory**.
-- **Builds:** each class starts with one build. "สร้างบิลด์ใหม่" opens another (warren-level gated +
-  gold). Each build has its own gear and skill cores. Each bunny picks a build; new recruits get
-  the class's main build. Example: Guard "Tank" vs Guard "Support".
+- **Builds:** each class starts with its default (attack) build. "+ บิลด์ใหม่" opens another
+  (warren-level gated + gold). Each build has its own gear, skill cores and specialization. Each
+  bunny picks a build; new recruits get the class's main build.
 - **Mastery is per class**, shared by all its builds. Every bunny of the class feeds its mastery XP.
   Milestones unlock passives and weapon skills from the main game's `WEAPON_MASTERY_MILESTONES`.
 - **Skill cores are per build.** Slots unlock with the bunny's level (e.g. Lv 10 / Lv 25 / Lv 40).
@@ -90,8 +108,9 @@ Classes: ผู้พิทักษ์ (swordShield), นักธนู (bow),
    wave-5 boss, waves scaled by warren level. HUD: day / wave / warren level.
 2. **Bunnies & items:** names + EXP/levels (cap = warren level), real item drops, forge (craft with
    rarity, enhance, dismantle), class builds with 3 gear slots, remove ★.
-3. **Mastery & cores:** class mastery + milestones, core slots per build, team-radius heals and
-   shields, the new staff class (นักบวช).
+3. **Mastery, cores, specializations:** class mastery + milestones, core slots per build,
+   specialization dropdown + auras, the new mage class (staff) with Fire / Ice / Lightning / Support,
+   team-radius heals and shields.
 4. **Lands:** desert / snow / magma / asgard waves and rosters by warren level; then new themes.
 
 ## 8. Rules for whoever implements this
