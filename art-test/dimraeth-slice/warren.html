@@ -4,12 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <link rel="icon" href="data:,">
-<title>Burrow Command — prototype</title>
+<title>Burrow Command — Village Progression</title>
 <style>
   :root{--ink:#fff4dc;--dim:#c9bfa6;--gold:#ffd45c;--panel:rgba(14,18,14,.86);--line:rgba(255,230,170,.22);--pink:#ff8fbf}
   html,body{margin:0;height:100%;background:#07090b;color:var(--ink);font:13px/1.35 system-ui,sans-serif;overflow:hidden;user-select:none}
+  /* One unobtrusive scrollbar for every scrollable Burrow Command panel, modal and list. */
+  *{scrollbar-width:thin;scrollbar-color:#647b59 #172119}
+  *::-webkit-scrollbar{width:7px;height:7px}
+  *::-webkit-scrollbar-track{background:#172119;border-radius:99px}
+  *::-webkit-scrollbar-thumb{background:#647b59;border:1px solid #172119;border-radius:99px;min-height:28px}
+  *::-webkit-scrollbar-thumb:hover{background:#92ad7b}
+  *::-webkit-scrollbar-corner{background:#172119}
   #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-  #scene{image-rendering:pixelated;background:#101510;max-width:100vw;max-height:100vh;aspect-ratio:16/9;width:100vw;height:auto}
+  #scene{image-rendering:pixelated;background:#101510;max-width:100vw;max-height:100vh;aspect-ratio:16/9;width:100vw;height:auto;touch-action:none}
+  #scene.tower-move{cursor:crosshair}
+  #worldLabels{position:absolute;inset:0;pointer-events:none;z-index:12;overflow:hidden}
+  .bc-world-label{position:absolute;pointer-events:auto;display:flex;align-items:center;gap:5px;transform:translate(-50%,-100%);background:rgba(19,29,21,.94);border:1.5px solid #b3c48e;color:#fff4d1;border-radius:6px;box-shadow:0 2px 0 #0a140e,0 4px 10px #000b;padding:4px 8px;font:800 11px/1.2 system-ui,sans-serif;text-shadow:0 1px 1px #071009;white-space:nowrap;min-height:25px;max-width:160px;z-index:1}
+  .bc-world-label:hover:not(:disabled),.bc-world-label:focus-visible{background:#3c5434;border-color:#ffe2a0;box-shadow:0 0 0 2px rgba(255,223,158,.4),0 4px 12px #0009;z-index:3}
+  .bc-world-label[data-world='sell']{border-color:#e4be6a;background:#40371d}
+  .bc-world-label[data-world-tower]{border-color:#94bcd2;background:#24383e}
+  #towerMoveNotice{font-size:11px;line-height:1.4;padding:7px;border-radius:6px;border:1px solid #d2b263;background:#40331a;color:#ffe9ad}
+  #towerMoveNotice[hidden]{display:none}
   #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:#f0c878;background:#07090b;z-index:90}
   .panel{position:fixed;background:var(--panel);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(6px);z-index:20}
   #top{left:50%;top:10px;transform:translateX(-50%);display:flex;gap:16px;align-items:center;padding:8px 14px;white-space:nowrap}
@@ -30,13 +45,22 @@
   .buy{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:6px;text-align:left;align-items:center}
   .buy i{grid-row:1/3;font-style:normal;font-size:20px}.buy small{color:var(--dim);font-size:10px}.buy em{grid-column:1/3;font-style:normal;color:var(--gold);font-weight:700;text-align:right;margin-top:2px}
   .up{font-size:10px;padding:4px;background:#2b2618;border-color:#6a5a33}
-  #side{right:10px;bottom:10px;padding:10px;width:230px;display:flex;flex-direction:column;gap:6px}
-  #squad{display:flex;flex-wrap:wrap;gap:4px}
+  #forgeOpen{background:#59441c;border-color:#aa8845;color:#ffecbc}
+  #side{right:10px;bottom:10px;padding:10px;width:min(280px,calc(100vw - 20px));display:flex;flex-direction:column;gap:6px;max-height:58vh}
+  #squad{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;width:100%;box-sizing:border-box;min-height:0;max-height:82px;overflow-y:auto;overflow-x:hidden;align-content:start;padding-right:3px}
   #upgrade:not(:disabled){background:#3b3212;border-color:#ffd45c;color:#ffe9a8}
   #wave{color:var(--gold);font-size:11px}
   #reset{margin-top:6px;font-size:10px;padding:3px 6px;background:#2a1a1a;border-color:#6a3a3a}
   #build.on{background:#5a4418;border-color:#ffd45c}
-  #squad button{width:44px;height:44px;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px}
+  #squad .bc-mini-hero{display:flex;align-items:center;gap:6px;min-width:0;width:100%;box-sizing:border-box;padding:4px 6px;text-align:left;white-space:nowrap}
+  #squad .bc-mini-hero img{width:24px;height:24px;flex-shrink:0;image-rendering:pixelated}
+  #squad .bc-mini-hero span{min-width:0;flex:1;font-size:11px;overflow:hidden;text-overflow:ellipsis}
+  #squad .bc-mini-hero small{display:block;font-size:9px;color:var(--dim)}
+  #squad .squad-card.down{border-color:#a04848;background:#3a1f1f}
+  #squad .squad-card>button{width:52px;height:44px;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+  #squad .squad-info{min-width:0;flex:1;display:flex;flex-direction:column;gap:1px}
+  #squad .squad-info small{font-size:10px;color:var(--dim)}#squad .squad-info select{width:100%;font-size:11px;background:#253025;color:var(--ink);border:1px solid #4d5d45}
+  #squad .rename{padding:0 3px;font-size:12px;background:transparent;border:0}
   #squad small{font-size:9px}#squad .guard{border-color:#6c9bd6;background:#1f2a3a}#squad .down{border-color:#a04848;background:#3a1f1f}
   .row{display:flex;gap:6px}.row button{flex:1}
   #help{left:10px;top:10px;padding:8px 10px;max-width:260px;font-size:11px;color:var(--dim)}#help b{color:var(--ink)}
@@ -45,27 +69,378 @@
   #banner.on{animation:bn 3.2s ease forwards}@keyframes bn{0%{opacity:0;transform:translate(-50%,-40%)}12%,70%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0}}
   #toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:rgba(40,16,16,.9);border:1px solid #a04848;padding:6px 12px;border-radius:8px;opacity:0;transition:opacity .2s;z-index:30;pointer-events:none}#toast.on{opacity:1}
   #over{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(5,6,8,.72);z-index:60;gap:8px}#over[hidden]{display:none}#over h2{font:800 42px Georgia,serif;margin:0}#over button{font-size:16px;padding:10px 22px}
-  @media (max-width:760px){#help{display:none}#top{gap:8px;font-size:11px}#hall{width:110px}#side{width:180px}}
+  #forgePanel{left:50%;top:50%;transform:translate(-50%,-50%);width:min(730px,calc(100vw - 32px));height:min(83vh,720px);padding:0;display:flex;flex-direction:column;z-index:46;box-shadow:0 22px 80px #000d}
+  #forgePanel[hidden]{display:none}#forgePanel header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--line)}
+  #forgePanel header h2{margin:0;font-size:18px}#forgePanel header small{font-size:11px;color:var(--dim)}#forgePanel #forgeClose{font-size:18px}
+  .forge-body{padding:12px 16px;overflow-y:auto;display:flex;flex-direction:column;gap:13px}.forge-body section{background:#202720;border:1px solid #4e6045;border-radius:8px;padding:9px}.forge-body h3{font-size:13px;color:#ffda86;margin:0 0 7px}
+  .forge-class,.forge-builds{display:flex;gap:5px;flex-wrap:wrap}.forge-class button.selected,.forge-builds button.selected{background:#53502c;border-color:#e8c77e}
+  .forge-list{display:flex;flex-direction:column;gap:5px;max-height:235px;overflow-y:auto}.forge-row{display:flex;gap:10px;align-items:center;justify-content:space-between;border-bottom:1px solid #3c443a;padding:5px 0}
+  .forge-row>div:first-child{min-width:0;flex:1}.forge-row small{display:block;font-size:10px;color:var(--dim)}.forge-actions{display:flex;gap:4px}
+  .forge-slot{display:flex;align-items:center;gap:8px;padding:4px;border-bottom:1px solid #3a4638}.forge-slot b{min-width:79px}.forge-slot span{flex:1;font-size:11px}
+  .forge-inventory{display:flex;flex-wrap:wrap;gap:5px}.forge-inventory span{border:1px solid #4d5d45;background:#30362b;padding:3px 5px;border-radius:5px;font-size:11px}
+  @media (max-width:760px){#help{display:none}#top{gap:8px;font-size:11px;flex-wrap:wrap;white-space:normal;width:calc(100vw - 20px)}#hall{width:110px}#side{width:180px;max-height:50vh}#squad{grid-template-columns:minmax(0,1fr);max-height:130px}#forgePanel{height:89vh}}
+  /* Burrow Command: focused modal workflow with main-game pixel artwork. */
+  #modalScrim{position:fixed;inset:0;background:rgba(3,7,6,.72);z-index:44;backdrop-filter:blur(3px)}
+  #modalScrim[hidden]{display:none}
+  .bc-quick-actions{display:grid;grid-template-columns:1fr;gap:5px}
+  .bc-quick{display:flex;gap:8px;align-items:center;justify-content:flex-start;text-align:left;min-height:38px;font-weight:650}
+  .bc-quick span{display:grid;place-items:center;width:27px;height:27px;font-size:19px}
+  .bc-quick img,.bc-class-icon,.bc-header-icon{image-rendering:pixelated;object-fit:contain}
+  .bc-quick img{width:25px;height:25px}
+  .bc-modal{left:50%;top:50%;transform:translate(-50%,-50%);width:min(850px,calc(100vw - 28px));height:min(84vh,780px);padding:0;display:flex;flex-direction:column;z-index:46;box-shadow:0 24px 90px #000d;overflow:hidden;border-color:#756a43;border-radius:14px;background:#19231e}
+  .bc-modal[hidden]{display:none!important}
+  #itemDetailPanel{z-index:56;width:min(710px,calc(100vw - 28px));height:auto;max-height:88vh}
+  .bc-modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 17px;border-bottom:1px solid #5d6143;background:linear-gradient(115deg,#37462e,#1a241d)}
+  .bc-modal-header>div{display:flex;align-items:center;gap:10px;min-width:0}
+  .bc-modal-header h2{margin:0;font-size:19px;color:#fff0c5}
+  .bc-modal-header small{display:block;font-size:11px;color:#cbbfa3;margin-top:3px}
+  .bc-header-icon{width:43px;height:43px;object-fit:contain}
+  .modal-close{font-size:20px;line-height:1;padding:6px 11px;background:#253326}
+  .bc-modal-body{padding:14px 17px;overflow-y:auto;min-height:0;flex:1;overscroll-behavior:contain}
+  .bc-modal button{transition:background .12s,border-color .12s}
+  .bc-modal button:focus-visible,.bc-modal select:focus-visible{outline:2px solid #ffd45c;outline-offset:2px}
+  .bc-class-tabs,.bc-build-tabs,.bc-inventory-tabs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+  .bc-class-tabs button{display:flex;align-items:center;gap:6px;min-height:40px;font-weight:650}
+  .bc-class-icon{width:27px;height:27px;flex-shrink:0}
+  .bc-class-tabs .active,.bc-build-tabs .active,.bc-inventory-tabs .active,.bc-hero-pick.active{background:#53532e;border-color:#efd18d;color:#ffedb7}
+  .bc-help{font-size:12px;color:#cbbfa3}
+  .bc-recipe-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:8px;padding-bottom:10px}
+  .bc-recipe{display:flex;align-items:center;gap:11px;min-width:0;padding:10px;border:1px solid #435644;border-radius:10px;background:#28352a}
+  .bc-recipe.ready{border-color:#7a9252}
+  .bc-recipe-icon{width:59px;height:59px;flex:none;object-fit:contain;image-rendering:pixelated;background:#18251b;border:1px solid #475945;border-radius:8px;padding:3px}
+  .bc-recipe-info{flex:1;min-width:0}
+  .bc-recipe-info>b{display:block;font-size:13px;margin-bottom:5px}
+  .bc-recipe-info small{color:#d6b77d}
+  .bc-materials{display:flex;flex-wrap:wrap;gap:4px}
+  .bc-materials span{display:flex;align-items:center;gap:3px;padding:2px 3px;border-radius:3px;font-size:10px;background:#1a281d}
+  .bc-materials .have{color:#aee8a0}.bc-materials .missing{color:#f4a4a0}
+  .bc-material-icon{width:18px;height:18px;object-fit:contain;image-rendering:pixelated}
+  .bc-recipe-action{display:flex;flex-direction:column;gap:6px;align-items:center;flex:none}
+  .bc-recipe-action small{color:#ffd45c;font-weight:700}.bc-recipe-action button,.bc-primary{background:#625020;border-color:#c8a34f;color:#ffe8a9;font-weight:650}
+  .bc-empty{color:#b6bcae;padding:10px;grid-column:1/-1}
+  .bc-hero-layout{display:grid;grid-template-columns:175px minmax(0,1fr);gap:0;flex:1;min-height:0}
+  .bc-hero-roster{border-right:1px solid #47533c;padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:5px}
+  .bc-hero-pick{display:flex;align-items:center;gap:6px;text-align:left;min-height:46px;padding:5px}
+  .bc-hero-pick span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bc-hero-pick small{display:block;color:#d3c59f;font-size:10px}
+  .bc-hero-main{padding:15px;overflow-y:auto;min-height:0}
+  .bc-profile{display:flex;align-items:center;gap:17px;padding:12px;border:1px solid #526249;border-radius:11px;background:#263729}
+  .bc-sprite-stage{width:118px;height:118px;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 50% 78%,#66844d,#273a2d 65%);border-radius:11px;position:relative}
+  .bc-bunny-sprite{width:108px;height:108px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 7px 2px #0007)}
+  .bc-bunny-fallback{font-size:70px}
+  .bc-profile h3{margin:0 0 7px;font-size:20px;color:#ffe5ad}
+  .bc-profile p{margin:6px 0;color:#e0dac8;font-size:11px}
+  .bc-profile>div+div>span{display:flex;align-items:center;gap:6px}
+  .bc-exp{width:min(260px,100%);height:7px;margin:7px 0;background:#111a13;border-radius:6px;overflow:hidden}
+  .bc-exp i{display:block;height:100%;background:#c4b06f;border-radius:6px}
+  .bc-build-panel{border:1px solid #485846;background:#202c23;border-radius:11px;padding:13px;margin-top:13px}
+  .bc-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .bc-title-row h3{margin:0 0 7px;font-size:14px;color:#ffdda0}
+  .bc-build-panel select{display:block;max-width:100%;min-height:30px;margin-top:5px;background:#263a2b;color:#fff0c5;border:1px solid #697556;border-radius:5px;padding:3px}
+  .bc-equipped-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:13px}
+  .bc-equip-slot{background:#18261d;border:1px solid #4f5d46;border-radius:8px;padding:6px;min-width:0}
+  .bc-equip-slot>small{display:block;margin-bottom:5px;color:#c3d0a9}
+  .bc-equipped{width:100%;min-height:85px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:5px;text-align:center}
+  .bc-equipped>span:last-child{min-width:0}.bc-equipped b{font-size:11px;display:block;line-height:1.3}
+  .bc-equipped small{display:block;color:#e0d0a7;font-size:9px;margin-top:2px}
+  .bc-equipped.empty{border-style:dashed;color:#b2bb9f}
+  .bc-item-icon{display:grid;place-items:center;position:relative;width:58px;height:58px;border-radius:8px;border:1px solid #6a8065;background:#1b261e;flex-shrink:0}
+  .bc-item-icon img,.bc-item-show img{width:90%;height:90%;object-fit:contain;image-rendering:pixelated}
+  .bc-item-icon em,.bc-item-icon i{position:absolute;font-size:10px;font-style:normal;color:#ffe09a;background:#141d17db;border-radius:3px;bottom:1px;right:2px;padding:1px 3px}
+  .bc-item-icon i{bottom:auto;top:1px;color:#cdb6ff}
+  /* Equipment clarity: tier before the item name, slot-bound Enhance top-right, Refine bottom-left. */
+  .bc-gear-icon{position:relative;isolation:isolate;overflow:visible}
+  .bc-gear-icon>.bc-gear-badge{position:absolute;z-index:2;font-style:normal;font-size:10px;font-weight:800;line-height:1.2;
+    padding:2px 4px;border-radius:4px;box-shadow:0 1px 4px #08120ec4;white-space:nowrap;pointer-events:none}
+  .bc-gear-enhance,.bc-gear-refine{background:none;border:0;box-shadow:none;padding:0;
+    text-shadow:0 1px 2px #0c140d,1px 0 2px #0c140d,-1px 0 2px #0c140d}
+  .bc-gear-enhance{top:3px;right:3px;color:#79e1f5}
+  .bc-gear-refine{bottom:2px;left:3px;color:#ffd476}
+  .bc-item-show.bc-gear-icon>.bc-gear-badge{font-size:12px;padding:4px 6px}
+  .bc-item-show.bc-gear-icon>.bc-gear-enhance,.bc-item-show.bc-gear-icon>.bc-gear-refine{padding:0;font-size:15px}
+  .bc-armory-current>.bc-gear-icon{width:60px;height:60px;flex-shrink:0}
+  .bc-enhance-text{color:#78dded;font-weight:700}.bc-refine-text{color:#f4c879;font-weight:700}
+  .bc-enhance-card{border-color:#37869b;background:#20353c}
+  .bc-refine-card{border-color:#a9813e;background:#3a3022}
+  .bc-enhance-card h3{color:#90ebfc}.bc-refine-card h3{color:#ffda8b}
+  .bc-enhance-card>button{background:#22536a;border-color:#4cbace;color:#e6fcff}
+  .bc-refine-card>button{background:#705321;border-color:#d1a44f;color:#fff0cf}
+  .bc-refine-feedback{min-height:0!important;margin:4px 0!important;padding:7px 9px;border-radius:6px;font-weight:700}
+  .bc-refine-feedback.success{color:#b8f8ce;background:#1d5736;border:1px solid #58b879}
+  .bc-refine-feedback.failure{color:#ffe3aa;background:#59402a;border:1px solid #cfa251}
+  .bc-lure-modes{display:grid;gap:10px;grid-template-columns:1fr}
+  .bc-lure-option{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;padding:11px;border:1px solid #5d7655;background:#253528;border-radius:9px}
+  .bc-lure-option h3{margin:0;color:#f6dca0;font-size:15px}
+  .bc-lure-option p{font-size:12px;color:#d0d7bd;margin:6px 0}
+  .bc-lure-option small{font-size:11px;color:#9fbea6}
+  .bc-lure-option button{min-width:120px;min-height:36px;white-space:nowrap}
+  .bc-lure-locked{grid-column:1/-1;color:#e3ad8a!important}
+  #lureOpen:not(:disabled){border-color:#c9a65f}
+  #fenceBuild{border-color:#829f6e;background:#263b2c}
+  #fenceBuild:hover:not(:disabled){border-color:#b8ce91;background:#354b34}
+  #wallStatus{font-size:11px;line-height:1.45;color:#b6cea5;padding:6px 9px;background:#1b2a1f;border:1px solid #435b42;border-radius:6px}
+  #gateControls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  #gateControls[hidden]{display:none}
+  #gateControls button{font-size:10px;padding:7px 2px;min-width:0;background:#283d2c;white-space:normal}
+  #gateControls button.selected{background:#543c2b;border-color:#d9ab73;color:#ffe4b7}
+  #gateControls button.broken{background:#472929;border-color:#b36b60;color:#ffbbbb}
+  #gateControls .gate-caption{grid-column:1/-1;font-size:10px;color:#b8c6ac}
+  #side{overflow-y:auto}
+  .bc-armory-notice.is-failure{background:#4b3b24;border-color:#c49c52;color:#ffe6af}
+  .bc-inline-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .bc-inventory-tabs{position:sticky;top:-14px;background:#19231e;padding:9px 0;z-index:1}
+  .bc-inventory-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:10px;padding-bottom:20px}
+  .bc-sale-list{display:grid;gap:5px;margin:12px 0}
+  .bc-sale-row{display:flex;align-items:center;gap:10px;padding:8px;background:#26382a;border:1px solid #526b4d;border-radius:7px;cursor:pointer}
+  .bc-sale-row:has(input:checked){border-color:#acbc87}
+  .bc-sale-icon{width:28px;height:28px;object-fit:contain;image-rendering:pixelated}
+  .bc-sale-row span{flex:1;min-width:0}.bc-sale-row small{display:block;color:#b6c9ad;font-size:10px}.bc-sale-row strong{color:#ffdf8b;white-space:nowrap}
+  .bc-sell-bar label{display:flex;gap:9px;align-items:center;font-weight:700}.bc-sell-bar select{font:inherit;color:#ffe8af;background:#24342b;border:1px solid #91a775;border-radius:5px;padding:5px}
+  .bc-sale-footer{display:flex;gap:14px;justify-content:space-between;align-items:center;border-top:1px solid #536a4f;padding-top:12px}
+  .bc-sale-footer span{display:block;font-size:11px;color:#b9caa8}.bc-sale-confirm{margin-top:12px;padding:10px;background:#42371f;border:1px solid #dbbc77;border-radius:8px}
+  .bc-building-body{display:flex;flex-direction:column;gap:12px}.bc-building-stat{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#263b2b;border:1px solid #718c64;border-radius:9px;padding:12px;color:#f4e5ae}.bc-building-stat span{color:#d6e9d0}
+  .bc-building-body section{padding:11px;border:1px solid #50634b;background:#223025;border-radius:8px}.bc-building-body h3{margin:0 0 5px;color:#f4dfa5}.bc-building-body p{font-size:12px;color:#bdcdb7;line-height:1.5}
+  .bc-building-body button{min-height:36px;padding:8px 12px}
+  #hallPanel,#blacksmithPanel,#resourcePanel,#sellPanel{width:min(540px,calc(100vw - 26px));height:auto;max-height:88vh}
+  .bc-inventory-piece{min-height:111px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px;background:#223024;border:1px solid #435944;border-radius:9px;text-align:center}
+  .bc-inventory-piece>b{font-size:11px;overflow-wrap:anywhere}
+  .bc-inventory-piece>small{font-size:10px;color:#bbbda4}
+  img.bc-item-icon{object-fit:contain;padding:5px;image-rendering:pixelated}
+  .bc-inventory-piece .bc-item-icon{width:60px;height:60px}
+  .rarity-normal{border-color:#6c7c70}.rarity-good{border-color:#4cbb6d}.rarity-rare{border-color:#5b9fdf}.rarity-epic{border-color:#bd79ea}.rarity-legend{border-color:#ffbd63}.rarity-mythic,.rarity-whiteAscended{border-color:#ff86ae}
+  .bc-item-detail{max-height:calc(88vh - 70px)}
+  .bc-item-preview{display:flex;align-items:center;gap:18px}
+  .bc-item-show{flex:none;width:128px;height:128px;display:grid;place-items:center;border:2px solid #91744a;border-radius:14px;background:radial-gradient(#3c4b3a,#172019)}
+  .bc-item-art{width:112px!important;height:112px!important}
+  .bc-item-preview h3{font-size:19px;margin:4px 0;color:#ffe7b0}
+  .bc-item-preview p{color:#d1cba9;margin:7px 0}
+  .bc-stats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+  .bc-stats div{padding:5px 8px;border:1px solid #465a46;border-radius:5px}
+  .bc-stats small{display:block;color:#a4bea4}.bc-stats b{color:#faebbf}
+  .bc-rarity{font-weight:700;font-size:12px}
+  .bc-item-controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  .bc-upgrade-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .bc-upgrade-card{background:#253329;border:1px solid #4f6248;border-radius:10px;padding:12px;min-width:0}
+  .bc-upgrade-card h3{display:flex;justify-content:space-between;align-items:center;margin:0 0 7px;font-size:15px;color:#ffdf9b}
+  .bc-upgrade-card p{color:#bfcbb4;font-size:11px;min-height:34px}
+  .bc-upgrade-material{display:flex;align-items:center;gap:5px;min-height:30px;margin:8px 0;color:#ffdf9b;font-size:11px}
+  .bc-upgrade-material img,.bc-protect img{width:26px;height:26px;object-fit:contain;image-rendering:pixelated}
+  .bc-upgrade-card>button{width:100%;min-height:36px;background:#514324;border-color:#aa8c4c}
+  .bc-protect{display:flex;align-items:center;gap:5px;font-size:10px;margin:6px 0;flex-wrap:wrap}
+  .bc-protect input{accent-color:#e4c16e}
+  @media(max-width:760px){
+   #top{top:4px;gap:6px}#side{width:174px;max-height:50vh}
+   .bc-quick{font-size:11px;min-height:30px}.bc-modal{height:min(91vh,760px);top:51%}
+   .bc-hero-layout{grid-template-columns:105px minmax(0,1fr)}.bc-hero-roster{padding:5px}.bc-hero-pick{flex-direction:column;gap:2px;font-size:10px}
+   .bc-hero-main{padding:8px}.bc-sprite-stage{width:80px;height:85px}.bc-bunny-sprite{width:75px;height:75px}.bc-profile{gap:8px;padding:6px}
+   .bc-profile h3{font-size:15px}.bc-equipped-list{grid-template-columns:1fr;gap:4px}
+   .bc-equipped{flex-direction:row;text-align:left;min-height:65px}.bc-title-row{flex-direction:column;align-items:flex-start}
+   .bc-recipe-list{grid-template-columns:1fr}.bc-upgrade-grid{grid-template-columns:1fr}
+   .bc-item-show{width:90px;height:90px}.bc-item-art{width:80px!important;height:80px!important}
+  }
+  /* Day preparation tools: focused Tower, Lodge, Mastery, Batch windows */
+  #shopbox{width:min(270px,calc(100vw - 20px));max-height:45vh;overflow-y:auto;padding:7px}
+  #recruitDetails{min-width:0}
+  #recruitDetails>summary{display:flex;align-items:center;gap:7px;list-style:none;cursor:pointer;padding:3px 5px;color:#e8ddba;font-size:12px;font-weight:700;user-select:none}
+  #recruitDetails>summary::-webkit-details-marker{display:none}
+  #recruitDetails>summary:before{content:'▸';display:inline-block;color:#d8c48a;font-size:12px;transition:transform .16s ease}
+  #recruitDetails[open]>summary:before{transform:rotate(90deg)}
+  #recruitDetails>summary:focus-visible{outline:2px solid #a3bf82;outline-offset:2px;border-radius:4px}
+  #recruitDetails>summary small{margin-left:auto;color:#aebda5;font-size:10px;font-weight:500}
+  #shop{display:grid;grid-template-columns:minmax(0,1fr);gap:3px;padding-top:6px}
+  #shop .buy{display:flex;align-items:center;gap:7px;min-width:0;min-height:34px;padding:4px 7px;text-align:left;border-radius:5px;background:#202b23}
+  #shop .buy i{font-size:0;display:flex;align-items:center;justify-content:center;flex:none}
+  #shop .buy .bc-class-icon{width:23px;height:23px;object-fit:contain;image-rendering:pixelated}
+  #shop .bc-buy-label{display:flex;flex-direction:column;min-width:0;flex:1;gap:2px}
+  #shop .bc-buy-label b{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #shop .bc-buy-label small{font-size:9px;white-space:nowrap;color:#aebda5}
+  #shop .buy em{font-size:11px;white-space:nowrap;font-style:normal;color:#f2d181;font-weight:700;margin:0}
+  #shop .buy:disabled{opacity:.57;background:#1b241d}
+  .bc-tower-layout{display:grid;grid-template-columns:180px 1fr;gap:15px}
+  .bc-tower-portrait{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#253426;border:1px solid #43553e;border-radius:11px;padding:17px;min-height:230px}
+  .bc-tower-big-icon{width:85px;height:85px;image-rendering:pixelated;object-fit:contain}
+  .bc-tower-portrait h3{color:#ffdaa0;font-size:20px;margin:8px 0}
+  .bc-tower-portrait p{color:#e2d8c0}
+  .bc-tower-layout section{padding:9px 0}
+  .bc-tower-layout section h3{font-size:15px;color:#ffdda0;margin:6px 0}
+  .bc-garrison{display:flex;align-items:center;gap:12px;background:#25372a;border:1px solid #536c50;border-radius:9px;padding:11px}
+  .bc-garrison .bc-class-icon{width:48px;height:48px}
+  .bc-garrison small,.bc-garrison p{display:block;color:#c6cbb1;font-size:11px;margin:4px 0}
+  .bc-tower-hire{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:15px}
+  .bc-tower-hire button{display:flex;flex-direction:column;align-items:center;gap:7px;min-height:100px}
+  .bc-tower-hire .bc-class-icon{width:50px;height:50px}
+  .bc-tower-hire small{color:#ffdfa2}
+  .bc-warning{color:#ffb4a9;font-weight:650}
+  .bc-lodge{display:flex;align-items:center;gap:20px;background:#233729;border:1px solid #496b50;border-radius:12px;padding:20px;max-width:580px;margin:auto}
+  .bc-lodge-art{height:110px;width:110px;display:grid;place-items:center;border:3px solid #629c72;background:#284b33;color:#b2f5bc;font-size:72px;border-radius:13px;flex-shrink:0}
+  .bc-lodge h2{color:#c4f0cb}.bc-lodge p{color:#cadfcf}
+  .bc-mastery-progress{background:#233427;border:1px solid #49664d;border-radius:10px;padding:15px;margin:8px 0 15px}
+  .bc-mastery-progress h3{color:#ffe6a8;margin:0 0 4px}
+  .bc-mastery-progress .bc-exp{width:100%}
+  .bc-master-list{display:flex;flex-direction:column;gap:8px}
+  .bc-master-step{display:flex;align-items:center;gap:11px;border:1px solid #445643;border-radius:10px;background:#253427;padding:9px}
+  .bc-master-step.unlocked{border-color:#75a05c}
+  .bc-master-art{width:49px;height:49px;object-fit:contain;image-rendering:pixelated;flex:none}
+  .bc-master-step>div{min-width:0;flex:1}
+  .bc-master-step b{color:#f1dbad}
+  .bc-master-step p{font-size:11px;color:#ccd0bb;margin:3px 0}
+  .bc-master-step button{min-width:99px}
+  .bc-batch-recommend{border:1px solid #617a56;border-radius:11px;background:#23332a;padding:13px;margin-bottom:15px}
+  .bc-batch-recommend h3{color:#ffde9b;font-size:14px;margin:0 0 5px}
+  .bc-recommend{display:flex;align-items:center;gap:11px;padding:8px;border-top:1px solid #405440}
+  .bc-recommend.primary{background:#35462d;border-left:3px solid #efcc71}
+  .bc-recommend-icon{width:55px;height:55px;object-fit:contain;image-rendering:pixelated;flex:none}
+  .bc-recommend>div{flex:1;min-width:0}
+  .bc-recommend b,.bc-recommend small{display:block}
+  .bc-recommend small{color:#cfdbb7;font-size:11px;margin-top:3px}
+  .bc-batch-filters{display:flex;flex-wrap:wrap;gap:5px;margin:11px 0}
+  .bc-batch-filters button.active{border-color:#d5ae66;background:#65512e}
+  .bc-batch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:12px 0}
+  .bc-batch-card{display:flex;flex-direction:column;gap:5px;align-items:center;text-align:center;border:2px solid #72816e;border-radius:10px;background:#213127;padding:11px;min-height:230px}
+  .bc-batch-art{width:77px;height:77px;object-fit:contain;image-rendering:pixelated}
+  .bc-batch-card>b{font-size:12px}
+  .bc-batch-card>small{font-size:11px;color:#c5cfb5}
+  .bc-suggest-tag{color:#afdbb4;font-size:10px;background:#31533d;padding:3px 5px;border-radius:4px}
+  .bc-batch-card label{font-size:11px;align-self:flex-start;cursor:pointer}
+  .bc-batch-card input{accent-color:#eaca7e}
+  .bc-batch-card button{width:100%;margin-top:auto}
+  .bc-have{color:#b5f1bb!important}
+  .bc-batch-footer{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:13px;border-top:1px solid #5d6f53;background:#213022}
+  .bc-batch-confirm{border:2px solid #bc9b58;padding:14px;border-radius:11px;margin:13px 0;background:#383222}
+  .bc-batch-confirm h3{color:#ffe4a8;margin-top:0}
+  .bc-batch-confirm p{color:#e1d2b5;font-size:12px}
+  .bc-batch-confirm [data-batch-dismantle]{background:#6a3533;border-color:#bd7e70}
+  .bc-class-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .bc-class-tabs button{display:flex;align-items:center;gap:4px}
+  .bc-class-tabs button.active{background:#575230;border-color:#edca73}
+  @media(max-width:760px){.bc-tower-layout{grid-template-columns:1fr}.bc-tower-portrait{min-height:100px}
+   .bc-lodge{padding:9px;gap:10px}.bc-lodge-art{width:75px;height:75px;font-size:49px}
+   .bc-master-art{width:38px;height:38px}.bc-master-step button{min-width:76px}
+   .bc-batch-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  }
+  .bc-armory-summary{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 13px;background:#253b2b;border:1px solid #4c6952;border-radius:9px;margin-bottom:11px}
+  .bc-armory-summary>b{color:#ffe1a9;font-size:15px}.bc-armory-summary span{color:#b7d4bc;font-size:11px}
+  .bc-hero-roster-inline{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+  .bc-hero-roster-inline .bc-hero-pick{min-width:155px;flex:1;max-width:270px}
+  .bc-inventory-equip{display:flex;flex-direction:column;align-items:center;gap:6px;background:transparent;border:0;width:100%;min-height:93px}
+  .bc-inventory-equip>b{font-size:11px}.bc-inventory-equip small{color:#aebdaa}
+  .bc-inventory-piece label{font-size:11px;color:#f0dab3}
+  #side{max-height:57vh;overflow-y:auto}
+  .bc-build-panel{margin-bottom:14px}
+  #itemDetailPanel .bc-item-controls label{display:flex;align-items:center;gap:8px}
+  #itemDetailPanel .bc-item-controls select{background:#263828;color:#fff0cf;border:1px solid #648164;border-radius:5px;max-width:160px;padding:6px}
+
+  /* Single-screen Class Armory: recipe, inventory, upgrade and result live in one scrollable surface. */
+  #inventoryOpen,#forgeOpen{display:none!important}
+  #heroPanel{width:min(1000px,calc(100vw - 24px));height:min(92vh,900px)}
+  .bc-armory-body{padding:17px;scroll-behavior:smooth}
+  .bc-armory-roster{margin:5px 0 12px;border:1px solid #435b44;background:#1d2c20;border-radius:9px;padding:7px 12px}
+  .bc-armory-roster>summary{cursor:pointer;color:#cedcb4;font-size:12px}
+  .bc-armory-member{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:11px}
+  .bc-armory-member button{margin-left:auto}
+  .bc-armory-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:13px 0}
+  .bc-armory-slot{min-width:0;min-height:87px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;text-align:left;padding:10px}
+  .bc-armory-slot>span{font-size:12px;color:#ffdcad;overflow-wrap:anywhere}
+  .bc-armory-slot>small{font-size:10px;color:#a9c8a8}
+  .bc-armory-slot.active,.bc-armory-toolbar .active,.bc-armory-recipe.active{border-color:#f7ce74;background:#445132}
+  .bc-armory-current{display:flex;align-items:center;gap:13px;border:1px solid #7f774a;border-radius:10px;background:#2b382a;padding:10px;min-height:75px}
+  .bc-armory-current>.bc-recipe-icon{width:60px;height:60px}
+  .bc-armory-current>div{display:flex;flex-direction:column;flex:1;gap:5px;min-width:0}
+  .bc-armory-current>div b{color:#ffdf9d;font-size:15px}
+  .bc-armory-current>div small{color:#bad1b6;font-size:11px}
+  .bc-armory-empty-icon{font-size:34px;width:58px;text-align:center;color:#becdb0}
+  .bc-armory-toolbar{margin:12px 0;align-items:center}
+  .bc-armory-toolbar button{min-height:37px}
+  .bc-armory-notice,.bc-review-notice{border:1px solid #67996f;border-radius:8px;background:#25452e;color:#d7f8da;padding:10px;font-size:12px}
+  .bc-armory-work,.bc-armory-detail,.bc-armory-results{background:#202e24;border:1px solid #4b664d;border-radius:11px;padding:14px;margin:13px 0}
+  .bc-armory-work h3,.bc-armory-detail h3,.bc-armory-results h3{color:#ffe0a1;font-size:15px;margin:0 0 12px}
+  .bc-armory-recipes{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:7px;max-height:225px;overflow-y:auto;margin-bottom:13px}
+  .bc-armory-recipe{display:flex;gap:7px;align-items:center;text-align:left;padding:7px}
+  .bc-armory-recipe .bc-recipe-icon{height:48px;width:48px;flex-shrink:0}
+  .bc-armory-recipe b{display:block;font-size:12px;color:#f3e4c6}
+  .bc-armory-recipe small{font-size:10px;color:#b4c9af}
+  .bc-armory-work-selected{display:flex;align-items:center;gap:12px;background:#18271f;border:1px solid #42563d;border-radius:9px;padding:10px;margin-bottom:15px}
+  .bc-armory-work-selected>.bc-recipe-icon{height:69px;width:69px;flex-shrink:0;image-rendering:pixelated}
+  .bc-armory-work-selected>div{min-width:0;flex:1}
+  .bc-armory-work-selected b{font-size:15px;color:#ffdeb0}
+  .bc-armory-work-selected small{display:block;color:#b5ceac;font-size:11px;margin:5px 0}
+  .bc-armory-qty strong{font-size:12px}
+  .bc-auto-settings{border:1px solid #6a7952;border-radius:9px;padding:12px;margin-top:12px;background:#233627;display:grid;gap:12px}
+  .bc-auto-settings legend{font-weight:700;color:#ffe0a0;padding:0 6px}
+  .bc-auto-settings .bc-auto-toggle{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .bc-auto-select{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .bc-auto-select select{font:inherit;background:#19271d;color:#fff0cc;border:1px solid #8da16b;border-radius:6px;padding:8px;min-width:175px}
+  .bc-auto-settings input{accent-color:#e7bf6f}
+  .bc-armory-primary{display:flex;justify-content:flex-end;margin-top:13px}
+  .bc-armory-primary button{min-width:220px;min-height:42px;font-size:14px}
+  .bc-auto-confirm{background:#3a3624;border-color:#cfab64}
+  .bc-batch-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:7px;margin-bottom:12px}
+  .bc-batch-summary span{background:#17291f;border:1px solid #56754a;border-radius:9px;padding:10px;color:#d6e1cf;font-size:11px}
+  .bc-batch-summary b{display:block;color:#ffe49c;font-size:20px;margin-top:2px}
+  .bc-recommend-other{margin-top:10px}
+  .bc-recommend-other summary{padding:9px;background:#1a2d23;border-radius:7px;cursor:pointer;color:#edddaa}
+  .bc-armory-detail .bc-modal-header{border-radius:8px}
+  .bc-armory-detail .bc-modal-body,.bc-armory-work .bc-item-detail{max-height:none;overflow:visible;padding:10px 0}
+  .bc-results-toggle{margin:10px 0 3px;width:100%;min-height:37px;border-color:#ae9654}
+  @media(max-width:760px){
+    #heroPanel{height:93vh;width:calc(100vw - 12px)}
+    .bc-armory-body{padding:10px}
+    .bc-armory-slots{gap:4px}
+    .bc-armory-slot{min-height:94px;padding:6px;font-size:11px}
+    .bc-armory-slot span{font-size:10px}
+    .bc-armory-current{flex-wrap:wrap}
+    .bc-armory-current>button{width:100%}
+    .bc-armory-recipes{grid-template-columns:1fr}
+    .bc-batch-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .bc-batch-summary span:last-child{grid-column:1/-1}
+  }
+
 </style>
-  <script type="module" crossorigin src="/burrow-command/assets/warren-D26ASKvo.js"></script>
+  <script type="module" crossorigin src="/burrow-command/assets/warren-DW0NVhp0.js"></script>
 </head>
 <body>
-<div id="wrap"><canvas id="scene" width="1280" height="720"></canvas></div>
+<div id="wrap"><canvas id="scene" width="1280" height="720"></canvas><div id="worldLabels" aria-label="อาคารและป้อมในหมู่บ้าน"></div></div>
 <div id="top" class="panel">
   <div id="clock"><b id="phase">☀️ วันที่ 1</b> <span id="timer"></span><br><small id="wave"></small><div><div id="clockbar"></div></div></div>
-  <div class="res"><span>🪙 <b id="gold">0</b></span><span>🪵 <b id="m-wood">0</b></span><span>🦴 <b id="m-hide">0</b></span><span>⛏ <b id="m-ore">0</b></span></div>
+  <div class="res"><span>🪙 <b id="gold">0</b></span><span title="วัตถุดิบที่ใช้สร้างและอัปบ้าน">🧰 <b id="materials">0</b></span></div>
   <div id="hall"><small>โพรงกระต่าย <span id="burrow-t"></span></small><div><div id="burrow"></div></div></div>
 </div>
-<div id="help" class="panel"><b>Burrow Command</b> · ต้นแบบ<br>☀️ กลางวัน: กระต่าย <b>ออกล่า</b> ไปล่ามอนในวงชมพูรอบธง 🚩 แล้วแบกของกลับโพรง · <b>เฝ้าบ้าน</b> ยืนรอบโพรง<br>🌙 กลางคืน: มอนบุก ถ้าแพ้ เช้าซ่อมแล้วสู้เวฟเดิมอีกรอบ<br>🏠 ชนะบอสเวฟ 5 แล้วอัปบ้านได้ · เกมเซฟทุกเช้า<br><b>คลิกพื้น</b> ย้ายจุดล่า 🚩 · 🏹 สร้างป้อมรอบโพรง (Esc ยกเลิก) · <b>WASD</b> เลื่อนกล้อง · <b>Space</b> กลับโพรง<br><button id="reset">เริ่มหมู่บ้านใหม่</button></div>
-<div id="shopbox" class="panel"><h3>จ้างกระต่าย (เงินได้จากการฆ่ามอนเท่านั้น)</h3><div id="shop"></div></div>
+<div id="help" class="panel"><b>Burrow Command</b> · กระต่ายฟาร์มอัตโนมัติรอบหมู่บ้าน · เพดาน Hero Lv = บ้าน × 3<br>🧱 เสริมฐานด้วยวัตถุดิบได้ตั้งแต่วันแรก · อัป Warren Level ด้วยวัตถุดิบหลังชนะบอสเวฟ 5<br>🌙 กลางคืน: Elite มีโอกาสมากขึ้นตามเวฟ · แพ้แล้วกลับมาสู้เวฟเดิมได้ · ซ่อมด้วย Gold ตอนกลางวัน<br>🏹 คลิกป้อมเพื่อจ้าง Archer / Mage อัป HP หรือย้ายตำแหน่ง · 🏠 คลิกโพรงเพื่อใช้ Heal (กลางวัน/คืน อย่างละครั้ง)<br>⚒ โรงตีเหล็กเพิ่มโอกาส Rarity สูง · 📦 โรงผลิตสร้าง Gold/วัตถุดิบต่อวินาที · 🛒 คลิกรถเข็นเพื่อขายของส่วนเกิน<br>🛡 รั้วรอบบ้าน: สร้างรั้วไม้ 15×15 ช่อง · อัปเกรดเป็นกำแพงหินโดยไม่ขยายพื้นที่ · ซ่อมด้วยปุ่มซ่อมทั้งหมด<br><b>WASD</b> เลื่อนกล้อง · <b>Space</b> กลับโพรง<br><button id="reset">เริ่มหมู่บ้านใหม่</button></div>
+<div id="shopbox" class="panel"><details id="recruitDetails" open><summary>จ้างกระต่าย <small id="recruitSummary">0/7</small></summary><div id="shop" aria-label="รายชื่อกระต่ายที่จ้างได้"></div></details></div>
 <div id="side" class="panel">
-  <h3>หน่วย (คลิก = สลับ ออกล่า / เฝ้าบ้าน)</h3><div id="squad"></div>
+  <h3>จัดการหมู่บ้าน</h3>
+  <div class="bc-quick-actions">
+    <button id="heroOpen" class="bc-quick"><span data-ui-icon="gear">🐰</span> Class Armory</button>
+    <button id="inventoryOpen" class="bc-quick"><span data-ui-icon="gear">🎒</span> คลังเก็บของ</button>
+    <button id="forgeOpen" class="bc-quick"><span data-ui-icon="craft">⚒</span> โรงตีเหล็ก</button>
+    <button id="masteryOpen" class="bc-quick"><span data-ui-icon="skill">✦</span> Class Mastery</button>
+  </div>
+  <div id="squad" aria-label="กระต่ายในกองทัพ"></div>
+  <div class="row"><button id="fortify" title="เสริมฐานได้ตั้งแต่วันแรก ใช้วัตถุดิบทั่วไปโดยไม่ใช้ Gold"></button></div>
+  <div class="row"><button id="lureOpen" title="ใช้วัตถุดิบล่อมอนสเตอร์พิเศษได้วันละหนึ่งครั้ง"></button></div>
   <div class="row"><button id="upgrade"></button></div>
   <div class="row"><button id="build"></button></div>
-  <div class="row"><button id="repair"></button></div>
+  <div id="towerMoveNotice" role="status" hidden>📍 ย้ายป้อม: คลิกพื้นใหม่ในเขตสร้างป้อม · กด Esc เพื่อยกเลิก <button id="cancelTowerMove">ยกเลิก</button></div>
+  <div class="row"><button id="fenceBuild" title="รั้วไม้ → กำแพงหิน → กำแพงหินเสริม · ขนาด 15×15 ช่องคงเดิม"></button></div>
+  <div id="wallStatus" role="status" aria-live="polite"></div>
+  <div id="gateControls" aria-label="เลือกประตูที่จะปิดตอนกลางคืน" hidden></div>
+  <div class="row"><button id="repair"></button><button id="repairAll"></button></div>
   <div class="row"><button id="revive"></button></div>
   <div class="row"><button id="speed">⏩ x1</button><button id="skip">🌙 เข้าคืนเลย</button></div>
 </div>
+<div id="modalScrim" hidden></div>
+<div id="forgePanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="โรงตีเหล็ก"></div>
+<div id="heroPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="จัดการกระต่าย"></div>
+<div id="inventoryPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="คลังเก็บของ"></div>
+<div id="itemDetailPanel" class="panel bc-modal bc-item-modal" hidden role="dialog" aria-modal="true" aria-label="รายละเอียดอุปกรณ์"></div>
+<div id="towerPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="ป้อมปราการ"></div>
+<div id="masteryPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="Class Mastery"></div>
+<div id="batchPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="Batch Craft Results"></div>
+<div id="lurePanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="Threat Lure"></div>
+<div id="sellPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="Quick Sell รถเข็นขายของ"></div>
+<div id="hallPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="โพรงกระต่าย"></div>
+<div id="blacksmithPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="โรงตีเหล็ก"></div>
+<div id="resourcePanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="โรงผลิตทรัพยากร"></div>
 <div id="banner"></div><div id="toast"></div>
 <div id="over" hidden><h2></h2><p></p><button id="again">เล่นอีกครั้ง</button></div>
 <div id="loading">กำลังสร้างหมู่บ้าน…</div>
