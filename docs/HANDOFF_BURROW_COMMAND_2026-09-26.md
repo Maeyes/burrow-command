@@ -54,10 +54,10 @@ the hall at ~60–80%. The user lost on night 5 before the last nerf, so the cur
 *after* that nerf (hall 500 HP, boss 650 HP/20 atk, count `2+3n+max(0,n-3)`, power `1+0.22(n-1)`).
 
 ## Gotchas (read before changing things)
-- **Blocking dependency:** `warren.js` imports `combat/skillfx.js`, which globs
-  `art-test/fx-production/**`. **Both are still untracked** (in-progress work from another session,
-  also used by `game.js`). The `burrow-command` branch builds only in a working tree that has them.
-  Commit that work before relying on a clean checkout.
+- **Dependency:** `warren.js` imports `combat/skillfx.js`, which globs
+  `art-test/fx-production/skills/*`. Both are committed on this branch (6a31a2c). The main game's
+  in-progress changes (`game.js`, `ui/*`, `src/simulation/*`) are **not** committed; they're unrelated to
+  the prototype.
 - **Never publish `public/`**: it holds the main game's assets, including art from another game we
   may not redistribute (the hero must be **Blessed Bunny only**). `vite.warren.config.ts` has
   `publicDir: false`; keep it. Check `dist-warren` for anything outside `blessed-bunny`,
