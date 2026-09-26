@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Burrow Command — prototype</title>
+<style>
+  :root{--ink:#fff4dc;--dim:#c9bfa6;--gold:#ffd45c;--panel:rgba(14,18,14,.86);--line:rgba(255,230,170,.22);--pink:#ff8fbf}
+  html,body{margin:0;height:100%;background:#07090b;color:var(--ink);font:13px/1.35 system-ui,sans-serif;overflow:hidden;user-select:none}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  #scene{image-rendering:pixelated;background:#101510;max-width:100vw;max-height:100vh;aspect-ratio:16/9;width:100vw;height:auto}
+  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;color:#f0c878;background:#07090b;z-index:90}
+  .panel{position:fixed;background:var(--panel);border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(6px);z-index:20}
+  #top{left:50%;top:10px;transform:translateX(-50%);display:flex;gap:16px;align-items:center;padding:8px 14px;white-space:nowrap}
+  #top b{font-size:15px}
+  #clock{width:160px}#clock div{height:6px;background:#2a2f28;border-radius:3px;overflow:hidden;margin-top:4px}
+  #clockbar{height:100%;background:linear-gradient(90deg,#ffe08a,#ff9a4a);transition:width .2s}#clockbar.night{background:linear-gradient(90deg,#6c7bd6,#b08cff)}
+  #timer{color:var(--dim);font-size:12px}
+  .res{display:flex;gap:10px}.res span{display:flex;gap:4px;align-items:center}.res b{color:var(--gold)}
+  #hall{width:170px}#hall div{height:8px;background:#2a2f28;border-radius:4px;overflow:hidden;margin-top:3px}#burrow{height:100%;background:linear-gradient(90deg,#5fd07a,#a8f08a);transition:width .2s}
+  #hall small{color:var(--dim)}
+  #shopbox{left:10px;bottom:10px;padding:10px;width:min(330px,calc(100vw - 20px))}
+  #shopbox h3,#side h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;color:var(--dim);font-weight:600}
+  #shop{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .card{display:flex;flex-direction:column;gap:3px}
+  button{font:inherit;color:var(--ink);background:#243024;border:1px solid #4d5d45;border-radius:7px;cursor:pointer;padding:6px}
+  button:hover:not(:disabled){background:#2f4130;border-color:#8fb07a}
+  button:disabled{opacity:.42;cursor:default}
+  .buy{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:6px;text-align:left;align-items:center}
+  .buy i{grid-row:1/3;font-style:normal;font-size:20px}.buy small{color:var(--dim);font-size:10px}.buy em{grid-column:1/3;font-style:normal;color:var(--gold);font-weight:700;text-align:right;margin-top:2px}
+  .up{font-size:10px;padding:4px;background:#2b2618;border-color:#6a5a33}
+  #side{right:10px;bottom:10px;padding:10px;width:230px;display:flex;flex-direction:column;gap:6px}
+  #squad{display:flex;flex-wrap:wrap;gap:4px}
+  #squad button{width:44px;height:44px;padding:2px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:18px}
+  #squad small{font-size:9px}#squad .guard{border-color:#6c9bd6;background:#1f2a3a}#squad .down{border-color:#a04848;background:#3a1f1f}
+  .row{display:flex;gap:6px}.row button{flex:1}
+  #help{left:10px;top:10px;padding:8px 10px;max-width:260px;font-size:11px;color:var(--dim)}#help b{color:var(--ink)}
+  #banner{position:fixed;left:50%;top:32%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;opacity:0;z-index:30}
+  #banner b{display:block;font:800 44px Georgia,serif;color:#fff1c8;text-shadow:0 3px 0 #3a2616,0 0 30px rgba(255,180,90,.6)}#banner span{color:var(--ink);text-shadow:0 2px 4px #000}
+  #banner.on{animation:bn 3.2s ease forwards}@keyframes bn{0%{opacity:0;transform:translate(-50%,-40%)}12%,70%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0}}
+  #toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);background:rgba(40,16,16,.9);border:1px solid #a04848;padding:6px 12px;border-radius:8px;opacity:0;transition:opacity .2s;z-index:30;pointer-events:none}#toast.on{opacity:1}
+  #over{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(5,6,8,.72);z-index:60;gap:8px}#over[hidden]{display:none}#over h2{font:800 42px Georgia,serif;margin:0}#over button{font-size:16px;padding:10px 22px}
+  @media (max-width:760px){#help{display:none}#top{gap:8px;font-size:11px}#hall{width:110px}#side{width:180px}}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="scene" width="1280" height="720"></canvas></div>
+<div id="top" class="panel">
+  <div id="clock"><b id="phase">☀️ วันที่ 1</b> <span id="timer"></span><div><div id="clockbar"></div></div></div>
+  <div class="res"><span>🪙 <b id="gold">0</b></span><span>🪵 <b id="m-wood">0</b></span><span>🦴 <b id="m-hide">0</b></span><span>⛏ <b id="m-ore">0</b></span></div>
+  <div id="hall"><small>โพรงกระต่าย <span id="burrow-t"></span></small><div><div id="burrow"></div></div></div>
+</div>
+<div id="help" class="panel"><b>Burrow Command</b> · ต้นแบบ<br>☀️ กลางวัน: กระต่ายออกฟาร์มรอบ 🚩 แล้วแบกของกลับโพรง<br>🌙 กลางคืน: มอนบุก ป้องกันโพรงให้รอด 5 คืน<br><b>คลิกพื้น</b> ย้ายธง · <b>WASD</b> เลื่อนกล้อง · <b>Space</b> กลับโพรง</div>
+<div id="shopbox" class="panel"><h3>จ้างกระต่าย (เงินได้จากการฆ่ามอนเท่านั้น)</h3><div id="shop"></div></div>
+<div id="side" class="panel">
+  <h3>หน่วย (คลิก = สลับ ฟาร์ม/เฝ้า)</h3><div id="squad"></div>
+  <div class="row"><button id="repair"></button></div>
+  <div class="row"><button id="revive"></button></div>
+  <div class="row"><button id="speed">⏩ x1</button><button id="skip">🌙 เข้าคืนเลย</button></div>
+</div>
+<div id="banner"></div><div id="toast"></div>
+<div id="over" hidden><h2></h2><p></p><button id="again">เล่นอีกครั้ง</button></div>
+<div id="loading">กำลังสร้างหมู่บ้าน…</div>
+<script type="module" src="./warren.js"></script>
+</body>
+</html>

@@ -10,6 +10,26 @@
       ],
       "port": 5173,
       "autoPort": true
+    },
+    {
+      "name": "warren-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "preview",
+        "--config",
+        "vite.warren.config.ts"
+      ],
+      "port": 4174
+    },
+    {
+      "name": "warren-pages-check",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "set WARREN_BASE=/burrow-command/&& npx vite preview --config vite.warren.config.ts --port 4175"
+      ],
+      "port": 4175
     }
   ]
 }

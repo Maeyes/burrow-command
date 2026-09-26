@@ -18,6 +18,11 @@ const SOURCES = {
   mine: { id: 'mine', assetRoot: MINE_ASSET_ROOT, monsters: MINE_MONSTERS, bosses: MINE_BOSSES, map: MINE_MAP, bossRoot: MINE_BOSS_ROOT },
 };
 
+// Roster roots are site-absolute ('/art-test/...'); prefix the deploy base so builds served from a
+// sub-path (GitHub Pages: /<repo>/) still find the frames. In dev BASE_URL is '/', so nothing changes.
+const BASE = (import.meta.env?.BASE_URL ?? '/').replace(/\/$/, '');
+const at = p => (p.startsWith('/') ? BASE + p : p);
+
 export const ROSTER_IDS = Object.freeze(Object.keys(SOURCES));
 
 export function chooseRosterId(mapRoster, biome) {
@@ -89,7 +94,7 @@ export function monsterPresentation(roster, monsterType) {
       isBoss: true,
       kind: 'sequence',
       count: boss.frameCount || 1,
-      frameSrc: i => `${source.bossRoot}/animations/${animation}/unknown/frame_${String(i).padStart(3, '0')}.png`,
+      frameSrc: i => at(`${source.bossRoot}/animations/${animation}/unknown/frame_${String(i).padStart(3, '0')}.png`),
     };
   }
 
@@ -101,9 +106,9 @@ export function monsterPresentation(roster, monsterType) {
     kind: 'sequence',
     count: asset.count || 1,
     scale: asset.scale || 1,
-    frameSrc: i => `${source.assetRoot}/${asset.dir}/animations/${asset.anim}/unknown/frame_${String(i).padStart(3, '0')}.png`,
+    frameSrc: i => at(`${source.assetRoot}/${asset.dir}/animations/${asset.anim}/unknown/frame_${String(i).padStart(3, '0')}.png`),
     // Optional attack clip; monsters without one fall back to the code tackle in game.js.
     attackCount: asset.attack ? (asset.attackCount || asset.count || 1) : 0,
-    attackSrc: asset.attack ? i => `${source.assetRoot}/${asset.dir}/animations/${asset.attack}/unknown/frame_${String(i).padStart(3, '0')}.png` : null,
+    attackSrc: asset.attack ? i => at(`${source.assetRoot}/${asset.dir}/animations/${asset.attack}/unknown/frame_${String(i).padStart(3, '0')}.png`) : null,
   };
 }

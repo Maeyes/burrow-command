@@ -14,3 +14,5 @@ _tmp-*
 test-out.txt
 test-result.txt
 *.zip
+dist-warren/
+.deploy-warren/
