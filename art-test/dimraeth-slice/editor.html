@@ -8,6 +8,7 @@
   :root{--bg:#0d0f0c;--panel:#17191400;--ink:#efe6cc;--dim:#a79f88;--gold:#f0c878;--line:#3a352b}
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:13px/1.4 system-ui,sans-serif}
+  body{display:flex;flex-direction:column;overflow:hidden}
   header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);background:#141611}
   header b{color:var(--gold);letter-spacing:.08em;font-size:12px;margin-right:6px}
   .group{display:flex;gap:4px;align-items:center;padding-right:10px;border-right:1px solid var(--line)}
@@ -18,7 +19,7 @@
   button.on{background:var(--gold);color:#1a140a;border-color:var(--gold);font-weight:700}
   button .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px;border:1px solid #0006}
   input[type=range]{width:110px;padding:0}
-  main{display:flex;gap:10px;padding:10px;height:calc(100% - 52px)}
+  main{display:flex;gap:10px;padding:10px;flex:1;min-height:0}
   #paneEdit{flex:1.1;min-width:0;display:flex;flex-direction:column;gap:6px}
   #paneView{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
   #edit{width:100%;flex:1;min-height:0;background:#0a0b09;border:1px solid var(--line);border-radius:6px;cursor:crosshair;image-rendering:pixelated}
@@ -26,6 +27,7 @@
   .hint{color:var(--dim);font-size:12px}
   .hint kbd{background:#2a2620;border:1px solid #4a4236;border-radius:3px;padding:0 4px;font-size:11px}
   #status{color:var(--gold);font-size:12px;min-height:16px}
+  @media(max-width:1100px){body{overflow:auto}main{flex-direction:column;min-height:900px}#paneEdit,#paneView{min-height:430px}header .group{flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -34,6 +36,8 @@
   <div class="group" id="tools"></div>
   <div class="group" id="objBar" style="display:none">ของ <select id="objType"></select>
     <span id="houseOpts" style="display:none;gap:4px;align-items:center">หลังคา <select id="roof"></select> ชั้น <select id="floors"><option>1</option><option>2</option><option>3</option></select> แนวหลังคา <select id="ridge"><option value="x">↘</option><option value="y">↙</option></select></span>
+    <span id="farmOpts" style="display:none;gap:4px;align-items:center"><span id="cropWrap">พืช <select id="crop"><option value="vegetables">ผัก</option><option value="grain">ธัญพืช</option><option value="herbs">สมุนไพร</option><option value="flowers">ดอกไม้</option></select></span> ระยะ <select id="cropStage"><option value="1">เพิ่งปลูก</option><option value="2">ต้นอ่อน</option><option value="3">โตเต็มที่</option><option value="4" selected>พร้อมเก็บ</option></select> ขนาด <select id="farmSize"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></span>
+    <span id="buildOpts" style="display:none;gap:4px;align-items:center">ขั้นก่อสร้าง <select id="buildStage"><option value="foundation">ฐานราก</option><option value="frame">โครงบ้าน</option><option value="complete" selected>สร้างเสร็จ</option></select></span>
     <span id="lineOpts" style="display:none;gap:4px;align-items:center">แนว <select id="axis"><option value="x">↘</option><option value="y">↙</option></select> <span id="lenWrap">ยาว <select id="flen"><option>2</option><option selected>3</option><option>4</option><option>6</option><option>8</option></select> ช่อง</span></span>
     <span id="portalOpts" style="display:none;gap:4px;align-items:center">ID <input id="portalId" size="8" placeholder="gate-a"> ไปแมพ <select id="portalTo"><option value="">—</option></select> ไปประตู <input id="portalToPortal" size="8" placeholder="gate-b"></span>
   </div>

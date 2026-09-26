@@ -19,6 +19,12 @@ let clickHandler=null,safeZones=[];
 /** Safe-zone rings drawn on the ground: [{x,y,r}] in world units. */
 export function setRuntimeSafeZones(z=[]){safeZones=Array.isArray(z)?z:[];}
 export function setRuntimeClickHandler(fn=null){clickHandler=typeof fn==='function'?fn:null;}
+/** Same zoom/camera-aware ground pick used by the game click handler; also supports drag-to-build. */
+export function runtimePointerHit(e){
+ if(!canvas||!WS.terrain||!cam)return null;
+ const r=canvas.getBoundingClientRect(),mx=(e.clientX-r.left)*W/r.width,my=(e.clientY-r.top)*H/r.height;
+ return WS.terrain.pick((mx-W/2)/viewZoom+cam.x,(my-H/2)/viewZoom+cam.y);
+}
 export function setRuntimeActorUpdater(fn=null){actorUpdater=typeof fn==='function'?fn:null;}
 export function getTerrainRuntime(){return WS.terrain;}
 export function projectRuntimePoint(x,y,z=0){const p=toScreen(x,y,z);return viewZoom===1?{x:p[0],y:p[1]}:{x:W/2+(p[0]-W/2)*viewZoom,y:H/2+(p[1]-H/2)*viewZoom};}
@@ -311,6 +317,48 @@ function drawObject(o, psx, psy, afterPlayer) {
       ctx.imageSmoothingEnabled=false;ctx.drawImage(img,sx-dox,sy-doy,dw,dh);
     }
     if(typeof o.drawOverlay==='function')o.drawOverlay(ctx,{x:sx,y:sy,z,time});
+  } else if (o.kind === 'gate') {
+    if(o.editorStoneSprite){
+      // Draw the EXACT stoneGateSprite used by the editor. Only the closed door leaf is dynamic.
+      const sprite=o.editorStoneSprite,[sx,sy]=toScreen(sprite.x,sprite.y,o.z);
+      const x=sx-sprite.ox,y=sy-sprite.oy;
+      if(x>W+80||y>H+80||x+sprite.img.width<-80||y+sprite.img.height<-80)return;
+      ctx.imageSmoothingEnabled=false;
+      ctx.drawImage(sprite.img,Math.round(x),Math.round(y));
+      if(o.closed){
+        // Wooden gate leaf below the editor's stone lintel. Actual blocked path is still
+        // the existing live gate collider; no gameplay collision comes from artwork.
+        for(const [height,dark,light] of [
+          [8,'#503720','#ae8350'],[17,'#5b3e25','#c49a63'],[26,'#624329','#b98a58'],[35,'#49301d','#a4794c']
+        ]){
+          drawIsoLine(o.x+9*(o.x1>o.x),o.y+9*(o.y1>o.y),
+            o.x1-9*(o.x1>o.x),o.y1-9*(o.y1>o.y),o.z+height,dark);
+          drawIsoLine(o.x+9*(o.x1>o.x),o.y+9*(o.y1>o.y),
+            o.x1-9*(o.x1>o.x),o.y1-9*(o.y1>o.y),o.z+height+3,light);
+        }
+      }
+      return;
+    }
+    // Wooden Lv1 gate retained for the starter perimeter.
+    const [ax,ay]=toScreen(o.x,o.y,o.z);
+    if(ax < -75 || ax > W+75 || ay < -75 || ay > H+75)return;
+    const R=n=>Math.max(1,Math.round(n*K));
+    drawIsoLine(o.x,o.y,o.x1,o.y1,o.z+38,'#4a2e1a');
+    drawIsoLine(o.x,o.y,o.x1,o.y1,o.z+41,'#b07e4a');
+    drawIsoLine(o.x,o.y,o.x1,o.y1,o.z+35,'#8c5c34');
+    if(o.closed){
+      for(const [h,dark,light] of [[9,'#4a2e1a','#ba874e'],[19,'#5c3d21','#d0a064'],[29,'#805432','#bc8953']]){
+        drawIsoLine(o.x,o.y,o.x1,o.y1,o.z+h,dark);
+        drawIsoLine(o.x,o.y,o.x1,o.y1,o.z+h+3,light);
+      }
+    }
+    for(const [wx,wy] of [[o.x,o.y],[o.x1,o.y1]]){
+      const [px,py]=toScreen(wx,wy,o.z);
+      ctx.fillStyle='#4a2e1a';ctx.fillRect(px-R(3),py-R(40),R(6),R(41));
+      ctx.fillStyle='#8c5c34';ctx.fillRect(px-R(3),py-R(40),R(3),R(40));
+      ctx.fillStyle='#b07e4a';ctx.fillRect(px-R(3),py-R(41),R(4),R(3));
+      ctx.fillStyle='#d2a16a';ctx.fillRect(px-R(2),py-R(31),R(2),R(2));
+    }
   } else if (o.kind === 'fence') {
     const [ax, ay] = toScreen(o.x, o.y, o.z);
     if (ax < -40 || ax > W + 40 || ay < -40 || ay > H + 40) return;
@@ -765,7 +813,7 @@ export async function boot(scene, { canvasEl, loadingEl, playerSprites = null, z
   const onKeyDown=e=>{keys.add(e.code);if(e.code==='KeyL')dusk=!dusk;if(e.code==='F3'){debugTraversal=!debugTraversal;e.preventDefault();}if(e.code==='KeyH'){const h=document.getElementById('hud');if(h)h.hidden=!h.hidden;}if(e.code.startsWith('Arrow'))e.preventDefault();};
   const onKeyUp=e=>keys.delete(e.code);
   const onWheel=e=>{const factor=e.deltaY<0?1.1:1/1.1;viewZoom=Math.max(zoomMin,Math.min(zoomMax,viewZoom*factor));e.preventDefault();};
-  const onPointer=e=>{const r=canvas.getBoundingClientRect(),mx=(e.clientX-r.left)*W/r.width,my=(e.clientY-r.top)*H/r.height,hit=WS.terrain.pick((mx-W/2)/viewZoom+cam.x,(my-H/2)/viewZoom+cam.y);if(clickHandler){clickHandler(hit,e);return;}player.target={x:hit.x,y:hit.y};};
+  const onPointer=e=>{const hit=runtimePointerHit(e);if(!hit)return;if(clickHandler){clickHandler(hit,e);return;}player.target={x:hit.x,y:hit.y};};
   window.addEventListener('keydown',onKeyDown);window.addEventListener('keyup',onKeyUp);canvas.addEventListener('wheel',onWheel,{passive:false});canvas.addEventListener('pointerdown',onPointer);
   bootListeners=[[window,'keydown',onKeyDown],[window,'keyup',onKeyUp],[canvas,'wheel',onWheel,{passive:false}],[canvas,'pointerdown',onPointer]];
   window.__slice = { WS, player, cam, actors, setRuntimeActors, setRuntimeActorUpdater, terrain:WS.terrain, projectRuntimePoint, canRuntimeActorStand, bakeMs, setDusk: v => { dusk = v; } };

@@ -28,6 +28,13 @@ export const OBJECT_TYPES = {
   lantern: { label: 'ตะเกียง/คบเพลิง', r: .25, color: '#ffd27a' },
   camp: { label: 'กองไฟ', r: .6, color: '#ff8a30' },
   house: { label: 'บ้าน', r: 1.8, color: '#c49a6c', opts: { roof: 'red', floors: 1 } },
+  cottage: { label: 'กระท่อม', kind: 'building', w: 2.75, d: 2.25, r: 1.55, color: '#c9a36f' },
+  farmhouse: { label: 'บ้านไร่', kind: 'building', w: 3.75, d: 3, r: 2.1, color: '#d0aa76' },
+  barn: { label: 'โรงนา', kind: 'building', w: 4, d: 2.75, r: 2.2, color: '#a85a42' },
+  storehouse: { label: 'โรงเก็บของ', kind: 'building', w: 3, d: 2.5, r: 1.75, color: '#9a744e' },
+  workshop: { label: 'โรงช่าง', kind: 'building', w: 3.25, d: 2.5, r: 1.85, color: '#b47a50' },
+  farmPlot: { label: 'แปลงเกษตร', kind: 'field', r: 1.5, color: '#7fa447' },
+  flowerMeadow: { label: 'ทุ่งดอกไม้', kind: 'field', r: 1.5, color: '#d98aaa' },
   crate: { label: 'ลังไม้', r: .3, color: '#a8743f' },
   barrel: { label: 'ถังไม้', r: .3, color: '#8c5c34' },
   altar: { label: 'แท่นบูชา', r: .8, color: '#8fe6ff' },
@@ -46,12 +53,27 @@ export const OBJECT_TYPES = {
   cactus: { label: 'กระบองเพชร', r: .3, color: '#468252' },
   coral: { label: 'ปะการัง', r: .35, color: '#e05a7c' },
   // village
+  stoneWall: { label: 'กำแพงหิน', r: .4, color: '#aaa291', opts: { axis: 'x', len: 3 } },
+  stoneGate: { label: 'ซุ้มประตูหิน', r: .45, color: '#c0b7a3', opts: { axis: 'x', len: 2 } },
   fence: { label: 'รั้วไม้', r: .3, color: '#ad7a47', opts: { axis: 'x', len: 3 } },
   well: { label: 'บ่อน้ำ', r: .5, color: '#9a8f7f' },
   signpost: { label: 'ป้ายบอกทาง', r: .2, color: '#8c5c34' },
   stall: { label: 'แผงตลาด', r: .6, color: '#d8483c' },
   cart: { label: 'เกวียน', r: .55, color: '#6b4427' },
   hay: { label: 'กองฟาง', r: .45, color: '#d4b25c' },
+  scarecrow: { label: 'หุ่นไล่กา', r: .3, color: '#b89646' },
+  woodpile: { label: 'กองฟืน', r: .45, color: '#7a5231' },
+  laundry: { label: 'ราวตากผ้า', r: .55, color: '#d8c9ad' },
+  chicken: { label: 'ไก่', r: .22, color: '#e8d6aa' },
+  sheep: { label: 'แกะ', r: .35, color: '#e8e2d6' },
+};
+
+const BUILDING_PRESETS = {
+  cottage: { w: 2.75, d: 2.25, wallH: 42, roofH: 38, chimney: true, flowers: true, porch: true, windows: [{ face: 'y', at: .2 }, { face: 'x', at: .55 }] },
+  farmhouse: { w: 3.75, d: 3, wallH: 68, roofH: 40, floors: 2, chimney: true, flowers: true, windows: [{ face: 'y', at: .2 }, { face: 'y', at: .8 }, { face: 'x', at: .3 }, { face: 'x', at: .72 }] },
+  barn: { w: 4, d: 2.75, wallH: 54, roofH: 44, wide: true, windows: [{ face: 'x', at: .25 }, { face: 'x', at: .75 }] },
+  storehouse: { w: 3, d: 2.5, wallH: 48, roofH: 34, wide: true, windows: [] },
+  workshop: { w: 3.25, d: 2.5, wallH: 52, roofH: 36, chimney: true, awning: true, windows: [{ face: 'y', at: .2 }, { face: 'x', at: .55 }] },
 };
 const STALL_LOOKS = [
   { goods: ['#d8483c', '#f0a53a', '#9fd05a'], cloth: ['#b8322a', '#efe3c8'] },
@@ -96,6 +118,7 @@ const decode = (str, n) => (str ? Uint8Array.from(str, c => c.charCodeAt(0) - 48
 // Returns engine stairs [{x0,x1,y0,y1,dir,from,to}] in world units, and the cells they occupy.
 export function autoStairs(level, road, water, n, cell, style = 'stone') {
   const stairs = [], taken = new Uint8Array(n * n), cands = [];
+  const smoothStyle = style === 'slope' || style === 'marble';
   // connected road patches: one painted road crossing one terrace edge = one slope
   const comp = new Int32Array(n * n).fill(-1);
   for (let k = 0, id = 0; k < n * n; k++) {
@@ -104,8 +127,8 @@ export function autoStairs(level, road, water, n, cell, style = 'stone') {
     while (q.length) { const c = q.pop(), i = c % n; for (const nb of [i > 0 ? c - 1 : -1, i < n - 1 ? c + 1 : -1, c - n, c + n]) if (nb >= 0 && nb < n * n && road[nb] && comp[nb] < 0) { comp[nb] = id; q.push(nb); } }
     id++;
   }
-  const STEP = style === 'slope' ? 5.5 : style === 'ramp' ? 4.5 : 7; // px per step (player can climb 12); ramps are longer and gentler
-  const MIN_W = style === 'slope' ? 10 : 1; // smooth slopes are at least ~3 characters wide (10 cells = 160 px)
+  const STEP = smoothStyle ? 5.5 : style === 'ramp' ? 4.5 : 7; // px per step (player can climb 12); ramps are longer and gentler
+  const MIN_W = smoothStyle ? 10 : 1; // smooth slopes are at least ~3 characters wide (10 cells = 160 px)
   // scan boundaries in 4 directions; a run of adjacent road cells along the boundary = one stairway
   const dirs = [[1, 0, '-x'], [-1, 0, '+x'], [0, 1, '-y'], [0, -1, '+y']]; // (di,dj) points from HIGH cell to LOW cell
   for (const [di, dj, dir] of dirs) {
@@ -157,7 +180,7 @@ export function autoStairs(level, road, water, n, cell, style = 'stone') {
   cands.sort((p, q) => q.w - p.w || (q.s.to - q.s.from) - (p.s.to - p.s.from));
   const done = new Set();
   for (const c of cands) {
-    if (style === 'slope' && done.has(c.key)) continue;
+    if (smoothStyle && done.has(c.key)) continue;
     const [x0, x1, y0, y1] = c.r;
     let hit = 0;
     for (let b = y0; b < y1; b++) for (let a = x0; a < x1; a++) if (a >= 0 && b >= 0 && a < n && b < n && taken[b * n + a]) hit++;
@@ -213,25 +236,38 @@ export function settleWater(level, water, n) {
 }
 
 // Bridges are placed by hand with the bridge brush: each connected painted patch becomes one deck.
-// It spans along the patch's longer side; the deck height comes from the banks at its two ends.
+// A diagonal brush stroke must not become its full bounding box: follow the dominant axis, use the
+// wet overlap for its span, and keep a predictable five-cell deck centred on the painted stroke.
 export function bridgesFromMask(mask, water, n, cell) {
   const seen = new Uint8Array(n * n), out = [];
   for (let k = 0; k < n * n; k++) {
     if (seen[k] || !mask[k]) continue;
-    let x0 = n, x1 = 0, y0 = n, y1 = 0; const q = [k]; seen[k] = 1;
+    const points = [], wet = [], q = [k]; seen[k] = 1;
     while (q.length) {
       const c = q.pop(), i = c % n, j = (c / n) | 0;
-      x0 = Math.min(x0, i); x1 = Math.max(x1, i); y0 = Math.min(y0, j); y1 = Math.max(y1, j);
-      for (const nb of [c - 1, c + 1, c - n, c + n]) if (nb >= 0 && nb < n * n && !seen[nb] && mask[nb]) { seen[nb] = 1; q.push(nb); }
+      points.push([i, j]); if (water[c]) wet.push([i, j]);
+      for (const [a, b] of [[i - 1, j], [i + 1, j], [i, j - 1], [i, j + 1]]) {
+        if (a < 0 || b < 0 || a >= n || b >= n) continue;
+        const nb = b * n + a;
+        if (!seen[nb] && mask[nb]) { seen[nb] = 1; q.push(nb); }
+      }
     }
-    const axis = (x1 - x0) >= (y1 - y0) ? 'x' : 'y';
-    out.push({ x0: x0 * cell, x1: (x1 + 1) * cell, y0: y0 * cell, y1: (y1 + 1) * cell, axis });
+    const source = wet.length >= 3 ? wet : points;
+    const xs = source.map(p => p[0]), ys = source.map(p => p[1]);
+    const axis = Math.max(...xs) - Math.min(...xs) >= Math.max(...ys) - Math.min(...ys) ? 'x' : 'y';
+    const along = axis === 'x' ? xs : ys, across = (axis === 'x' ? ys : xs).sort((a, b) => a - b);
+    const a0 = Math.max(0, Math.min(...along) - 1), a1 = Math.min(n, Math.max(...along) + 2); // one bank cell at each end
+    const width = Math.min(5, n), mid = across[(across.length - 1) >> 1];
+    const l0 = clamp(mid - Math.floor(width / 2), 0, n - width), l1 = l0 + width;
+    out.push(axis === 'x'
+      ? { x0: a0 * cell, x1: a1 * cell, y0: l0 * cell, y1: l1 * cell, axis }
+      : { x0: l0 * cell, x1: l1 * cell, y0: a0 * cell, y1: a1 * cell, axis });
   }
   return out;
 }
 
 // how a road climbs a terrace: 'auto' follows the biome (forest = earth ramp, mine = wooden steps, city = stone stairs…)
-export const SLOPE_STYLES = { auto: 'อัตโนมัติตามธีม', slope: 'เนินลาดเรียบ (กว้าง)', ramp: 'ทางลาดดิน', stone: 'บันไดหิน', wood: 'บันไดไม้' };
+export const SLOPE_STYLES = { auto: 'อัตโนมัติตามธีม', slope: 'เนินลาดเรียบ (กว้าง)', marble: 'ทางลาดหินอ่อน', ramp: 'ทางลาดดิน', stone: 'บันไดหิน', wood: 'บันไดไม้' };
 export const slopeStyleOf = data => (data.slopeStyle && data.slopeStyle !== 'auto' ? data.slopeStyle : biomeOf({ biome: data.biome }).stairStyle || 'stone');
 
 export function sceneFromMap(data, opts = {}) {
@@ -246,7 +282,9 @@ export function sceneFromMap(data, opts = {}) {
   // brush stroke still gives a meandering bank / cliff line. No warp next to stairs (they need the
   // exact painted edge) or under bridges.
   const calm = new Uint8Array(n * n);
-  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) if (taken[j * n + i] || bridgeMask[j * n + i])
+  const bridgeDeck = new Uint8Array(n * n);
+  for (const b of bridges) for (let j = b.y0 / cell; j < b.y1 / cell; j++) for (let i = b.x0 / cell; i < b.x1 / cell; i++) bridgeDeck[j * n + i] = 1;
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) if (taken[j * n + i] || bridgeDeck[j * n + i])
     for (let b = -3; b <= 3; b++) for (let a = -3; a <= 3; a++) { const ii = i + a, jj = j + b; if (ii >= 0 && jj >= 0 && ii < n && jj < n) calm[jj * n + ii] = 1; }
   const warp = data.organic === false ? 0 : 26;
   const idxW = (x, y) => {
@@ -278,7 +316,7 @@ export function sceneFromMap(data, opts = {}) {
     baseDensity: (x, y) => FOREST_DENSITY[forest[idx(x, y)]] ?? -1, bareByDefault: true, noEdgeForest: true,
     densNoise: .6, worn: 1, cliffStyle: data.cliffStyle,
     treePathClear: 56, canopyClear: 72, // keep painted roads and houses readable under tree crowns
-    trees: [], props: [], lanterns: [], camps: [], logs: [], crates: [], barrels: [], buildings: [], portals: [], stalls: [], fences: [],
+    trees: [], props: [], plots: [], lanterns: [], camps: [], logs: [], crates: [], barrels: [], buildings: [], portals: [], stalls: [], fences: [],
     gameplay: { mapId: data.name, spawnPoints: [] },
   };
   for (const o of data.objects || []) {
@@ -299,8 +337,28 @@ export function sceneFromMap(data, opts = {}) {
       case 'log': scene.logs.push(o.axis === 'y' ? { x: p.x - 8, y: p.y - 28, w: 16, d: 56, h: 14 } : { x: p.x - 28, y: p.y - 8, w: 56, d: 16, h: 14 }); break;
       case 'stall': scene.stalls.push({ x: p.x - 26, y: p.y - 13, ...STALL_LOOKS[Math.round(o.x * 7 + o.y * 13) % STALL_LOOKS.length] }); break;
       case 'fence': { const L = (o.len || 3) * T / 2; scene.fences.push(o.axis === 'y' ? { ax: p.x, ay: p.y - L, bx: p.x, by: p.y + L } : { ax: p.x - L, ay: p.y, bx: p.x + L, by: p.y }); break; }
+      case 'stoneWall': scene.props.push({ type: 'stoneWall', ...p, axis: o.axis || 'x', len: (o.len || 3) * T, seed: Math.round(o.x * 7 + o.y * 13), r: (o.len || 3) * T / 2 }); break;
+      case 'stoneGate': scene.props.push({ type: 'stoneGate', ...p, axis: o.axis || 'x', len: (o.len || 2) * T, seed: Math.round(o.x * 7 + o.y * 13), r: (o.len || 2) * T / 2 }); break;
       case 'stump': case 'mushroom': case 'flowers': case 'fern': case 'coral': case 'well': case 'signpost': case 'cart': case 'hay':
+      case 'scarecrow': case 'woodpile': case 'laundry': case 'chicken': case 'sheep':
         scene.props.push({ type: o.type, ...p, seed: Math.round(o.x * 7 + o.y * 13), r: OBJECT_TYPES[o.type].r * T * .8 }); break;
+      case 'farmPlot': case 'flowerMeadow': {
+        const size = clamp(o.size || 3, 2, 5) * T, meadow = o.type === 'flowerMeadow';
+        scene.plots.push({ x0: p.x - size / 2, x1: p.x + size / 2, y0: p.y - size / 2, y1: p.y + size / 2,
+          gate: 'x0', crop: meadow ? 'flowers' : (o.crop || 'vegetables'), stage: clamp(o.stage || 4, 1, 4), fence: !meadow, ground: meadow ? 'grass' : 'rows' });
+        break;
+      }
+      case 'cottage': case 'farmhouse': case 'barn': case 'storehouse': case 'workshop': {
+        const q = BUILDING_PRESETS[o.type], theme = biomeOf(scene).village || { wall: 'timber', roof: RED }, w = q.w * T, d = q.d * T;
+        scene.buildings.push({ x0: p.x - w / 2, x1: p.x + w / 2, y0: p.y - d / 2, y1: p.y + d / 2,
+          wallH: q.wallH, roofH: q.roofH, floors: q.floors || 1, ridge: o.ridge || 'x', roof: o.type === 'cottage' ? (theme.cottageRoof || theme.roof) : theme.roof, wall: theme.wall,
+          wallPalette: theme.wallPalette, woodPalette: theme.woodPalette, stage: o.stage || 'complete',
+          archetype: o.type, porch: !!q.porch, chimney: !!q.chimney, flowers: !!q.flowers && scene.biome !== 'mine' && scene.biome !== 'magma', moss: !!theme.moss,
+          door: { face: 'y', at: .5, wide: !!q.wide }, windows: q.windows,
+          awning: q.awning ? { face: 'y', at: .5, cols: scene.biome === 'underwater' ? ['#7a54bc', '#ffd08a'] : ['#b8322a', '#efe3c8'] } : undefined,
+          sign: o.type === 'workshop' ? { face: 'y', at: .5, icon: 'sword' } : undefined });
+        break;
+      }
       case 'monster': scene.gameplay.spawnPoints.push({ ...p, pool: o.pool || null }); break;
       case 'house': {
         const floors = clamp(o.floors || 1, 1, 3), w = (o.w || 3.5) * T, d = (o.d || 2.75) * T;

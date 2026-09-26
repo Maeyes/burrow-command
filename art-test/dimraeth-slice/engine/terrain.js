@@ -17,7 +17,7 @@ const BIO = () => B;
 export const C = 16;                         // cell size (world units)
 const GX0 = -2560, GY0 = -2560, N = 512;     // grid origin & size (covers everything the camera can see)
 export const MAT = { GROUND: 0, STAIR: 1, WATER: 2 };
-export const STAIR_STYLE = { stone: 0, ramp: 1, wood: 2, slope: 3 };
+export const STAIR_STYLE = { stone: 0, ramp: 1, wood: 2, slope: 3, marble: 4 };
 export const GROUND = { x0: -1540, x1: 1540, y0: -280, y1: 1640 }; // baked ground canvas, absolute screen px (scaled by K in buildTerrain)
 const GROUND_DESIGN = { ...GROUND };
 
@@ -27,7 +27,7 @@ export function buildTerrain(scene) {
   for (const k in GROUND_DESIGN) GROUND[k] = Math.round(GROUND_DESIGN[k] * K);
   const t = scene.terrain || {};
   const Hh = new Float32Array(N * N), M = new Uint8Array(N * N), riser = new Uint8Array(N * N); // riser: 1 = +x face, 2 = +y face
-  // stair look per cell: 0 stone steps, 1 earth ramp, 2 wooden steps; axis: 1 climbs along x, 2 along y
+  // stair look per cell: 0 stone, 1 earth ramp, 2 wood, 3 natural slope, 4 marble slope
   const ST = new Uint8Array(N * N), SAX = new Uint8Array(N * N);
   // smooth slopes (ramp + its graded shoulders): per cell surface h = max(S0 + GXs*lx + GYs*ly, FL),
   // lx/ly = local coords 0..C inside the cell. FL is the untouched ground under a shoulder.
@@ -46,7 +46,7 @@ export function buildTerrain(scene) {
     const alongY = s.dir === '-y' || s.dir === '+y', up = s.dir[0] === '+';
     const n = Math.round((alongY ? s.y1 - s.y0 : s.x1 - s.x0) / C), step = (s.to - s.from) / (n + 1);
     const style = STAIR_STYLE[s.style || B.stairStyle || 'stone'] ?? 0;
-    if (style === 3) { // smooth slope: continuous height from `from` at the low end to `to` at the high end
+    if (style === 3 || style === 4) { // smooth slope: continuous height from `from` at the low end to `to` at the high end
       const len = alongY ? s.y1 - s.y0 : s.x1 - s.x0, gA = (s.to - s.from) / len * (up ? 1 : -1);
       const A0 = alongY ? s.y0 : s.x0, A1 = alongY ? s.y1 : s.x1, L0 = alongY ? s.x0 : s.y0, L1 = alongY ? s.x1 : s.y1;
       const rampH = a => s.from + (s.to - s.from) * clamp(up ? (a - A0) / len : (A1 - a) / len, 0, 1);
@@ -59,7 +59,7 @@ export function buildTerrain(scene) {
         const k = j * N + i;
         if (l >= L0 && l <= L1) { // ramp surface
           setPlane(k, i, j, (x, y) => rampH(alongY ? y : x), gAx, gAy, -1e9);
-          M[k] = MAT.STAIR; riser[k] = 0; ST[k] = 3; SAX[k] = alongY ? 2 : 1;
+          M[k] = MAT.STAIR; riser[k] = 0; ST[k] = style; SAX[k] = alongY ? 2 : 1;
           continue;
         }
         if (M[k] === MAT.STAIR || SL[k]) continue;
@@ -297,6 +297,7 @@ function groundColor(x, y, px, py, F) {
     const c = cobble(x, y, px, py); if (c) return c;
   }
   for (const plot of SC.plots || []) if (inRect(x, y, plot)) {
+    if (plot.ground === 'grass') continue;
     const v = (y - plot.y0) % 26;
     let l = v < 14 ? (v < 4 ? 3 : v > 11 ? 1 : 2) : (v < 18 ? 0 : 1);
     if (hash2(px, py) > .88) l = clamp(l + (hash2(py, px) > .5 ? 1 : -1), 0, 4);
@@ -509,6 +510,22 @@ function stairTopColor(tx, ty, cellX0, cellY0, riser, px, py) {
   const l = 2 + (hash2(Math.floor(lat / 20), Math.floor(cellY0 + cellX0)) > .5 ? 1 : 0) - (hash2(px, py) > .9 ? 1 : 0);
   return P.COBBLE[clamp(l, 0, 4)];
 }
+// Asgard uses the same continuous, comfortably wide climb as a natural slope, but with fitted
+// marble slabs. Fine seams keep the surface readable without turning it back into narrow stairs.
+function marbleTopColor(tx, ty, idx, px, py) {
+  const ax = WS.terrain.SAX[idx], along = ax === 2 ? ty : tx, lat = ax === 2 ? tx : ty;
+  const seamA = ((along % 32) + 32) % 32, seamL = ((lat % 48) + 48) % 48;
+  if (seamA < 1.1 || seamL < 1.1) return P.MARBLE[1];
+  const vein = vnoise(tx * .035 + 19, ty * .06 - 7);
+  let l = 2 + (bayer(px, py) > .25 ? 1 : 0) + (vein > .7 ? 1 : 0) - (vein < .28 ? 1 : 0);
+  return P.MARBLE[clamp(l, 0, 4)];
+}
+function marbleRiserColor(side, e, hgt, tall, px, py) {
+  if (hgt > tall - 1.5) return P.MARBLE[4];
+  const seam = ((e % 32) + 32) % 32;
+  if (seam < 1.1 || ((hgt % 18) + 18) % 18 < 1) return P.MARBLE[0];
+  return P.MARBLE[clamp(1 + (bayer(px, py) > .1 ? 1 : 0) - (side === 1 ? 1 : 0), 0, 4)];
+}
 function waterColor(tx, ty, idx, px, py) {
   const T0 = WS.terrain, d = T0.wdist[idx], fo = T0.foam[idx], B = T0.LQ[idx] ? LAVA : BIO();
   const across = tx - ty, along = tx + ty;
@@ -575,6 +592,7 @@ export async function bakeGround(progress) {
         else if (m === MAT.STAIR) {
           const st = T0.ST[hit.idx], isRiser = riser[hit.idx] === hit.face;
           if (st === 3) col = naturalCliff(hit.face, e, hgt, tall, px, py);
+          else if (st === 4) col = marbleRiserColor(hit.face, e, hgt, tall, px, py);
           else if (st === 1) col = isRiser ? rampRiserColor(hit.face, e, hgt, tall, px, py) : naturalCliff(hit.face, e, hgt, tall, px, py);
           else if (st === 2) col = isRiser ? woodRiserColor(hit.face, e, hgt, tall, px, py) : (tall < 20 ? P.WOOD[1] : cliffColor(hit.face, e, hgt, tall, px, py));
           else col = isRiser ? riserColor(hit.face, e, hgt, tall, px, py) : cliffColor(hit.face, e, hgt, tall, px, py);
@@ -589,7 +607,7 @@ export async function bakeGround(progress) {
           if (hash2(px * 7, py * 3) > .985) waterPix.push(px, py, T0.LQ[hit.idx]);
         } else if (m === MAT.STAIR) {
           const st = T0.ST[hit.idx];
-          col = st === 1 || st === 3 ? rampTopColor(tx, ty, cx0, cy0, hit.idx, px, py, sample(px, py + h * K)) : st === 2 ? woodTopColor(tx, ty, cx0, cy0, hit.idx, px, py) : stairTopColor(tx, ty, cx0, cy0, riser[hit.idx], px, py);
+          col = st === 4 ? marbleTopColor(tx, ty, hit.idx, px, py) : st === 1 || st === 3 ? rampTopColor(tx, ty, cx0, cy0, hit.idx, px, py, sample(px, py + h * K)) : st === 2 ? woodTopColor(tx, ty, cx0, cy0, hit.idx, px, py) : stairTopColor(tx, ty, cx0, cy0, riser[hit.idx], px, py);
         }
         else {
           col = groundColor(tx, ty, px, py, sample(px, py + h * K));

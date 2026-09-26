@@ -22,6 +22,9 @@ const PROPS = {
   signpost: { lib: 'signpost', col: 5 },
   cart: { lib: 'cart', box: [34, 14], dx: -22, dy: -12, col: 1 },
   hay: { lib: 'hay', box: [18, 20], dx: -17, dy: -19, col: 1 },
+  scarecrow: { lib: 'scarecrow', col: 5 },
+  woodpile: { lib: 'woodpile', box: [24, 12], dx: -20, dy: -10, col: 1 },
+  laundry: { lib: 'laundry', box: [30, 8], dx: -27, dy: -2, col: 1 },
 };
 const boxOfItem = c => ({ x0: c.x, x1: c.x + c.w, y0: c.y, y1: c.y + c.d });
 const H = (x, y) => WS.terrain.heightAt(x, y);
@@ -175,7 +178,7 @@ export function placeStructures() {
     if (s.chimneyTop) WS.chimneys.push({ x: b.x0 + s.chimneyTop[0], y: b.y0 + s.chimneyTop[1], z: z + s.chimneyTop[2] });
     if (s.flagAt) WS.objects[WS.objects.length - 1].flagAt = { x: b.x0 + s.flagAt[0], y: b.y0 + s.flagAt[1], z: z + s.flagAt[2] };
     const Wx = b.x1 - b.x0, Wy = b.y1 - b.y0, floors = b.floors || 1, floorH = (b.wallH - 8) / floors;
-    for (const w of b.windows || []) for (let f = 0; f < floors; f++) {
+    for (const w of b.stage && b.stage !== 'complete' ? [] : (b.windows || [])) for (let f = 0; f < floors; f++) {
       const wz = z + 8 + f * floorH + floorH * .5;
       if (w.face === 'y') WS.lights.push({ x: b.x0 + w.at * Wx, y: b.y1 + 8, z: wz, r: 55, col: [255, 190, 110], a: .5, dusk: true });
       else WS.lights.push({ x: b.x1 + 8, y: b.y0 + w.at * Wy, z: wz, r: 55, col: [255, 190, 110], a: .5, dusk: true });
@@ -213,6 +216,44 @@ export function placeStructures() {
       const spr = lib[(p.seed || 0) % lib.length]; addSprite(spr, p.x, p.y, z, { box: 8 });
       WS.shadows.push({ x: p.x, y: p.y, z, dx: 6, dy: 2, rx: spr.img.width / K * .45, ry: spr.img.width / K * .2 });
       if (p.type === 'rock' && spr.img.width / K > 26) WS.colliders.push({ type: 'c', x: p.x, y: p.y, r: spr.img.width / K * .45 });
+      continue;
+    }
+    else if (p.type === 'stoneWall') {
+      const len = p.len || T * 3, alongX = p.axis !== 'y', th = 12;
+      const x0 = alongX ? p.x - len / 2 : p.x - th / 2, y0 = alongX ? p.y - th / 2 : p.y - len / 2;
+      box = alongX
+        ? { x0, x1: x0 + len, y0, y1: y0 + th }
+        : { x0, x1: x0 + th, y0, y1: y0 + len };
+      s = SP.stoneWallSprite(len, alongX, p.seed || 0);
+      addBoxed(s, x0, y0, z, box);
+      WS.colliders.push({ type: 'b', ...box });
+      if (alongX) WS.rectShadows.push({ x0: box.x0, x1: box.x1, y0: box.y1, y1: box.y1 + 10, k: .8 });
+      else WS.rectShadows.push({ x0: box.x1, x1: box.x1 + 40, y0: box.y0, y1: box.y1, k: .72 });
+      continue;
+    }
+    else if (p.type === 'stoneGate') {
+      const len = p.len || T * 2, alongX = p.axis !== 'y', th = 14, pier = 18;
+      const x0 = alongX ? p.x - len / 2 : p.x - th / 2, y0 = alongX ? p.y - th / 2 : p.y - len / 2;
+      box = alongX
+        ? { x0, x1: x0 + len, y0, y1: y0 + th }
+        : { x0, x1: x0 + th, y0, y1: y0 + len };
+      const palette = biomeOf(SC).village?.wallPalette || P.WSTONE;
+      s = SP.stoneGateSprite(len, alongX, palette);
+      addBoxed(s, x0, y0, z, box);
+      if (alongX) WS.colliders.push(
+        { type: 'b', x0, x1: x0 + pier, y0, y1: y0 + th },
+        { type: 'b', x0: x0 + len - pier, x1: x0 + len, y0, y1: y0 + th });
+      else WS.colliders.push(
+        { type: 'b', x0, x1: x0 + th, y0, y1: y0 + pier },
+        { type: 'b', x0, x1: x0 + th, y0: y0 + len - pier, y1: y0 + len });
+      if (alongX) WS.rectShadows.push({ x0: box.x0, x1: box.x1, y0: box.y1, y1: box.y1 + 12, k: .76 });
+      else WS.rectShadows.push({ x0: box.x1, x1: box.x1 + 62, y0: box.y0, y1: box.y1, k: .7 });
+      continue;
+    }
+    else if (p.type === 'chicken' || p.type === 'sheep') {
+      const spr = SP.farmAnimalSprite(p.type, p.seed || 1, SC.biome);
+      addSprite(spr, p.x, p.y, z, { box: p.type === 'sheep' ? 10 : 6 });
+      WS.shadows.push({ x: p.x, y: p.y, z, dx: 3, dy: 1, rx: p.type === 'sheep' ? 12 : 7, ry: p.type === 'sheep' ? 5 : 3 });
       continue;
     }
     else if (p.type === 'temple' || p.type === 'palace') {
@@ -280,9 +321,13 @@ export function placeStructures() {
     const bankZ = alongY ? Math.max(H(mx, b.y0 - 8), H(mx, b.y1 + 8)) : Math.max(H(b.x0 - 8, my), H(b.x1 + 8, my));
     const deck = { ...b, z: bankZ + 5 };
     WS.bridges.push(deck);
-    let waterZ = bankZ;
-    if (alongY) for (let y = b.y0; y < b.y1; y += 8) waterZ = Math.min(waterZ, H(mx, y));
-    else for (let x = b.x0; x < b.x1; x += 8) waterZ = Math.min(waterZ, H(x, my));
+    const bed = [];
+    if (alongY) for (let y = b.y0; y < b.y1; y += 8) bed.push(H(mx, y));
+    else for (let x = b.x0; x < b.x1; x += 8) bed.push(H(x, my));
+    bed.sort((a, c) => a - c);
+    // A bridge may cross a waterfall edge. The median represents the river bed without one low
+    // sample stretching every support down to the bottom terrace.
+    const waterZ = bed.length ? bed[(bed.length - 1) >> 1] : bankZ;
     const style = b.style || biomeOf(SC).bridgeStyle || 'wood';
     const s = SP.bridgeSprite(b.x1 - b.x0, b.y1 - b.y0, deck.z, waterZ, alongY, style);
     addBoxed(s, b.x0, b.y0, 0, { x0: b.x0, x1: b.x1, y0: b.y0, y1: b.y1 }, { flat: true, deck: true });
@@ -297,12 +342,20 @@ export function placeStructures() {
     const gateMid = plot.gate === 'x0' ? (plot.y0 + plot.y1) / 2 : (plot.x0 + plot.x1) / 2;
     const gate = (x, y) => Math.abs((plot.gate === 'x0' ? y : x) - gateMid) < 40;
     const z = H((plot.x0 + plot.x1) / 2, (plot.y0 + plot.y1) / 2);
-    fenceRun(plot.x0, plot.y0, plot.x1, plot.y0, null, z);
-    fenceRun(plot.x0, plot.y0, plot.x0, plot.y1, plot.gate === 'x0' ? gate : null, z);
-    fenceRun(plot.x1, plot.y0, plot.x1, plot.y1, null, z);
-    fenceRun(plot.x0, plot.y1, plot.x1, plot.y1, plot.gate === 'y1' ? gate : null, z);
-    for (let yy = plot.y0 + 22; yy < plot.y1 - 10; yy += 52) for (let xx = plot.x0 + 24; xx < plot.x1 - 14; xx += 30) {
-      const c = LIB.crop[Math.floor(hash2(xx, yy) * 4)];
+    if (plot.fence !== false) {
+      fenceRun(plot.x0, plot.y0, plot.x1, plot.y0, null, z);
+      fenceRun(plot.x0, plot.y0, plot.x0, plot.y1, plot.gate === 'x0' ? gate : null, z);
+      fenceRun(plot.x1, plot.y0, plot.x1, plot.y1, null, z);
+      fenceRun(plot.x0, plot.y1, plot.x1, plot.y1, plot.gate === 'y1' ? gate : null, z);
+    }
+    const kit = biomeOf(SC), stage = Math.max(1, Math.min(4, plot.stage || 4)), crop = plot.crop || 'vegetables';
+    const ramp = crop === 'grain' ? (kit.grain || P.STRAW) : crop === 'herbs' ? kit.moss : (kit.crop || P.CROP);
+    const flowerCols = crop === 'flowers' ? kit.flowers : (crop === 'vegetables' && stage === 4 ? [kit.flowers[0]] : undefined);
+    const libKey = `field:${SC.biome}:${crop}:${stage}`;
+    const fieldLib = LIB[libKey] ||= Array.from({ length: 4 }, (_, i) => SP.bushSprite(3600 + i, Math.round((5 + stage * 3) * K), ramp, flowerCols));
+    const stepX = crop === 'grain' ? 22 : 28, stepY = crop === 'flowers' ? 30 : 42;
+    for (let yy = plot.y0 + 18; yy < plot.y1 - 8; yy += stepY) for (let xx = plot.x0 + 18; xx < plot.x1 - 8; xx += stepX) {
+      const c = fieldLib[Math.floor(hash2(xx, yy) * fieldLib.length)];
       WS.baked.push({ img: c.img, x: xx, y: yy + 6, z, ox: c.ox, oy: c.oy });
     }
   }

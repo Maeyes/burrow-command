@@ -359,6 +359,21 @@ const ICON_COL = { k: '#2a1c14', r: '#d8483c', w: '#e8eef2' };
 //      door:{face:'x'|'y',at,wide?}, windows:[{face,at}], chimney?, flowers?, moss?, awning?, sign?, tower?, banner? }
 export function buildingSprite(b) {
   const Wx = b.x1 - b.x0, Wy = b.y1 - b.y0, Hw = b.wallH, Hr = b.roofH, o = 12;
+  const wallPal = b.wallPalette || P.WSTONE, woodPal = b.woodPalette || P.WOOD;
+  if (b.stage === 'foundation') {
+    const sc = k => stoneColor(k, wallPal, 5, 12);
+    return rasterFaces(boxFaces(0, 0, 0, Wx, Wy, 8, sc(1), sc(.74), sc(1.14)));
+  }
+  if (b.stage === 'frame') {
+    const timber = k => (u, v, lu, lv, px, py) => shadeCol(woodPal[clamp(2 + (hash2(px, py) > .7 ? 1 : 0), 0, woodPal.length - 1)], k);
+    const faces = [...boxFaces(0, 0, 0, Wx, Wy, 6, timber(1), timber(.74), timber(1.12))];
+    for (const [x, y] of [[0, 0], [Wx - 6, 0], [0, Wy - 6], [Wx - 6, Wy - 6]]) faces.push(...boxFaces(x, y, 6, 6, 6, Hw - 6, timber(1), timber(.74), timber(1.12)));
+    faces.push(...boxFaces(0, 0, Hw - 5, Wx, 6, 6, timber(1), timber(.74), timber(1.12)));
+    faces.push(...boxFaces(0, Wy - 6, Hw - 5, Wx, 6, 6, timber(1), timber(.74), timber(1.12)));
+    faces.push(...boxFaces(0, 0, Hw - 5, 6, Wy, 6, timber(1), timber(.74), timber(1.12)));
+    faces.push(...boxFaces(Wx - 6, 0, Hw - 5, 6, Wy, 6, timber(1), timber(.74), timber(1.12)));
+    return rasterFaces(faces);
+  }
   const floors = b.floors || 1, floorH = (Hw - 8) / floors;
   const style = b.wall;
   const wins = (face) => (b.windows || []).filter(w => w.face === face);
@@ -372,9 +387,9 @@ export function buildingSprite(b) {
     if (door) {
       const dw = door.wide ? 13 : 9, dh = door.wide ? 40 : 34, du = u - lu * door.at;
       if (Math.abs(du) < dw && v < dh) {
-        if (Math.abs(du) > dw - 2 || v > dh - 2) return shadeCol(style === 'stone' ? P.WSTONE[1] : P.WOOD[0], k);
-        if (door.wide && v > dh - 10 && Math.hypot(du / (dw - 2), (v - (dh - 10)) / 8) > 1) return shadeCol(P.WSTONE[2], k);
-        if ((du + dw) % 4.5 < 1) return shadeCol(P.WOOD[1], k);
+        if (Math.abs(du) > dw - 2 || v > dh - 2) return shadeCol(style === 'stone' ? wallPal[1] : woodPal[0], k);
+        if (door.wide && v > dh - 10 && Math.hypot(du / (dw - 2), (v - (dh - 10)) / 8) > 1) return shadeCol(wallPal[2], k);
+        if ((du + dw) % 4.5 < 1) return shadeCol(woodPal[1], k);
         if (Math.abs(du - (door.wide ? 0 : 4)) < 1 && Math.abs(v - 18) < 1) return hex('#d8b25a');
         return shadeCol(P.WOOD[2], k);
       }
@@ -384,31 +399,31 @@ export function buildingSprite(b) {
         const wc = 8 + f * floorH + floorH * .5, wu = u - lu * w.at;
         if (f === 0 && door && Math.abs(lu * w.at - lu * door.at) < 16) continue;
         if (Math.abs(wu) < 8 && Math.abs(v - wc) < 8) {
-          if (Math.abs(wu) > 6.5 || Math.abs(v - wc) > 6.8) return shadeCol(style === 'stone' ? P.WSTONE[1] : P.WOOD[0], k);
-          if (Math.abs(wu) < .8 || Math.abs(v - wc) < .8) return shadeCol(P.WOOD[1], k);
+          if (Math.abs(wu) > 6.5 || Math.abs(v - wc) > 6.8) return shadeCol(style === 'stone' ? wallPal[1] : woodPal[0], k);
+          if (Math.abs(wu) < .8 || Math.abs(v - wc) < .8) return shadeCol(woodPal[1], k);
           return v > wc ? hex('#ffd98a') : hex('#f0a24a');
         }
         if (b.flowers && Math.abs(wu) < 9 && v < wc - 7 && v > wc - 11) {
           if (v > wc - 9 && hash2(px, py) > .45) return hex(['#e8627a', '#f4d35e', '#f2f0e8', '#b56ad8'][Math.floor(hash2(px * 3, py) * 4)]);
-          return shadeCol(v > wc - 9 ? P.BUSH[3] : P.WOOD[1], k);
+          return shadeCol(v > wc - 9 ? P.BUSH[3] : woodPal[1], k);
         }
       }
     }
     if (style === 'stone') {
-      if (u < 5 || u > lu - 5) return stoneColor(k * 1.08, P.WSTONE, 8, 10)(u, v, lu, lv, px, py);
-      if (floors > 1 && Math.abs(v - (8 + floorH)) < 2) return shadeCol(P.WSTONE[3], k);
-      return stoneColor(k)(u, v, lu, lv, px, py);
+      if (u < 5 || u > lu - 5) return stoneColor(k * 1.08, wallPal, 8, 10)(u, v, lu, lv, px, py);
+      if (floors > 1 && Math.abs(v - (8 + floorH)) < 2) return shadeCol(wallPal[3], k);
+      return stoneColor(k, wallPal)(u, v, lu, lv, px, py);
     }
     if (style === 'wood') {
-      if (u < 3 || u > lu - 3 || v > lv - 3) return shadeCol(P.WOOD[1], k);
+      if (u < 3 || u > lu - 3 || v > lv - 3) return shadeCol(woodPal[1], k);
       let l = 2 + (hash2(Math.floor(v / 5), 9) > .5 ? 1 : 0);
       if (v % 5 < 1) l = 1;
       if (hash2(px * 3, py) > .92) l--;
-      return shadeCol(P.WOOD[clamp(l, 0, 4)], k);
+      return shadeCol(woodPal[clamp(l, 0, woodPal.length - 1)], k);
     }
     const beam = u < 3 || u > lu - 3 || v > lv - 4 || (v > 8 && v < 11) || Math.abs(u - lu / 3) < 1.6 || Math.abs(u - lu * 2 / 3) < 1.6 ||
       (floors > 1 && Math.abs(v - (8 + floorH)) < 1.5);
-    if (beam) return shadeCol(P.WOOD[hash2(Math.floor(u), Math.floor(v / 3)) > .8 ? 1 : 2], k);
+    if (beam) return shadeCol(woodPal[hash2(Math.floor(u), Math.floor(v / 3)) > .8 ? 1 : 2], k);
     const l = 2 + (hash2(px, py) > .88 ? 1 : 0) - (hash2(px * 7, py * 3) > .9 ? 1 : 0) - (v < 14 ? 1 : 0);
     return shadeCol(P.PLASTER[clamp(l, 0, 3)], k);
   };
@@ -423,7 +438,7 @@ export function buildingSprite(b) {
     if (b.moss && vnoise(u * .15, v * .3 + row) > .74 && frac >= .2) return shadeCol(P.BUSH[2 + (l > 2 ? 1 : 0)], k);
     return shadeCol(RP[clamp(l, 0, 4)], k);
   };
-  const edge = (k) => (u, v) => shadeCol(P.WOOD[v < 1.5 ? 1 : 3], k);
+  const edge = (k) => (u, v) => shadeCol(woodPal[v < 1.5 ? 1 : 3], k);
   const faces = [];
   const ch = Hw + Hr + 10, cw = 18;
   const chimney = (x0, y0) => {
@@ -453,6 +468,15 @@ export function buildingSprite(b) {
     faces.push({ O: [Wx + o, -o, Hw], A: [0, Wy + 2 * o, 0], B: [0, 0, -4], color: edge(.7) });
     faces.push({ O: [Wx + o, Wy + o, Hw], A: [-(Wx / 2 + o), 0, Hr], B: [0, 0, -4], color: edge(.9) });
     faces.push({ O: [-o, Wy + o, Hw], A: [Wx / 2 + o, 0, Hr], B: [0, 0, -4], color: edge(1) });
+  }
+  if (b.porch) {
+    const pw = Wx * .78, px = (Wx - pw) / 2, pd = 24, deckZ = 5, awningZ = Hw * .62;
+    const wc = k => (u, v, lu, lv, sx, sy) => shadeCol(woodPal[clamp(2 + (hash2(sx, sy) > .72 ? 1 : 0), 0, woodPal.length - 1)], k);
+    faces.push(...boxFaces(px, Wy - 2, 0, pw, pd, deckZ, wc(1), wc(.74), wc(1.12)));
+    faces.push(...boxFaces(px + pw * .12, Wy + pd - 5, deckZ, 5, 5, awningZ - deckZ, wc(1), wc(.74), wc(1.12)));
+    faces.push(...boxFaces(px + pw * .88 - 5, Wy + pd - 5, deckZ, 5, 5, awningZ - deckZ, wc(1), wc(.74), wc(1.12)));
+    faces.push({ O: [px - 6, Wy - 2, awningZ], A: [pw + 12, 0, 0], B: [0, pd + 8, -11], color: roof(1.02) });
+    faces.push(...boxFaces(Wx * .38, Wy + pd, 0, Wx * .24, 10, 3, wc(1), wc(.74), wc(1.12)));
   }
   let flagAt = null, clock = null;
   if (b.tower) { // square clock tower rising through the ridge (ridge 'x' only)
@@ -619,6 +643,44 @@ export function wallSegSprite(len, th, h, alongX) {
   }
   return rasterFaces(faces);
 }
+
+// Freestanding editor wall: a lower, chunkier stone run with cap stones and
+// regularly-spaced buttresses. Length is supplied by the editor in world px.
+export function stoneWallSprite(len, alongX, seed = 0) {
+  const th = 12, h = 30, capH = 4, capOver = 2;
+  const sc = k => stoneColor(k, P.WSTONE, 6, 14);
+  const faces = alongX
+    ? boxFaces(0, 0, 0, len, th, h, sc(1), sc(.74), sc(1.16))
+    : boxFaces(0, 0, 0, th, len, h, sc(1), sc(.74), sc(1.16));
+  faces.push(...(alongX
+    ? boxFaces(-capOver, -capOver, h, len + capOver * 2, th + capOver * 2, capH, sc(1), sc(.74), sc(1.16))
+    : boxFaces(-capOver, -capOver, h, th + capOver * 2, len + capOver * 2, capH, sc(1), sc(.74), sc(1.16))));
+  const step = 38, pier = 5;
+  for (let at = 0; at <= len; at += step) {
+    const pos = Math.min(len - pier, Math.max(0, at + ((seed & 1) ? 2 : 0)));
+    faces.push(...(alongX
+      ? boxFaces(pos, -3, 0, pier, th + 6, h + 2, sc(1), sc(.74), sc(1.16))
+      : boxFaces(-3, pos, 0, th + 6, pier, h + 2, sc(1), sc(.74), sc(1.16))));
+  }
+  return rasterFaces(faces);
+}
+
+// Walk-through stone gate that shares the wall footprint and palette. The two
+// piers remain physical while the opening is intentionally collider-free.
+export function stoneGateSprite(len, alongX, palette = P.WSTONE) {
+  const th = 14, h = 56, pier = 18, lintelZ = 40, cap = 3;
+  const sc = k => stoneColor(k, palette, 6, 14);
+  const block = (at, span, z, height) => alongX
+    ? boxFaces(at, 0, z, span, th, height, sc(1), sc(.74), sc(1.16))
+    : boxFaces(0, at, z, th, span, height, sc(1), sc(.74), sc(1.16));
+  const faces = [
+    ...block(0, pier, 0, h), ...block(len - pier, pier, 0, h),
+    ...block(-cap, pier + cap * 2, h, 5), ...block(len - pier - cap, pier + cap * 2, h, 5),
+    ...block(0, len, lintelZ, 13),
+    ...block(len / 2 - 6, 12, lintelZ + 13, 7),
+  ];
+  return rasterFaces(faces);
+}
 export function towerSprite(tw, h, roofPal) {
   const sc = (k) => stoneColor(k, P.WSTONE, 7, 12);
   return rasterFaces([
@@ -783,6 +845,60 @@ export function pebbleSprite(seed, ramp) {
   return c;
 }
 
+// ---------- farm & village life ----------
+export function scarecrowSprite(seed = 1) {
+  const cloth = seed & 1 ? P.RED : P.SLATE;
+  const wood = k => () => shadeCol(P.WOOD[2], k);
+  return rasterFaces([
+    ...boxFaces(-2, -2, 0, 4, 4, 58, wood(1), wood(.74), wood(1.1)),
+    ...boxFaces(-25, -2, 39, 50, 4, 4, wood(1), wood(.74), wood(1.1)),
+    { O: [-23, 3, 30], A: [46, 0, 0], B: [0, 0, 20], color: (u, v, lu) => shadeCol(cloth[clamp(2 + (u > lu / 2 ? -1 : 1), 0, 4)], 1), clip: (u, v) => v < .75 || Math.abs(u - .5) > .12 },
+    ...boxFaces(-8, -6, 52, 16, 12, 14, () => P.STRAW[3], () => P.STRAW[2], () => P.STRAW[4]),
+    { O: [-15, -8, 66], A: [30, 0, 0], B: [0, 16, 0], color: () => P.STRAW[2] },
+    { O: [-9, 0, 66], A: [18, 0, 0], B: [0, 0, 6], color: () => P.STRAW[3] },
+  ]);
+}
+
+export function woodpileSprite(seed = 1) {
+  const faces = [], r = rng(seed);
+  for (let row = 0; row < 3; row++) for (let i = 0; i < 4 - row; i++) {
+    const x = i * 13 + row * 6, z = row * 10, d = 18 + Math.round(r() * 5);
+    faces.push(...boxFaces(x, 0, z, 11, d, 9, plankColor(1, seed + i + row * 7), plankColor(.72, seed + i), () => P.WOOD[3]));
+  }
+  return rasterFaces(faces);
+}
+
+export function laundrySprite(seed = 1) {
+  const cols = seed & 1 ? [P.RED[3], '#efe3c8', P.SLATE[3]] : [P.GREENR[3], '#e8d8b8', P.ORANGE[3]];
+  const post = x => [
+    ...boxFaces(x, 0, 0, 4, 4, 50, () => P.WOOD[2], () => P.WOOD[1], () => P.WOOD[3]),
+  ];
+  const faces = [...post(0), ...post(54)];
+  for (let i = 0; i < 3; i++) faces.push({ O: [5 + i * 17, 2, 27 + (i & 1) * 2], A: [14, 0, 0], B: [0, 0, 18], color: (u, v, lu, lv, px, py) => shadeCol(Array.isArray(cols[i]) ? cols[i] : hex(cols[i]), .9 + bayer(px, py) * .12) });
+  return rasterFaces(faces, (g, proj) => { const [a, b] = proj(2, 2, 48), [c, d] = proj(56, 2, 48); g.strokeStyle = '#d8c9ad'; g.lineWidth = 1; g.beginPath(); g.moveTo(a, b); g.lineTo(c, d); g.stroke(); });
+}
+
+export function farmAnimalSprite(kind, seed = 1, theme = 'forest') {
+  const themes = {
+    forest: ['#6b4427', '#e9dfca', '#c84232'], desert: ['#8e6038', '#ead07a', '#d0704a'],
+    snow: ['#56707e', '#f4faff', '#8aa2b8'], mine: ['#262028', '#766a74', '#6ae0ff'],
+    magma: ['#1c1414', '#6e5e54', '#ff6a1a'], underwater: ['#26503a', '#cab0f0', '#ff8a9a'],
+    asgard: ['#908a96', '#f2f6fa', '#f6cc50'], city: ['#6b4427', '#e9dfca', '#c84232'],
+  };
+  const [dark, body, accent] = themes[theme] || themes.forest, scale = K, W = kind === 'sheep' ? 34 : 25, H = kind === 'sheep' ? 25 : 22;
+  const c = makeCanvas(Math.round(W * scale), Math.round(H * scale)), g = c.getContext('2d');
+  const rect = (x, y, w, h, col) => { g.fillStyle = col; g.fillRect(Math.round(x * scale), Math.round(y * scale), Math.max(1, Math.round(w * scale)), Math.max(1, Math.round(h * scale))); };
+  if (kind === 'sheep') {
+    rect(6, 7, 21, 11, dark); rect(5, 5, 20, 11, body); rect(23, 10, 7, 7, dark);
+    rect(8, 16, 3, 7, dark); rect(21, 16, 3, 7, dark); rect(27, 12, 2, 2, accent);
+    for (let i = 0; i < 7; i++) rect(6 + (i * 7 + seed * 3) % 18, 4 + (i * 5) % 9, 4, 3, body);
+  } else {
+    rect(5, 9, 13, 8, dark); rect(4, 7, 13, 8, body); rect(15, 5, 7, 7, body); rect(21, 8, 4, 3, accent);
+    rect(17, 2, 2, 4, accent); rect(20, 3, 2, 3, accent); rect(8, 16, 2, 5, dark); rect(14, 16, 2, 5, dark);
+  }
+  return { img: c, ox: Math.round(W * scale / 2), oy: Math.round((H - 1) * scale) };
+}
+
 // ---------- shared libraries (built once) ----------
 export const LIB = {};
 let MAKE = null;
@@ -855,6 +971,9 @@ export function buildLibraries(kit = null) {
     hay: () => n(2, i => haySprite(3250 + i)),
     cart: () => n(2, i => cartSprite(3300 + i, i ? P.PALM : P.STRAW)),
     well: () => [wellSprite()],
+    scarecrow: () => n(2, i => scarecrowSprite(3400 + i)),
+    woodpile: () => n(2, i => woodpileSprite(3450 + i)),
+    laundry: () => n(2, i => laundrySprite(3500 + i)),
   };
   for (const key of want) if (!LIB[key] && make[key]) LIB[key] = make[key]();
 }
