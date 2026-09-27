@@ -1,13 +1,13 @@
 import {describe,it,expect} from 'vitest';
-import {renderArmoryHtml} from './warren-armory-ui.js';
-import {renderItemDetailHtml} from './warren-ui.js';
+import {renderArmoryHtml,visibleArmoryInventory} from './warren-armory-ui.js';
+import {renderItemDetailHtml,renderInventoryHtml} from './warren-ui.js';
 import {CLASS_IDS,defaultBuilds,defaultProgress,defaultMastery,defaultAutoDismantleSettings,
- craftGear,equipBuildItem,
+ craftGear,equipBuildItem,dismantleSelection,
  settleBatchCraft} from './warren-progression.js';
 const classes=Object.fromEntries(CLASS_IDS.map(cls=>[cls,{icon:'🐰',name:cls}]));
 const state=()=>({warren:1,gold:9999,inventory:{tier1Blueprint:50,copperOre:500,livingMoss:500,brutalSpore:500},
  gear:[],nextGearId:0,builds:defaultBuilds(),progress:defaultProgress(),mastery:defaultMastery(),
- autoDismantle:defaultAutoDismantleSettings(),forgeClass:'archer',armorySlot:'weapon',armoryTab:'craft',batchQty:10,
+ autoDismantle:defaultAutoDismantleSettings(),armoryInventorySelection:[],forgeClass:'archer',armorySlot:'weapon',armoryTab:'craft',batchQty:10,
  units:[],towers:[],batchResults:[],batchFilter:'all',batchSelection:[],night:false});
 describe('single-screen Class Armory',()=>{
  it('chooses class, slot, recipe, quantity and automatic salvage rules before crafting',()=>{
@@ -23,14 +23,14 @@ describe('single-screen Class Armory',()=>{
   expect(html).toContain('data-auto-rarity');
   expect(html).toContain('White Ascended');
  });
- it('shows each class setting and an explicit one-time approval when a batch is pending',()=>{
+ it('shows per-class auto-salvage preferences and crafts directly without a second confirmation',()=>{
   const s=state();s.autoDismantle.archer={enabled:true,minRarity:'legend',protectOtherClasses:false};
-  s.pendingCraft={recipeId:'mosswoodBow',qty:10,cls:'archer',settings:{...s.autoDismantle.archer}};
   const html=renderArmoryHtml(s,classes);
   expect(html).toContain('value="legend" selected');
-  expect(html).toContain('ยืนยันกฎก่อนเริ่มคราฟต์');
-  expect(html).toContain('data-auto-confirm');
-  expect(html).toContain('data-auto-cancel');
+  expect(html).toContain('data-forge-craft="mosswoodBow"');
+  expect(html).not.toContain('ยืนยันกฎก่อนเริ่มคราฟต์');
+  expect(html).not.toContain('data-auto-confirm');
+  expect(html).not.toContain('data-auto-cancel');
  });
  it('keeps results and actionable replacement recommendations inside the same armory',()=>{
   const s=state();const result=settleBatchCraft(s,'mosswoodBow',10,'archer',
@@ -55,5 +55,59 @@ describe('single-screen Class Armory',()=>{
   expect(html).toContain('bc-gear-refine');expect(html).toContain('title="Refine ของช่อง">+4</span>');
   s.refineFeedback={itemId:p.id,success:true,text:'✦ Refine ติด! Mosswood Bow +3 → +4'};
   expect(renderItemDetailHtml(s,p.id,classes)).toContain('role="status" class="bc-refine-feedback success"');
+ });
+ it('shows direct bag salvage for selected unlocked copies and protects locked/equipped gear',()=>{
+  const s=state();s.armoryTab='inventory';s.armorySlot='weapon';s.armoryInventorySelection=[];
+  const equipped=craftGear(s,'mosswoodBow',()=>.51);
+  const locked=craftGear(s,'mosswoodBow',()=>.51);
+  const spare=craftGear(s,'mosswoodBow',()=>.51);
+  expect(equipBuildItem(s,'archer',null,'weapon',equipped.id)).toBe(true);
+  locked.locked=true;
+  expect(visibleArmoryInventory(s).map(p=>p.id)).toEqual([locked.id,spare.id]);
+  let html=renderArmoryHtml(s,classes);
+  expect(html).not.toContain('data-armory-select="'+equipped.id+'"');
+  expect(html).toContain('data-armory-select="'+locked.id+'"  disabled');
+  expect(html).toContain('data-armory-select="'+spare.id+'" ');
+  expect(html).toContain('data-armory-select-all');
+  expect(html).toContain('data-armory-dismantle disabled');
+  s.armoryInventorySelection=[locked.id,spare.id];
+  html=renderArmoryHtml(s,classes);
+  expect(html).toContain('เลือกย่อย 1 / 1 ชิ้น'); // locked item never counts
+  expect(html).toContain('data-armory-dismantle ');
+  const before=s.gear.length;
+  expect(dismantleSelection(s,[spare.id,locked.id])).toBeNull(); // atomic if any item became locked
+  expect(s.gear.length).toBe(before);
+  const removed=dismantleSelection(s,[spare.id]);
+  expect(removed).toMatchObject({count:1});
+  expect(removed.fragments).toBeGreaterThan(0);
+  expect(s.inventory.stoneFragment).toBe(removed.fragments);
+  expect(new Set(s.gear.map(p=>p.id))).toEqual(new Set([equipped.id,locked.id]));
+  expect(dismantleSelection(s,[equipped.id])).toBeNull();
+  s.night=true;
+  expect(dismantleSelection(s,[locked.id])).toBeNull();
+ });
+ it('shows only unequipped item instances in Armory and inventory, while keeping equipped slots actionable',()=>{
+  const s=state();s.armoryTab='inventory';s.armorySlot='armor';
+  const [archerArmor,guardArmor,spare]=Array.from({length:3},()=>craftGear(s,'t1Armor',()=>.51));
+  expect([archerArmor,guardArmor,spare].every(Boolean)).toBe(true);
+  expect(new Set([archerArmor.id,guardArmor.id,spare.id]).size).toBe(3);
+  expect(equipBuildItem(s,'archer',null,'armor',archerArmor.id)).toBe(true);
+  expect(equipBuildItem(s,'guard',null,'armor',guardArmor.id)).toBe(true);
+  const armoryIds=()=>[...renderArmoryHtml(s,classes).matchAll(/data-open-item="([^"]+)"/g)].map(m=>m[1]);
+  const storedIds=()=>[...renderInventoryHtml(s,classes).matchAll(/data-open-item="([^"]+)"/g)].map(m=>m[1]);
+  expect(armoryIds()).toEqual([spare.id]); // Same template, distinct actual items.
+  expect(storedIds()).toEqual([spare.id]); // Applies to the separate inventory view too.
+  expect(renderArmoryHtml(s,classes)).toContain('T1'); // Equipped slot summary stays visible.
+  expect(renderItemDetailHtml(s,archerArmor.id,classes)).toContain('ถอดอุปกรณ์');
+  expect(equipBuildItem(s,'archer',null,'armor',spare.id)).toBe(true);
+  expect(armoryIds()).toEqual([archerArmor.id]); // Replaced item returns to the bag.
+  expect(storedIds()).toEqual([archerArmor.id]);
+  s.builds.guard[0].gear.armor=null;
+  expect(new Set(armoryIds())).toEqual(new Set([archerArmor.id,guardArmor.id]));
+  expect(new Set(storedIds())).toEqual(new Set([archerArmor.id,guardArmor.id]));
+  s.armoryInventoryRarity='mythic';
+  expect(armoryIds()).toEqual([]); // Rarity filter still applies after excluding equipped pieces.
+  s.armoryInventoryRarity='all';s.inventoryFilter='equipment';
+  expect(new Set(storedIds())).toEqual(new Set([archerArmor.id,guardArmor.id]));
  });
 });

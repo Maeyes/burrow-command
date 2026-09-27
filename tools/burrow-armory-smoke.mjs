@@ -26,10 +26,9 @@ try{
  await page.evaluate(()=>{const seq=[.95,.85,.85,.65,.65,.65,.01,.01,.01,.01];let n=0;
   window.__originalRandom=Math.random;Math.random=()=>seq[n++%seq.length];});
  await page.click('#heroPanel [data-forge-craft="mosswoodBow"]');
- pass('one explicit pre-craft approval; no pieces spent before confirmation',
-  await page.locator('#heroPanel [data-auto-confirm]').isVisible()&&
-  await page.evaluate(n=>window.__warren.gear.length===n,before));
- await page.click('#heroPanel [data-auto-confirm]');
+ pass('one-click batch craft follows saved auto-dismantle rules without confirmation',
+  await page.locator('#heroPanel [data-auto-confirm]').count()===0&&
+  await page.evaluate(n=>window.__warren.gear.length>n,before));
  const result=await page.evaluate(()=>{const s=window.__warren;
   return {crafted:s.batchReport?.made?.length,kept:s.batchReport?.retained?.length,
    dismantled:s.batchReport?.dismantled?.length,fragments:s.batchReport?.fragments,
@@ -47,6 +46,11 @@ try{
  const oldId=await page.evaluate(()=>window.__warren.builds.archer[0].gear.weapon);
  pass('explicit recommended equip retains class-slot enhancement/refinement',!!oldId&&
   await page.evaluate(()=>{const s=window.__warren;return s.progress.archer.weapon.enhance===5&&s.progress.archer.weapon.refine===3;}));
+ await page.click('#heroPanel [data-armory-tab="inventory"]');
+ pass('equipped item disappears from Armory bag, while unused duplicates remain',
+  await page.locator('#heroPanel .bc-inventory-grid [data-open-item="'+oldId+'"]').count()===0&&
+  await page.locator('#heroPanel .bc-inventory-grid [data-open-item]').count()===2);
+ await page.click('#heroPanel [data-armory-tab="craft"]');
  await page.click('#heroPanel [data-batch-expanded]');
  const second=await page.evaluate(old=>window.__warren.batchResults.find(id=>id!==old),oldId);
  await page.click('#heroPanel [data-open-item="'+second+'"]');
@@ -57,6 +61,11 @@ try{
   await page.evaluate(([old,current])=>{const s=window.__warren;return s.builds.archer[0].gear.weapon===current&&
    s.gear.some(p=>p.id===old)&&s.armoryNotice.includes('อุปกรณ์เก่ากลับเข้าคลัง')&&
    s.progress.archer.weapon.enhance===5&&s.progress.archer.weapon.refine===3&&s.modal==='hero';},[oldId,second]));
+ await page.click('#heroPanel [data-armory-tab="inventory"]');
+ pass('replaced weapon reappears in bag but newly equipped weapon stays hidden',
+  await page.locator('#heroPanel .bc-inventory-grid [data-open-item="'+oldId+'"]').count()===1&&
+  await page.locator('#heroPanel .bc-inventory-grid [data-open-item="'+second+'"]').count()===0);
+ await page.click('#heroPanel [data-armory-tab="craft"]');
  await page.click('#heroPanel [data-forge-class="mage"]');
  await page.locator('#heroPanel [data-auto-rarity]').selectOption('legend');
  await page.click('#heroPanel [data-forge-class="archer"]');
@@ -66,6 +75,27 @@ try{
  pass('saved preferences and equipped gear survive a fresh reload',await page.evaluate(()=>{
   const s=window.__warren;return s.autoDismantle.archer.minRarity==='rare'&&s.autoDismantle.mage.minRarity==='legend'&&
    s.progress.archer.weapon.enhance===5&&s.progress.archer.weapon.refine===3&&s.gear.length===3;}));
+ await page.click('#heroOpen');
+ await page.click('#heroPanel [data-forge-class="archer"]');
+ await page.click('#heroPanel [data-armory-tab="inventory"]');
+ const bagBefore=await page.locator('#heroPanel .bc-inventory-grid [data-armory-select]').count();
+ pass('Armory bag shows the two unequipped copies with independent salvage checkboxes',bagBefore===2);
+ const lockedId=await page.locator('#heroPanel .bc-inventory-grid [data-batch-lock]').first().getAttribute('data-batch-lock');
+ await page.locator('#heroPanel [data-batch-lock="'+lockedId+'"]').check();
+ await page.click('#heroPanel [data-armory-select-all]');
+ pass('select all skips locked and equipped items',await page.evaluate(id=>{
+  const s=window.__warren;
+  return s.armoryInventorySelection.length===1&&!s.armoryInventorySelection.includes(id);
+ },lockedId));
+ const beforeSalvage=await page.evaluate(()=>({gear:__warren.gear.length,fragments:__warren.inventory.stoneFragment||0,equipped:__warren.builds.archer[0].gear.weapon}));
+ await page.click('#heroPanel [data-armory-dismantle]');
+ pass('one-click salvage selected works in the Armory without touching equipped or locked gear',
+   await page.evaluate(([before,id])=>{
+    const s=__warren;
+    return s.gear.length===before.gear-1&&s.inventory.stoneFragment>before.fragments&&
+     s.builds.archer[0].gear.weapon===before.equipped&&s.gear.some(p=>p.id===id&&p.locked)&&
+     s.armoryInventorySelection.length===0&&s.modal==='hero';
+   },[beforeSalvage,lockedId]));
  pass('no uncaught page errors',errors.length===0);await context.close();
 }catch(e){console.error(e.stack||e);console.error('PAGE ERRORS',JSON.stringify(errors));process.exitCode=1;}
 finally{await browser.close();await new Promise(resolve=>server.httpServer.close(resolve));}

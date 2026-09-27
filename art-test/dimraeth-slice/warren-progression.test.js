@@ -1,7 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import {CLASS_IDS,CLASS_FAMILIES,SAVE_KEY,PRIOR_SAVE_KEY,LEGACY_SAVE_KEY,MAX_FIELD_PER_CLASS,
  defaultBuilds,defaultMastery,defaultProgress,migrateSave,expRequired,giveBunnyExp,monsterLoot,
- addInventory,craftMaterialCount,spendCraftMaterials,scaledWarrenGold,shouldDepositLootDirectly,unlockedTier,minLevelForTier,
+ addInventory,craftMaterialCount,spendCraftMaterials,burrowMonsterGold,BURROW_GOLD_BY_STAGE,shouldDepositLootDirectly,unlockedTier,minLevelForTier,
  availableRecipes,canCraft,craftGear,craftBatch,enhanceGear,enhanceAll,refineGear,refineQuote,
  dismantleGear,dismantleSelection,setGearLock,recommendations,
  buildFor,buildCombatBonus,equipBuildItem,autoEquipBuild,makeBuild,equippedGearIds,
@@ -11,6 +11,9 @@ import {BURROW_REFINE_SUCCESS,BURROW_REFINE_FAIL_DROP_CHANCE,resolveBurrowRefine
 import {renderSquadHtml,renderForgeHtml,renderHeroHtml,renderInventoryHtml,renderItemDetailHtml,gameIcon} from './warren-ui.js';
 import {renderTowerHtml,renderLodgeHtml,renderMasteryHtml,renderBatchHtml} from './warren-extra-ui.js';
 import {masteryXpRequired} from '../../src/simulation/mastery.ts';
+import {REFINE_SUCCESS} from '../../src/simulation/equipmentV2.ts';
+import {PHASE1_STAGES} from './warren-phase1.js';
+import {getRoster,monsterPresentation} from './combat/rosters.js';
 
 const classes=Object.fromEntries(CLASS_IDS.map(c=>[c,{name:c,icon:'🐰'}]));
 const old=()=>({v:2,gold:500,warren:3,wave:5,day:12,burrow:200,kills:70,losses:3,cleared:false,
@@ -45,11 +48,21 @@ describe('Burrow Command new progression',()=>{
   expect(migrateSave(JSON.parse(JSON.stringify(s))).reserve).toEqual(s.reserve);
   expect(CLASS_IDS).toEqual(['guard','archer','scout','brute','axe','vanguard','mage']);
  });
- it('constrains gold growth while keeping rewards positive as the village levels',()=>{
-  expect(scaledWarrenGold(100,1)).toBe(13);
-  expect(scaledWarrenGold(100,10)).toBe(26);
-  expect(scaledWarrenGold(100,50)).toBe(31);
-  expect(scaledWarrenGold(1,1)).toBe(1);
+ it('uses Burrow-only flat region/rank Gold: +20% of Forest I per subsequent stage',()=>{
+  expect(BURROW_GOLD_BY_STAGE).toEqual({
+   forest1:{normal:5,elite:15,boss:50},forest2:{normal:6,elite:18,boss:60},
+   desert1:{normal:7,elite:21,boss:70},desert2:{normal:8,elite:24,boss:80},
+  });
+  // Resolve Gold by the actual monster region, independent of Warren level and main-game rolls.
+  for(const stage of PHASE1_STAGES){
+   const roster=getRoster(stage.roster,stage.mapId);
+   for(const id of roster.monsterIds){
+    const art=monsterPresentation(roster,id);
+    const rank=id===roster.bossType?'boss':art.elite?'elite':'normal';
+    expect(burrowMonsterGold(id),id).toBe(BURROW_GOLD_BY_STAGE[stage.mapId][rank]);
+   }
+  }
+  expect(burrowMonsterGold('missing-monster')).toBe(0);
  });
  it('allows bunny XP to grow beyond village level without losing banked experience',()=>{
   const u={level:1,exp:0};
@@ -203,11 +216,16 @@ describe('Burrow Command new progression',()=>{
   expect(html).not.toContain('data-forge-new-build');
   expect(gameIcon('axe','family')).toContain('/assets/icons/family/axe.png');
  });
- it('improves only Burrow refine by x1.5 (capped, with guaranteed first level), with 20% drop on failed attempts',()=>{
+ it('uses main-game refine success rates exactly, but only 20% drop on failed Burrow attempts',()=>{
+  expect(BURROW_REFINE_SUCCESS).toEqual([...REFINE_SUCCESS]);
   expect(BURROW_REFINE_SUCCESS[0]).toBe(1);
   expect(BURROW_REFINE_SUCCESS[1]).toBe(.95);
-  expect(BURROW_REFINE_SUCCESS[8]).toBeCloseTo(.525);
-  expect(BURROW_REFINE_SUCCESS[14]).toBeCloseTo(.075);
+  expect(BURROW_REFINE_SUCCESS[7]).toBe(.45); // +7 → +8: success 45%, stay 44%, drop 11%
+  expect(BURROW_REFINE_SUCCESS[8]).toBe(.35);
+  expect(BURROW_REFINE_SUCCESS[14]).toBe(.05);
+  expect(resolveBurrowRefinement(7,.44,false,.01)).toMatchObject({success:true,level:8,dropped:false});
+  expect(resolveBurrowRefinement(7,.46,false,.19)).toMatchObject({success:false,level:6,dropped:true});
+  expect(resolveBurrowRefinement(7,.46,false,.20)).toMatchObject({success:false,level:7,dropped:false});
   expect(BURROW_REFINE_FAIL_DROP_CHANCE).toBe(.2);
   expect(resolveBurrowRefinement(8,.99,false,.19)).toMatchObject({success:false,level:7,dropped:true});
   expect(resolveBurrowRefinement(8,.99,false,.2)).toMatchObject({success:false,level:8,dropped:false});
@@ -216,7 +234,14 @@ describe('Burrow Command new progression',()=>{
   const s=fund(starter()),piece=craftGear(s,'mosswoodBow',()=>0);
   equipBuildItem(s,'archer',null,'weapon',piece.id);
   s.progress.archer.weapon.refine=8;
-  expect(refineQuote(s,piece.id).rate).toBeCloseTo(.525);
-  expect(refineGear(s,piece.id,()=>.99,false,()=>.2)).toMatchObject({success:false,level:8,dropped:false});
+  expect(refineQuote(s,piece.id).rate).toBe(.35);
+  const quote=refineQuote(s,piece.id),gold=s.gold,stones=s.inventory.astraliteStone;
+  expect(quote.gold).toBeGreaterThan(0);
+  s.gold=quote.gold-1;expect(refineGear(s,piece.id,()=>.99)).toBeNull();
+  expect(s.inventory.astraliteStone).toBe(stones);
+  s.gold=gold;
+  expect(refineGear(s,piece.id,()=>.99,false,()=>.2)).toMatchObject({success:false,level:8,dropped:false,gold:quote.gold});
+  expect(s.gold).toBe(gold-quote.gold);
+  expect(s.inventory.astraliteStone).toBe(stones-quote.astralite);
  });
 });

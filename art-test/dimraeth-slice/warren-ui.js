@@ -85,8 +85,8 @@ export function renderHeroHtml(s,classes){
 export function renderInventoryHtml(s,classes){
  const tabs=['All','equipment','Crafting Mat','Upgrading Mat','Blueprint','Skill Core','Quest','Misc'];
  const filter=s.inventoryFilter||'All',used=equippedGearIds(s);
- const gear=filter==='All'||filter==='equipment'?s.gear.map(p=>`<div class="bc-inventory-piece"><button class="bc-inventory-equip" data-open-item="${p.id}" title="${esc(itemLabel(p.templateId))}">${itemCard(p,'',s)}
-   <b>${esc(itemLabel(p.templateId))}</b><small>${RARITY_NAMES[p.rarity]}${used.has(p.id)?' · สวมอยู่':''}</small></button>
+ const gear=filter==='All'||filter==='equipment'?s.gear.filter(p=>!used.has(p.id)).map(p=>`<div class="bc-inventory-piece"><button class="bc-inventory-equip" data-open-item="${p.id}" title="${esc(itemLabel(p.templateId))}">${itemCard(p,'',s)}
+   <b>${esc(itemLabel(p.templateId))}</b><small>${RARITY_NAMES[p.rarity]}</small></button>
    <label><input type="checkbox" data-batch-lock="${p.id}" ${p.locked?'checked':''} ${s.night?'disabled':''}> ล็อกเก็บไว้</label></div>`).join(''):'';
  const goods=Object.entries(s.inventory).filter(([id,n])=>n>0&&(filter==='All'||filter===inventoryItemMeta(id).category))
   .sort((a,b)=>a[0].localeCompare(b[0])).map(([id,n])=>`<div class="bc-inventory-piece">
@@ -108,7 +108,7 @@ export function renderItemDetailHtml(s,itemId,classes){
  const refineReq=refineQuote(s,p.id);
  const prot=refineReq?.protectedRequirement,protectedAttempt=!!s.itemProtect;
  const costReady=req&&s.gold>=req.gold&&qty(s,req.stoneId)>=req.stoneQty;
- const refineReady=refineReq&&qty(s,'astraliteStone')>=refineReq.astralite&&(!protectedAttempt||!prot||qty(s,prot.id)>=prot.qty);
+ const refineReady=refineReq&&s.gold>=refineReq.gold&&qty(s,'astraliteStone')>=refineReq.astralite&&(!protectedAttempt||!prot||qty(s,prot.id)>=prot.qty);
  const stats=Object.entries(t.baseCombat).filter(([,v])=>v).map(([k,v])=>`<div><small>${statNames[k]||esc(k)}</small><b>+${Math.round(v*(EQUIPMENT_RARITY_STAT_MULTIPLIER[p.rarity]||1))}</b></div>`).join('');
  return `<header class="bc-modal-header"><div>${gameIcon('gear','ui','◈','bc-header-icon')}<span><h2>T${t.tier} ${esc(t.name)}</h2><small>${RARITY_NAMES[p.rarity]} · ${SLOT_NAMES[slot]}</small></span></div><button class="modal-close" data-item-close aria-label="ปิดรายละเอียด">✕</button></header>
  <div class="bc-modal-body bc-item-detail">
@@ -127,7 +127,7 @@ export function renderItemDetailHtml(s,itemId,classes){
    <button data-item-enhance="${p.id}" ${s.night||!costReady?'disabled':''}>Enhance → +${enhance+1}</button></section>
    <section class="bc-upgrade-card bc-refine-card"><h3>✦ REFINE <strong>+${refine}</strong></h3>
    <p>เพิ่มประสิทธิภาพตามค่าตีบวก · ล้มเหลวอาจลด 1 ระดับ (ไม่ต่ำกว่า Safe Floor)</p>
-   <div class="bc-upgrade-material">${refineReq?`${gameIcon('astraliteStone','item')}Astralite ${qty(s,'astraliteStone')}/${refineReq.astralite} · สำเร็จ ${(refineReq.rate*100).toFixed(0)}% · ล้มเหลวลดขั้น 20%`:'ถึงเพดาน +15 แล้ว'}</div>
+   <div class="bc-upgrade-material">${refineReq?`${gameIcon('astraliteStone','item')}Astralite ${qty(s,'astraliteStone')}/${refineReq.astralite} · ${refineReq.gold.toLocaleString()} G (มี ${s.gold.toLocaleString()} G) · สำเร็จ ${(refineReq.rate*100).toFixed(0)}% · เมื่อล้มเหลวมีโอกาสลดขั้น 20%`:'ถึงเพดาน +15 แล้ว'}</div>
    ${s.refineFeedback?.itemId===p.id?`<p role="status" class="bc-refine-feedback ${s.refineFeedback.success?'success':'failure'}">${esc(s.refineFeedback.text)}</p>`:''}
    ${prot?`<label class="bc-protect"><input id="itemProtect" type="checkbox" ${protectedAttempt?'checked':''}> ใช้ Protection ${gameIcon(prot.id,'item')} ${qty(s,prot.id)}/${prot.qty}</label>`:''}
    <button data-item-refine="${p.id}" ${s.night||!refineReady?'disabled':''}>Refine → +${refine+1}</button></section></div>

@@ -21,19 +21,24 @@ import {PERIMETER_TIERS,perimeterTier,nextPerimeterTier,perimeterFootprint,perim
 import { WS } from './engine/state.js';
 import { K } from './engine/util.js';
 import * as PAL from './engine/palettes.js';
-import { CLASS_FAMILIES, LEGACY_SAVE_KEY, SAVE_KEY, bunnyName, expRequired, giveBunnyExp, migrateSave, monsterLoot, addInventory, craftMaterialCount, spendCraftMaterials, defaultBuilds, unlockedTier, minLevelForTier, buildFor, buildCombatBonus, availableRecipes, canCraft, craftGear, craftBatch, enhanceGear, enhanceAll, refineGear, dismantleGear, dismantleSelection, setGearLock, recommendations, grantClassMastery, unlockClassMastery, unlockedMastery, classProgress, defaultProgress, defaultMastery, scaledWarrenGold, shouldDepositLootDirectly, autoEquipBuild, equipBuildItem, equippedGearIds, gearSlot, EQUIPMENT_MASTER_V2, EQUIPMENT_RARITY_STAT_MULTIPLIER, MAX_FIELD_PER_CLASS, fieldSquadCap, fieldClassCap, FIELD_SQUAD_GATES, CLASS_IDS, GEAR_SLOTS, PRIOR_SAVE_KEY, defaultAutoDismantleSettings, settleBatchCraft, constructionMaterialCount, spendConstructionMaterials, warrenConstructionCost, fortificationCost, fortificationCap, fortificationHpBonus, repairAllQuote, repairEverything, CONSTRUCTION_MATERIAL_IDS, constructionRefund } from './warren-progression.js';
+import { CLASS_FAMILIES, LEGACY_SAVE_KEY, SAVE_KEY, bunnyName, expRequired, giveBunnyExp, migrateSave, monsterLoot, addInventory, craftMaterialCount, spendCraftMaterials, defaultBuilds, unlockedTier, minLevelForTier, buildFor, buildCombatBonus, availableRecipes, canCraft, craftGear, craftBatch, enhanceGear, enhanceAll, refineGear, dismantleGear, dismantleSelection, setGearLock, recommendations, grantClassMastery, unlockClassMastery, unlockedMastery, classProgress, defaultProgress, defaultMastery, burrowMonsterGold, shouldDepositLootDirectly, autoEquipBuild, equipBuildItem, equippedGearIds, gearSlot, EQUIPMENT_MASTER_V2, EQUIPMENT_RARITY_STAT_MULTIPLIER, MAX_FIELD_PER_CLASS, fieldSquadCap, fieldClassCap, FIELD_SQUAD_GATES, CLASS_IDS, GEAR_SLOTS, PRIOR_SAVE_KEY, defaultAutoDismantleSettings, settleBatchCraft, constructionMaterialCount, spendConstructionMaterials, warrenConstructionCost, fortificationCost, fortificationCap, fortificationHpBonus, repairAllQuote, repairEverything, CONSTRUCTION_MATERIAL_IDS, constructionRefund } from './warren-progression.js';
 import { inventoryItemMeta } from '../../src/simulation/itemTagsV2.ts';
 import { MONSTERS_V2 as MONSTER_XP } from '../../src/simulation/monsterDataV2.ts';
 import { itemLabel, gameIcon, renderSquadHtml, renderForgeHtml, renderHeroHtml, renderInventoryHtml, renderItemDetailHtml } from './warren-ui.js';
 import { renderTowerHtml, renderMasteryHtml, renderBatchHtml } from './warren-extra-ui.js';
 import { selectNightDefenseTarget, chooseRaidGate, nearestClosedGate } from './warren-defense-ai.js';
-import {renderArmoryHtml} from './warren-armory-ui.js';
+import {renderArmoryHtml,visibleArmoryInventory} from './warren-armory-ui.js';
 import {PHASE1_MAX_LEVEL,stageForWarren,frontierStage,lureQuote,LURE_MODES} from './warren-phase1.js';
 import {renderLureHtml} from './warren-lure-ui.js';
 import {NPC_COMMON_PRICES,quoteQuickSell,commitQuickSell} from './warren-quick-sell.js';
 import {renderQuickSellHtml} from './warren-quick-sell-ui.js';
 import {FORGE_COST,RESOURCE_COST,applyMonsterResourceBonus,castWarrenHeal,BUILDING_LEVEL_MAX} from './warren-village-buildings.js';
 import {renderHallBuildingHtml,renderBlacksmithBuildingHtml,renderResourceBuildingHtml} from './warren-building-ui.js';
+import {defaultClassSkills,applyBurrowSkillCommand,classActiveCores} from './warren-class-cores.js';
+import {skillUpgradeKind} from '../../src/simulation/skillCoreService.ts';
+import {regenBurrowSp,chooseBurrowCore,resolveBurrowCore,resolveBurrowMovement} from './warren-core-combat.js';
+import {renderClassCoreHtml} from './warren-class-core-ui.js';
+import {BASE_CRIT_DAMAGE,rollWarrenCrit,rollMasteryProc,hitFeedback} from './warren-hit-feedback.js';
 
 // ---------- rules ----------
 const CLASSES = {
@@ -46,9 +51,9 @@ const CLASSES = {
   mage: { name: 'นักเวท', icon: '🔮', fam: 'staff', cost: 90, hp: 88, atk: 17, range: 205, cd: 1.55, speed: 96, carry: 5, splash: 70, blurb: 'เวทวงกว้าง' },
 };
 const DAY_S = 80, NIGHT_S = 55, WAVES_PER_LEVEL = 5;
-const BURROW_MAX = 500, REPAIR_HP = 60, REPAIR_COST = 12, REVIVE_COST = 15;
+const BURROW_MAX = 500, REPAIR_HP = 60, REPAIR_COST = 12;
 // warren level gates: hall HP, squad size, tower count; upgrading needs the level's boss beaten
-const LOSS = { hallLeft: .2, goldLost: 0 }; // after a lost night: hall left at 20% HP, 20% of banked gold gone
+const LOSS = { hallLeft: .2 }; // after a lost night: Hall remains at 20% HP; banked Gold is preserved
 const hallMax = () => BURROW_MAX + (S.warren - 1) * 80 + fortificationHpBonus(S.fortification);
 const squadMax = () => fieldSquadCap(S.warren);
 const towerMax = () => Math.min(TOWER.max, 2 + S.warren);
@@ -134,10 +139,10 @@ await Promise.all([...normals, ...elites, bossId].filter(Boolean).map(id=>artFor
 
 // ---------- state ----------
 const S = {
-  gold: 20, inventory: {}, gear: [], nextGearId: 0, builds: defaultBuilds(), progress:defaultProgress(), mastery:defaultMastery(), reserve:[],forgeLevel:1,resourceLevel:1,resourceGoldBank:0,resourceMatBank:0,dayHealDay:0,nightHealDay:0,sellReserve:300,sellSelected:Object.keys(NPC_COMMON_PRICES),sellConfirm:false,forgeClass: 'guard', modal: null, selectedTower:-1, heroUnitId: null, heroPortrait: hero.animations.idle.south.frames[0]?.src ?? null,
+  gold: 20, inventory: {}, gear: [], nextGearId: 0, builds: defaultBuilds(), progress:defaultProgress(), mastery:defaultMastery(), classSkills:defaultClassSkills(),coreClass:'guard',reserve:[],forgeLevel:1,resourceLevel:1,resourceGoldBank:0,resourceMatBank:0,dayHealDay:0,nightHealDay:0,sellReserve:300,sellSelected:Object.keys(NPC_COMMON_PRICES),sellConfirm:false,forgeClass: 'guard', modal: null, selectedTower:-1, heroUnitId: null, heroPortrait: hero.animations.idle.south.frames[0]?.src ?? null,
   inventoryFilter: 'All', itemDetailId: null, itemProtect:false, itemTargetClass:'guard', forgeBuildByClass: {},
   armorySlot:'weapon',armoryTab:'craft',armoryRecipe:null,armoryInventoryRarity:'all',armoryNotice:'',refineFeedback:null,
-  autoDismantle:defaultAutoDismantleSettings(),pendingCraft:null,batchReport:null,batchExpanded:false,armoryScrollToResults:false,
+  autoDismantle:defaultAutoDismantleSettings(),armoryInventorySelection:[],batchReport:null,batchExpanded:false,armoryScrollToResults:false,
   burrow: BURROW_MAX, day: 1, night: false, clock: 0, speed: 1, over: null, batchResults:[],batchFilter:'all',batchSelection:[],batchRecs:[],batchQty:1,batchClass:'guard',batchConfirm:false,
   warren: 1, fortification:0, wave: 1, cleared: false, losses: 0, lureDay:0, // warren level is boss-gated; material-funded fortification is available from day one
   units: [], monsters: [], towers: [], movingTower:-1, fences: [], gateClosed:[], wallLevel:0, wallPreview:false, building:false, queue: [], waveTimer: 0, kills: 0, time: 0, events: [],
@@ -363,11 +368,17 @@ function createTower(x, y, hp = TOWER.hp, level=1, garrison=null) {
 function updateTowers(dt) {
   for(const t of S.towers){
     if(!t.garrison||t.hp<=0)continue;
+    const g=t.garrison,c=CLASSES[g.cls];
+    const st=statsOf(g.cls,g.level);
+    Object.assign(g,{x:t.x,y:t.y,...st});g.hp=Math.min(g.maxHp,g.hp??g.maxHp);
+    regenBurrowSp(g,dt);
     t.cd-=dt;if(t.cd>0)continue;
-    const c=CLASSES[t.garrison.cls],m=nearestMonster(t,TOWER.range);if(!m)continue;
-    t.cd=c.cd;
+    const m=nearestMonster(t,TOWER.range);if(!m)continue;
+    const core=chooseBurrowCore(S,g,m,S.monsters);
+    if(core&&castEquippedCore(g,m,core)){t.cd=Math.max(.55,c.cd);continue;}
+    t.cd=c.cd*((g.coreValkyrieUntil||0)>S.time?.8:1);
     const gear=buildCombatBonus(S,t.garrison.cls,null,t.garrison.level);
-    const damage=Math.max(1,Math.round(c.atk+(t.garrison.level-1)*.9+gear.atk));
+    const damage=Math.max(1,Math.round((c.atk+(t.garrison.level-1)*.9+gear.atk)*((g.coreValkyrieUntil||0)>S.time?1.15:1)));
     skillFx?.play(t.garrison.cls==='mage'?'arcBolt':'shotArrow',{from:{x:t.x,y:t.y},to:{x:m.x,y:m.y}});
     later(.22,()=>{if(m.dead||t.hp<=0)return;m.hp-=damage;floaters?.text(m.x,m.y,damage,{color:t.garrison.cls==='mage'?'#ccacff':'#bfe3ff',size:13});
       combatFX.playHitSpark(m.x,m.y,{visualScale:m.actor.visualScale});if(m.hp<=0)killMonster(m,t.garrison);});
@@ -395,7 +406,7 @@ function upgradeTower(t){
 let unitSeq = 0;
 function statsOf(cls,level=1,buildId=cls+'-1') {
   const c=CLASSES[cls], gear=buildCombatBonus(S,cls,buildId,level);
-  return {maxHp:Math.round(c.hp+(level-1)*12+gear.maxHp),atk:Math.round((c.atk+(level-1)*.9+gear.atk)*10)/10,def:Math.round(gear.def)};
+  return {maxHp:Math.round(c.hp+(level-1)*12+gear.maxHp),atk:Math.round((c.atk+(level-1)*.9+gear.atk)*10)/10,def:Math.round(gear.def),critBonus:gear.critBonus||0,luk:Math.floor(level/4)};
 }
 function refreshArmy() {
   for(const u of S.units){const oldMax=u.maxHp||1,oldHp=u.hp;Object.assign(u,statsOf(u.cls,u.level,u.buildId));u.hp=u.down?0:Math.min(u.maxHp,Math.max(1,Math.round(oldHp/oldMax*u.maxHp)));}
@@ -459,7 +470,7 @@ function spawnMonster(type, x, y, { night = false, power = 1 } = {}) {
   const p = monsterArt.get(type); if (!p) return;
   const boss = !!p.isBoss, elite = !!p.elite;
   const hp = Math.round((boss ? 300 : elite ? 110 : 45) * power), atk = (boss ? 15 : elite ? 11 : 6) * power;
-  const m = { id: ++monSeq, type, p, r: boss ? 22 : 13, x, y, home: { x, y }, hp, maxHp: hp, atk, range: boss ? 70 : 38, cd: 1 + Math.random() * .5, speed: boss ? 60 : elite ? 72 : 78, night, boss, elite, left: false, dead: false, reward: Math.round((boss ? 40 : elite ? 8 : 3) * (1 + (S.warren - 1) * .1)) };
+  const m = { id: ++monSeq, type, p, r: boss ? 22 : 13, x, y, home: { x, y }, hp, maxHp: hp, atk, range: boss ? 70 : 38, cd: 1 + Math.random() * .5, speed: boss ? 60 : elite ? 72 : 78, night, boss, elite, left: false, dead: false };
   m.actor = {
     kind: 'actor', get x() { return m.x + (m.lx ?? 0); }, get y() { return m.y + (m.ly ?? 0); }, z: 0, r: 12,
     visualScale: (boss ? 1.65 : elite ? 2.4 : 2) * (p.scale || 1),
@@ -490,9 +501,8 @@ function killMonster(m, by) {
   (m.boss ? combatFX.playBossDeath : combatFX.playNormalDeath).call(combatFX, m.x, m.y, { visualScale: m.actor.visualScale });
   combatSFX.playDeath({ volume: .45 });
   const loot=monsterLoot(m.type,Math.random,1.35);
-  // Main-game gold source, warren progression multiplier scales forest-wave rewards without fake generic mats.
-  // Reduce prototype inflation; growth is deliberately shallow, while Mastery/towers consume Gold.
-  loot.gold=scaledWarrenGold(loot.gold||m.reward,S.warren);
+  // Burrow's own flat region/rank reward; never scale Gold by the home's level or main-game loot range.
+  loot.gold=burrowMonsterGold(m.type);
   applyMonsterResourceBonus(S,loot,CONSTRUCTION_MATERIAL_IDS);
   const drops=[{label:`${loot.gold} G`,tier:'gold'},...Object.entries(loot.items).map(([id,q])=>({label:`${itemLabel(id)} ×${q}`,tier:m.elite||m.boss?'blue':'green'}))];
   floaters?.loot(m.x,m.y,drops);
@@ -512,40 +522,146 @@ function killMonster(m, by) {
 }
 
 // ---------- combat ----------
+// The real BunnySimulation resolves Skill Core + Mod + rarity combat in an isolated
+// snapshot. Only an accepted authoritative cast is applied to the Burrow actors.
+function castEquippedCore(u,target,skill){
+ const result=resolveBurrowCore(S,u,target,S.monsters,skill.id);
+ if(!result.accepted)return false;
+ const player=result.player;
+ u.sp=player.sp;
+ u.hp=Math.max(1,Math.min(u.maxHp,player.hp));
+ u.coreCooldowns??={};
+ for(const event of result.events){
+  if(event.type==='cooldownStarted'&&event.abilityId===skill.id)
+   u.coreCooldowns[skill.id]=S.time+event.durationMs/1000;
+ }
+ u.coreBarrierHp=player.barrierHp||0;u.coreBarrierMaxHp=player.barrierMaxHp||0;
+ u.coreBarrierUntil=player.barrierUntilMs?S.time+player.barrierUntilMs/1000:0;
+ u.coreBarrierBreakHeal=player.barrierBreakHeal||0;
+ u.coreValkyrieUntil=player.valkyrieUntilMs?S.time+player.valkyrieUntilMs/1000:0;
+ u.coreCastUntil=S.time+.4;
+ u.moving=false;u.dir=facingTo(target.x-u.x,target.y-u.y);
+ const from={x:u.x,y:u.y},to={x:target.x,y:target.y};
+ skillFx?.play(skill.id,{from,to});
+ floaters?.text(u.x,u.y,skill.name+'!',{color:'#87efbd',size:14,lift:62});
+ combatSFX.playAttack?.({volume:.22});
+ for(const event of result.events){
+  if(event.type==='damageDealt'&&event.sourceId===player.id&&event.targetId!==player.id){
+   const m=result.enemyById.get(event.targetId);
+   if(!m||m.dead)continue;
+   const v=hitFeedback(event.amount,{kind:event.effect?.origin==='ECHO'?'additional':'normal',critical:event.critical,coreName:skill.name});
+   floaters?.text(m.x,m.y,v.text,{color:v.color,size:v.size,lift:v.lift});
+   combatFX.playHitSpark(m.x,m.y,{visualScale:m.actor.visualScale});
+  }else if(event.type==='healed'&&event.targetId===player.id){
+   floaters?.text(u.x,u.y,'+'+event.amount,{color:'#83f0aa',size:14,lift:46});
+  }else if(event.type==='barrierApplied'&&event.entityId===player.id){
+   skillFx?.burst(u.x,u.y,{color:'#87efbd',count:14,up:42});
+  }else if(event.type==='attackMissed'){
+   const m=result.enemyById.get(event.targetId);if(m)floaters?.text(m.x,m.y,'MISS',{color:'#ced8d6',size:13});
+  }
+ }
+ // Snapshot monsters are not shared references: copy the simulation-approved HP and
+ // movement back, then fire the existing Burrow kill/loot/EXP exactly once per defeated mob.
+ const damagedIds=new Set(result.events.filter(e=>e.type==='damageDealt'&&e.sourceId===player.id&&e.targetId!==player.id).map(e=>e.targetId));
+ for(const [id,m] of result.enemyById){
+  const resolved=result.world.monsters.get(id);if(!resolved||m.dead)continue;
+  m.hp=Math.max(0,resolved.hp);if(damagedIds.has(id))m.aggro=u;
+  if((resolved.position.x!==m.x-u.x||resolved.position.y!==m.y-u.y)&&!m.boss){
+   const x=u.x+resolved.position.x,y=u.y+resolved.position.y;
+   if(standable(x,y)&&canWalkStraight(m.x,m.y,x,y)) {m.x=x;m.y=y;}
+  }
+  if(m.hp<=0)killMonster(m,u);
+ }
+ if(skill.id==='thorsJudgement'){
+  const affected=[...result.enemyById].filter(([id])=>result.world.monsters.get(id)?.judgementUntilMs>0);
+  for(const [id,m] of affected){const initial=m.hp;
+   later((skill.durationMs||4000)/1000,()=>{
+    if(m.dead)return;
+    const lost=Math.max(0,initial-m.hp),blast=Math.min(m.hp,Math.round(lost*.30));
+    if(blast>0){m.hp-=blast;floaters?.text(m.x,m.y,blast,{color:'#87efbd',size:16,lift:48});if(m.hp<=0)killMonster(m,u);}
+   });
+  }
+ }
+ return true;
+}
+function castMovementCore(u,target,c){
+ const id=S.classSkills?.[u.cls]?.movement;
+ if(!id||S.warren<10||u.down||(u.coreCastUntil||0)>S.time||(u.coreMovementBlockedUntil||0)>S.time)return false;
+ const result=resolveBurrowMovement(S,u,target,(x,y)=>{
+  const z=runtimeWalkHeight(x,y);
+  return z!==null&&canRuntimeActorStand(x,y,z)&&canWalkStraight(u.x,u.y,x,y);
+ });
+ if(!result.accepted)return false;
+ const newX=u.x+result.player.position.x,newY=u.y+result.player.position.y;
+ if(Math.hypot(newX-u.x,newY-u.y)<12){u.coreMovementBlockedUntil=S.time+1;return false;}
+ u.x=newX;u.y=newY;u.dir=facingTo(target.x-u.x,target.y-u.y);
+ u.coreCooldowns??={};
+ for(const event of result.events)if(event.type==='cooldownStarted'&&event.abilityId===id)
+   u.coreCooldowns[id]=S.time+event.durationMs/1000;
+ u.coreCastUntil=S.time+.25;u.moving=true;
+ skillFx?.burst(u.x,u.y,{color:id==='blink'?'#bc95ff':'#f9eafc',count:15,up:30});
+ floaters?.text(u.x,u.y,result.skill.name+'!',{color:'#e5ceff',size:15,lift:52});
+ return true;
+}
 function strike(u, target) {
-  const c = CLASSES[u.cls], now = performance.now();
-  u.cd = c.cd; u.atkUntil = now + 375; u.dir = facingTo(target.x - u.x, target.y - u.y);
-  combatSFX.playAttack({ volume: .25 });
-  skillFx?.play(BASIC_ATTACK_FX[c.fam]||'arcBolt', { from: { x: u.x, y: u.y }, to: { x: target.x, y: target.y } });
-  later(['bow','staff'].includes(c.fam) ? .26 : .18, () => {
-    if (u.down) return;
-    const hits = c.splash ? S.monsters.filter(m => !m.dead && dist(m, target) < c.splash) : [target];
-    for (const m of hits) {
-      if (m.dead) continue;
-      const mastery=S.mastery[u.cls]?.unlocked||[];
-      const crit=Math.random()<.12;
-      let multiplier=1;
-      if(c.fam==='dagger'&&mastery.includes(10)&&Math.random()<(mastery.includes(50)?.30:mastery.includes(20)?.25:.20))multiplier+=1;
-      if(c.fam==='bow'&&mastery.includes(30))u.masteryRange=true;
-      if(c.fam==='greatsword'&&mastery.includes(10))multiplier+=mastery.includes(50)?1:mastery.includes(40)?.75:mastery.includes(20)?.60:.5;
-      const dmg=Math.max(1,Math.round(u.atk*multiplier*(crit?1.8:1)*(.9+Math.random()*.2)));
+  const c=CLASSES[u.cls],now=performance.now();
+  u.cd=c.cd*((u.coreValkyrieUntil||0)>S.time?.8:1);u.atkUntil=now+375;u.dir=facingTo(target.x-u.x,target.y-u.y);
+  combatSFX.playAttack({volume:.25});
+  skillFx?.play(BASIC_ATTACK_FX[c.fam]||'arcBolt',{from:{x:u.x,y:u.y},to:{x:target.x,y:target.y}});
+  later(['bow','staff'].includes(c.fam)?.26:.18,()=>{
+    if(u.down||target.dead)return;
+    const unlocked=S.mastery[u.cls]?.unlocked||[];
+    const proc=rollMasteryProc(c.fam,unlocked);
+
+    const deal=(m,ratio=1,{kind='normal',allowCrit=true,coreName=null}={})=>{
+      if(!m||m.dead)return;
+      const critical=allowCrit&&rollWarrenCrit(u.luk||0,u.critBonus||0);
+      const dmg=Math.max(1,Math.round(u.atk*ratio*((u.coreValkyrieUntil||0)>S.time?1.15:1)*(critical?BASE_CRIT_DAMAGE:1)*(.9+Math.random()*.2)));
       m.hp-=dmg;m.aggro=u;
-      floaters?.text(m.x, m.y, crit ? `★ ${dmg}` : dmg, { color: crit ? '#ffe36f' : '#ffffff', size: crit ? 18 : 14 });
-      combatFX.playHitSpark(m.x, m.y, { visualScale: m.actor.visualScale }); combatSFX.playHit({ critical: crit, volume: .3 });
-      if (m.hp <= 0) killMonster(m, u);
+      const feedback=hitFeedback(dmg,{kind,critical,coreName});
+      floaters?.text(m.x,m.y,feedback.text,{color:feedback.color,size:feedback.size,lift:feedback.lift});
+      combatFX.playHitSpark(m.x,m.y,{visualScale:m.actor.visualScale});
+      if(critical)skillFx?.burst(m.x,m.y,{color:'#ffe36f',count:14,up:42});
+      combatSFX.playHit({critical,volume:.3});
+      if(m.hp<=0)killMonster(m,u);
+    };
+    // The Greatsword cleave from main-game Mastery is a secondary-target hit,
+    // not a multiplier to every swing. Other existing splash classes keep their AoE.
+    const hits=c.splash&&c.fam!=='greatsword'
+      ?S.monsters.filter(m=>!m.dead&&dist(m,target)<c.splash):[target];
+    for(const m of hits){
+      if(m.dead)continue;
+      deal(m);
+    }
+    if(proc){
+      const follow=proc.kind==='double'?target:
+        S.monsters.find(m=>!m.dead&&m!==target&&dist(m,target)<(proc.range||Math.min(210,c.range)));
+      if(follow&&!follow.dead){
+        skillFx?.burst(follow.x,follow.y,{color:proc.kind==='additional'?'#a98cff':'#9fe8ff',count:8,up:30});
+        deal(follow,proc.ratio,{kind:proc.kind,allowCrit:proc.criticalAllowed});
+      }
     }
   });
 }
 function hurtUnit(u, dmg, from) {
   if (u.down) return;
-  const dealt=Math.max(1,Math.round(dmg*90/(90+(u.def||0))));
+  let dealt=Math.max(1,Math.round(dmg*90/(90+(u.def||0))));
+  if((u.coreBarrierUntil||0)>S.time&&(u.coreBarrierHp||0)>0){
+   const absorbed=Math.min(dealt,u.coreBarrierHp);
+   u.coreBarrierHp-=absorbed;dealt-=absorbed;
+   if(u.coreBarrierHp<=0&&u.coreBarrierBreakHeal){
+    const healed=Math.min(u.maxHp-u.hp,u.coreBarrierBreakHeal);
+    u.hp+=healed;if(healed>0)floaters?.text(u.x,u.y,'+'+healed,{color:'#83f0aa',size:14});
+    u.coreBarrierBreakHeal=0;
+   }
+  }
   u.hp -= dealt; u.hurtUntil = performance.now() + 360;
   floaters?.text(u.x, u.y, `-${dealt}`, { color: '#ff6b5e', size: 13 });
   if (u.hp <= 0) {
     u.hp = 0; u.down = true; u.moving = false;
     // A fallen carrier loses half its loot; survivors must still deliver theirs to the warren.
     u.carry.gold=Math.floor(u.carry.gold/2);for(const k in u.carry.items)u.carry.items[k]=Math.floor(u.carry.items[k]/2);
-    toast(`${u.name} ล้มแล้ว! (ฟื้นตอนเช้า หรือจ่าย ${REVIVE_COST}G)`); combatSFX.playDeath({ volume: .5 }); renderUi();
+    toast(`${u.name} ล้มแล้ว! ฟื้นอัตโนมัติตอนเช้า`); combatSFX.playDeath({ volume: .5 }); renderUi();
   }
 }
 function nearestMonster(p, maxD, filter = () => true) { let b = null, bd = maxD; for (const m of S.monsters) { if (m.dead || !filter(m)) continue; const d = dist(p, m); if (d < bd) { bd = d; b = m; } } return b; }
@@ -574,8 +690,10 @@ function pickTarget(u, from, maxD, filter) {
 }
 function updateUnit(u, dt, i) {
   if (u.down) return;
+  regenBurrowSp(u,dt);
   u.cd -= dt;
   const c = CLASSES[u.cls], atHome = dist(u, CENTER) < BASE_R;
+  u.masteryRange=c.fam==='bow'&&(S.mastery[u.cls]?.unlocked||[]).includes(30);
   if (atHome && carried(u)) deposit(u);
   if (atHome && !S.night && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * .08 * dt); // rest in the warren
   const holdsRing=S.night,post=holdsRing?ringPost(u):{x:CENTER.x+(u.id%5-2)*30,y:CENTER.y+150};
@@ -590,6 +708,9 @@ function updateUnit(u, dt, i) {
   else target=pickTarget(u,u,675,m=>!m.night)||pickTarget(u,farmSpot(u),300,m=>!m.night);
   if (target) {
     const d = dist(u, target);
+    const core=(u.coreCastUntil||0)<=S.time?chooseBurrowCore(S,u,target,S.monsters):null;
+    if(core&&castEquippedCore(u,target,core))return;
+    if(d>c.range+95&&castMovementCore(u,target,c))return;
     if (d <= c.range*(u.masteryRange?1.1:1)) { u.moving = false; if (u.cd <= 0) strike(u, target); }
     else moveToward(u, target.x, target.y, c.speed, dt, c.range * .8);
     return;
@@ -724,7 +845,7 @@ function startDay() {
   syncGateRuntime();
   for (const m of S.monsters) m.dead = true;
   S.monsters = S.monsters.filter(m => !m.dead);
-  for (const u of S.units) { if (u.down) { u.down = false; u.x = CENTER.x + (Math.random() - .5) * 120; u.y = CENTER.y + 150; } u.hp = u.maxHp; } // everyone wakes up rested
+  for (const u of S.units) { if (u.down) { u.down = false; u.x = CENTER.x + (Math.random() - .5) * 120; u.y = CENTER.y + 150; } u.hp = u.maxHp; u.sp=u.maxSp??u.sp; } // everyone wakes up rested
   window.__slice?.setDusk(false);
   if (!S.pendingBanner) banner(`วันที่ ${S.day}`, 'กระต่ายกระจายตัวออกฟาร์มมอนสเตอร์รอบหมู่บ้านอัตโนมัติ');
   S.pendingBanner = false;
@@ -761,11 +882,11 @@ function upgradeFortification(){
 // ---------- save / load (localStorage; versioned for later migrations) ----------
 function save() {
   const data={v:3,gold:S.gold,burrow:S.burrow,warren:S.warren,fortification:S.fortification,wallLevel:S.wallLevel,wave:S.wave,cleared:S.cleared,day:S.day,kills:S.kills,losses:S.losses,
-    inventory:S.inventory,gear:S.gear,nextGearId:S.nextGearId,builds:S.builds,progress:S.progress,mastery:S.mastery,reserve:S.reserve,
+    inventory:S.inventory,gear:S.gear,nextGearId:S.nextGearId,builds:S.builds,progress:S.progress,mastery:S.mastery,classSkills:S.classSkills,reserve:S.reserve,
     forgeLevel:S.forgeLevel,resourceLevel:S.resourceLevel,resourceGoldBank:S.resourceGoldBank,resourceMatBank:S.resourceMatBank,resourceBonusVersion:1,dayHealDay:S.dayHealDay,nightHealDay:S.nightHealDay,sellReserve:S.sellReserve,sellSelected:S.sellSelected,
     autoDismantle:S.autoDismantle,lureDay:S.lureDay,gateClosed:S.gateClosed,
     units:S.units.map(u=>({cls:u.cls,name:u.name,level:u.level,exp:u.exp})),
-    towers:S.towers.map(t=>({x:t.x,y:t.y,hp:Math.round(t.hp),level:t.level,garrison:t.garrison})),fences:S.fences};
+    towers:S.towers.map(t=>({x:t.x,y:t.y,hp:Math.round(t.hp),level:t.level,garrison:t.garrison?{cls:t.garrison.cls,isGarrison:true,name:t.garrison.name,level:t.garrison.level,exp:t.garrison.exp}:null})),fences:S.fences};
   try{localStorage.setItem(SAVE_KEY,JSON.stringify(data));}catch{}
 }
 function load() {
@@ -775,7 +896,7 @@ function load() {
    if(!raw){raw=JSON.parse(localStorage.getItem(LEGACY_SAVE_KEY)||'null');old=!!raw;}
   }catch{}
   const d=migrateSave(raw);if(!d)return false;
-  Object.assign(S,{gold:d.gold,inventory:d.inventory,gear:d.gear,nextGearId:d.nextGearId,builds:d.builds,progress:d.progress,mastery:d.mastery,
+  Object.assign(S,{gold:d.gold,inventory:d.inventory,gear:d.gear,nextGearId:d.nextGearId,builds:d.builds,progress:d.progress,mastery:d.mastery,classSkills:d.classSkills,
     reserve:d.reserve,autoDismantle:d.autoDismantle,lureDay:d.lureDay,fences:d.fences,gateClosed:d.gateClosed,wallLevel:d.wallLevel,forgeLevel:d.forgeLevel,resourceLevel:d.resourceLevel,resourceGoldBank:d.resourceGoldBank,resourceMatBank:d.resourceMatBank,dayHealDay:d.dayHealDay,nightHealDay:d.nightHealDay,sellReserve:d.sellReserve,sellSelected:d.sellSelected,warren:d.warren,fortification:d.fortification,wave:d.wave,cleared:d.cleared,day:d.day,kills:d.kills,losses:d.losses});
   S.burrow=Math.min(hallMax(),Number.isFinite(d.burrow)?d.burrow:hallMax());
   for(const x of d.units)recruit(x.cls,true,x);
@@ -862,7 +983,6 @@ function openItemDetail(id){
 function completeArmoryCraft(order){
  if(!order||S.night)return false;
  const result=settleBatchCraft(S,order.recipeId,order.qty,order.cls,order.settings);
- S.pendingCraft=null;
  if(!result){toast('Blueprint / Gold / วัตถุดิบไม่พอ หรือ Tier ยังไม่ปลดล็อก');renderUi();return false;}
  S.batchReport=result;
  S.batchResults=[...result.retained,...result.review].map(p=>p.id);
@@ -877,6 +997,27 @@ function completeArmoryCraft(order){
 const $ = id => document.getElementById(id);
 const mobileLayout=matchMedia('(max-width:760px), (max-height:500px) and (pointer:coarse)');
 let mobileDrawer=null;
+// Desktop-only preferences are independent of gameplay saves and never affect the mobile drawer.
+const PANEL_PREF_KEY='burrow-panel-collapse-v1';
+let panelPrefs={help:false,side:false};
+try{const saved=JSON.parse(localStorage.getItem(PANEL_PREF_KEY)||'null');if(saved)panelPrefs={help:saved.help===true,side:saved.side===true};}catch{}
+function applyPanelPrefs(){
+ const desktop=!mobileLayout.matches;
+ for(const name of ['help','side']){
+  const el=$(name),button=$(name+'Toggle'),collapsed=desktop&&panelPrefs[name];
+  el.classList.toggle('is-collapsed',collapsed);
+  button.setAttribute('aria-expanded',String(!collapsed));
+  button.textContent=collapsed?(name==='help'?'📘 Guide ▸':'🏠 หมู่บ้าน ▸'):'−';
+  button.setAttribute('aria-label',collapsed?'แสดง'+(name==='help'?'คำแนะนำ':'แผงจัดการหมู่บ้าน'):'ซ่อน'+(name==='help'?'คำแนะนำ':'แผงจัดการหมู่บ้าน'));
+ }
+}
+for(const name of ['help','side'])$(name+'Toggle').addEventListener('click',()=>{
+ if(mobileLayout.matches)return;
+ panelPrefs[name]=!panelPrefs[name];
+ try{localStorage.setItem(PANEL_PREF_KEY,JSON.stringify(panelPrefs));}catch{}
+ applyPanelPrefs();
+});
+applyPanelPrefs();
 function closeMobileDrawer(){
  mobileDrawer=null;
  document.body.removeAttribute('data-mobile-drawer');
@@ -892,7 +1033,7 @@ function syncMobileControls(){
  $('shopbox').inert=mobile&&mobileDrawer!=='recruit';
  $('mobileDrawerScrim').hidden=!mobileDrawer||!mobile;
  for(const b of document.querySelectorAll('#mobileDock [data-mobile-open]')){
-  const type=b.dataset.mobileOpen,selected=type===mobileDrawer||(S.modal==='hero'&&(type==='hero'&&S.armoryTab!=='craft'||type==='craft'&&S.armoryTab==='craft'))||(S.modal==='sell'&&type==='sell');
+  const type=b.dataset.mobileOpen,selected=type===mobileDrawer||(type==='skills'&&['bunnyMenu','mastery','skillCore'].includes(S.modal))||(type==='craft'&&S.modal==='hero')||(type==='sell'&&S.modal==='sell');
   b.setAttribute('aria-pressed',mobile&&selected?'true':'false');
  }
 }
@@ -903,14 +1044,15 @@ function openMobileView(type){
   document.body.dataset.mobileDrawer=type;
  }else{
   closeMobileDrawer();
-  if(type==='hero'||type==='craft'){
+  if(type==='skills'){S.modal='bunnyMenu';}
+  else if(type==='hero'||type==='craft'){
    S.armoryTab=type==='craft'?'craft':'inventory';S.modal='hero';
   }else if(type==='sell'){S.sellConfirm=false;S.modal='sell';}
  }
  renderUi();
 }
 $('mobileDrawerScrim').addEventListener('click',()=>{closeMobileDrawer();syncMobileControls();});
-mobileLayout.addEventListener('change',()=>{setRuntimeZoomRange(mobileLayout.matches?.26:.45,1.3);if(!mobileLayout.matches){setRuntimeZoom(getRuntimeZoom());closeMobileDrawer();}syncMobileControls();});
+mobileLayout.addEventListener('change',()=>{setRuntimeZoomRange(mobileLayout.matches?.26:.45,1.3);if(!mobileLayout.matches){setRuntimeZoom(getRuntimeZoom());closeMobileDrawer();}syncMobileControls();applyPanelPrefs();});
 for(const target of document.querySelectorAll('[data-ui-icon]'))target.innerHTML=gameIcon(target.dataset.uiIcon,'ui',target.textContent);
 function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => el.classList.remove('on'), 2200); }
 function banner(title, sub) { const el = $('banner'); el.innerHTML = `<b>${title}</b><span>${sub}</span>`; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); }
@@ -925,7 +1067,6 @@ function renderUi() {
     return `<button class="buy" data-buy="${k}" aria-label="จ้าง${c.name} ราคา ${priceOf(k)} Gold · ${status}" ${S.night||S.gold<priceOf(k)||full||teamFull?'disabled':''}>`+
       `<i>${gameIcon(c.fam,'family',c.icon,'bc-class-icon')}</i><span class="bc-buy-label"><b>${c.name}</b><small>${status}</small></span><em>${priceOf(k)} G</em></button>`;
   }).join('');
-  const downs=S.units.filter(u=>u.down).length;
   $('repair').disabled=S.night||S.gold<REPAIR_COST||(S.burrow>=hallMax()&&S.towers.every(t=>t.hp>=t.maxHp));
   $('repair').textContent=`🔧 +${REPAIR_HP} HP (${REPAIR_COST}G)`;
   const repairQuote=repairAllQuote(S,hallMax(),REPAIR_HP,REPAIR_COST);
@@ -941,8 +1082,6 @@ function renderUi() {
   const fc=reinforceCost(),cap=fortificationCap(S.warren);
   $('fortify').disabled=S.night||S.fortification>=cap||matCount()<fc;
   $('fortify').textContent=S.fortification>=cap?`🧱 เสริมฐาน Lv ${S.fortification}/${cap} · เต็มสำหรับ Warren Lv ${S.warren}`:`🧱 เสริมฐาน Lv ${S.fortification}/${cap} → HP +35 (${fc} วัตถุดิบ)`;
-  $('revive').disabled=S.night||!downs||S.gold<REVIVE_COST;
-  $('revive').textContent=`💖 ปลุกกระต่าย (${REVIVE_COST}G)${downs?` · ล้ม ${downs}`:''}`;
   $('squad').innerHTML=renderSquadHtml(S,CLASSES);
   if($('recruitSummary'))$('recruitSummary').textContent=`${S.units.length}/${squadMax()}`;
   $('lureOpen').disabled=S.night||S.lureDay===S.day;
@@ -972,13 +1111,23 @@ function renderUi() {
   }else gates.innerHTML='';
   for(const [type,id,render] of [['hall','hallPanel',()=>renderHallBuildingHtml(S,hallMax(),Math.round(hallMax()*.2))],
     ['blacksmith','blacksmithPanel',()=>renderBlacksmithBuildingHtml(S)],['resource','resourcePanel',()=>renderResourceBuildingHtml(S)],
-    ['sell','sellPanel',()=>renderQuickSellHtml(S)],['forge','forgePanel',()=>renderForgeHtml(S,CLASSES)],['hero','heroPanel',()=>renderArmoryHtml(S,CLASSES)],['inventory','inventoryPanel',()=>renderInventoryHtml(S,CLASSES)],['tower','towerPanel',()=>renderTowerHtml(S,CLASSES)],['mastery','masteryPanel',()=>renderMasteryHtml(S,CLASSES)],['batch','batchPanel',()=>renderBatchHtml(S,CLASSES)],['lure','lurePanel',()=>renderLureHtml(S,matCount())]]){
-    const panel=$(id),oldScroll=panel.querySelector('.bc-modal-body')?.scrollTop||0;
+    ['sell','sellPanel',()=>renderQuickSellHtml(S)],['forge','forgePanel',()=>renderForgeHtml(S,CLASSES)],['hero','heroPanel',()=>renderArmoryHtml(S,CLASSES)],['inventory','inventoryPanel',()=>renderInventoryHtml(S,CLASSES)],['tower','towerPanel',()=>renderTowerHtml(S,CLASSES)],['mastery','masteryPanel',()=>renderMasteryHtml(S,CLASSES)],['skillCore','skillCorePanel',()=>renderClassCoreHtml(S,CLASSES)],['batch','batchPanel',()=>renderBatchHtml(S,CLASSES)],['lure','lurePanel',()=>renderLureHtml(S,matCount())]]){
+    const panel=$(id),scrollSelectors=['.bc-modal-body','.bc-armory-recipes','.bc-recipe-list','.bc-batch-expansion','.bc-master-list'];
+    // Combat rewards may update the HUD while the player is reading or scrolling a modal.
+    // Preserve BOTH its main scroll and nested recipe list instead of replacing the nodes at scroll=0.
+    const scrolls=scrollSelectors.map(sel=>[sel,panel.querySelector(sel)?.scrollTop??0]);
     panel.hidden=S.modal!==type;
-    if(!panel.hidden){panel.innerHTML=render();const body=panel.querySelector('.bc-modal-body');if(body)body.scrollTop=oldScroll;
-      if(type==='hero'&&S.armoryScrollToResults){panel.querySelector('.bc-armory-results')?.scrollIntoView({block:'start'});S.armoryScrollToResults=false;}
+    if(!panel.hidden){
+      panel.innerHTML=render();
+      for(const [sel,top] of scrolls){const el=panel.querySelector(sel);if(el)el.scrollTop=top;}
+      if(type==='hero'&&S.armoryScrollToResults){
+        const results=panel.querySelector('.bc-armory-results'),body=panel.querySelector('.bc-modal-body');
+        if(results&&body)body.scrollTop=Math.max(0,results.offsetTop-body.offsetTop);
+        S.armoryScrollToResults=false;
+      }
     }
   }
+  $('bunnyMenuPanel').hidden=S.modal!=='bunnyMenu';
   const detail=$('itemDetailPanel');detail.hidden=!S.itemDetailId||S.modal==='hero';
   if(S.itemDetailId){if(S.gear.some(i=>i.id===S.itemDetailId)&&S.modal!=='hero')detail.innerHTML=renderItemDetailHtml(S,S.itemDetailId,CLASSES);else if(!S.gear.some(i=>i.id===S.itemDetailId)){detail.hidden=true;S.itemDetailId=null;}}
   $('modalScrim').hidden=!S.modal&&!S.itemDetailId;
@@ -1035,7 +1184,12 @@ document.body.addEventListener('click', e => {
   else if(b.id==='lureOpen'&&!S.night){S.modal='lure';renderUi();}
   else if(b.dataset.lure){void useLure(b.dataset.lure);}
   else if(b.id==='inventoryOpen'){S.armoryTab='inventory';S.modal='hero';renderUi();}
-  else if(b.id==='masteryOpen'){S.modal='mastery';renderUi();}
+  else if(b.id==='masteryOpen'||b.hasAttribute('data-open-mastery-menu')){S.modal='mastery';renderUi();}
+  else if(b.id==='skillCoreOpen'||b.hasAttribute('data-open-core-menu')){S.modal='skillCore';renderUi();}
+  else if(b.dataset.coreClass){S.coreClass=b.dataset.coreClass;renderUi();}
+  else if(b.dataset.skillSalvage){const id=b.dataset.skillSalvage;try{applyBurrowSkillCommand(S,S.coreClass,{type:'salvageSkillItem',itemId:id,qty:1});save();renderUi();toast('ย่อย '+id+' ได้ Shard +1');}catch(e){toast('ย่อยไม่ได้: '+String(e.message||e));}}
+  else if(b.dataset.skillExchange){const id=b.dataset.skillExchange;try{applyBurrowSkillCommand(S,S.coreClass,{type:'exchangeShards',itemId:id});save();renderUi();toast('แลก '+id+' สำเร็จ');}catch(e){toast('แลกไม่ได้: '+String(e.message||e));}}
+  else if(b.dataset.skillUpgrade){const id=b.dataset.skillUpgrade;try{const kind=skillUpgradeKind(id);if(!kind)throw Error('invalid-skill-item');applyBurrowSkillCommand(S,S.coreClass,kind==='modifier'?{type:'upgradeModifier',modifierId:id}:kind==='movement'?{type:'upgradeMovementCore',coreId:id}:{type:'upgradeCore',coreId:id});save();renderUi();toast('อัปเกรด '+id+' เสร็จแล้ว');}catch(e){toast('อัปเกรดไม่ได้: '+String(e.message||e));}}
   else if(b.dataset.openMastery){S.masteryClass=b.dataset.openMastery;S.modal='mastery';renderUi();}
   else if(b.hasAttribute('data-modal-close')){S.modal=null;S.itemDetailId=null;renderUi();}
   else if(b.hasAttribute('data-item-close')){S.itemDetailId=null;S.itemProtect=false;renderUi();}
@@ -1044,20 +1198,46 @@ document.body.addEventListener('click', e => {
   else if(b.dataset.inventoryFilter){S.inventoryFilter=b.dataset.inventoryFilter;renderUi();}
   else if(b.dataset.openItem){if(openItemDetail(b.dataset.openItem))renderUi();}
   else if(b.dataset.forgeClass){if(selectArmoryClass(b.dataset.forgeClass)){
-    S.pendingCraft=null;S.armoryRecipe=null;S.armoryNotice='';S.itemDetailId=null;renderUi();}}
+    S.armoryInventorySelection=[];S.armoryRecipe=null;S.armoryNotice='';S.itemDetailId=null;renderUi();}}
   else if(b.dataset.masteryClass){S.masteryClass=b.dataset.masteryClass;renderUi();}
   else if(b.dataset.unlockMastery&&!S.night){const r=unlockClassMastery(S,b.dataset.unlockMastery);if(r){save();renderUi();toast('ปลด Mastery Lv '+r.level+' · '+r.milestone.description);}else toast('Mastery ยังไม่ถึงระดับนี้ หรือ Gold ไม่พอ');}
   else if(b.dataset.towerHire&&!S.night){const t=S.towers[S.selectedTower];if(hireGarrison(t,b.dataset.towerHire))toast('จ้าง '+CLASSES[b.dataset.towerHire].name+' ประจำป้อมแล้ว');}
   else if(b.hasAttribute('data-tower-upgrade')&&!S.night){if(upgradeTower(S.towers[S.selectedTower]))toast('เพิ่มความทนทานป้อมแล้ว');}
   else if(b.dataset.armorySlot){
-    S.armorySlot=b.dataset.armorySlot;S.armoryRecipe=null;S.itemDetailId=null;S.pendingCraft=null;
+    S.armorySlot=b.dataset.armorySlot;S.armoryRecipe=null;S.itemDetailId=null;S.armoryInventorySelection=[];
     S.armoryTab='craft';S.batchReport=null;renderUi();
   }
   else if(b.dataset.armoryTab){S.armoryTab=b.dataset.armoryTab;S.itemDetailId=null;renderUi();}
-  else if(b.dataset.armoryRecipe){S.armoryRecipe=b.dataset.armoryRecipe;S.pendingCraft=null;renderUi();}
-  else if(b.dataset.armoryRarity){S.armoryInventoryRarity=b.dataset.armoryRarity;renderUi();}
-  else if(b.hasAttribute('data-auto-cancel')){S.pendingCraft=null;renderUi();}
-  else if(b.hasAttribute('data-auto-confirm')&&!S.night&&S.pendingCraft){completeArmoryCraft(S.pendingCraft);}
+  else if(b.dataset.armoryRecipe){S.armoryRecipe=b.dataset.armoryRecipe;renderUi();}
+  else if(b.dataset.armoryRarity){S.armoryInventoryRarity=b.dataset.armoryRarity;S.armoryInventorySelection=[];renderUi();}
+  else if(b.hasAttribute('data-armory-select-all')&&!S.night){
+    const items=visibleArmoryInventory(S).filter(p=>!p.locked);
+    const selected=new Set(S.armoryInventorySelection);
+    S.armoryInventorySelection=items.length&&items.every(p=>selected.has(p.id))?[]:items.map(p=>p.id);
+    renderUi();
+  }
+  else if(b.hasAttribute('data-armory-dismantle')&&!S.night){
+    // Only visible, unlocked and unequipped copies are eligible. The economy layer
+    // validates all IDs again atomically before modifying the inventory.
+    const selected=new Set(S.armoryInventorySelection),ids=visibleArmoryInventory(S)
+      .filter(p=>!p.locked&&selected.has(p.id)).map(p=>p.id);
+    if(!ids.length)return;
+    const r=dismantleSelection(S,ids);
+    if(!r){S.armoryInventorySelection=[];renderUi();return toast('รายการเปลี่ยนแล้ว กรุณาเลือกใหม่');}
+    const removed=new Set(ids);
+    if(S.batchReport){
+      S.batchReport.manualDismantled=[...(S.batchReport.manualDismantled||[]),...S.batchReport.made.filter(p=>removed.has(p.id))];
+      S.batchReport.retained=S.batchReport.retained.filter(p=>!removed.has(p.id));
+      S.batchReport.review=S.batchReport.review.filter(p=>!removed.has(p.id));
+      S.batchReport.fragments+=r.fragments;
+    }
+    S.batchResults=S.batchResults.filter(id=>!removed.has(id));
+    S.batchSelection=S.batchSelection.filter(id=>!removed.has(id));
+    if(removed.has(S.itemDetailId))S.itemDetailId=null;
+    S.armoryInventorySelection=[];
+    S.armoryNotice='ย่อยอุปกรณ์ '+r.count+' ชิ้น · ได้ '+r.fragments+' Stone Fragments';
+    save();renderUi();toast(S.armoryNotice);
+  }
   else if(b.hasAttribute('data-batch-expanded')){S.batchExpanded=!S.batchExpanded;renderUi();}
   else if(b.dataset.batchFilter){S.batchFilter=b.dataset.batchFilter;renderUi();}
   else if(b.dataset.batchEquip&&!S.night){
@@ -1101,8 +1281,7 @@ document.body.addEventListener('click', e => {
     if(!availableRecipes(S,cls).some(r=>r.id===id&&gearSlot(id)===(S.armorySlot||'weapon'))||!canCraft(S,id))
       return toast('สูตร / วัตถุดิบ / Tier ไม่ตรงกับช่องที่เลือก');
     const order={recipeId:id,qty,cls,settings};
-    if(settings.enabled){S.pendingCraft=order;renderUi();}
-    else completeArmoryCraft(order);
+    completeArmoryCraft(order);
   }
   else if(b.id==='enhanceAll'&&!S.night){
     const r=enhanceAll(S,S.forgeClass);if(r.levels){refreshArmy();save();renderUi();}
@@ -1141,7 +1320,7 @@ document.body.addEventListener('click', e => {
       S.armoryNotice=text;
       if(refined.success){combatSFX.playLevelUp?.({volume:.3});skillFx?.burst(CENTER.x,CENTER.y,{color:'#ffd27b',count:14,up:80});}
       refreshArmy();save();renderUi();toast(text);
-    }else toast('Astralite / Protection ไม่พอ หรือถึง +15 แล้ว');
+    }else toast('Gold / Astralite / Protection ไม่พอ หรือถึง +15 แล้ว');
   }
   else if(b.dataset.itemDismantle&&!S.night){
     const piece=S.gear.find(x=>x.id===b.dataset.itemDismantle);
@@ -1171,10 +1350,9 @@ document.body.addEventListener('click', e => {
     for(const t of damaged)skillFx?.burst(t.x,t.y,{color:'#ffe27a',count:10,up:60});
     save();renderUi();toast(`ซ่อมทั้งหมด · โพรง +${quote.hallMissing} HP · ป้อม ${quote.towerCount} หลัง · รั้ว +${quote.wallMissing||0} HP · ใช้ ${quote.gold}G`);
   }
-  else if (b.id === 'revive'&&!S.night&&S.gold>=REVIVE_COST) { const u = S.units.find(x => x.down); if (u) { S.gold -= REVIVE_COST; u.down = false; u.hp = Math.round(u.maxHp * .6); skillFx?.pillar(u.x, u.y, { color: '#ffd6ec' }); renderUi(); } }
   else if(b.id==='fenceBuild'&&!S.night)upgradePerimeter();
   else if(b.dataset.gateSide&&!S.night)selectGate(b.dataset.gateSide);
-  else if (b.id === 'build'&&!S.night) { S.building = !S.building; if (S.building) toast('คลิกพื้นในวงสีเหลืองเพื่อวางป้อม'); renderUi(); }
+  else if (b.id === 'build'&&!S.night) { S.building = !S.building; if(S.building&&mobileDrawer)closeMobileDrawer(); if (S.building) toast('คลิกพื้นในวงสีเหลืองเพื่อวางป้อม'); renderUi(); }
   else if (b.id === 'speed') { S.speed = S.speed === 1 ? 2 : 1; b.textContent = `⏩ x${S.speed}`; }
   else if (b.id === 'skip' && !S.night) S.clock = DAY_S - .1;
   else if (b.id === 'upgrade') upgradeWarren();
@@ -1185,18 +1363,43 @@ document.body.addEventListener('click', e => {
 $('modalScrim').addEventListener('click',()=>{if(S.itemDetailId){S.itemDetailId=null;S.itemProtect=false;}else S.modal=null;renderUi();});
 
 document.body.addEventListener('change',e=>{
+  const choice=e.target;
+  if(choice?.hasAttribute('data-core-choose')||choice?.hasAttribute('data-mod-choose')||choice?.hasAttribute('data-movement-choose')){
+    let command;
+    try{
+      if(choice.hasAttribute('data-core-choose')){
+        const slot=Number(choice.dataset.coreChoose);
+        command=choice.value?{type:'equipCore',coreId:choice.value,slot}:{type:'unequipCore',slot};
+      }else if(choice.hasAttribute('data-mod-choose')){
+        const [slot,modSlot]=choice.dataset.modChoose.split(':').map(Number),coreId=S.classSkills[S.coreClass]?.active?.[slot];
+        if(!coreId)throw Error('skill-core-not-equipped');
+        command=choice.value?{type:'equipModifier',coreId,modifierId:choice.value,modSlot}:{type:'unequipModifier',coreId,modSlot};
+      }else command=choice.value?{type:'equipMovementCore',coreId:choice.value}:{type:'unequipMovementCore'};
+      applyBurrowSkillCommand(S,S.coreClass,command);save();renderUi();
+    }catch(error){toast('ไม่สามารถสวมใส่: '+String(error.message||error));renderUi();}
+    return;
+  }
   if(e.target?.hasAttribute('data-auto-enabled')||e.target?.hasAttribute('data-auto-protect')||e.target?.hasAttribute('data-auto-rarity')){
     const prefs=S.autoDismantle[S.forgeClass];
     if(e.target.hasAttribute('data-auto-enabled'))prefs.enabled=e.target.checked;
     if(e.target.hasAttribute('data-auto-protect'))prefs.protectOtherClasses=e.target.checked;
     if(e.target.hasAttribute('data-auto-rarity'))prefs.minRarity=e.target.value;
-    S.pendingCraft=null;save();renderUi();return;
+    save();renderUi();return;
   }
   if(e.target?.id==='sellReserve'){S.sellReserve=Number(e.target.value);S.sellConfirm=false;save();renderUi();return;}
   if(e.target?.dataset?.sellItem){const id=e.target.dataset.sellItem;
     S.sellSelected=e.target.checked?[...new Set([...S.sellSelected,id])]:S.sellSelected.filter(x=>x!==id);
     S.sellConfirm=false;save();renderUi();return;}
-  if(e.target?.dataset?.batchLock){if(!S.night){setGearLock(S,e.target.dataset.batchLock,e.target.checked);S.batchSelection=S.batchSelection.filter(id=>id!==e.target.dataset.batchLock);S.batchConfirm=false;save();renderUi();}return;}
+  if(e.target?.dataset?.batchLock){if(!S.night){setGearLock(S,e.target.dataset.batchLock,e.target.checked);S.batchSelection=S.batchSelection.filter(id=>id!==e.target.dataset.batchLock);S.armoryInventorySelection=S.armoryInventorySelection.filter(id=>id!==e.target.dataset.batchLock);S.batchConfirm=false;save();renderUi();}return;}
+  if(e.target?.dataset?.armorySelect){
+    if(!S.night){
+      const id=e.target.dataset.armorySelect,eligible=visibleArmoryInventory(S).some(p=>p.id===id&&!p.locked);
+      S.armoryInventorySelection=e.target.checked&&eligible
+        ?[...new Set([...S.armoryInventorySelection,id])]:S.armoryInventorySelection.filter(x=>x!==id);
+      renderUi();
+    }
+    return;
+  }
   if(e.target?.dataset?.batchSelect){if(!S.night){const id=e.target.dataset.batchSelect;
     S.batchSelection=e.target.checked?[...new Set([...S.batchSelection,id])]:S.batchSelection.filter(x=>x!==id);
     S.batchConfirm=false;renderUi();}return;}
@@ -1278,6 +1481,8 @@ function drawEdgeArrows() {
 let labelTowerCount=-1;
 const WORLD_NAMES={hall:'🏠 โพรงกระต่าย',blacksmith:'⚒ โรงตีเหล็ก',resource:'📦 โรงผลิตทรัพยากร',sell:'🛒 รถเข็น · Quick Sell'};
 function updateWorldLabels(){
+ // During placement all labels remain readable but cannot steal taps/clicks from the map.
+ worldLabels.classList.toggle('placement-mode',S.building||S.movingTower>=0);
  if(labelTowerCount!==S.towers.length){
   labelTowerCount=S.towers.length;
   worldLabels.replaceChildren();
@@ -1394,7 +1599,9 @@ wallButton.addEventListener('focus',()=>{S.wallPreview=true;});
 wallButton.addEventListener('blur',()=>{S.wallPreview=false;});
 { const l = $('loading'); if (l) l.hidden = true; }
 banner(resumed ? `กลับมาแล้ว · วันที่ ${S.day}` : 'วันที่ 1', resumed ? `บ้าน Lv ${S.warren} · เวฟ ${S.warren}-${S.wave}` : 'กระต่ายฟาร์มเองรอบหมู่บ้าน · คลิกป้อมเพื่อจัดทหารประจำป้อม');
-window.__warren = S; window.__warrenDev = { placeTower, canWalkStraight, upgradePerimeter, hurtPerimeter, rebuildPerimeter, perimeterHealth:()=>perimeterHealth(S.fences), renderUi, save, upgradeWarren, hireGarrison:(index,cls)=>hireGarrison(S.towers[index],cls),upgradeTower:index=>upgradeTower(S.towers[index]),
+window.__warren = S; window.__warrenDev = { recruit:(cls)=>recruit(cls,true),spawnMonster:(...args)=>spawnMonster(...args),
+  castCore:(u,m,skillId)=>{const skill=classActiveCores(S,u?.cls).find(x=>x.id===skillId);return Boolean(u&&m&&skill&&castEquippedCore(u,m,skill));},
+  placeTower, canWalkStraight, upgradePerimeter, hurtPerimeter, rebuildPerimeter, perimeterHealth:()=>perimeterHealth(S.fences), renderUi, save, upgradeWarren, hireGarrison:(index,cls)=>hireGarrison(S.towers[index],cls),upgradeTower:index=>upgradeTower(S.towers[index]),
   beginTowerMove,relocateTower,canTowerSpot,upgradeForgeBuilding,upgradeResourceBuilding,useHallHeal,updateWorldLabels,quoteQuickSell:()=>quoteQuickSell(S.inventory,S.sellReserve,S.sellSelected),commitQuickSell:()=>{const q=commitQuickSell(S,S.sellReserve,S.sellSelected);if(q){save();renderUi();}return q;}, craftBatch:(id,n)=>{const pieces=craftBatch(S,id,n);save();renderUi();return pieces;},enhanceAll:cls=>{const r=enhanceAll(S,cls);refreshArmy();save();renderUi();return r;},refineGear:id=>{const r=refineGear(S,id);refreshArmy();save();renderUi();return r;}, craftGear:id=>{const item=craftGear(S,id);refreshArmy();save();renderUi();return item;},enhanceGear:id=>{const r=enhanceGear(S,id);refreshArmy();save();renderUi();return r;},dismantleGear:id=>{const n=dismantleGear(S,id);save();renderUi();return n;},autoEquipBuild:(cls,id)=>{const n=autoEquipBuild(S,cls,id);refreshArmy();save();renderUi();return n;} }; // dev hooks
 window.__warrenStep = // dev: fast-forward the simulation (balance tests)
   sec => { for (let t = 0; t < sec && !S.over; t += 1 / 30) { tick(1 / 30); combatFX.update(1 / 30); } renderUi(); };

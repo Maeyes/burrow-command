@@ -1,5 +1,6 @@
 // Burrow Command's single-screen Class Armory. Legacy RPG windows remain importable for regression tests.
 import {esc,itemLabel,gameIcon,renderItemDetailHtml,armoryGearIcon} from './warren-ui.js';
+import {dismantleFragments} from '../../src/simulation/equipmentV2.ts';
 import {renderBatchHtml} from './warren-extra-ui.js';
 import {CLASS_IDS,CLASS_FAMILIES,GEAR_SLOTS,AUTO_DISMANTLE_RARITIES,
  availableRecipes,buildFor,canCraft,equippedGearIds,gearSlot,gearScore,
@@ -30,8 +31,7 @@ function craftPanel(s,classes){
   gameIcon(id,'item','•','bc-material-icon')+esc(itemLabel(id))+' '+fmt(s.inventory[id])+'/'+fmt(n)+'</span>').join('');
  const options=AUTO_DISMANTLE_RARITIES.map((key,i)=>'<option value="'+key+'" '+(prefs.minRarity===key?'selected':'')+'>'+
   (i===0?'เก็บทั้งหมด':label(key)+' ขึ้นไป')+'</option>').join('');
- const pending=s.pendingCraft;
- return '<section class="bc-armory-work"><h3>คราฟต์ '+SLOTS[slot]+' ให้ '+esc(classes[cls].name)+'</h3>'+
+  return '<section class="bc-armory-work"><h3>คราฟต์ '+SLOTS[slot]+' ให้ '+esc(classes[cls].name)+'</h3>'+
   '<div class="bc-armory-recipes">'+(list||'<p class="bc-empty">ยังไม่มีสูตรที่ใช้ได้กับช่องนี้</p>')+'</div>'+
   (selected?'<div class="bc-armory-work-selected">'+img(selected.id)+'<div><b>'+esc(selected.name)+'</b>'+
   '<small>Tier '+selected.tier+' · '+fmt(r.gold)+' Gold / ชิ้น · Tier กำหนดโดยสูตร ไม่ใช่ Rarity</small>'+
@@ -45,32 +45,42 @@ function craftPanel(s,classes){
   '<label class="bc-auto-toggle"><input type="checkbox" data-auto-protect '+(prefs.protectOtherClasses?'checked':'')+
   '> ป้องกันชิ้นที่ Smart Recommendation แนะนำให้คลาสอื่น</label>'+
   '<p class="bc-help">ตั้งค่านี้จำแยกตามคลาส · ไอเทมล็อกและที่สวมใส่อยู่จะไม่ถูกย่อย · ไม่สวมของใหม่ให้อัตโนมัติ</p></fieldset>'+
-  (pending?'<section class="bc-batch-confirm bc-auto-confirm"><h3>ยืนยันกฎก่อนเริ่มคราฟต์</h3><p>'+
-   esc(itemLabel(pending.recipeId))+' ×'+pending.qty+' · '+esc(classes[pending.cls]?.name||pending.cls)+
-   ' · '+(pending.settings.enabled?'ย่อยต่ำกว่า '+label(pending.settings.minRarity):'เก็บทั้งหมด')+
-   (pending.settings.protectOtherClasses?' · ป้องกันคำแนะนำสำหรับคลาสอื่น':'')+
-   '</p><p>ยืนยันครั้งเดียว ระบบจะใช้กฎนี้กับ Batch นี้และรายงาน Stone Fragments ที่ได้จริง</p>'+
-   '<button class="bc-primary" data-auto-confirm>ยืนยันและเริ่มคราฟต์</button> <button data-auto-cancel>กลับไปแก้ไข</button></section>':'')+
   '<div class="bc-armory-primary"><button class="bc-primary" data-forge-craft="'+esc(selected?.id||'')+'" '+
-  (!selected||s.night||!canCraft(s,selected.id)||!!pending?'disabled':'')+'>⚒ คราฟต์ ×'+(s.batchQty||1)+
+  (!selected||s.night||!canCraft(s,selected.id)?'disabled':'')+'>⚒ คราฟต์ ×'+(s.batchQty||1)+
   (prefs.enabled?' · Auto Dismantle':'')+'</button></div></section>';
 }
-function inventoryPanel(s,classes){
- const cls=s.forgeClass,slot=s.armorySlot||'weapon',used=equippedGearIds(s);
+// Only current-class, current-slot and currently visible rarity items can be batch-salvaged.
+// The same predicate is used by the UI and by the click handler before the atomic transaction.
+export function visibleArmoryInventory(s){
+ const cls=s.forgeClass||'guard',slot=s.armorySlot||'weapon',used=equippedGearIds(s);
  const rarity=s.armoryInventoryRarity||'all';
- const eligible=s.gear.filter(p=>gearSlot(p.templateId)===slot&&
+ return s.gear.filter(p=>!used.has(p.id)&&gearSlot(p.templateId)===slot&&
   (slot!=='weapon'||EQUIPMENT_MASTER_V2[p.templateId]?.weaponFamily===CLASS_FAMILIES[cls])&&
   EQUIPMENT_MASTER_V2[p.templateId]?.tier<=unlockedTier(s.warren))
   .filter(p=>rarity==='all'||p.rarity===rarity)
   .sort((a,b)=>gearScore(b,cls)-gearScore(a,cls));
+}
+function inventoryPanel(s,classes){
+ const slot=s.armorySlot||'weapon',rarity=s.armoryInventoryRarity||'all',eligible=visibleArmoryInventory(s);
+ const selected=new Set(s.armoryInventorySelection||[]),chosen=eligible.filter(p=>!p.locked&&selected.has(p.id));
+ const selectable=eligible.filter(p=>!p.locked);
+ const fragmentPreview=chosen.reduce((n,p)=>n+dismantleFragments(p.rarity),0);
  const rarityFilters=['all',...AUTO_DISMANTLE_RARITIES].map(key=>
   '<button class="'+(rarity===key?'active':'')+'" data-armory-rarity="'+key+'">'+(key==='all'?'ทั้งหมด':label(key))+'</button>').join('');
  return '<section class="bc-armory-work"><h3>เลือก '+SLOTS[slot]+' จากคลัง</h3>'+
-  '<p class="bc-help">เลือกอุปกรณ์เพื่อดูรายละเอียดก่อนใส่ · ของที่สวมใส่ในคลาสอื่นจะแจ้งให้ทราบก่อนย้าย</p>'+
-  '<nav class="bc-batch-filters">'+rarityFilters+'</nav><div class="bc-inventory-grid">'+
+  '<p class="bc-help">คลังแสดงเฉพาะอุปกรณ์ที่ยังไม่ได้สวมใส่ · ของที่สวมอยู่ดูได้จากช่องอุปกรณ์ของแต่ละคลาส</p>'+
+  '<nav class="bc-batch-filters">'+rarityFilters+'</nav>'+
+  '<div class="bc-armory-salvage-bar"><span>เลือกย่อย '+chosen.length+' / '+selectable.length+' ชิ้น'+
+  (chosen.length?' · จะได้รับ '+fragmentPreview+' Stone Fragments':'')+'</span>'+
+  '<button data-armory-select-all '+(s.night||!selectable.length?'disabled':'')+'>'+
+  (selectable.length&&selectable.every(p=>selected.has(p.id))?'ยกเลิกทั้งหมด':'เลือกทั้งหมดที่ย่อยได้')+'</button>'+
+  '<button class="bc-armory-salvage-action" data-armory-dismantle '+(s.night||!chosen.length?'disabled':'')+'>♻ ย่อยที่เลือก ('+chosen.length+')</button></div>'+
+  '<div class="bc-inventory-grid">'+
   (eligible.map(p=>'<article class="bc-inventory-piece rarity-'+p.rarity+'">'+armoryGearIcon(p)+
-   '<b>'+esc(itemLabel(p.templateId))+'</b><small>'+label(p.rarity)+(used.has(p.id)?' · สวมอยู่':'')+'</small>'+
+   '<b>'+esc(itemLabel(p.templateId))+'</b><small>'+label(p.rarity)+'</small>'+
    '<button data-open-item="'+esc(p.id)+'">ดู / เลือกใส่</button>'+
+   '<label class="bc-armory-select-label"><input type="checkbox" data-armory-select="'+esc(p.id)+'" '+
+   (selected.has(p.id)?'checked':'')+(p.locked||s.night?' disabled':'')+'> เลือกย่อย</label>'+
    '<label><input type="checkbox" data-batch-lock="'+esc(p.id)+'" '+(p.locked?'checked':'')+
    (s.night?' disabled':'')+'> 🔒 ล็อก</label></article>').join('')||
    '<p class="bc-empty">ไม่มีอุปกรณ์ที่ตรงกับคลาส ช่อง และ Rarity นี้</p>')+'</div></section>';

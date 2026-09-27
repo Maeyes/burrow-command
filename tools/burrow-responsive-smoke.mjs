@@ -37,7 +37,7 @@ try{
   console.log('Baseline saved to '+dir);
  }else{
   const baseline=JSON.parse(fs.readFileSync(path.join(dir,'desktop-baseline.json')));
-  const core=['wrap','scene','top','side','shopbox','help','heroPanel','modalScrim'];
+  const core=['wrap','scene','top','shopbox','heroPanel','modalScrim']; // Help/side can intentionally collapse on desktop.
   for(const id of core)check('desktop '+id+' geometry unchanged',JSON.stringify(d.metrics[id])===JSON.stringify(baseline[id]),{before:baseline[id],after:d.metrics[id]});
   fs.writeFileSync(path.join(dir,'desktop-after.png'),d.screenshot);
   for(const [width,height] of [[360,800],[390,844]]){
@@ -54,6 +54,9 @@ try{
    await p.screenshot({path:path.join(dir,'mobile-'+width+'.png')});
    await p.locator('#mobileDock [data-mobile-open="village"]').click();
    check(width+' village drawer opens',await p.locator('body').evaluate(e=>e.dataset.mobileDrawer==='village'));
+   check(width+' village drawer has no duplicate class/Armory buttons',await p.locator('#side .bc-quick-actions').isHidden()&&
+     await p.locator('#mobileDock [data-mobile-open="skills"]').count()===1&&
+     await p.locator('#mobileDock [data-mobile-open="craft"]').count()===1);
    check(width+' reset remains accessible inside village drawer',await p.locator('#side #mobileReset').isVisible());
    await p.locator('#mobileDrawerScrim').click({position:{x:15,y:45}});
    check(width+' drawer scrim closes',await p.locator('#mobileDrawerScrim').isHidden());
@@ -62,8 +65,20 @@ try{
    await p.evaluate(()=>{__warren.gold=25000;__warrenDev.renderUi();});
    await p.locator('#shopbox [data-buy="scout"]').click();
    check(width+' recruit works through drawer',await p.evaluate(()=>__warren.units.some(u=>u.cls==='scout')));
-   await p.locator('#mobileDock [data-mobile-open="hero"]').click();
+   await p.locator('#mobileDock [data-mobile-open="skills"]').click();
+   check(width+' bunny icon opens two-choice ability modal',
+     await p.locator('#bunnyMenuPanel').isVisible()&&await p.locator('#bunnyMenuPanel .bc-bunny-menu button').count()===2);
+   await p.locator('#bunnyMenuPanel [data-open-mastery-menu]').click();
+   check(width+' bunny menu opens existing Mastery',await p.locator('#masteryPanel').isVisible());
+   await p.locator('#masteryPanel [data-modal-close]').first().click();
+   await p.locator('#mobileDock [data-mobile-open="skills"]').click();
+   await p.locator('#bunnyMenuPanel [data-open-core-menu]').click();
+   check(width+' bunny menu opens class Skill Core (Lv10 gate)',await p.locator('#skillCorePanel').isVisible()&&
+     /Warren Lv 10/.test(await p.locator('#skillCorePanel').innerText()));
+   await p.locator('#skillCorePanel [data-modal-close]').first().click();
+   await p.locator('#mobileDock [data-mobile-open="craft"]').click();
    check(width+' Armory bottom sheet visible',await p.locator('#heroPanel').isVisible());
+   check(width+' Armory does not duplicate the Bunny/Mastery menu',await p.locator('#heroPanel .bc-armory-toolbar [data-open-mastery]').isHidden());
    const sheet=await p.locator('#heroPanel').evaluate(e=>e.getBoundingClientRect().toJSON());
    check(width+' bottom sheet fits portrait',sheet.width<=width+1&&sheet.bottom<=height+1,sheet);
    await p.locator('#heroPanel [data-modal-close]').first().click();

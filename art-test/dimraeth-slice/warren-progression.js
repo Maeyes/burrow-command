@@ -8,6 +8,7 @@ import { masteryXpRequired, masteryContribution, masteryLevelMultiplier } from '
 import { WEAPON_MASTERY_MILESTONES } from '../../src/simulation/masteryMilestones.ts';
 import {perimeterBlueprint,perimeterTier,normalizeGateSelections} from './warren-perimeter.js';
 import {buildingLevel,forgeRarityRoll} from './warren-village-buildings.js';
+import {normalizeClassSkills} from './warren-class-cores.js';
 
 export { EQUIPMENT_MASTER_V2, CRAFT_RECIPES_V2, EQUIPMENT_RARITY_STAT_MULTIPLIER, WEAPON_MASTERY_MILESTONES };
 export const CLASS_FAMILIES=Object.freeze({guard:'swordShield',archer:'bow',scout:'dagger',brute:'hammer',axe:'axe',vanguard:'greatsword',mage:'staff'});
@@ -55,7 +56,7 @@ export function gearSlot(id){const t=EQUIPMENT_MASTER_V2[id];return !t?null:t.sl
 export function buildFor(s,cls){return s.builds[cls]?.[0]??null;}
 export function makeBuild(){return null;}
 export function classProgress(s,cls,slot){return s.progress?.[cls]?.[slot]??{enhance:0,refine:0};}
-export function equippedGearIds(s){return new Set(CLASS_IDS.flatMap(cls=>GEAR_SLOTS.map(slot=>buildFor(s,cls)?.gear[slot]).filter(Boolean)));}
+export function equippedGearIds(s){return new Set(CLASS_IDS.flatMap(cls=>(s.builds?.[cls]||[]).flatMap(b=>GEAR_SLOTS.map(slot=>b?.gear?.[slot]).filter(Boolean))));}
 export function equipBuildItem(s,cls,_buildId,slot,id){
  if(s.night)return false;
  const b=buildFor(s,cls),item=s.gear.find(i=>i.id===id),t=item&&EQUIPMENT_MASTER_V2[item.templateId];
@@ -116,7 +117,7 @@ export function migrateSave(raw){
  });
  return {v:3,gold:Math.max(0,Math.floor((raw.gold||0)+goldRefund)),warren:Math.max(1,Math.floor(raw.warren||1)),
   wave:Math.max(1,Math.min(5,Math.floor(raw.wave||1))),cleared:!!raw.cleared,day:Math.max(1,raw.day||1),
-  kills:Math.max(0,raw.kills||0),losses:Math.max(0,raw.losses||0),burrow:raw.burrow,inventory,gear,builds,progress,mastery,
+  kills:Math.max(0,raw.kills||0),losses:Math.max(0,raw.losses||0),burrow:raw.burrow,inventory,gear,builds,progress,mastery,classSkills:normalizeClassSkills(raw.classSkills),
   reserve,autoDismantle:normalizeAutoDismantleSettings(raw.autoDismantle),
   fortification:Math.max(0,Math.min(fortificationCap(Math.max(1,Math.floor(raw.warren||1))),Math.floor(raw.fortification||0))),
   lureDay:Math.max(0,Math.floor(raw.lureDay||0)),
@@ -132,8 +133,19 @@ export function migrateSave(raw){
   nextGearId:Math.max(raw.nextGearId||0,...gear.map(x=>parseInt(String(x.id).split('-').pop(),10)||0)),
   units,towers};
 }
-// Gold is a constrained reward: costs rise via mastery, crafting, garrisons and durable towers.
-export function scaledWarrenGold(amount,warren){return Math.max(1,Math.round(amount*(.13+Math.min(.18,(Math.max(1,warren)-1)*.014))));}
+// Burrow-only Gold rewards: flat per monster rank and its actual region.
+// +20% of the Forest I baseline per successive region (not compounding); no Warren-level multiplier.
+// Resolve by monster type so Frontier Lure still rewards the frontier region, not the current home region.
+export const BURROW_GOLD_BY_STAGE=Object.freeze({
+ forest1:Object.freeze({normal:5,elite:15,boss:50}),
+ forest2:Object.freeze({normal:6,elite:18,boss:60}),
+ desert1:Object.freeze({normal:7,elite:21,boss:70}),
+ desert2:Object.freeze({normal:8,elite:24,boss:80}),
+});
+export function burrowMonsterGold(type){
+ const monster=MONSTERS_V2[type];
+ return monster?(BURROW_GOLD_BY_STAGE[monster.mapId]?.[monster.rank]??0):0;
+}
 // Garrison kills bypass carrying (especially during daytime farming).
 export function shouldDepositLootDirectly(isNight,killer){return isNight||!killer||!!killer.isGarrison;}
 export function monsterLoot(type,rng=Math.random,dropMultiplier=1.25){
@@ -236,8 +248,15 @@ export function enhanceAll(s,cls){
  return {levels,gold:before-s.gold};
 }
 // Burrow Command balance only: keep the main Bunny World refinement rules unchanged.
-export const BURROW_REFINE_SUCCESS=Object.freeze(REFINE_SUCCESS.map((rate,level)=>level===0?1:Math.min(.95,rate*1.5)));
+// Exact main-game success rates. Only failed-attempt downgrade chance differs for Burrow.
+export const BURROW_REFINE_SUCCESS=Object.freeze([...REFINE_SUCCESS]);
 export const BURROW_REFINE_FAIL_DROP_CHANCE=.20;
+// Each attempt costs Gold as well as Astralite, including failed or protected attempts.
+// A single shared quote is authoritative for UI, affordability and the actual transaction.
+export function burrowRefineGoldCost(target,baseGoldCost=0){
+ if(!Number.isInteger(target)||target<1||target>15)throw new Error('invalid-refine-target');
+ return Math.ceil(60*Math.pow(target,1.5)+Math.max(0,Number(baseGoldCost)||0)*.15);
+}
 export function resolveBurrowRefinement(current,roll,protectedAttempt=false,dropRoll=0){
  if(!Number.isInteger(current)||current<0||current>=15)throw new Error('invalid-refine-level');
  const target=current+1,protection=protectedAttempt?protectionRequirement(target):null;
@@ -254,16 +273,16 @@ export function refineQuote(s,id){
  const current=classProgress(s,owner.cls,owner.slot).refine;
  if(current>=15)return null;
  const target=current+1;
- return {owner,target,rate:BURROW_REFINE_SUCCESS[current],astralite:astraliteCost(target),protectedRequirement:protectionRequirement(target)};
+ return {owner,target,rate:BURROW_REFINE_SUCCESS[current],astralite:astraliteCost(target),gold:burrowRefineGoldCost(target,EQUIPMENT_MASTER_V2[p.templateId]?.baseGoldCost),protectedRequirement:protectionRequirement(target)};
 }
 export function refineGear(s,id,rng=Math.random,protectedAttempt=false,dropRng=Math.random){
  if(s.night)return null;
- const quote=refineQuote(s,id);if(!quote||(s.inventory.astraliteStone||0)<quote.astralite)return null;
+ const quote=refineQuote(s,id);if(!quote||(s.inventory.astraliteStone||0)<quote.astralite||s.gold<quote.gold)return null;
  const protect=quote.protectedRequirement;if(protectedAttempt&&protect&&(s.inventory[protect.id]||0)<protect.qty)return null;
  const progress=classProgress(s,quote.owner.cls,quote.owner.slot),before=progress.refine;
  const result=resolveBurrowRefinement(before,rng(),protectedAttempt,dropRng());
- s.inventory.astraliteStone-=quote.astralite;if(protectedAttempt&&protect)s.inventory[protect.id]-=protect.qty;
- progress.refine=result.level;return {before,...result};
+ s.inventory.astraliteStone-=quote.astralite;s.gold-=quote.gold;if(protectedAttempt&&protect)s.inventory[protect.id]-=protect.qty;
+ progress.refine=result.level;return {before,...result,gold:quote.gold};
 }
 export function dismantleGear(s,id){
  if(s.night)return 0;
@@ -343,7 +362,7 @@ export function autoEquipBuild(s,cls){
  return n;
 }
 export function buildCombatBonus(s,cls,_buildId,bunnyLevel=1){
- const b=buildFor(s,cls),out={atk:0,maxHp:0,def:0},bonus={atk:0,def:0,hp:0};
+ const b=buildFor(s,cls),out={atk:0,maxHp:0,def:0,critBonus:0},bonus={atk:0,def:0,hp:0};
  if(!b)return out;
  for(const slot of GEAR_SLOTS){
   const p=s.gear.find(i=>i.id===b.gear[slot]);if(!p)continue;
@@ -352,10 +371,11 @@ export function buildCombatBonus(s,cls,_buildId,bunnyLevel=1){
   out.atk+=(t.baseCombat.atk||0)*mult+(t.baseCombat.matk||0)*mult+(cat==='offensive'?v.enhance*2:0);
   out.maxHp+=(t.baseCombat.maxHp||0)*mult;
   out.def+=(t.baseCombat.def||0)*mult+(cat==='defensive'?v.enhance:0);
+  out.critBonus+=(t.baseCombat.crit||0)*mult;
   if(cat==='offensive')bonus.atk+=v.refine*.005;
   else if(cat==='defensive'){bonus.def+=v.refine*.005;bonus.hp+=v.refine*.005;}
  }
- return {atk:out.atk*.22*(1+bonus.atk),maxHp:out.maxHp*.45*(1+bonus.hp),def:out.def*.4*(1+bonus.def)};
+ return {atk:out.atk*.22*(1+bonus.atk),maxHp:out.maxHp*.45*(1+bonus.hp),def:out.def*.4*(1+bonus.def),critBonus:out.critBonus};
 }
 export function availableRecipes(s,cls){return Object.values(EQUIPMENT_MASTER_V2).filter(t=>gearSlot(t.id)&&t.tier<=unlockedTier(s.warren)&&
  (gearSlot(t.id)!=='weapon'||t.weaponFamily===CLASS_FAMILIES[cls]));}

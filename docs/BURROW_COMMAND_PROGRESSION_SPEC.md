@@ -14,7 +14,7 @@ tougher waves + new items → every 10 warren levels a new land (theme).
   (with confirm).
 - **Losing a night is not game over.** When the hall hits 0 HP:
   - the night ends at once; towers that fell stay destroyed; all bunnies are downed;
-  - the hall is left at a low HP (e.g. 20%); 20% of banked gold is lost;
+  - the hall is left at 20% HP; banked Gold is preserved;
   - next dawn is a normal day: repair, farm, recruit, craft.
 - **The wave counter only advances on a win.** Next night the *same* wave comes back (same
   composition and strength). You face it better prepared.
