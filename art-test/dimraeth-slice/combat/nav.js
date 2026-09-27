@@ -74,11 +74,11 @@ const key = (gx, gy) => (gx + 4096) * 8192 + (gy + 4096);
  * reachable point instead). Returns null when there is nowhere to go.
  * `reach` lets the search stop once within that many world units of the goal (attack range).
  */
-export function findPath(sx, sy, gx, gy, { reach = 0 } = {}) {
+export function findPath(sx, sy, gx, gy, { reach = 0, maxExpansions = MAX_EXPANSIONS, skipStraightCheck = false } = {}) {
   const sz = runtimeWalkHeight(sx, sy);
   if (sz === null) return null;
   if (Math.hypot(gx - sx, gy - sy) <= Math.max(reach, 6)) return { path: [], complete: true };
-  if (canWalkStraight(sx, sy, gx, gy)) return { path: [{ x: gx, y: gy }], complete: true, length: Math.hypot(gx - sx, gy - sy) };
+  if (!skipStraightCheck && canWalkStraight(sx, sy, gx, gy)) return { path: [{ x: gx, y: gy }], complete: true, length: Math.hypot(gx - sx, gy - sy) };
 
   const s = { gx: Math.round(sx / G), gy: Math.round(sy / G) };
   const goalG = { gx: Math.round(gx / G), gy: Math.round(gy / G) };
@@ -99,7 +99,10 @@ export function findPath(sx, sy, gx, gy, { reach = 0 } = {}) {
   const open = new Heap(); open.push(heur(start) * 1.15, start);
   let best = start, bestH = heur(start), expansions = 0, found = null;
 
-  while (open.size && expansions < MAX_EXPANSIONS) {
+  // Callers controlling many autonomous agents can use a smaller per-search
+  // budget without restricting the full-resolution hero navigator.
+  const searchLimit = Math.max(64, Math.min(MAX_EXPANSIONS, Math.floor(maxExpansions)));
+  while (open.size && expansions < searchLimit) {
     const [, cur] = open.pop();
     if (cur.closed) continue;
     cur.closed = true; expansions++;

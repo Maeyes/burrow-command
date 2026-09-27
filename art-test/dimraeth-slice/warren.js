@@ -156,6 +156,11 @@ const DIRS = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west'
 const facingTo = (dx, dy) => { const vx = (dx - dy) / 2, vy = (dx + dy) / 4; return DIRS[Math.round(((Math.atan2(vx, -vy) * 180 / Math.PI + 360) % 360) / 45) % 8]; };
 const screenLeft = (dx, dy) => dx - dy < 0;
 
+// One capped A* plan per simulation step: an entire night wave must not
+// exhaust the browser's main thread trying to route through closed stone walls.
+let pathSearchBudget = 1;
+let insideSimulation = false, uiDirty = false, lastUiPaint = 0;
+const BURROW_PATH_EXPANSIONS = 1200;
 function moveToward(e, tx, ty, speed, dt, stop = 0) {
   const dGoal = Math.hypot(tx - e.x, ty - e.y);
   if (dGoal <= stop + .5) { e.moving = false; e.path = null; return true; }
@@ -165,9 +170,19 @@ function moveToward(e, tx, ty, speed, dt, stop = 0) {
   // A new nighttime threat overrides yesterday's farm route immediately; do not wait
   // for an existing A* replanning cooldown while a tower is being attacked.
   if (changedGoal || (e.replan <= 0 && ((e.stuck ?? 0) > .25 || !e.path))) {
-    e.replan = .7 + Math.random() * .5; e.goalP = { x: tx, y: ty };
-    if (canWalkStraight(e.x, e.y, tx, ty)) e.path = null;
-    else { const r = findPath(e.x, e.y, tx, ty, { reach: stop }); e.path = r?.path?.length ? r.path.slice() : null; }
+    if (pathSearchBudget > 0) {
+      pathSearchBudget--;
+      e.replan = .7 + Math.random() * .5; e.goalP = { x: tx, y: ty };
+      if (canWalkStraight(e.x, e.y, tx, ty)) e.path = null;
+      else {
+        const r = findPath(e.x, e.y, tx, ty, { reach: stop, maxExpansions: BURROW_PATH_EXPANSIONS, skipStraightCheck: true });
+        e.path = r?.path?.length ? r.path.slice() : null;
+      }
+    } else {
+      // Keep an existing route, or steer locally while waiting for a plan.
+      // A rejected plan must remain eligible next frame, not wait a full second.
+      e.replan = Math.min(e.replan, 0);
+    }
   }
   let wx = tx, wy = ty;
   if (e.path) { while (e.path.length && Math.hypot(e.path[0].x - e.x, e.path[0].y - e.y) < 14) e.path.shift(); if (e.path.length) { wx = e.path[0].x; wy = e.path[0].y; } else e.path = null; }
@@ -579,7 +594,7 @@ function castEquippedCore(u,target,skill){
  const damagedIds=new Set(result.events.filter(e=>e.type==='damageDealt'&&e.sourceId===player.id&&e.targetId!==player.id).map(e=>e.targetId));
  for(const [id,m] of result.enemyById){
   const resolved=result.world.monsters.get(id);if(!resolved||m.dead)continue;
-  m.hp=Math.max(0,resolved.hp);if(damagedIds.has(id))m.aggro=u;
+  m.hp=Math.max(0,resolved.hp);if(damagedIds.has(id)&&!u.isGarrison)m.aggro=u;
   if((resolved.position.x!==m.x-u.x||resolved.position.y!==m.y-u.y)&&!m.boss){
    const x=u.x+resolved.position.x,y=u.y+resolved.position.y;
    if(standable(x,y)&&canWalkStraight(m.x,m.y,x,y)) {m.x=x;m.y=y;}
@@ -633,7 +648,7 @@ function castMasteryOnBasicHit(u,target){
  for(const [id,m] of result.enemyById){
   const resolved=result.world.monsters.get(id);if(!resolved||m.dead)continue;
   m.hp=Math.max(0,resolved.hp);
-  if(damagedIds.has(id))m.aggro=u;
+  if(damagedIds.has(id)&&!u.isGarrison)m.aggro=u;
   if((resolved.position.x!==m.x-u.x||resolved.position.y!==m.y-u.y)&&!m.boss){
    const x=u.x+resolved.position.x,y=u.y+resolved.position.y;
    if(standable(x,y)&&canWalkStraight(m.x,m.y,x,y)){m.x=x;m.y=y;}
@@ -703,6 +718,13 @@ function strike(u, target) {
   });
 }
 function hurtUnit(u, dmg, from) {
+  // Tower garrisons do not have a carrier bag or participate in field-unit
+  // knockdowns. Old/queued aggro targeting a garrison must damage its tower.
+  if (u.isGarrison) {
+    const tower=S.towers.find(t=>t.garrison===u);
+    if(tower)hurtTower(tower,dmg*.7);
+    return;
+  }
   if (u.down) return;
   let dealt=Math.max(1,Math.round(dmg*90/(90+(u.def||0))));
   if((u.coreBarrierUntil||0)>S.time&&(u.coreBarrierHp||0)>0){
@@ -719,7 +741,7 @@ function hurtUnit(u, dmg, from) {
   if (u.hp <= 0) {
     u.hp = 0; u.down = true; u.moving = false;
     // A fallen carrier loses half its loot; survivors must still deliver theirs to the warren.
-    u.carry.gold=Math.floor(u.carry.gold/2);for(const k in u.carry.items)u.carry.items[k]=Math.floor(u.carry.items[k]/2);
+    if(u.carry){u.carry.gold=Math.floor(u.carry.gold/2);for(const k in u.carry.items)u.carry.items[k]=Math.floor(u.carry.items[k]/2);}
     toast(`${u.name} ล้มแล้ว! ฟื้นอัตโนมัติตอนเช้า`); combatSFX.playDeath({ volume: .5 }); renderUi();
   }
 }
@@ -780,6 +802,9 @@ function updateUnit(u, dt, i) {
 function updateMonster(m, dt) {
   if (m.dead) return;
   m.cd -= dt; m.lx = m.ly = 0;
+  // Garrison spells should draw attacks onto their tower, not its bagless
+  // stationary occupant. Discard any such aggro retained by an older tick.
+  if(m.aggro?.isGarrison)m.aggro=null;
   let target = m.aggro && !m.aggro.down && dist(m, m.aggro) < 420 ? m.aggro : nearestUnit(m, m.night ? 180 : 150);
   if (!m.night && !target && dist(m, m.home) > 60) { moveToward(m, m.home.x, m.home.y, m.speed * .6, dt); m.left = screenLeft(m.home.x - m.x, m.home.y - m.y); return; }
   if (!m.night && target && dist(target, m.home) > 480) { m.aggro = null; target = null; }
@@ -969,9 +994,11 @@ addEventListener('beforeunload', () => { if (!S.night && !S.resetting) save(); }
 
 function tick(dt) {
   if (S.over) return;
+  pathSearchBudget = 1;
   // Let players manage the forge, inventory and hero builds without losing precious daylight.
   // Nighttime combat still advances if they inspect a panel, but changes remain locked.
   if (!S.night && (S.modal || S.itemDetailId || mobileDrawer)) return;
+  insideSimulation = true;
   dt *= S.speed; S.clock += dt; S.time += dt;
   if (S.events.length) { const due = S.events.filter(e => e.at <= S.time); S.events = S.events.filter(e => e.at > S.time); for (const e of due) e.fn(); }
   if (!S.night) {
@@ -999,6 +1026,7 @@ function tick(dt) {
   for (const m of S.monsters) updateMonster(m, dt);
   separate(S.units, 32); separate(S.monsters.filter(m => !m.dead), 30);
   S.monsters = S.monsters.filter(m => !m.dead || performance.now() - (m.deadAt ??= performance.now()) < 50);
+  insideSimulation = false;
 }
 
 // ---------- camera: WASD / arrows / drag, the runtime player is an invisible camera rig ----------
@@ -1117,6 +1145,10 @@ for(const target of document.querySelectorAll('[data-ui-icon]'))target.innerHTML
 function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => el.classList.remove('on'), 2200); }
 function banner(title, sub) { const el = $('banner'); el.innerHTML = `<b>${title}</b><span>${sub}</span>`; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); }
 function renderUi() {
+  // AoE kills and simultaneous raider wall hits can request dozens of identical
+  // UI rebuilds in one frame. Only paint once after that simulation batch.
+  if (insideSimulation) { uiDirty = true; return; }
+  uiDirty = false; lastUiPaint = performance.now();
   $('gold').textContent=S.gold;
   $('materials').textContent=matCount();
   $('burrow').style.width=`${100*S.burrow/hallMax()}%`;
@@ -1203,13 +1235,17 @@ function renderUi() {
 }
 function syncClock() {
   const total = S.night ? NIGHT_S : DAY_S, left = Math.max(0, Math.ceil(total - S.clock));
-  $('phase').textContent = S.night ? `🌙 คืนที่ ${S.day}` : `☀️ วันที่ ${S.day}`;
-  $('timer').textContent = S.night ? `เหลือมอน ${S.queue.length + S.monsters.filter(m => m.night && !m.dead).length}` : `ค่ำใน ${left}s`;
+  const phase=S.night ? `🌙 คืนที่ ${S.day}` : `☀️ วันที่ ${S.day}`;
+  const timer=S.night ? `เหลือมอน ${S.queue.length + S.monsters.filter(m => m.night && !m.dead).length}` : `ค่ำใน ${left}s`;
+  if($('phase').textContent!==phase)$('phase').textContent=phase;
+  if($('timer').textContent!==timer)$('timer').textContent=timer;
   const liveGold=String(Math.floor(S.gold)),liveMats=String(matCount());
   if($('gold').textContent!==liveGold)$('gold').textContent=liveGold;
   if($('materials').textContent!==liveMats)$('materials').textContent=liveMats;
-  $('wave').textContent = `🏠 Lv ${S.warren} · เวฟ ${S.warren}-${S.cleared ? `${WAVES_PER_LEVEL} ✓` : S.wave}`;
-  $('clockbar').style.width = `${100 * Math.min(1, S.clock / total)}%`; $('clockbar').className = S.night ? 'night' : '';
+  const wave=`🏠 Lv ${S.warren} · เวฟ ${S.warren}-${S.cleared ? `${WAVES_PER_LEVEL} ✓` : S.wave}`;
+  if($('wave').textContent!==wave)$('wave').textContent=wave;
+  const bar=$('clockbar');bar.style.width=`${100*Math.min(1,S.clock/total)}%`;
+  const mode=S.night?'night':'';if(bar.className!==mode)bar.className=mode;
 }
 document.body.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
@@ -1509,12 +1545,17 @@ function drawBuildRing(g) { // the build radius as an iso ellipse around the hal
   g.save(); g.setLineDash([8, 6]); g.strokeStyle = 'rgba(255,214,90,.85)'; g.lineWidth = 2; g.beginPath(); g.ellipse(c.x, c.y, rx, rx / 2, 0, 0, Math.PI * 2); g.stroke();
   g.fillStyle = 'rgba(255,214,90,.07)'; g.fill(); g.restore();
 }
-let skillFx = null, floaters = null, edgeLayer = null;
-function drawEdgeArrows() {
+let skillFx = null, floaters = null, edgeLayer = null, edgeBounds = null;
+function drawEdgeArrows(viewport) {
   if (!edgeLayer) { edgeLayer = document.createElement('canvas'); edgeLayer.style.cssText = 'position:absolute;pointer-events:none;z-index:6;background:transparent!important'; canvas.after(edgeLayer); }
-  const L = edgeLayer, r = canvas.getBoundingClientRect(), pr = canvas.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
+  const L = edgeLayer, r = viewport?.rect ?? canvas.getBoundingClientRect();
+  const pr = viewport?.parent ?? canvas.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
   if (L.width !== canvas.width || L.height !== canvas.height) { L.width = canvas.width; L.height = canvas.height; }
-  Object.assign(L.style, { left: `${r.left - pr.left}px`, top: `${r.top - pr.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+  const next = [r.left - pr.left, r.top - pr.top, r.width, r.height];
+  if (!edgeBounds || next.some((value, i) => value !== edgeBounds[i])) {
+    [L.style.left, L.style.top, L.style.width, L.style.height] = next.map(value => `${value}px`);
+    edgeBounds = next;
+  }
   const g = L.getContext('2d'), W = L.width, H = L.height, pad = 26;
   g.clearRect(0, 0, W, H);
   // The former passive Healing Lodge aura was removed; Heal now belongs to the Warren.
@@ -1564,7 +1605,7 @@ function drawEdgeArrows() {
 }
 let labelTowerCount=-1;
 const WORLD_NAMES={hall:'🏠 โพรงกระต่าย',blacksmith:'⚒ โรงตีเหล็ก',resource:'📦 โรงผลิตทรัพยากร',sell:'🛒 รถเข็น · Quick Sell'};
-function updateWorldLabels(){
+function updateWorldLabels(viewport){
  // During placement all labels remain readable but cannot steal taps/clicks from the map.
  worldLabels.classList.toggle('placement-mode',S.building||S.movingTower>=0);
  if(labelTowerCount!==S.towers.length){
@@ -1579,7 +1620,7 @@ function updateWorldLabels(){
    b.dataset.worldTower=String(i);b.setAttribute('aria-label','เปิดรายละเอียดป้อมธนู '+(i+1));worldLabels.append(b);
   });
  }
- const rect=canvas.getBoundingClientRect(),wrap=document.getElementById('wrap').getBoundingClientRect();
+ const rect=viewport?.rect??canvas.getBoundingClientRect(),wrap=viewport?.parent??document.getElementById('wrap').getBoundingClientRect();
  const scaleX=rect.width/canvas.width,scaleY=rect.height/canvas.height;
  const staticTargets={hall:{p:CENTER,y:120,name:WORLD_NAMES.hall+' Lv '+S.warren},
   blacksmith:{p:FORGE_POS,y:86,name:WORLD_NAMES.blacksmith+' Lv '+S.forgeLevel},
@@ -1594,7 +1635,11 @@ function updateWorldLabels(){
   const x=rect.left-wrap.left+p.x*scaleX,y=rect.top-wrap.top+(p.y-target.y)*scaleY;
   const visible=x>55&&x<wrap.width-55&&y>30&&y<wrap.height-20;
   b.style.display=visible?'flex':'none';
-  if(visible){b.style.left=x+'px';b.style.top=y+'px';}
+  if(visible){
+   const left=x+'px',top=y+'px';
+   if(b.style.left!==left)b.style.left=left;
+   if(b.style.top!==top)b.style.top=top;
+  }
  }
 }
 
@@ -1665,7 +1710,11 @@ setRuntimeActorUpdater(({ player }) => {
   setRuntimePlayerControl(true); moveCamera(dt); player.x = cam.x; player.y = cam.y;
   tick(dt); combatFX.update(dt * S.speed);
   setRuntimeActors([...S.units.map(u => u.actor ??= unitActor(u)), ...S.monsters.filter(m => !m.dead).map(m => m.actor), ...S.towers.map(t => t.actor), hallActor, ...combatFX.getRuntimeActors()]);
-  skillFx?.update(dt); skillFx?.draw(); floaters?.update(dt); floaters?.draw(); drawEdgeArrows();updateWorldLabels(); syncClock();
+  // One layout snapshot for all overlays avoids repeated forced reflow at high mob counts.
+  const viewport={rect:canvas.getBoundingClientRect(),parent:worldLabels.parentElement.getBoundingClientRect()};
+  skillFx?.update(dt); skillFx?.draw(viewport); floaters?.update(dt); floaters?.draw(viewport);
+  drawEdgeArrows(viewport);updateWorldLabels(viewport);syncClock();
+  if(uiDirty&&now-lastUiPaint>=120)renderUi();
 });
 skillFx = createSkillFx(canvas); floaters = createFloaters(canvas);
 const resumed = load();

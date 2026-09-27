@@ -313,7 +313,18 @@ function drawObject(o, psx, psy, afterPlayer) {
     const actorScale=o.visualScale??1;
     if(o.terrainOcclusion){
       const renderImg=scaledRuntimeSprite(img,actorScale),ox=o.ox??Math.round(img.width/2),oy=o.oy??img.height,dox=Math.round(ox*actorScale),doy=Math.round(oy*actorScale);
-      const masked=occluded(renderImg,dox,doy,o.x,o.y,z,o._occlusionCanvas);if(masked)o._occlusionCanvas=masked;
+      // An approved hit/death FX often holds the same sprite and position for
+      // several render frames. Reuse both positive and negative terrain-occlusion
+      // checks; otherwise crowded AoE bursts rescan every sprite pixel per frame.
+      const previous=o.fx?o._occlusionMemo:null;
+      let masked;
+      if(previous&&previous.img===renderImg&&previous.x===o.x&&previous.y===o.y&&previous.z===z&&previous.dox===dox&&previous.doy===doy){
+        masked=previous.masked;
+      }else{
+        masked=occluded(renderImg,dox,doy,o.x,o.y,z,o._occlusionCanvas);
+        if(o.fx)o._occlusionMemo={img:renderImg,x:o.x,y:o.y,z,dox,doy,masked};
+      }
+      if(masked)o._occlusionCanvas=masked;
       ctx.imageSmoothingEnabled=false;ctx.drawImage(masked??renderImg,Math.round(sx-dox),Math.round(sy-doy));
     }else{
       const ox=o.ox??Math.round(img.width/2),oy=o.oy??img.height,dw=Math.round(img.width*actorScale),dh=Math.round(img.height*actorScale),dox=Math.round(ox*actorScale),doy=Math.round(oy*actorScale);
@@ -733,10 +744,17 @@ function frame(now) {
     if (sx < -360 || sx > W + 360 || sy < -80 || sy > H + 420) continue;
     vis.push(o);
   }
+  // Off-camera raiders/FX still simulate, but need not be depth-sorted or painted.
+  // Expand the bounds for mobile pinch zoom (the source scene remains native 16:9).
+  const left=W/2-W/(2*viewZoom)-400,right=W/2+W/(2*viewZoom)+400;
+  const top=H/2-H/(2*viewZoom)-400,bottom=H/2+H/(2*viewZoom)+400;
   for(const actor of actors){
     if(actor.hidden||actor.dead)continue;
     const z=WS.terrain.walkHeight(actor.x,actor.y);if(z===null)continue;
-    actor.z=z+(actor.zOffset??0);vis.push(actor);
+    actor.z=z+(actor.zOffset??0);
+    const [ax,ay]=toScreen(actor.x,actor.y,actor.z);
+    if(ax<left||ax>right||ay<top||ay>bottom)continue;
+    vis.push(actor);
   }
   vis.push(player);
   vis.sort(compare);

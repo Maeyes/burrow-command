@@ -89,6 +89,10 @@ export function createSkillFx(sceneCanvas, { beforeEl = null } = {}) {
   const items = [];
   const parts = [];   // code particles: world x/y, height h above ground, velocities in world units/s
   let statusSource = null;
+  let lastBounds = null, wasDrawn = false;
+  const MAX_FX = 96, MAX_PARTICLES = 440;
+  const trimFx = () => { if (items.length > MAX_FX) items.splice(0, items.length - MAX_FX); };
+  const trimParticles = () => { if (parts.length > MAX_PARTICLES) parts.splice(0, parts.length - MAX_PARTICLES); };
   const zAt = (x, y) => runtimeWalkHeight(x, y) ?? 0;
   const proj = (x, y) => projectRuntimePoint(x, y, zAt(x, y));
   // screen pixels per world unit at a spot (the iso projection squashes y by half)
@@ -96,10 +100,15 @@ export function createSkillFx(sceneCanvas, { beforeEl = null } = {}) {
   // size. A world circle of radius r is an iso ellipse r*a*√2 wide, where a = screen px per world x.
   const pxPerUnit = (x, y) => { const z = zAt(x, y), a = projectRuntimePoint(x, y, z), b = projectRuntimePoint(x + 10, y, z); return Math.abs(b.x - a.x) / 10 * Math.SQRT2; };
 
-  function fit() {
+  function fit(viewport) {
     if (layer.width !== sceneCanvas.width || layer.height !== sceneCanvas.height) { layer.width = sceneCanvas.width; layer.height = sceneCanvas.height; }
-    const r = sceneCanvas.getBoundingClientRect(), pr = sceneCanvas.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
-    Object.assign(layer.style, { left: `${r.left - pr.left}px`, top: `${r.top - pr.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+    const r = viewport?.rect ?? sceneCanvas.getBoundingClientRect();
+    const pr = viewport?.parent ?? sceneCanvas.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
+    const next = [r.left - pr.left, r.top - pr.top, r.width, r.height];
+    if (!lastBounds || next.some((value, i) => value !== lastBounds[i])) {
+      [layer.style.left, layer.style.top, layer.style.width, layer.style.height] = next.map(value => `${value}px`);
+      lastBounds = next;
+    }
   }
 
   const sheetId = id => FX_SPECS[id]?.sheet ?? id;
@@ -138,7 +147,7 @@ export function createSkillFx(sceneCanvas, { beforeEl = null } = {}) {
       load(id);
       const size = spec.size ?? (radius ? radius * 2.1 : 110);
       const item = { id, spec, from: from && { ...from }, to: to && { ...to }, follow, size, age: 0, life: spec.ms / 1000, color };
-      items.push(item); return item;
+      items.push(item); trimFx(); return item;
     },
     stop(item) { const i = items.indexOf(item); if (i >= 0) items.splice(i, 1); },
 
@@ -154,6 +163,7 @@ export function createSkillFx(sceneCanvas, { beforeEl = null } = {}) {
       const cg = c.getContext('2d'); cg.shadowColor = '#ff5fae'; cg.shadowBlur = 10;
       cg.drawImage(sil, 8, 8); cg.drawImage(sil, 8, 8);
       items.push({ id: '__ghost', ghost: c, flipX: visual.flipX, footY: (visual.footY ?? h) + 8, x, y, scale, age: 0, life });
+      trimFx();
     },
 
 
@@ -163,6 +173,7 @@ export function createSkillFx(sceneCanvas, { beforeEl = null } = {}) {
         const a = Math.random() * Math.PI * 2, v = speed * (.4 + Math.random() * .6);
         parts.push({ x, y, h, vx: Math.cos(a) * v, vy: Math.sin(a) * v, vh: up * (.5 + Math.random()), g: gravity, age: 0, life: life * (.7 + Math.random() * .5), size, color: color2 && i % 2 ? color2 : color });
       }
+      trimParticles();
     },
     /** Rising column of sparkles (level up / heal). */
     pillar(x, y, { color = '#ffe27a', count = 26, life = 1.1 } = {}) {
@@ -170,12 +181,13 @@ export function createSkillFx(sceneCanvas, { beforeEl = null } = {}) {
         const a = Math.random() * Math.PI * 2, r = 6 + Math.random() * 22;
         parts.push({ x: x + Math.cos(a) * r, y: y + Math.sin(a) * r, h: Math.random() * 10, vx: 0, vy: 0, vh: 50 + Math.random() * 90, g: -10, age: -Math.random() * .4, life, size: 2 + (i % 3), color, twinkle: true });
       }
-      items.push({ id: '__ring', x, y, radius: 34, color, age: 0, life: .7, solid: true });
+      trimParticles();
+      items.push({ id: '__ring', x, y, radius: 34, color, age: 0, life: .7, solid: true }); trimFx();
     },
     /** Status overlays are drawn every frame from this provider: () => [{x,y,slow,stun,armorBreak}]. */
     setStatusSource(fn) { statusSource = fn; },
     /** Ground telegraph ring under an area skill's target spot. */
-    ring(x, y, radius, color = '#ffd27a', life = .45) { items.push({ id: '__ring', x, y, radius, color, age: 0, life }); },
+    ring(x, y, radius, color = '#ffd27a', life = .45) { items.push({ id: '__ring', x, y, radius, color, age: 0, life }); trimFx(); },
 
     update(dt) {
       for (let i = parts.length - 1; i >= 0; i--) { const q = parts[i]; q.age += dt; if (q.age < 0) continue; if (q.age >= q.life) { parts.splice(i, 1); continue; }
@@ -190,9 +202,12 @@ export function createSkillFx(sceneCanvas, { beforeEl = null } = {}) {
       }
     },
 
-    draw() {
-      fit();
+    draw(viewport) {
+      if (!items.length && !parts.length && !statusSource && !wasDrawn) return;
+      fit(viewport);
       g.clearRect(0, 0, layer.width, layer.height);
+      wasDrawn = Boolean(items.length || parts.length || statusSource);
+      if (!wasDrawn) return;
       g.imageSmoothingEnabled = false;
       for (const it of items) {
         const t = Math.min(.999, it.age / it.life);

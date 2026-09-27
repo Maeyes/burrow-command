@@ -14,18 +14,28 @@ export function createFloaters(sceneCanvas) {
   sceneCanvas.after(layer);
   const g = layer.getContext('2d');
   const items = [];
+  // Visual-only budget: an AoE kill burst must not queue unlimited canvas text.
+  const MAX_FLOATERS = 160;
+  const trim = () => { if (items.length > MAX_FLOATERS) items.splice(0, items.length - MAX_FLOATERS); };
+  let lastBounds = null, wasDrawn = false;
   const zAt = (x, y) => runtimeWalkHeight(x, y) ?? 0;
 
-  function fit() {
+  function fit(viewport) {
     if (layer.width !== sceneCanvas.width || layer.height !== sceneCanvas.height) { layer.width = sceneCanvas.width; layer.height = sceneCanvas.height; }
-    const r = sceneCanvas.getBoundingClientRect(), pr = sceneCanvas.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
-    Object.assign(layer.style, { left: `${r.left - pr.left}px`, top: `${r.top - pr.top}px`, width: `${r.width}px`, height: `${r.height}px` });
+    const r = viewport?.rect ?? sceneCanvas.getBoundingClientRect();
+    const pr = viewport?.parent ?? sceneCanvas.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
+    const next = [r.left - pr.left, r.top - pr.top, r.width, r.height];
+    if (!lastBounds || next.some((value, i) => value !== lastBounds[i])) {
+      [layer.style.left, layer.style.top, layer.style.width, layer.style.height] = next.map(value => `${value}px`);
+      lastBounds = next;
+    }
   }
 
   return {
     /** A number or short label over a world position. */
     text(x, y, text, { color = '#ffffff', size = 15, rise = 26, life = 1.2, lift = 24, dx = 0 } = {}) {
       items.push({ kind: 'text', x, y, text: String(text), color, size, rise, life, lift, dx, age: 0 });
+      trim();
     },
     /** Loot burst from a defeated monster: one sparkle per item plus a name tag. */
     loot(x, y, drops) {
@@ -34,11 +44,15 @@ export function createFloaters(sceneCanvas) {
         items.push({ kind: 'spark', x, y, tier, vx: Math.cos(a) * 26, vy: Math.sin(a) * 18 - 22, age: 0, delay: .25 + i * .06, life: 1.1 });
         items.push({ kind: 'text', x, y, text: label, color: LOOT_COLORS[tier], size: 12, rise: 30, life: 1.8, lift: 52 + i * 14, dx: 0, age: -(.25 + i * .06) });
       });
+      trim();
     },
     update(dt) { for (let i = items.length - 1; i >= 0; i--) { items[i].age += dt; if (items[i].age >= items[i].life) items.splice(i, 1); } },
-    draw() {
-      fit();
+    draw(viewport) {
+      if (!items.length && !wasDrawn) return;
+      fit(viewport);
       g.clearRect(0, 0, layer.width, layer.height);
+      wasDrawn = items.length > 0;
+      if (!wasDrawn) return;
       g.textAlign = 'center';
       for (const f of items) {
         if (f.age < 0) continue;
