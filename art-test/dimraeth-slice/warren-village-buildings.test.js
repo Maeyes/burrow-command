@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {NPC_COMMON_PRICES,quoteQuickSell,commitQuickSell} from './warren-quick-sell.js';
-import {forgeRarityRoll,applyMonsterResourceBonus,castWarrenHeal,resourceBonusRate} from './warren-village-buildings.js';
+import {forgeRarityRoll,applyMonsterResourceBonus,castWarrenHeal,resourceBonusRate,buildingLevelCap} from './warren-village-buildings.js';
 import {migrateSave,defaultBuilds} from './warren-progression.js';
 describe('Local NPC Quick Sell',()=>{
  it('sells only opted-in common excess while retaining a per-material reserve',()=>{
@@ -34,6 +34,9 @@ describe('Local NPC Quick Sell',()=>{
  });
 });
 describe('Village building functions',()=>{
+ it('unlocks building levels gradually with Warren progression',()=>{
+  expect([1,4,5,9,10,14,15,19,20,25].map(buildingLevelCap)).toEqual([1,1,3,3,5,5,8,8,10,10]);
+ });
  it('blacksmith upgrades bias future rarity rolls toward the upper end without a guaranteed top rarity',()=>{
   expect(forgeRarityRoll(.5,1)).toBe(.5);
   expect(forgeRarityRoll(.5,2)).toBeGreaterThan(.5);
@@ -41,7 +44,7 @@ describe('Village building functions',()=>{
   expect(forgeRarityRoll(0,3)).toBe(0);
  });
  it('resource workshop boosts actual monster Gold and common drops by one percent per level',()=>{
-  expect([1,2,3].map(resourceBonusRate)).toEqual([.01,.02,.03]);
+  expect([1,2,3,10].map(resourceBonusRate)).toEqual([.01,.02,.03,.1]);
   for(const level of [1,2,3]){
    const state={gold:0,inventory:{livingMoss:0},resourceLevel:level,resourceGoldBank:0,resourceMatBank:0};
    let totalGold=0,totalMoss=0;

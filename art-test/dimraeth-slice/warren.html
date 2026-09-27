@@ -63,7 +63,8 @@
   #squad .rename{padding:0 3px;font-size:12px;background:transparent;border:0}
   #squad small{font-size:9px}#squad .guard{border-color:#6c9bd6;background:#1f2a3a}#squad .down{border-color:#a04848;background:#3a1f1f}
   .row{display:flex;gap:6px}.row button{flex:1}
-  #help{left:10px;top:10px;padding:8px 10px;max-width:260px;font-size:11px;color:var(--dim)}#help b{color:var(--ink)}
+  #help{left:10px;top:10px;padding:6px;display:flex;gap:6px;max-width:none;font-size:11px;color:var(--dim);z-index:29}
+  #help button{min-height:34px;padding:6px 9px;white-space:nowrap}
   #banner{position:fixed;left:50%;top:32%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;opacity:0;z-index:30}
   #banner b{display:block;font:800 44px Georgia,serif;color:#fff1c8;text-shadow:0 3px 0 #3a2616,0 0 30px rgba(255,180,90,.6)}#banner span{color:var(--ink);text-shadow:0 2px 4px #000}
   #banner.on{animation:bn 3.2s ease forwards}@keyframes bn{0%{opacity:0;transform:translate(-50%,-40%)}12%,70%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0}}
@@ -376,6 +377,44 @@
   .bc-armory-work-selected>div{min-width:0;flex:1}
   .bc-armory-work-selected b{font-size:15px;color:#ffdeb0}
   .bc-armory-work-selected small{display:block;color:#b5ceac;font-size:11px;margin:5px 0}
+  .bc-craft-preview{background:linear-gradient(135deg,#17251f,#24382b);border:1px solid #607b56;border-radius:11px;padding:14px;margin:0 0 12px;min-width:0}
+  .bc-craft-preview-heading{display:flex;align-items:center;gap:12px;min-width:0}
+  .bc-craft-preview-heading>div{min-width:0;flex:1}
+  .bc-craft-preview-art{width:76px;height:76px;object-fit:contain;image-rendering:pixelated;flex-shrink:0}
+  .bc-craft-eyebrow{font-size:10px;letter-spacing:.04em;color:#a5cf9f;display:block;margin-bottom:4px}
+  .bc-craft-preview h4{font-size:18px;line-height:1.3;margin:0 0 9px;color:#ffe5ad;overflow-wrap:anywhere}
+  .bc-craft-preview h5{font-size:12px;color:#ffe0a1;margin:15px 0 8px}
+  .bc-craft-chips{display:flex;flex-wrap:wrap;gap:5px}
+  .bc-craft-chips span{font-size:10px;color:#e2edcb;background:#304332;border:1px solid #6c855c;border-radius:5px;padding:4px 7px}
+  .bc-craft-stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(94px,1fr));gap:7px}
+  .bc-craft-stat{background:#304534;border:1px solid #62835c;border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+  .bc-craft-stat small{font-size:10px;color:#b9d6b6}
+  .bc-craft-stat strong{font-size:20px;line-height:1.25;color:#ffe3a2;font-variant-numeric:tabular-nums}
+  .bc-craft-note{font-size:11px;color:#bbd1b8;line-height:1.5;margin:10px 0}
+  .bc-craft-table-wrap{width:100%;max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+  .bc-craft-compare,.bc-craft-rarity-table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums;min-width:320px}
+  .bc-craft-compare th,.bc-craft-compare td,.bc-craft-rarity-table th,.bc-craft-rarity-table td{padding:7px;text-align:left;border-bottom:1px solid #456149;white-space:nowrap}
+  .bc-craft-compare thead th,.bc-craft-rarity-table thead th{font-size:10px;color:#c7dab9;background:#233629}
+  .bc-craft-compare tbody th,.bc-craft-rarity-table tbody th{font-weight:600;color:#f4dfb4}
+  .bc-craft-compare .gain{color:#92ef9c}.bc-craft-compare .loss{color:#ffaaa0}.bc-craft-compare .same{color:#c3d0be}
+  .bc-craft-rarity-details{margin-top:12px;border:1px solid #526f4d;border-radius:8px;background:#1b2d22;padding:9px}
+  .bc-craft-rarity-details summary{font-size:12px;color:#f1d9a4;cursor:pointer;line-height:1.4;padding:3px}
+  .bc-craft-rarity-details[open] summary{margin-bottom:10px}
+  .bc-craft-rarity{font-size:11px;padding:3px 5px;border:1px solid #698561;border-radius:4px}
+  .bc-craft-rarity-table td:nth-child(3){white-space:normal;min-width:150px;line-height:1.5}
+  .bc-craft-cost{background:#19291f;border:1px solid #476c4d;border-radius:8px;padding:11px;margin-bottom:15px}
+  .bc-craft-cost>strong{display:block;font-size:12px;color:#ffe0a1;margin-bottom:8px}
+  .bc-craft-capacity{display:block;font-size:11px;color:#c3d9ad;margin-top:8px;line-height:1.5}
+  .bc-craft-materials span{padding:5px 7px;font-size:11px}
+  @media(max-width:760px){
+    .bc-craft-preview{padding:10px}
+    .bc-craft-preview-art{width:62px;height:62px}
+    .bc-craft-preview h4{font-size:15px}
+    .bc-craft-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .bc-craft-stat strong{font-size:18px}
+    .bc-craft-compare,.bc-craft-rarity-table{font-size:10px}
+    .bc-craft-compare th,.bc-craft-compare td,.bc-craft-rarity-table th,.bc-craft-rarity-table td{padding:6px}
+  }
   .bc-armory-qty strong{font-size:12px}
   .bc-auto-settings{border:1px solid #6a7952;border-radius:9px;padding:12px;margin-top:12px;background:#233627;display:grid;gap:12px}
   .bc-auto-settings legend{font-weight:700;color:#ffe0a0;padding:0 6px}
@@ -383,7 +422,8 @@
   .bc-auto-select{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .bc-auto-select select{font:inherit;background:#19271d;color:#fff0cc;border:1px solid #8da16b;border-radius:6px;padding:8px;min-width:175px}
   .bc-auto-settings input{accent-color:#e7bf6f}
-  .bc-armory-primary{display:flex;justify-content:flex-end;margin-top:13px}
+  .bc-armory-primary{display:flex;justify-content:flex-end;align-items:center;flex-wrap:wrap;gap:8px;margin-top:13px}
+  .bc-armory-primary .bc-results-link{border-color:#72936c;background:#2c4934;color:#e5f1d5;min-height:42px;min-width:0}
   .bc-armory-primary button{min-width:220px;min-height:42px;font-size:14px}
   .bc-auto-confirm{background:#3a3624;border-color:#cfab64}
   .bc-batch-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(115px,1fr));gap:7px;margin-bottom:12px}
@@ -589,6 +629,8 @@
   .bc-core-recycle-row b{flex:1;min-width:115px}.bc-core-recycle-row span{font-size:11px;color:#c1d2b5}
   .bc-core-recycle-row button{min-height:40px}
   @media (max-width:760px), (max-height:500px) and (pointer:coarse){
+    #help.bc-help-launcher{display:flex;left:6px;top:6px;padding:4px;gap:4px;background:rgba(20,31,25,.9)}
+    #help.bc-help-launcher button{min-width:44px;min-height:36px;padding:5px 7px;font-size:10px}
     #sideToggle,#helpToggle{display:none!important}
     #side.is-collapsed{width:100%;height:auto;max-height:min(67dvh,640px);padding:12px 14px;overflow-y:auto}
     #side.is-collapsed>:not(#sideToggle){display:revert!important}
@@ -609,7 +651,7 @@
   <div class="res"><span>🪙 <b id="gold">0</b></span><span title="วัตถุดิบที่ใช้สร้างและอัปบ้าน">🧰 <b id="materials">0</b></span></div>
   <div id="hall"><small>โพรงกระต่าย <span id="burrow-t"></span></small><div><div id="burrow"></div></div></div>
 </div>
-<div id="help" class="panel"><button id="helpToggle" class="bc-collapse-toggle" type="button" aria-expanded="true" aria-label="ซ่อนคำแนะนำ" title="ซ่อน/แสดงคำแนะนำ">−</button><div class="bc-guide-body"><b>Burrow Command</b> · กระต่ายฟาร์มอัตโนมัติรอบหมู่บ้าน · เพดาน Hero Lv = บ้าน × 3<br>🧱 เสริมฐานด้วยวัตถุดิบได้ตั้งแต่วันแรก · อัป Warren Level ด้วยวัตถุดิบหลังชนะบอสเวฟ 5<br>🌙 กลางคืน: Elite มีโอกาสมากขึ้นตามเวฟ · แพ้แล้วกลับมาสู้เวฟเดิมได้ · ซ่อมด้วย Gold ตอนกลางวัน<br>🏹 คลิกป้อมเพื่อจ้าง Archer / Mage อัป HP หรือย้ายตำแหน่ง · 🏠 คลิกโพรงเพื่อใช้ Heal (กลางวัน/คืน อย่างละครั้ง)<br>⚒ โรงตีเหล็กเพิ่มโอกาส Rarity สูง · 📦 โรงผลิตเพิ่ม Gold/วัตถุดิบทั่วไปที่ดรอปจากมอนสเตอร์ · 🛒 คลิกรถเข็นเพื่อขายของส่วนเกิน<br>🛡 รั้วรอบบ้าน: สร้างรั้วไม้ 15×15 ช่อง · อัปเกรดเป็นกำแพงหินโดยไม่ขยายพื้นที่ · ซ่อมด้วยปุ่มซ่อมทั้งหมด<br><b>WASD</b> เลื่อนกล้อง · <b>Space</b> กลับโพรง<br><button id="reset">เริ่มหมู่บ้านใหม่</button></div></div>
+<div id="help" class="panel bc-help-launcher" aria-label="คู่มือและข่าวสาร"><button type="button" data-open-guide>📖 คู่มือ</button><button type="button" data-open-patch-notes>📜 v0.4.0</button></div>
 <div id="shopbox" class="panel"><div class="mobile-drawer-head"><b>🐰 จ้างกระต่าย</b><button type="button" data-mobile-close aria-label="ปิดหน้าจ้างกระต่าย">✕</button></div><details id="recruitDetails" open><summary>จ้างกระต่าย <small id="recruitSummary">0/7</small></summary><div id="shop" aria-label="รายชื่อกระต่ายที่จ้างได้"></div></details></div>
 <div id="side" class="panel">
   <button id="sideToggle" class="bc-collapse-toggle" type="button" aria-expanded="true" aria-label="ย่อแผงจัดการหมู่บ้าน" title="ซ่อน/แสดงแผงจัดการหมู่บ้าน">−</button>
@@ -617,6 +659,7 @@
   <div class="mobile-village-shortcuts" aria-label="อาคารและตลาด">
     <button type="button" data-world="hall">🏠 โพรง</button><button type="button" data-world="blacksmith">⚒ โรงตีเหล็ก</button>
     <button type="button" data-world="resource">📦 โรงผลิต</button><button type="button" data-world="sell">🛒 Quick Sell</button>
+    <button type="button" data-open-guide>📖 คู่มือ</button><button type="button" data-open-patch-notes>📜 Patch Notes</button>
   </div>
   <h3>จัดการหมู่บ้าน</h3>
   <div class="bc-quick-actions">
@@ -631,12 +674,14 @@
   <div class="row"><button id="lureOpen" title="ใช้วัตถุดิบล่อมอนสเตอร์พิเศษได้วันละหนึ่งครั้ง"></button></div>
   <div class="row"><button id="upgrade"></button></div>
   <div class="row"><button id="build"></button></div>
-  <div id="towerMoveNotice" role="status" hidden>📍 ย้ายป้อม: คลิกพื้นใหม่ในเขตสร้างป้อม · กด Esc เพื่อยกเลิก <button id="cancelTowerMove">ยกเลิก</button></div>
+  <div class="row"><button id="buildMagicCart" title="ปลดล็อกที่บ้าน Lv15 · รับเฉพาะนักเวทประจำรถ"></button></div>
+  <div id="towerMoveNotice" role="status" hidden>📍 ย้ายสิ่งก่อสร้าง: คลิกพื้นใหม่ในเขตป้องกัน · กด Esc เพื่อยกเลิก <button id="cancelTowerMove">ยกเลิก</button></div>
   <div class="row"><button id="fenceBuild" title="รั้วไม้ → กำแพงหิน → กำแพงหินเสริม · ขนาด 15×15 ช่องคงเดิม"></button></div>
   <div id="wallStatus" role="status" aria-live="polite"></div>
   <div id="gateControls" aria-label="เลือกประตูที่จะปิดตอนกลางคืน" hidden></div>
   <div class="row"><button id="repair"></button><button id="repairAll"></button></div>
   <div class="row"><button id="speed">⏩ x1</button><button id="skip">🌙 เข้าคืนเลย</button></div>
+  <button id="reset" type="button">⚠ เริ่มหมู่บ้านใหม่</button>
   <button id="mobileReset" type="button">⚠ เริ่มหมู่บ้านใหม่</button>
 </div>
 <div id="mobileDrawerScrim" hidden></div>
@@ -647,13 +692,14 @@
   <button type="button" data-mobile-open="craft" aria-label="Armory และคราฟต์อุปกรณ์" aria-pressed="false"><span aria-hidden="true">⚒</span>อุปกรณ์</button>
   <button type="button" data-mobile-open="sell" aria-label="Quick Sell ขายของ" aria-pressed="false"><span aria-hidden="true">🛒</span>ขาย</button>
 </nav>
-<div id="mobileTowerMoveNotice" hidden role="status"><span>📍 แตะพื้นเพื่อย้ายป้อม · ลากแผนที่เพื่อหาจุดวาง</span><button id="mobileCancelTowerMove" type="button">ยกเลิก</button></div>
+<div id="mobileTowerMoveNotice" hidden role="status"><span>📍 แตะพื้นเพื่อย้ายสิ่งก่อสร้าง · ลากแผนที่เพื่อหาจุดวาง</span><button id="mobileCancelTowerMove" type="button">ยกเลิก</button></div>
 <div id="modalScrim" hidden></div>
 <div id="forgePanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="โรงตีเหล็ก"></div>
 <div id="heroPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="จัดการกระต่าย"></div>
 <div id="inventoryPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="คลังเก็บของ"></div>
 <div id="itemDetailPanel" class="panel bc-modal bc-item-modal" hidden role="dialog" aria-modal="true" aria-label="รายละเอียดอุปกรณ์"></div>
 <div id="towerPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="ป้อมปราการ"></div>
+<div id="magicCartPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="รถยิงเวทย์"></div>
 <div id="masteryPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="Class Mastery"></div>
 <div id="skillCorePanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="Class Skill Core"></div>
 <div id="bunnyMenuPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="ความสามารถกระต่าย">
@@ -665,6 +711,8 @@
 <div id="hallPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="โพรงกระต่าย"></div>
 <div id="blacksmithPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="โรงตีเหล็ก"></div>
 <div id="resourcePanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="โรงผลิตทรัพยากร"></div>
+<div id="guidePanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="คู่มือ Burrow Command"></div>
+<div id="patchNotesPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="Patch Notes"></div>
 <div id="banner"></div><div id="toast"></div>
 <div id="over" hidden><h2></h2><p></p><button id="again">เล่นอีกครั้ง</button></div>
 <div id="loading">กำลังสร้างหมู่บ้าน…</div>

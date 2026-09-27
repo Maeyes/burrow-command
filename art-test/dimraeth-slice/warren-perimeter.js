@@ -18,9 +18,16 @@ export const PERIMETER_TIERS=Object.freeze([
  {level:1,radius:7.5,cost:160,sectionHp:55,gateHp:240,material:'wood'},
  {level:2,radius:7.5,cost:300,sectionHp:85,gateHp:360,material:'stone'},
  {level:3,radius:7.5,cost:480,sectionHp:125,gateHp:500,material:'stone',reinforced:true},
+ {level:4,radius:7.5,cost:700,sectionHp:170,gateHp:680,material:'stone',reinforced:true},
+ {level:5,radius:7.5,cost:950,sectionHp:220,gateHp:880,material:'stone',reinforced:true},
+ {level:6,radius:7.5,cost:1250,sectionHp:280,gateHp:1120,material:'stone',reinforced:true},
+ {level:7,radius:7.5,cost:1600,sectionHp:350,gateHp:1400,material:'stone',reinforced:true},
+ {level:8,radius:7.5,cost:2000,sectionHp:430,gateHp:1720,material:'stone',reinforced:true},
+ {level:9,radius:7.5,cost:2450,sectionHp:520,gateHp:2080,material:'stone',reinforced:true},
+ {level:10,radius:7.5,cost:3000,sectionHp:620,gateHp:2480,material:'stone',reinforced:true},
 ]);
-export const perimeterTier=level=>PERIMETER_TIERS[Math.max(0,Math.min(3,Math.floor(level||0)))];
-export const nextPerimeterTier=level=>PERIMETER_TIERS[Math.min(3,Math.max(0,Math.floor(level||0))+1)]||PERIMETER_TIERS[3];
+export const perimeterTier=level=>PERIMETER_TIERS[Math.max(0,Math.min(PERIMETER_TIERS.length-1,Math.floor(level||0)))];
+export const nextPerimeterTier=level=>PERIMETER_TIERS[Math.min(PERIMETER_TIERS.length-1,Math.max(0,Math.floor(level||0))+1)]||PERIMETER_TIERS.at(-1);
 export const perimeterFootprint=level=>{
  const r=perimeterTier(level).radius;
  return {side:r*2,halfSide:r,worldSide:r*2*64};
@@ -31,6 +38,7 @@ export function perimeterBlueprint(level,cx=20,cy=20){
  const r=cfg.radius,solid=[];
  const add=(axis,x,y,kind='fence',len=1)=>{
   solid.push({axis,x,y,kind,len,material:cfg.material,...(cfg.reinforced?{reinforced:true}:{}),
+   tier:cfg.level,
    ...(kind==='gate'?{side:axis==='x'?'south':x<cx?'west':'east'}:{}),
    hp:kind==='gate'?cfg.gateHp:cfg.sectionHp,maxHp:kind==='gate'?cfg.gateHp:cfg.sectionHp});
  };

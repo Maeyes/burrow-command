@@ -11,6 +11,20 @@ export const NIGHT_DEFENSE = Object.freeze({
 
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 
+/** Stable guard posts distributed across every built gate. Multiple rabbits assigned to the
+ * same gate fan out along its inner edge instead of stacking on the opening. */
+export function assignedGateDefensePost(unit,units,sections,center,tile=64,ranged=false){
+ const alive=(units||[]).filter(u=>!u.down),index=alive.indexOf(unit);
+ const gates=(sections||[]).filter(f=>f.kind==='gate'&&f.hp>0);
+ if(index<0||!gates.length)return null;
+ const gateIndex=index%gates.length,gate=gates[gateIndex],laneRank=Math.floor(index/gates.length);
+ const laneCount=Math.ceil((alive.length-gateIndex)/gates.length),offset=(laneRank-(laneCount-1)/2)*46;
+ const x=(gate.x+(gate.axis==='x'?(gate.len||1)/2:0))*tile,y=(gate.y+(gate.axis==='y'?(gate.len||1)/2:0))*tile;
+ const dx=center.x-x,dy=center.y-y,d=Math.hypot(dx,dy)||1,inset=ranged?118:72;
+ const tx=gate.axis==='x'?1:0,ty=gate.axis==='y'?1:0;
+ return {x:x+dx/d*inset+tx*offset,y:y+dy/d*inset+ty*offset,gate:gate.side||gateIndex};
+}
+
 /** When a raider nears a player-built barrier, route it through the nearest OPEN gate.
  * Other gates and standard perimeter gaps remain traversable by normal A* if no built gate qualifies. */
 export function chooseRaidGate(raider,segments,center,tile=64){
@@ -54,7 +68,7 @@ export function selectNightDefenseTarget(unit,post,monsters,towers,center){
     const towerUrgency=threatensTower?220+(NIGHT_DEFENSE.towerAlertRadius-towerDistance)*.65:0;
     const hallUrgency=hallDistance<NIGHT_DEFENSE.hallCriticalRadius?
       150+(NIGHT_DEFENSE.hallCriticalRadius-hallDistance)*.6:0;
-    const score=unitDistance+sectorDistance*.22+(m.claims||0)*NIGHT_DEFENSE.claimPenalty-
+    const score=unitDistance+sectorDistance*.55+(m.claims||0)*NIGHT_DEFENSE.claimPenalty-
       towerUrgency-hallUrgency-(m.boss?45:0);
     if(score<bestScore){bestScore=score;best=m;}
   }

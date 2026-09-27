@@ -22,6 +22,7 @@ export const ROOFS = { red: RED, slate: SLATE, orange: ORANGE, green: GREENR };
 // Everything the editor can stamp. `r` = editor footprint radius in tiles (for picking/overlap).
 export const OBJECT_TYPES = {
   tree: { label: 'ต้นไม้', r: .5, color: '#3f7a34' },
+  rabbitBurrow: { label: 'บ้านโพรงกระต่าย (หลังคาหญ้า)', r: 1.5, color: '#639631' },
   palm: { label: 'ต้นปาล์ม', r: .5, color: '#7fae3a' },
   bush: { label: 'พุ่มไม้', r: .35, color: '#6ea647' },
   rock: { label: 'หิน', r: .4, color: '#8b8a90' },
@@ -340,7 +341,7 @@ export function sceneFromMap(data, opts = {}) {
       case 'stoneWall': scene.props.push({ type: 'stoneWall', ...p, axis: o.axis || 'x', len: (o.len || 3) * T, seed: Math.round(o.x * 7 + o.y * 13), r: (o.len || 3) * T / 2 }); break;
       case 'stoneGate': scene.props.push({ type: 'stoneGate', ...p, axis: o.axis || 'x', len: (o.len || 2) * T, seed: Math.round(o.x * 7 + o.y * 13), r: (o.len || 2) * T / 2 }); break;
       case 'stump': case 'mushroom': case 'flowers': case 'fern': case 'coral': case 'well': case 'signpost': case 'cart': case 'hay':
-      case 'scarecrow': case 'woodpile': case 'laundry': case 'chicken': case 'sheep':
+      case 'scarecrow': case 'woodpile': case 'laundry': case 'chicken': case 'sheep': case 'rabbitBurrow':
         scene.props.push({ type: o.type, ...p, seed: Math.round(o.x * 7 + o.y * 13), r: OBJECT_TYPES[o.type].r * T * .8 }); break;
       case 'farmPlot': case 'flowerMeadow': {
         const size = clamp(o.size || 3, 2, 5) * T, meadow = o.type === 'flowerMeadow';

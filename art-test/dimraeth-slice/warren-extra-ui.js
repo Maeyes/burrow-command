@@ -5,11 +5,13 @@ import { masteryXpRequired } from '../../src/simulation/mastery.ts';
 import {WEAPON_SKILLS_BY_FAMILY_V2} from '../../src/simulation/skillEntitlements.ts';
 import {SKILLS_V2} from '../../src/simulation/skills.ts';
 import {WEAPON_PROC_RULES_V2} from '../../src/simulation/engine.ts';
+import {MAGIC_CART_COST,MAGIC_CART_HP,MAGIC_CART_RANGE,MAGIC_CART_UPGRADE} from './warren-magic-cart.js';
 
 const close='<button class="modal-close" data-modal-close aria-label="ปิดหน้าต่าง">✕</button>';
 const head=(icon,title,info)=>`<header class="bc-modal-header"><div>${gameIcon(icon,'ui','◈','bc-header-icon')}<span><h2>${title}</h2><small>${info}</small></span></div>${close}</header>`;
 const fam=(cls,classes)=>gameIcon(CLASS_FAMILIES[cls],'family',classes[cls].icon,'bc-class-icon');
 const TOWER_UPGRADE=[0,120,320,720,1450],TOWER_HP=[270,410,590,820,1120],HIRE={archer:90,mage:135};
+const TOWER_RANGE=[305,330,360,395,435];
 export function renderTowerHtml(s,classes){
  const t=s.towers[s.selectedTower];if(!t)return head('gear','ป้อมปราการ','ยังไม่ได้เลือกป้อม')+'<p>คลิกป้อมบนแผนที่ก่อน</p>';
  const next=t.level<5?TOWER_UPGRADE[t.level]:null,has=t.garrison;
@@ -22,10 +24,29 @@ export function renderTowerHtml(s,classes){
   `<p class="bc-help">ป้อมว่างยังไม่ยิง จ้างนักธนูหรือนักเวทได้ตอนกลางวันเท่านั้น</p>
    <div class="bc-tower-hire">${['archer','mage'].map(cls=>`<button data-tower-hire="${cls}" ${s.night||t.hp<=0||s.gold<HIRE[cls]?'disabled':''}>${fam(cls,classes)}<b>${esc(classes[cls].name)}</b><small>${HIRE[cls]} Gold</small></button>`).join('')}</div>`}
  <h3>อัปเกรดความทนทาน</h3><p class="bc-help">อัปป้อมเพิ่ม HP อย่างเดียว ไม่เพิ่ม ATK ของกระต่าย</p>
- ${next?`<div class="bc-upgrade-material">ป้อม Lv ${t.level+1} · ${TOWER_HP[t.level]} HP · ${next} Gold</div>`:'<p>ป้อมเต็มระดับแล้ว</p>'}
+ <p class="bc-help">ระยะยิงปัจจุบัน ${TOWER_RANGE[t.level-1]}</p>
+ ${next?`<div class="bc-upgrade-material">ป้อม Lv ${t.level+1} · ${TOWER_HP[t.level]} HP · ระยะ ${TOWER_RANGE[t.level]} · ${next} Gold</div>`:'<p>ป้อมเต็มระดับแล้ว</p>'}
  <button data-tower-upgrade ${!next||s.night||s.gold<next?'disabled':''}>อัปเกรดป้อม</button>
  <button data-tower-move ${s.night?'disabled':''} title="ย้ายป้อมโดยไม่เสียค่ารื้อและยังคงเลเวล HP กับทหารประจำป้อม">📍 ย้ายป้อม · คลิกตำแหน่งใหม่</button>
  ${t.hp<=0?'<p class="bc-warning">ป้อมพัง · ซ่อมตอนกลางวันเพื่อให้ทหารกลับมาปฏิบัติหน้าที่</p>':''}
+ </section></div></div>`;
+}
+export function renderMagicCartHtml(s,classes){
+ const cart=s.magicCarts?.[s.selectedMagicCart];
+ if(!cart)return head('staff','รถยิงเวทย์','ยังไม่ได้เลือกรถยิงเวทย์')+'<p>คลิกรถบนแผนที่ก่อน</p>';
+ const mage=cart.garrison,hire=MAGIC_CART_COST.mageHire,next=cart.level<5?MAGIC_CART_UPGRADE[cart.level]:null;
+ return `${head('staff','รถยิงเวทย์ · #${s.selectedMagicCart+1}','อาวุธเวทหมู่ · รับเฉพาะนักเวทประจำรถ')}
+ <div class="bc-modal-body bc-tower-window"><div class="bc-tower-layout"><div class="bc-tower-portrait">
+ ${gameIcon('staff','family','🔮','bc-tower-big-icon')}<h3>Arcane Cart Lv ${cart.level}</h3>
+ <div class="bc-exp"><i style="width:${100*cart.hp/cart.maxHp}%"></i></div><p>HP ${Math.ceil(cart.hp)} / ${cart.maxHp}</p></div>
+ <section><h3>นักเวทประจำรถ</h3>${mage?`<div class="bc-garrison">${fam('mage',classes)}<div><b>${esc(mage.name)} · ${esc(classes.mage.name)}</b><small>Lv ${mage.level} · EXP ${mage.exp}/${14+mage.level*8}</small><p>ยิงเวทระเบิดสร้างความเสียหายหมู่ และใช้ Class Armory ของนักเวท</p></div></div>`:
+ `<p class="bc-help">รถว่างยังไม่ยิง จ้างนักเวทได้ตอนกลางวันเท่านั้น</p><div class="bc-tower-hire"><button data-magic-cart-hire ${s.night||cart.hp<=0||s.gold<hire?'disabled':''}>${fam('mage',classes)}<b>${esc(classes.mage.name)}</b><small>${hire} Gold</small></button></div>`}
+ <p class="bc-help">ระยะยิง ${MAGIC_CART_RANGE[cart.level-1]} · ยิงช้าแต่ระเบิดโดนศัตรูรอบเป้าหมาย</p>
+ <h3>อัปเกรดความทนทาน</h3><p class="bc-help">เพิ่ม HP ของรถเท่านั้น พลังโจมตีสเกลจาก Class Armory และ Weapon Mastery ของนักเวท</p>
+ ${next?`<div class="bc-upgrade-material">รถ Lv ${cart.level+1} · ${MAGIC_CART_HP[cart.level]} HP · ระยะ ${MAGIC_CART_RANGE[cart.level]} · ${next} Gold</div>`:'<p>รถยิงเวทย์เต็มระดับแล้ว</p>'}
+ <button data-magic-cart-upgrade ${!next||s.night||s.gold<next?'disabled':''}>อัปเกรดรถยิงเวทย์</button>
+ <button data-magic-cart-move ${s.night?'disabled':''}>📍 ย้ายรถยิงเวทย์ · คลิกตำแหน่งใหม่</button>
+ ${cart.hp<=0?'<p class="bc-warning">รถพัง · ใช้ซ่อมทั้งหมดตอนกลางวันเพื่อให้กลับมายิง</p>':''}
  </section></div></div>`;
 }
 export function renderLodgeHtml(s){

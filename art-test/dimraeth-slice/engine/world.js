@@ -208,6 +208,14 @@ export function placeStructures() {
   // hand-placed props: ruined pillars, altars
   for (const p of SC.props || []) {
     const z = H(p.x, p.y);
+    if (p.type === 'rabbitBurrow') {
+      const box = { x0: p.x - 80, x1: p.x + 80, y0: p.y - 64, y1: p.y + 64 };
+      addBoxed(SP.rabbitBurrowSprite(), p.x, p.y, z, box, { fade: true });
+      WS.colliders.push({ type: 'b', ...box });
+      WS.rectShadows.push({ x0: box.x1, x1: box.x1 + 50, y0: box.y0, y1: box.y1 + 10, k: .62 });
+      WS.rectShadows.push({ x0: box.x0 - 3, x1: box.x1 + 3, y0: box.y1, y1: box.y1 + 6, k: .8 });
+      continue;
+    }
     let s, box;
     if (p.type === 'pillar') { s = SP.pillarSprite(p.seed || 1, 20, p.h || 60, p.broken, p.palette ? P[p.palette] : undefined); box = { x0: p.x - 4, x1: p.x + 24, y0: p.y - 4, y1: p.y + 24 }; WS.colliders.push({ type: 'b', ...box }); }
     else if (p.type === 'altar') { s = SP.altarSprite(); box = { x0: p.x - 8, x1: p.x + 64, y0: p.y - 8, y1: p.y + 44 }; WS.colliders.push({ type: 'b', ...box }); WS.lights.push({ x: p.x + 28, y: p.y + 18, z: z + 22, r: 90, col: [120, 220, 255], a: .6, flick: true }); }

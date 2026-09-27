@@ -3,8 +3,9 @@ import {PERIMETER_TIERS,perimeterBlueprint,perimeterFootprint,perimeterHealth,pe
 
 describe('One-click Warren perimeter',()=>{
  it('keeps the same 15×15 footprint through wood, stone and reinforced stone upgrades',()=>{
-  expect(PERIMETER_TIERS.map(t=>t.radius*2)).toEqual([0,15,15,15]);
-  expect(PERIMETER_TIERS.map(t=>t.material)).toEqual(['none','wood','stone','stone']);
+  expect(PERIMETER_TIERS).toHaveLength(11);
+  expect(PERIMETER_TIERS.map(t=>t.radius*2)).toEqual([0,...Array(10).fill(15)]);
+  expect(PERIMETER_TIERS.map(t=>t.material)).toEqual(['none','wood',...Array(9).fill('stone')]);
   const baseline=perimeterBlueprint(1).map(f=>f.axis+':'+f.x+':'+f.y);
   for(const level of [2,3])expect(perimeterBlueprint(level).map(f=>f.axis+':'+f.x+':'+f.y)).toEqual(baseline);
   for(let level=1;level<=3;level++){

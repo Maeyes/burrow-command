@@ -1,10 +1,23 @@
 import {describe,it,expect} from 'vitest';
-import {NIGHT_DEFENSE,selectNightDefenseTarget,chooseRaidGate,nearestClosedGate} from './warren-defense-ai.js';
+import {NIGHT_DEFENSE,selectNightDefenseTarget,chooseRaidGate,nearestClosedGate,assignedGateDefensePost} from './warren-defense-ai.js';
 
 const C={x:0,y:0}, tower=(x,y=0)=>({x,y,hp:270});
 const raider=(x,y=0,extra={})=>({x,y,night:true,dead:false,claims:0,...extra});
+const distanceForTest=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 
 describe('Burrow Command: proactive nighttime defense',()=>{
+ it('fans defenders across all three gates without stacking their posts',()=>{
+  const center={x:1280,y:1280},units=Array.from({length:14},(_,id)=>({id}));
+  const gates=[
+   {x:18.5,y:27.5,axis:'x',len:3,kind:'gate',side:'south',hp:240},
+   {x:12.5,y:18.5,axis:'y',len:3,kind:'gate',side:'west',hp:240},
+   {x:27.5,y:18.5,axis:'y',len:3,kind:'gate',side:'east',hp:240},
+  ];
+  const posts=units.map(u=>assignedGateDefensePost(u,units,gates,center));
+  expect(new Set(posts.map(p=>p.gate))).toEqual(new Set(['south','west','east']));
+  expect(new Set(posts.map(p=>`${p.x}:${p.y}`)).size).toBe(units.length);
+  expect(Math.min(...posts.flatMap((p,i)=>posts.slice(i+1).map(q=>distanceForTest(p,q))))).toBeGreaterThanOrEqual(45);
+ });
  it('intercepts raiders outside a bunny ring sector before they destroy an outer tower',()=>{
   const guard={x:-235,y:0},post={...guard},t=tower(500),m=raider(700);
   expect(Math.hypot(post.x-m.x,post.y-m.y)).toBeGreaterThan(250); // prior AI ignored it

@@ -349,6 +349,49 @@ export function altarSprite() {
 }
 
 // ---------- buildings ----------
+// Low barrel-vault cottage, rasterized with the same projection and ramps as terrain.
+export function rabbitBurrowSprite() {
+  const w = 160, d = 128, base = 24, rise = 54;
+  const height = x => base + rise * Math.sqrt(Math.max(0, 1 - ((x - w / 2) / (w / 2)) ** 2));
+  const wall = (u, v, lu, lv, px, py) => {
+    const x = u / lu * w, z = v / lv * (base + rise);
+    if (z > height(x)) return null;
+    const dx = x - 80;
+    const arch = (half, bottom, top) => Math.abs(dx) < half && z >= bottom && z < top - half + Math.sqrt(Math.max(0, half * half - dx * dx));
+    if (arch(23, 0, 55)) {
+      if (!arch(17, 0, 49)) return P.WSTONE[2 + (Math.floor(z / 7) % 2)];
+      if (Math.abs(dx - 9) < 2 && Math.abs(z - 20) < 2) return hex('#d8b25a');
+      return P.WOOD[(Math.floor(x) % 7 < 1 || z < 3) ? 0 : 2];
+    }
+    for (const wx of [30, 130]) {
+      const r = Math.hypot(x - wx, z - 30);
+      if (r < 11) return r > 8 || Math.abs(x - wx) < 1.5 || Math.abs(z - 30) < 1.5 ? P.WOOD[1] : hex('#e8b765');
+    }
+    return stoneColor(1, P.WSTONE, 9, 7)(u, v, lu, lv, px, py);
+  };
+  const faces = [
+    ...boxFaces(0, 0, 0, w, d, base, stoneColor(1, P.WSTONE), stoneColor(.74, P.WSTONE), () => P.DIRT[1]),
+    { O: [0, d, 0], A: [w, 0, 0], B: [0, 0, base + rise], color: wall },
+  ];
+  const segments = 20;
+  for (let i = 0; i < segments; i++) {
+    const x0 = w * i / segments, x1 = w * (i + 1) / segments;
+    const z0 = height(x0) + 5, z1 = height(x1) + 5;
+    const grass = (u, v, lu, lv, px, py) => {
+      const n = hash2(Math.floor(px / K), Math.floor(py / K));
+      const level = clamp(3 + (i < 9 ? 1 : -1) + (n > .86 ? 1 : n < .13 ? -1 : 0), 0, 5);
+      return P.GRASS[level];
+    };
+    faces.push({ O: [x0, -4, z0], A: [x1 - x0, 0, z1 - z0], B: [0, d + 10, 0], color: grass });
+    faces.push({ O: [x0, d + 6, z0 - 6], A: [x1 - x0, 0, z1 - z0], B: [0, 0, 6], color: () => P.DIRT[2] });
+  }
+  faces.push(...boxFaces(57, d, 0, 46, 13, 3, stoneColor(1, P.WSTONE), stoneColor(.74, P.WSTONE), stoneColor(1.12, P.WSTONE)));
+  const s = rasterFaces(faces);
+  // The placement point is the centre of the footprint, not its back corner.
+  s.ox += isoX(w / 2, d / 2); s.oy += isoY(w / 2, d / 2);
+  return s;
+}
+
 const ICONS = {
   potion: ['..kk..', '..kk..', '.krrk.', 'krrrrk', 'krwrrk', 'krrrrk', '.kkkk.'],
   sword: ['....kw', '...kwk', '..kwk.', 'kkwk..', '.kk...', 'kk.k..', 'k.....'],
@@ -646,8 +689,8 @@ export function wallSegSprite(len, th, h, alongX) {
 
 // Freestanding editor wall: a lower, chunkier stone run with cap stones and
 // regularly-spaced buttresses. Length is supplied by the editor in world px.
-export function stoneWallSprite(len, alongX, seed = 0) {
-  const th = 12, h = 30, capH = 4, capOver = 2;
+export function stoneWallSprite(len, alongX, seed = 0, height = 30) {
+  const th = 12, h = Math.max(30,height), capH = 4, capOver = 2;
   const sc = k => stoneColor(k, P.WSTONE, 6, 14);
   const faces = alongX
     ? boxFaces(0, 0, 0, len, th, h, sc(1), sc(.74), sc(1.16))
@@ -667,8 +710,8 @@ export function stoneWallSprite(len, alongX, seed = 0) {
 
 // Walk-through stone gate that shares the wall footprint and palette. The two
 // piers remain physical while the opening is intentionally collider-free.
-export function stoneGateSprite(len, alongX, palette = P.WSTONE) {
-  const th = 14, h = 56, pier = 18, lintelZ = 40, cap = 3;
+export function stoneGateSprite(len, alongX, palette = P.WSTONE, extraHeight = 0) {
+  const th = 14, h = 56+Math.max(0,extraHeight), pier = 18, lintelZ = 40+Math.max(0,extraHeight), cap = 3;
   const sc = k => stoneColor(k, palette, 6, 14);
   const block = (at, span, z, height) => alongX
     ? boxFaces(at, 0, z, span, th, height, sc(1), sc(.74), sc(1.16))
@@ -843,6 +886,27 @@ export function pebbleSprite(seed, ramp) {
     g.fillStyle = `rgb(${ramp[1]})`; g.fillRect(x, y + 1, s2 + 1, s2); g.fillStyle = `rgb(${ramp[3]})`; g.fillRect(x, y, s2, s2);
   }
   return c;
+}
+
+// Arcane siege cart for Burrow Command. Built from the same iso faces and palette ramps
+// as the village so it remains crisp at every engine render scale.
+export function magicCartSprite() {
+  const wood=k=>(u,v,lu,lv,px,py)=>shadeCol(P.WOOD[clamp(2+(hash2(px,py)>.72?1:0),0,4)],k);
+  const stone=k=>stoneColor(k,P.SLATE,6,8);
+  const faces=[
+   ...boxFaces(-32,-21,10,64,42,13,wood(1),wood(.72),wood(1.12)),
+   ...boxFaces(-25,-15,23,50,30,8,stone(1),stone(.75),stone(1.14)),
+   ...boxFaces(-5,-5,31,10,10,35,stone(1),stone(.75),stone(1.14)),
+   {O:[0,0,66],A:[19,0,-14],B:[0,19,-14],color:()=>P.CORAL_PURPLE[4]},
+   {O:[0,0,66],A:[-19,0,-14],B:[0,19,-14],color:()=>P.CORAL_PURPLE[3]},
+   {O:[0,0,66],A:[19,0,-14],B:[0,-19,-14],color:()=>P.CORAL_PURPLE[2]},
+   {O:[0,0,66],A:[-19,0,-14],B:[0,-19,-14],color:()=>P.CORAL_PURPLE[4]},
+  ];
+  return rasterFaces(faces,(g,proj)=>{
+   g.fillStyle='#2e1c10';g.strokeStyle='#8c5c34';g.lineWidth=4;
+   for(const [x,y] of [[-25,-20],[25,20]]){const [sx,sy]=proj(x,y,12);g.beginPath();g.ellipse(sx,sy,9,6,0,0,Math.PI*2);g.fill();g.stroke();}
+   const [cx,cy]=proj(0,0,60);g.fillStyle='#e0c7ff';g.fillRect(cx-2,cy-2,4,4);
+  });
 }
 
 // ---------- farm & village life ----------

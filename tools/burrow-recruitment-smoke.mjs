@@ -1,5 +1,5 @@
 // Browser regression: seven distinct field classes at Lv 1; +2/+2/+3 slots at Lv 5/7/9.
-// Each class allows one at Lv 1 and two from Lv 5 onward. Tower garrisons are separate.
+// Lv15 adds seven slots and removes the per-class cap. Tower garrisons are separate.
 // Temporary Vite preview; no deploy/push.
 import {preview} from 'vite';
 import {chromium} from '../artifacts/img2threejs/BunnyWorldHero/node_modules/playwright/index.mjs';
@@ -40,6 +40,13 @@ try{
  await page.waitForFunction(()=>window.__warren?.units?.length===14&&(!document.querySelector('#loading')||document.querySelector('#loading').hidden),null,{timeout:45000});
  check('full squad persists after reload',await page.evaluate(()=>__warren.warren===9&&__warren.units.length===14)&&
    await page.locator('#recruitSummary').innerText()==='14/14');
+ await page.evaluate(()=>{__warren.warren=15;__warren.gold=100000;__warrenDev.renderUi();});
+ check('Warren Lv 15 adds seven slots and reopens every class',await page.locator('#recruitSummary').innerText()==='14/21'&&
+   await page.locator('[data-buy="guard"]').isEnabled());
+ for(let i=0;i<7;i++)await page.locator('#shop [data-buy="guard"]').click();
+ check('Lv 15 can fill every new slot with the same class',await page.evaluate(()=>
+   __warren.units.length===21&&__warren.units.filter(u=>u.cls==='guard').length===9)&&
+   await page.locator('#recruitSummary').innerText()==='21/21'&&await page.locator('[data-buy="guard"]').isDisabled());
  check('no uncaught browser errors',errors.length===0);
 }catch(e){console.error(e.stack||e,errors);process.exitCode=1;}
 finally{await browser.close();await new Promise(resolve=>server.httpServer.close(resolve));}

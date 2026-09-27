@@ -20,6 +20,11 @@ try{
  check('single click builds the north wall and three selectable gates around 15×15 village',await page.evaluate(()=>
   __warren.wallLevel===1&&__warren.fences.length===54&&__warren.fences.filter(f=>f.kind==='gate').length===3)&&
   /15×15/.test(await page.locator('#wallStatus').innerText()));
+ check('night defense posts distribute rabbits across distinct gate lanes',await page.evaluate(()=>{
+  const posts=__warren.units.map(__warrenDev.defensePost);
+  return new Set(posts.map(p=>p.gate)).size===Math.min(3,__warren.units.length)&&
+   new Set(posts.map(p=>Math.round(p.x)+':'+Math.round(p.y))).size===posts.length;
+ }));
  check('first fence does not touch the authored houses or impassable terrain',await page.evaluate(()=>{
    const scene=__slice.WS.scene,parts=__warren.fences;
    return parts.every(f=>{
@@ -37,6 +42,12 @@ try{
   return parts.filter(f=>f.kind==='fence').every(f=>f.hp===55&&f.maxHp===55&&colliders.some(c=>c.bcFenceId===f.axis+':'+f.x+':'+f.y))
    &&parts.filter(f=>f.kind==='gate').every(f=>!colliders.some(c=>c.bcFenceId===f.axis+':'+f.x+':'+f.y)&&objects.some(o=>o.kind==='gate'&&o.bcFenceId===f.axis+':'+f.x+':'+f.y))
    &&__warrenDev.canWalkStraight(20*64,27*64,20*64,29*64);
+ }));
+ check('rabbit pinned at a wall corner recovers to a clear walkable point',await page.evaluate(()=>{
+  const u=__warren.units[0],corner=__warren.fences.find(f=>f.kind==='fence'&&f.axis==='x');
+  u.wallSafeX=20*64;u.wallSafeY=20*64;u.x=corner.x*64;u.y=corner.y*64;u.path=null;u.stuck=1;
+  __warrenStep(1);
+  return __warrenDev.canWalkStraight(u.x,u.y,u.x,u.y)&&Math.hypot(u.x-corner.x*64,u.y-corner.y*64)>10;
  }));
  const broken=await page.evaluate(()=>{
   const first=__warren.fences.find(f=>f.kind==='fence'),id=first.axis+':'+first.x+':'+first.y;

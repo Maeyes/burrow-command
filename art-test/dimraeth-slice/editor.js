@@ -3,12 +3,14 @@
 // scenes/custom.js adds stairs where roads meet cliffs and bridges where roads cross water.
 import { T, S, clamp } from './engine/util.js';
 import { BIOMES } from './engine/biomes.js';
+import { rabbitBurrowSprite } from './engine/sprites.js';
 import { COBBLE, WOOD, MARBLE } from './engine/palettes.js';
 import { emptyMap, MAP_N, MAP_CELL, OBJECT_TYPES, ROOFS, SLOPE_STYLES, slopeStyleOf, autoStairs, settleWater, bridgesFromMask } from './scenes/custom.js';
 
 const N = MAP_N, CELL = MAP_CELL;
 const $ = id => document.getElementById(id);
 const canvas = $('edit'), ctx = canvas.getContext('2d');
+const burrowArt = rabbitBurrowSprite();
 
 // ---------- state ----------
 let map = upgrade(loadDraft() || emptyMap('my-map'));
@@ -157,6 +159,12 @@ function draw() {
   for (const ob of map.objects) {
     const def = OBJECT_TYPES[ob.type]; if (!def) continue;
     const [sx, sy] = toScreen(ob.x * T, ob.y * T);
+    if (ob.type === 'rabbitBurrow' && burrowArt) {
+      ctx.save(); ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(burrowArt.img, sx - burrowArt.ox * E, sy - burrowArt.oy * E, burrowArt.img.width * E, burrowArt.img.height * E);
+      ctx.restore();
+      continue;
+    }
     if (ob.type === 'house' || def.kind === 'building') {
       const hw = (ob.w || def.w || 3.5) / 2 * T, hd = (ob.d || def.d || 2.75) / 2 * T;
       ctx.fillStyle = ob.type === 'house' ? `rgb(${(ROOFS[ob.roof] || ROOFS.red)[3]})` : def.color; ctx.strokeStyle = '#1a1208'; ctx.lineWidth = 1; ctx.beginPath();

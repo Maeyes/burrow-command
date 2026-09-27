@@ -7,16 +7,23 @@ const raw=(warren,units)=>({v:3,warren,day:12,wave:3,gold:250,
   reserve:[unit('scout','Previously Reserved')]});
 
 describe('Burrow Command field recruitment',()=>{
- it('opens all seven classes at Lv 1, then +2/+2/+3 slots at Lv 5/7/9 up to fourteen',()=>{
+ it('opens seven classes, grows to fourteen, then unlocks seven slots and removes the class cap at Lv 15',()=>{
   expect(CLASS_IDS).toHaveLength(7);
-  expect(FIELD_SQUAD_GATES).toEqual([{level:1,slots:7},{level:5,slots:9},{level:7,slots:11},{level:9,slots:14}]);
+  expect(FIELD_SQUAD_GATES).toEqual([{level:1,slots:7},{level:5,slots:9},{level:7,slots:11},{level:9,slots:14},{level:15,slots:21}]);
   for(const [level,slots,perClass] of [
-   [1,7,1],[4,7,1],[5,9,2],[6,9,2],[7,11,2],[8,11,2],[9,14,2],[10,14,2],[20,14,2]
+   [1,7,1],[4,7,1],[5,9,2],[6,9,2],[7,11,2],[8,11,2],[9,14,2],[14,14,2],[15,21,21],[20,21,21]
   ]) {
    expect(fieldSquadCap(level)).toBe(slots);
    expect(fieldClassCap(level)).toBe(perClass);
   }
   expect(MAX_FIELD_PER_CLASS).toBe(2);
+ });
+ it('Lv 15 accepts a full twenty-one-rabbit team from one class',()=>{
+  const guards=Array.from({length:24},(_,i)=>unit('guard','Guard '+(i+1)));
+  const s=migrateSave(raw(15,guards));
+  expect(s.units).toHaveLength(21);
+  expect(s.units.every(u=>u.cls==='guard')).toBe(true);
+  expect(s.reserve.map(u=>u.name)).toEqual(['Previously Reserved','Guard 22','Guard 23','Guard 24']);
  });
  it('preserves all seven distinct early field recruits; early same-class extras go to reserve',()=>{
   const original=[unit('guard','Pip'),unit('guard','Maple'),...CLASS_IDS.filter(cls=>cls!=='guard').map(cls=>unit(cls))];

@@ -1,5 +1,5 @@
 import {warrenConstructionCost,fortificationCost,fortificationCap,constructionMaterialCount} from './warren-progression.js';
-import {BUILDING_LEVEL_MAX,FORGE_COST,RESOURCE_COST,resourceBonusRate} from './warren-village-buildings.js';
+import {BUILDING_LEVEL_MAX,FORGE_COST,RESOURCE_COST,buildingLevelCap,resourceBonusRate} from './warren-village-buildings.js';
 import {PHASE1_MAX_LEVEL} from './warren-phase1.js';
 const head=(icon,name,subtitle)=>'<header class="bc-modal-header"><div>'+icon+' <span><h2>'+name+'</h2><small>'+subtitle+'</small></span></div><button data-modal-close aria-label="ปิดหน้าต่าง">✕</button></header>';
 export function renderHallBuildingHtml(s,maxHall,healAmount){
@@ -17,19 +17,19 @@ export function renderHallBuildingHtml(s,maxHall,healAmount){
  '<button data-hall-fortify '+(s.night||s.fortification>=maxFort||mats<boost?'disabled':'')+'>'+(s.fortification>=maxFort?'เสริมฐานเต็มแล้ว':'เสริมฐาน · '+boost+' วัตถุดิบ')+'</button></section></div>';
 }
 export function renderBlacksmithBuildingHtml(s){
- const lv=s.forgeLevel||1,cost=FORGE_COST[lv]||0;
+ const lv=s.forgeLevel||1,cost=FORGE_COST[lv]||0,cap=buildingLevelCap(s.warren);
  return head('⚒','โรงตีเหล็ก · Lv '+lv,'เพิ่มโอกาสออก Rarity สูง · ใช้สูตรคราฟต์เดิม')+
  '<div class="bc-modal-body bc-building-body"><div class="bc-building-stat"><b>โบนัส Rarity Lv '+lv+'</b><span>'+(lv===1?'โอกาสพื้นฐาน':'เพิ่มน้ำหนักฝั่ง Rarity สูง '+((lv-1)*10)+'%')+'</span></div>'+
  '<section><h3>การคราฟต์</h3><p>อัปเกรดโรงตีเหล็กจะเพิ่มโอกาสได้ Rarity ดีขึ้นเท่านั้น ไม่เพิ่ม Enhance หรือ Refine และไม่เปลี่ยนสูตรคราฟต์</p>'+
  '<button data-open-crafting>⚒ เปิดหน้าคราฟต์อุปกรณ์</button></section>'+
- '<section><h3>อัปเกรดโรงตีเหล็ก</h3><button data-forge-upgrade '+(s.night||lv>=BUILDING_LEVEL_MAX||s.gold<cost?'disabled':'')+'>'+
- (lv>=BUILDING_LEVEL_MAX?'เต็มระดับแล้ว':'ขึ้น Lv '+(lv+1)+' · '+cost+' Gold')+'</button></section></div>';
+ '<section><h3>อัปเกรดโรงตีเหล็ก</h3><button data-forge-upgrade '+(s.night||lv>=cap||s.gold<cost?'disabled':'')+'>'+
+ (lv>=BUILDING_LEVEL_MAX?'เต็มระดับแล้ว':lv>=cap?'ปลดเพดานถัดไปเมื่อบ้าน Lv '+(s.warren<5?5:s.warren<10?10:s.warren<15?15:20):'ขึ้น Lv '+(lv+1)+' · '+cost+' Gold')+'</button></section></div>';
 }
 export function renderResourceBuildingHtml(s){
- const lv=s.resourceLevel||1,cost=RESOURCE_COST[lv]||0,bonus=Math.round(resourceBonusRate(lv)*100);
+ const lv=s.resourceLevel||1,cost=RESOURCE_COST[lv]||0,bonus=Math.round(resourceBonusRate(lv)*100),cap=buildingLevelCap(s.warren);
  return head('📦','โรงผลิตทรัพยากร · Lv '+lv,'เพิ่มรางวัลจากมอนสเตอร์แทนการผลิตต่อวินาที')+
  '<div class="bc-modal-body bc-building-body"><div class="bc-building-stat"><b>+'+bonus+'% Gold จากมอนสเตอร์</b><span>+'+bonus+'% วัตถุดิบทั่วไปที่มอนสเตอร์ดรอป</span></div>'+
  '<section><h3>โบนัสผลตอบแทนการล่า</h3><p>ได้รับเมื่อฆ่ามอนสเตอร์ทั้งกลางวันและกลางคืน รวมถึงของที่กระต่ายขนกลับบ้าน โบนัสสะสมเศษจนได้เป็นจำนวนเต็ม ไม่เพิ่ม Blueprint หินอัปเกรด ของหายาก หรือ Gold จาก Quick Sell และไม่มีรายได้ขณะไม่ได้ล่า</p></section>'+
- '<section><h3>อัปเกรดโรงผลิต</h3><button data-resource-upgrade '+(s.night||lv>=BUILDING_LEVEL_MAX||s.gold<cost?'disabled':'')+'>'+
- (lv>=BUILDING_LEVEL_MAX?'เต็มระดับแล้ว':'ขึ้น Lv '+(lv+1)+' · '+cost+' Gold · โบนัส +'+Math.round(resourceBonusRate(lv+1)*100)+'%')+'</button></section></div>';
+ '<section><h3>อัปเกรดโรงผลิต</h3><button data-resource-upgrade '+(s.night||lv>=cap||s.gold<cost?'disabled':'')+'>'+
+ (lv>=BUILDING_LEVEL_MAX?'เต็มระดับแล้ว':lv>=cap?'ปลดเพดานถัดไปเมื่อบ้าน Lv '+(s.warren<5?5:s.warren<10?10:s.warren<15?15:20):'ขึ้น Lv '+(lv+1)+' · '+cost+' Gold · โบนัส +'+Math.round(resourceBonusRate(lv+1)*100)+'%')+'</button></section></div>';
 }

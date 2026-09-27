@@ -799,7 +799,8 @@ export async function prepare(scene,{canvasEl,loadingEl,renderScale}={}){
   await yieldFrame();const tStart=performance.now();say('กำลังสร้างต้นไม้…');await yieldFrame();
   KIT=biomeOf(scene);buildLibraries(KIT);WS.terrain=buildTerrain(scene);placeStructures();say('กำลังวางของ…');await yieldFrame();placeScatter();
   const noCache=new URLSearchParams(location.search).has('nocache');
-  const cacheKey=!noCache&&scene.cacheKey?`${TERRAIN_CACHE_VERSION}:${scene.cacheKey}:scale:${K}`:null;
+  const propVersion=scene.props?.some(p=>p.type==='rabbitBurrow')?':burrow-v2':'';
+  const cacheKey=!noCache&&scene.cacheKey?`${TERRAIN_CACHE_VERSION}:${scene.cacheKey}:scale:${K}${propVersion}`:null;
   WS.ground=null;
   if(cacheKey){say('กำลังโหลดพื้นจาก cache…');WS.ground=await readGroundCache(cacheKey);}
   if(!WS.ground){await bakeGround(p=>say(`กำลังวาดพื้น… ${Math.round(p*100)}%`));if(cacheKey)writeGroundCache(cacheKey,WS.ground);}

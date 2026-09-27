@@ -2,6 +2,7 @@
 import {esc,itemLabel,gameIcon,renderItemDetailHtml,armoryGearIcon} from './warren-ui.js';
 import {dismantleFragments} from '../../src/simulation/equipmentV2.ts';
 import {renderBatchHtml} from './warren-extra-ui.js';
+import {craftStatSummary,renderCraftPreview} from './warren-craft-preview.js';
 import {CLASS_IDS,CLASS_FAMILIES,GEAR_SLOTS,AUTO_DISMANTLE_RARITIES,
  availableRecipes,buildFor,canCraft,equippedGearIds,gearSlot,gearScore,
  EQUIPMENT_MASTER_V2,unlockedTier,classProgress,fieldClassCap}
@@ -25,17 +26,17 @@ function craftPanel(s,classes){
  const prefs=s.autoDismantle?.[cls]||{enabled:false,minRarity:'normal',protectOtherClasses:true};
  const list=recipes.map(t=>'<button class="bc-armory-recipe '+(selected?.id===t.id?'active':'')+
   '" data-armory-recipe="'+esc(t.id)+'">'+img(t.id)+
-  '<span><b>'+esc(t.name)+'</b><small>Tier '+t.tier+' · '+fmt(t.recipe.gold)+' Gold / ชิ้น</small></span></button>').join('');
+  '<span><b>'+esc(t.name)+'</b><small>T'+t.tier+' · '+esc(craftStatSummary(t))+'</small><small>'+fmt(t.recipe.gold)+' Gold / ชิ้น</small></span></button>').join('');
  const r=selected?.recipe,req=r?[[r.blueprintId,1],[r.oreId,r.oreQty],...r.materials.map(m=>[m.itemId,m.qty])]:[];
+ const craftable=r?Math.max(0,Math.min(50,Math.floor(s.gold/r.gold),...req.map(([id,n])=>Math.floor((s.inventory[id]||0)/n)))):0;
  const materials=req.map(([id,n])=>'<span class="'+((s.inventory[id]||0)>=n?'have':'missing')+'">'+
   gameIcon(id,'item','•','bc-material-icon')+esc(itemLabel(id))+' '+fmt(s.inventory[id])+'/'+fmt(n)+'</span>').join('');
  const options=AUTO_DISMANTLE_RARITIES.map((key,i)=>'<option value="'+key+'" '+(prefs.minRarity===key?'selected':'')+'>'+
   (i===0?'เก็บทั้งหมด':label(key)+' ขึ้นไป')+'</option>').join('');
   return '<section class="bc-armory-work"><h3>คราฟต์ '+SLOTS[slot]+' ให้ '+esc(classes[cls].name)+'</h3>'+
   '<div class="bc-armory-recipes">'+(list||'<p class="bc-empty">ยังไม่มีสูตรที่ใช้ได้กับช่องนี้</p>')+'</div>'+
-  (selected?'<div class="bc-armory-work-selected">'+img(selected.id)+'<div><b>'+esc(selected.name)+'</b>'+
-  '<small>Tier '+selected.tier+' · '+fmt(r.gold)+' Gold / ชิ้น · Tier กำหนดโดยสูตร ไม่ใช่ Rarity</small>'+
-  '<div class="bc-materials">'+materials+'</div></div></div>':'')+
+  (selected?renderCraftPreview(s,selected,classes)+'<div class="bc-craft-cost"><strong>วัตถุดิบที่ต้องใช้ / ชิ้น · '+fmt(r.gold)+' Gold</strong><div class="bc-materials bc-craft-materials">'+materials+'</div>'+
+  '<small class="bc-craft-capacity">'+(s.night?'คราฟต์ได้เฉพาะกลางวัน':craftable?'วัตถุดิบและ Gold ตอนนี้เพียงพอสำหรับ '+craftable+' ชิ้น':'วัตถุดิบหรือ Gold ยังไม่พอสำหรับชิ้นนี้')+'</small></div>':'')+
   '<div class="bc-armory-qty"><strong>จำนวนที่คราฟต์</strong><nav class="bc-batch-filters">'+
   [1,10,20,50].map(n=>'<button data-batch-qty="'+n+'" class="'+((s.batchQty||1)===n?'active':'')+'">×'+n+'</button>').join('')+
   '</nav></div>'+
@@ -47,7 +48,9 @@ function craftPanel(s,classes){
   '<p class="bc-help">ตั้งค่านี้จำแยกตามคลาส · ไอเทมล็อกและที่สวมใส่อยู่จะไม่ถูกย่อย · ไม่สวมของใหม่ให้อัตโนมัติ</p></fieldset>'+
   '<div class="bc-armory-primary"><button class="bc-primary" data-forge-craft="'+esc(selected?.id||'')+'" '+
   (!selected||s.night||!canCraft(s,selected.id)?'disabled':'')+'>⚒ คราฟต์ ×'+(s.batchQty||1)+
-  (prefs.enabled?' · Auto Dismantle':'')+'</button></div></section>';
+  (prefs.enabled?' · Auto Dismantle':'')+'</button>'+
+  (s.batchReport&&s.batchClass===cls?'<button type="button" class="bc-results-link" data-armory-show-results>↓ ดูผลคราฟต์ล่าสุด</button>':'')+
+  '</div></section>';
 }
 // Only current-class, current-slot and currently visible rarity items can be batch-salvaged.
 // The same predicate is used by the UI and by the click handler before the atomic transaction.
@@ -125,5 +128,5 @@ export function renderArmoryHtml(s,classes){
    '<button data-armory-tab="'+key+'" class="'+(tab===key?'active':'')+'">'+name+'</button>').join('')+
   '<button id="enhanceAll" '+(s.night?'disabled':'')+'>Enhance All Max</button>'+
   '<button data-open-mastery="'+cls+'">✦ Mastery</button></div>'+
-  detail+results+view+'</div>';
+  detail+view+results+'</div>';
 }

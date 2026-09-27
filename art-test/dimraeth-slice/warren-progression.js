@@ -9,6 +9,7 @@ import { WEAPON_MASTERY_MILESTONES } from '../../src/simulation/masteryMilestone
 import { WEAPON_SKILLS_BY_FAMILY_V2 } from '../../src/simulation/skillEntitlements.ts';
 import {perimeterBlueprint,perimeterTier,normalizeGateSelections} from './warren-perimeter.js';
 import {buildingLevel,forgeRarityRoll} from './warren-village-buildings.js';
+import {normalizeMagicCart} from './warren-magic-cart.js';
 import {normalizeClassSkills} from './warren-class-cores.js';
 
 export { EQUIPMENT_MASTER_V2, CRAFT_RECIPES_V2, EQUIPMENT_RARITY_STAT_MULTIPLIER, WEAPON_MASTERY_MILESTONES };
@@ -28,7 +29,8 @@ export function normalizeAutoDismantleSettings(raw){
 }
 export const SAVE_KEY='burrow-command-save-v3', PRIOR_SAVE_KEY='burrow-command-save-v2', LEGACY_SAVE_KEY='burrow-command-save-v1';
 export const BUNNY_NAMES=['โมจิ','มะลิ','ถั่วแดง','ปุยฝ้าย','ข้าวปั้น','นุ่มนิ่ม','ตังเม','พุดดิ้ง','คุกกี้','จันทร์เจ้า','Mochi','Clover','Pip','Mallow','Hazel','Luna','Poppy','Basil','Maple','Biscuit'];
-// Field squad slots open at Warren Lv 5/7/9. Garrison recruits occupy tower slots, never field slots.
+// Field squad slots open at Warren Lv 5/7/9/15. At Lv15 the per-class cap is removed.
+// Garrison recruits occupy tower slots, never field slots.
 export const MAX_FIELD_PER_CLASS=2, MASTERY_GOLD={10:180,20:600,30:1750,40:4400,50:11500};
 export const MASTERY_ACTIVE_LEVELS=Object.freeze([10,20,30]);
 // One canonical weapon skill per tier for each fixed Burrow class. Missing saved toggles
@@ -48,9 +50,9 @@ export function toggleMasteryWeaponSkill(s,cls,level){
  m.disabledWeaponSkills=[...disabled].sort((a,b)=>a-b);
  return true;
 }
-export const FIELD_SQUAD_GATES=Object.freeze([{level:1,slots:7},{level:5,slots:9},{level:7,slots:11},{level:9,slots:14}]);
+export const FIELD_SQUAD_GATES=Object.freeze([{level:1,slots:7},{level:5,slots:9},{level:7,slots:11},{level:9,slots:14},{level:15,slots:21}]);
 export const fieldSquadCap=warren=>FIELD_SQUAD_GATES.reduce((cap,gate)=>warren>=gate.level?gate.slots:cap,7);
-export const fieldClassCap=warren=>warren>=5?MAX_FIELD_PER_CLASS:1;
+export const fieldClassCap=warren=>warren>=15?fieldSquadCap(warren):warren>=5?MAX_FIELD_PER_CLASS:1;
 // Legacy export retained for callers; additional builds are intentionally disabled.
 export const BUILD_GATES=[{level:1,gold:0}];
 export const minLevelForTier=tier=>[0,1,11,21,31,41,51][tier]??Infinity;
@@ -124,6 +126,7 @@ export function migrateSave(raw){
   else reserve.push(item);
  }
  const towers=(raw.towers||[]).map(t=>({x:t.x,y:t.y,hp:t.hp,level:Math.max(1,Math.min(5,t.level||1)),garrison:t.garrison&&['archer','mage'].includes(t.garrison.cls)?t.garrison:null}));
+ const magicCarts=(raw.magicCarts||[]).map(normalizeMagicCart).filter(Boolean).slice(0,6);
  // The retired hand-painted fence system is converted into a full common-material refund ONCE.
  // New saves always contain wallLevel, so loading them cannot refund the same pieces again.
  const wallLevel=Number.isInteger(raw.wallLevel)?perimeterTier(raw.wallLevel).level:0;
@@ -141,7 +144,7 @@ export function migrateSave(raw){
  return {v:3,gold:Math.max(0,Math.floor((raw.gold||0)+goldRefund)),warren:Math.max(1,Math.floor(raw.warren||1)),
   wave:Math.max(1,Math.min(5,Math.floor(raw.wave||1))),cleared:!!raw.cleared,day:Math.max(1,raw.day||1),
   kills:Math.max(0,raw.kills||0),losses:Math.max(0,raw.losses||0),burrow:raw.burrow,inventory,gear,builds,progress,mastery,classSkills:normalizeClassSkills(raw.classSkills),
-  reserve,autoDismantle:normalizeAutoDismantleSettings(raw.autoDismantle),
+  reserve,magicCarts,autoDismantle:normalizeAutoDismantleSettings(raw.autoDismantle),
   fortification:Math.max(0,Math.min(fortificationCap(Math.max(1,Math.floor(raw.warren||1))),Math.floor(raw.fortification||0))),
   lureDay:Math.max(0,Math.floor(raw.lureDay||0)),
   wallLevel,fences,gateClosed:normalizeGateSelections(raw.gateClosed),
@@ -200,7 +203,7 @@ export const fortificationHpBonus=level=>35*Math.max(0,level);
 // One action pays exactly the same 60 HP / 12 Gold rate as manual repair, without partial purchases.
 export function repairAllQuote(s,maxHallHp,repairHp=60,repairGold=12){
  const hallMissing=Math.max(0,Math.ceil(maxHallHp-(s.burrow||0)));
- const damagedTowers=(s.towers||[]).filter(t=>t.hp<t.maxHp);
+ const damagedTowers=[...(s.towers||[]),...(s.magicCarts||[])].filter(t=>t.hp<t.maxHp);
  const towerMissing=damagedTowers.reduce((n,t)=>n+Math.max(0,Math.ceil(t.maxHp-t.hp)),0);
  const wallPieces=(s.wallLevel>0?s.fences:[])||[];
  const damagedWall=wallPieces.filter(f=>(f.kind==='fence'||f.kind==='gate')&&f.hp<f.maxHp);
@@ -213,7 +216,7 @@ export function repairEverything(s,maxHallHp,repairHp=60,repairGold=12){
  const quote=repairAllQuote(s,maxHallHp,repairHp,repairGold);
  if(!quote.repairs||(s.gold||0)<quote.gold)return null;
  s.gold-=quote.gold;s.burrow=maxHallHp;
- for(const t of s.towers||[])t.hp=t.maxHp;
+ for(const t of [...(s.towers||[]),...(s.magicCarts||[])])t.hp=t.maxHp;
  if(s.wallLevel>0)for(const f of s.fences||[])if(f.kind==='fence'||f.kind==='gate')f.hp=f.maxHp;
  return quote;
 }

@@ -1,9 +1,12 @@
 // Village building progression. The Resource Workshop boosts actual monster Gold and common construction-material drops; it never generates idle/offline income.
-export const BUILDING_LEVEL_MAX=3;
-export const FORGE_COST=Object.freeze([0,180,520]); // Gold to go from Lv 1 to Lv 2/3
-export const RESOURCE_COST=Object.freeze([0,160,480]);
+export const BUILDING_LEVEL_MAX=10;
+// Indexed by current level: the Lv1 entry is the price paid to reach Lv2.
+export const FORGE_COST=Object.freeze([0,180,520,1000,1800,3000,4800,7200,10500,15000]);
+export const RESOURCE_COST=Object.freeze([0,160,480,900,1600,2700,4200,6200,9000,12500]);
 export const RESOURCE_BONUS_PER_LEVEL=.01;
 export const buildingLevel=n=>Math.max(1,Math.min(BUILDING_LEVEL_MAX,Math.floor(Number(n)||1)));
+export const BUILDING_LEVEL_GATES=Object.freeze([{warren:5,level:3},{warren:10,level:5},{warren:15,level:8},{warren:20,level:10}]);
+export const buildingLevelCap=warren=>BUILDING_LEVEL_GATES.reduce((cap,gate)=>Number(warren)>=gate.warren?gate.level:cap,1);
 export const resourceBonusRate=n=>buildingLevel(n)*RESOURCE_BONUS_PER_LEVEL;
 // Convert a small amount of high-end rarity probability from common rolls without any guaranteed rarity.
 export function forgeRarityRoll(roll,level){
