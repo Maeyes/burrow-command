@@ -44,6 +44,26 @@ describe('Burrow reuses main-game Skill Core and Modifier authority',()=>{
   s.night=true;
   expect(()=>applyBurrowSkillCommand(s,'archer',{type:'equipCore',coreId:'fireball',slot:0})).toThrow('daytime-only');
  });
+ it('forbids a duplicate Core inside one class even with multiple owned copies and heals corrupt saves',()=>{
+  const s=state();s.inventory.fireball=4;
+  applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'fireball',slot:0});
+  expect(()=>applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'fireball',slot:1}))
+    .toThrow('skill-core-already-equipped');
+  expect(()=>applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'fireball'}))
+    .toThrow('skill-core-already-equipped');
+  expect(s.classSkills.mage.active).toEqual(['fireball',null,null]);
+  // Repeat-selecting the SAME slot is safe, but moving requires unequip first.
+  expect(()=>applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'fireball',slot:0})).not.toThrow();
+  s.coreClass='mage';
+  const html=renderClassCoreHtml(s,classes);
+  expect((html.match(/option value="fireball"/g)||[])).toHaveLength(1);
+  const corrupt=JSON.parse(JSON.stringify(s.classSkills));
+  corrupt.mage.active=['fireball','fireball','fireball'];
+  expect(normalizeClassSkills(corrupt).mage.active).toEqual(['fireball',null,null]);
+  applyBurrowSkillCommand(s,'mage',{type:'unequipCore',slot:0});
+  applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'fireball',slot:1});
+  expect(s.classSkills.mage.active).toEqual([undefined,'fireball',null]);
+ });
  it('main service authorizes exact Core rarity cost, duplicate consumption and Gold',()=>{
   const s=state();
   applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'fireball',slot:0});

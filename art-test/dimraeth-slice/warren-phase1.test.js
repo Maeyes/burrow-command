@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {unlockedTier,giveBunnyExp} from './warren-progression.js';
-import {PHASE1_MAX_LEVEL,PHASE1_STAGES,FUTURE_REGIONS,stageForWarren,frontierStage,lureQuote,LURE_MODES} from './warren-phase1.js';
+import {PHASE1_MAX_LEVEL,PHASE1_STAGES,FUTURE_REGIONS,warrenStageDifficulty,warrenMonsterStats,stageForWarren,frontierStage,lureQuote,LURE_MODES} from './warren-phase1.js';
 describe('Burrow Command Phase 1 world and lure plan',()=>{
  it('alternates maps every five Warren levels with one equipment tier per ten levels',()=>{
   expect(PHASE1_MAX_LEVEL).toBe(20);
@@ -13,6 +13,24 @@ describe('Burrow Command Phase 1 world and lure plan',()=>{
   const bunny={level:1,exp:0};giveBunnyExp(bunny,10000,3);
   expect(bunny.level).toBe(3);expect(bunny.exp).toBeGreaterThan(0);
   giveBunnyExp(bunny,0,6);expect(bunny.level).toBe(6);
+ });
+ it('doubles base monster HP/ATK only when the Warren crosses each five-level boundary',()=>{
+  const checkpoints=[1,2,5,6,7,10,11,12,15,16,17,20];
+  const expected=[1,1,1,2,2,2,4,4,4,8,8,8];
+  expect(checkpoints.map(warrenStageDifficulty)).toEqual(expected);
+  // The stage and the monster power change together, not on every single
+  // Warren upgrade or on a rabbit level-up.
+  expect(checkpoints.map(level=>stageForWarren(level).mapId)).toEqual([
+   'forest1','forest1','forest1','forest2','forest2','forest2',
+   'desert1','desert1','desert1','desert2','desert2','desert2']);
+  for(const [level,multiplier] of checkpoints.map((x,i)=>[x,expected[i]])){
+   for(const [rank,baseHp,baseAtk] of [['normal',45,6],['elite',110,11],['boss',300,15]]){
+    expect(warrenMonsterStats(rank,warrenStageDifficulty(level)),`${rank} at Warren ${level}`)
+      .toEqual({hp:baseHp*multiplier,atk:baseAtk*multiplier});
+   }
+  }
+  // Levels above 20 remain capped until their real rosters are authored.
+  expect(warrenStageDifficulty(21)).toBe(8);
  });
  it('reserves Mine, Magma, Snow, Underwater and Asgard without activating them in Phase 1',()=>{
   expect(FUTURE_REGIONS.map(s=>s.biome)).toEqual(['mine','magma','snow','underwater','asgard']);

@@ -19,6 +19,24 @@ const monster = (): MonsterEntity => ({
 });
 
 describe('BunnySimulation authoritative core',()=>{
+  it('exposes host-only mastery on-hit procs without adding a second basic swing or a new client command',()=>{
+    const world=createWorldState('forest1'),p=player(),m=monster();
+    p.weaponFamily='greatsword';
+    p.skillEntitlements.weaponSkills=['bowlingBash'];
+    m.hp=m.maxHp=50000;addPlayer(world,p);addMonster(world,m);
+    const sim=new BunnySimulation(world,()=>.1);
+    const proc=sim.triggerWeaponMasteryOnHit(p.id,m.id);
+    expect(proc.some(e=>e.type==='skillCast'&&e.skillId==='bowlingBash')).toBe(true);
+    const hitEvents=proc.filter(e=>e.type==='damageDealt');
+    expect(hitEvents.length).toBeGreaterThan(0);
+    expect(hitEvents.every(e=>e.effect?.origin==='MASTERY_PROC')).toBe(true);
+    expect(m.hp).toBe(50000-hitEvents.reduce((n,e)=>n+e.amount,0));
+    expect(proc.some(e=>e.type==='attackStarted')).toBe(false);
+    expect(p.weaponProc?.hits).toBe(1);
+    expect(sim.triggerWeaponMasteryOnHit(p.id,m.id)).toEqual([]); // authored cooldown floor
+    expect(sim.dispatch({type:'castSkill',playerId:p.id,skillId:'bowlingBash',targetId:m.id,clientSequence:1}))
+      .toMatchObject({accepted:false,reason:'weapon-skill-triggers-on-attack'});
+  });
   it('combines shield refine, innate shield and Guard passives for any weapon, capped at 35%',()=>{
     const p=player();
     p.hasShieldEquipped=true;

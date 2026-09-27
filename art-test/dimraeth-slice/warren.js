@@ -21,14 +21,14 @@ import {PERIMETER_TIERS,perimeterTier,nextPerimeterTier,perimeterFootprint,perim
 import { WS } from './engine/state.js';
 import { K } from './engine/util.js';
 import * as PAL from './engine/palettes.js';
-import { CLASS_FAMILIES, LEGACY_SAVE_KEY, SAVE_KEY, bunnyName, expRequired, giveBunnyExp, migrateSave, monsterLoot, addInventory, craftMaterialCount, spendCraftMaterials, defaultBuilds, unlockedTier, minLevelForTier, buildFor, buildCombatBonus, availableRecipes, canCraft, craftGear, craftBatch, enhanceGear, enhanceAll, refineGear, dismantleGear, dismantleSelection, setGearLock, recommendations, grantClassMastery, unlockClassMastery, unlockedMastery, classProgress, defaultProgress, defaultMastery, burrowMonsterGold, shouldDepositLootDirectly, autoEquipBuild, equipBuildItem, equippedGearIds, gearSlot, EQUIPMENT_MASTER_V2, EQUIPMENT_RARITY_STAT_MULTIPLIER, MAX_FIELD_PER_CLASS, fieldSquadCap, fieldClassCap, FIELD_SQUAD_GATES, CLASS_IDS, GEAR_SLOTS, PRIOR_SAVE_KEY, defaultAutoDismantleSettings, settleBatchCraft, constructionMaterialCount, spendConstructionMaterials, warrenConstructionCost, fortificationCost, fortificationCap, fortificationHpBonus, repairAllQuote, repairEverything, CONSTRUCTION_MATERIAL_IDS, constructionRefund } from './warren-progression.js';
+import { CLASS_FAMILIES, LEGACY_SAVE_KEY, SAVE_KEY, bunnyName, expRequired, giveBunnyExp, migrateSave, monsterLoot, addInventory, craftMaterialCount, spendCraftMaterials, defaultBuilds, unlockedTier, minLevelForTier, buildFor, buildCombatBonus, availableRecipes, canCraft, craftGear, craftBatch, enhanceGear, enhanceAll, refineGear, dismantleGear, dismantleSelection, setGearLock, recommendations, grantClassMastery, unlockClassMastery, unlockedMastery, toggleMasteryWeaponSkill, classProgress, defaultProgress, defaultMastery, burrowMonsterGold, shouldDepositLootDirectly, autoEquipBuild, equipBuildItem, equippedGearIds, gearSlot, EQUIPMENT_MASTER_V2, EQUIPMENT_RARITY_STAT_MULTIPLIER, MAX_FIELD_PER_CLASS, fieldSquadCap, fieldClassCap, FIELD_SQUAD_GATES, CLASS_IDS, GEAR_SLOTS, PRIOR_SAVE_KEY, defaultAutoDismantleSettings, settleBatchCraft, constructionMaterialCount, spendConstructionMaterials, warrenConstructionCost, fortificationCost, fortificationCap, fortificationHpBonus, repairAllQuote, repairEverything, CONSTRUCTION_MATERIAL_IDS, constructionRefund } from './warren-progression.js';
 import { inventoryItemMeta } from '../../src/simulation/itemTagsV2.ts';
 import { MONSTERS_V2 as MONSTER_XP } from '../../src/simulation/monsterDataV2.ts';
 import { itemLabel, gameIcon, renderSquadHtml, renderForgeHtml, renderHeroHtml, renderInventoryHtml, renderItemDetailHtml } from './warren-ui.js';
 import { renderTowerHtml, renderMasteryHtml, renderBatchHtml } from './warren-extra-ui.js';
 import { selectNightDefenseTarget, chooseRaidGate, nearestClosedGate } from './warren-defense-ai.js';
 import {renderArmoryHtml,visibleArmoryInventory} from './warren-armory-ui.js';
-import {PHASE1_MAX_LEVEL,stageForWarren,frontierStage,lureQuote,LURE_MODES} from './warren-phase1.js';
+import {PHASE1_MAX_LEVEL,stageForWarren,warrenStageDifficulty,warrenMonsterStats,frontierStage,lureQuote,LURE_MODES} from './warren-phase1.js';
 import {renderLureHtml} from './warren-lure-ui.js';
 import {NPC_COMMON_PRICES,quoteQuickSell,commitQuickSell} from './warren-quick-sell.js';
 import {renderQuickSellHtml} from './warren-quick-sell-ui.js';
@@ -36,7 +36,8 @@ import {FORGE_COST,RESOURCE_COST,applyMonsterResourceBonus,castWarrenHeal,BUILDI
 import {renderHallBuildingHtml,renderBlacksmithBuildingHtml,renderResourceBuildingHtml} from './warren-building-ui.js';
 import {defaultClassSkills,applyBurrowSkillCommand,classActiveCores} from './warren-class-cores.js';
 import {skillUpgradeKind} from '../../src/simulation/skillCoreService.ts';
-import {regenBurrowSp,chooseBurrowCore,resolveBurrowCore,resolveBurrowMovement} from './warren-core-combat.js';
+import {regenBurrowSp,chooseBurrowCore,resolveBurrowCore,resolveBurrowMovement,resolveBurrowMasteryOnHit,persistBurrowMasteryRuntime} from './warren-core-combat.js';
+import {SKILLS_V2} from '../../src/simulation/skills.ts';
 import {renderClassCoreHtml} from './warren-class-core-ui.js';
 import {BASE_CRIT_DAMAGE,rollWarrenCrit,rollMasteryProc,hitFeedback} from './warren-hit-feedback.js';
 
@@ -59,8 +60,9 @@ const squadMax = () => fieldSquadCap(S.warren);
 const towerMax = () => Math.min(TOWER.max, 2 + S.warren);
 const warrenCost = () => warrenConstructionCost(S.warren);
 const reinforceCost = () => fortificationCost(S.fortification,S.warren);
-// wave strength grows with the wave index inside a level and with the warren level
-const levelPower = () => 1 + (S.warren - 1) * .22;
+// Base monster HP/ATK doubles only when the Warren enters its next 5-level
+// region. The existing separate night-wave multiplier still controls each wave.
+const levelPower = () => warrenStageDifficulty(S.warren);
 // Phase 2: ★ class upgrades are replaced with persistent bunny levels and shared class-build gear.
 const HALL = { dmg: 9, cd: 1, range: 300 };
 // archer towers: built with gold + materials around the warren; raiders knock them down on the way in
@@ -381,7 +383,10 @@ function updateTowers(dt) {
     const damage=Math.max(1,Math.round((c.atk+(t.garrison.level-1)*.9+gear.atk)*((g.coreValkyrieUntil||0)>S.time?1.15:1)));
     skillFx?.play(t.garrison.cls==='mage'?'arcBolt':'shotArrow',{from:{x:t.x,y:t.y},to:{x:m.x,y:m.y}});
     later(.22,()=>{if(m.dead||t.hp<=0)return;m.hp-=damage;floaters?.text(m.x,m.y,damage,{color:t.garrison.cls==='mage'?'#ccacff':'#bfe3ff',size:13});
-      combatFX.playHitSpark(m.x,m.y,{visualScale:m.actor.visualScale});if(m.hp<=0)killMonster(m,t.garrison);});
+      combatFX.playHitSpark(m.x,m.y,{visualScale:m.actor.visualScale});
+      if(m.hp<=0)killMonster(m,t.garrison);
+      else castMasteryOnBasicHit(g,m);
+    });
   }
 }
 function hurtTower(t, dmg) {
@@ -469,7 +474,7 @@ let monSeq = 0;
 function spawnMonster(type, x, y, { night = false, power = 1 } = {}) {
   const p = monsterArt.get(type); if (!p) return;
   const boss = !!p.isBoss, elite = !!p.elite;
-  const hp = Math.round((boss ? 300 : elite ? 110 : 45) * power), atk = (boss ? 15 : elite ? 11 : 6) * power;
+  const {hp,atk}=warrenMonsterStats(boss?'boss':elite?'elite':'normal',power);
   const m = { id: ++monSeq, type, p, r: boss ? 22 : 13, x, y, home: { x, y }, hp, maxHp: hp, atk, range: boss ? 70 : 38, cd: 1 + Math.random() * .5, speed: boss ? 60 : elite ? 72 : 78, night, boss, elite, left: false, dead: false };
   m.actor = {
     kind: 'actor', get x() { return m.x + (m.lx ?? 0); }, get y() { return m.y + (m.ly ?? 0); }, z: 0, r: 12,
@@ -530,26 +535,35 @@ function castEquippedCore(u,target,skill){
  const player=result.player;
  u.sp=player.sp;
  u.hp=Math.max(1,Math.min(u.maxHp,player.hp));
+ persistBurrowMasteryRuntime(S,u,player);
  u.coreCooldowns??={};
  for(const event of result.events){
-  if(event.type==='cooldownStarted'&&event.abilityId===skill.id)
-   u.coreCooldowns[skill.id]=S.time+event.durationMs/1000;
+  if(event.type==='cooldownStarted'&&SKILLS_V2[event.abilityId]?.kind!=='weapon')
+   u.coreCooldowns[event.abilityId]=S.time+event.durationMs/1000;
  }
  u.coreBarrierHp=player.barrierHp||0;u.coreBarrierMaxHp=player.barrierMaxHp||0;
  u.coreBarrierUntil=player.barrierUntilMs?S.time+player.barrierUntilMs/1000:0;
  u.coreBarrierBreakHeal=player.barrierBreakHeal||0;
  u.coreValkyrieUntil=player.valkyrieUntilMs?S.time+player.valkyrieUntilMs/1000:0;
  u.coreCastUntil=S.time+.4;
+ const active=S.classSkills?.[u.cls]?.active||[];
+ if(active.length)u.nextCoreSlot=(active.indexOf(skill.id)+1)%active.length;
  u.moving=false;u.dir=facingTo(target.x-u.x,target.y-u.y);
  const from={x:u.x,y:u.y},to={x:target.x,y:target.y};
  skillFx?.play(skill.id,{from,to});
  floaters?.text(u.x,u.y,skill.name+'!',{color:'#87efbd',size:14,lift:62});
  combatSFX.playAttack?.({volume:.22});
  for(const event of result.events){
-  if(event.type==='damageDealt'&&event.sourceId===player.id&&event.targetId!==player.id){
+  if(event.type==='skillCast'&&event.skillId!==skill.id){
+   const chained=SKILLS_V2[event.skillId];if(chained){
+    skillFx?.play(chained.id,{from,to});
+    floaters?.text(u.x,u.y,chained.name+'!',{color:'#f3c67b',size:14,lift:67});
+   }
+  }else if(event.type==='damageDealt'&&event.sourceId===player.id&&event.targetId!==player.id){
    const m=result.enemyById.get(event.targetId);
    if(!m||m.dead)continue;
-   const v=hitFeedback(event.amount,{kind:event.effect?.origin==='ECHO'?'additional':'normal',critical:event.critical,coreName:skill.name});
+   const skillLabel=SKILLS_V2[event.effect?.ability||event.effect?.sourceCoreId]?.name||skill.name;
+   const v=hitFeedback(event.amount,{kind:event.effect?.origin==='ECHO'?'additional':'normal',critical:event.critical,coreName:skillLabel});
    floaters?.text(m.x,m.y,v.text,{color:v.color,size:v.size,lift:v.lift});
    combatFX.playHitSpark(m.x,m.y,{visualScale:m.actor.visualScale});
   }else if(event.type==='healed'&&event.targetId===player.id){
@@ -581,6 +595,50 @@ function castEquippedCore(u,target,skill){
     if(blast>0){m.hp-=blast;floaters?.text(m.x,m.y,blast,{color:'#87efbd',size:16,lift:48});if(m.hp<=0)killMonster(m,u);}
    });
   }
+ }
+ return true;
+}
+// Weapon Mastery Active skills are separate from Skill Cores. One canonical main-game
+// on-hit resolver owns their 25%/fifth-hit/14-hit rules and half-cooldown floors.
+function castMasteryOnBasicHit(u,target){
+ const result=resolveBurrowMasteryOnHit(S,u,target,S.monsters);
+ if(!result.accepted)return false;
+ const player=result.player;
+ persistBurrowMasteryRuntime(S,u,player); // hit counter and gauge advance even without a proc
+ if(!result.events.length)return false;
+ u.hp=Math.max(1,Math.min(u.maxHp,player.hp));
+ const from={x:u.x,y:u.y},to={x:target.x,y:target.y};
+ for(const event of result.events){
+  if(event.type==='skillCast'){
+   const skill=SKILLS_V2[event.skillId];if(!skill)continue;
+   const m=event.targetId?result.enemyById.get(event.targetId):target;
+   skillFx?.play(skill.id,{from,to:{x:m?.x??target.x,y:m?.y??target.y}});
+   floaters?.text(u.x,u.y,skill.name+'!',{color:'#f3c67b',size:14,lift:63});
+  }else if(event.type==='damageDealt'&&event.sourceId===player.id&&event.targetId!==player.id){
+   const m=result.enemyById.get(event.targetId);if(!m||m.dead)continue;
+   const name=SKILLS_V2[event.effect?.ability]?.name||'MASTERY ACTIVE';
+   const display=hitFeedback(event.amount,{critical:event.critical,coreName:name});
+   floaters?.text(m.x,m.y,display.text,{
+    color:event.critical?'#ffe36f':event.effect?.origin==='ECHO'?'#a98cff':'#f3c67b',
+    size:display.size,lift:display.lift});
+   combatFX.playHitSpark(m.x,m.y,{visualScale:m.actor.visualScale});
+  }else if(event.type==='attackMissed'){
+   const m=result.enemyById.get(event.targetId);
+   if(m)floaters?.text(m.x,m.y,'MISS',{color:'#ced8d6',size:13});
+  }else if(event.type==='healed'&&event.targetId===player.id){
+   floaters?.text(u.x,u.y,'+'+event.amount,{color:'#83f0aa',size:14,lift:46});
+  }
+ }
+ const damagedIds=new Set(result.events.filter(e=>e.type==='damageDealt'&&e.sourceId===player.id&&e.targetId!==player.id).map(e=>e.targetId));
+ for(const [id,m] of result.enemyById){
+  const resolved=result.world.monsters.get(id);if(!resolved||m.dead)continue;
+  m.hp=Math.max(0,resolved.hp);
+  if(damagedIds.has(id))m.aggro=u;
+  if((resolved.position.x!==m.x-u.x||resolved.position.y!==m.y-u.y)&&!m.boss){
+   const x=u.x+resolved.position.x,y=u.y+resolved.position.y;
+   if(standable(x,y)&&canWalkStraight(m.x,m.y,x,y)){m.x=x;m.y=y;}
+  }
+  if(m.hp<=0)killMonster(m,u);
  }
  return true;
 }
@@ -641,6 +699,7 @@ function strike(u, target) {
         deal(follow,proc.ratio,{kind:proc.kind,allowCrit:proc.criticalAllowed});
       }
     }
+    if(!target.dead)castMasteryOnBasicHit(u,target);
   });
 }
 function hurtUnit(u, dmg, from) {
@@ -799,7 +858,8 @@ async function useLure(mode){
  for(let i=0;i<points.length;i++){
   const pool=elite.length&&Math.random()<quote.eliteChance?elite:normal.length?normal:elite;
   const id=pool[Math.floor(Math.random()*pool.length)];
-  const m=spawnMonster(id,points[i].x,points[i].y,{power:levelPower()*quote.power});if(m)m.lured=true;
+  const stagePower=quote.mode==='frontier'?warrenStageDifficulty(frontierStage(S.warren).min):levelPower();
+  const m=spawnMonster(id,points[i].x,points[i].y,{power:stagePower*quote.power});if(m)m.lured=true;
  }
  save();renderUi();banner('Threat Lure · '+quote.label,'ล่อมอน '+points.length+' ตัว · ใช้วัตถุดิบ '+quote.mats+' ชิ้น');
  return true;
@@ -1200,6 +1260,12 @@ document.body.addEventListener('click', e => {
   else if(b.dataset.forgeClass){if(selectArmoryClass(b.dataset.forgeClass)){
     S.armoryInventorySelection=[];S.armoryRecipe=null;S.armoryNotice='';S.itemDetailId=null;renderUi();}}
   else if(b.dataset.masteryClass){S.masteryClass=b.dataset.masteryClass;renderUi();}
+  else if(b.dataset.masteryActiveLevel){
+    const cls=b.dataset.masteryActiveClass||S.masteryClass,level=Number(b.dataset.masteryActiveLevel);
+    if(toggleMasteryWeaponSkill(S,cls,level)){
+      save();renderUi();toast('อัปเดต Weapon Mastery Active Lv '+level);
+    }
+  }
   else if(b.dataset.unlockMastery&&!S.night){const r=unlockClassMastery(S,b.dataset.unlockMastery);if(r){save();renderUi();toast('ปลด Mastery Lv '+r.level+' · '+r.milestone.description);}else toast('Mastery ยังไม่ถึงระดับนี้ หรือ Gold ไม่พอ');}
   else if(b.dataset.towerHire&&!S.night){const t=S.towers[S.selectedTower];if(hireGarrison(t,b.dataset.towerHire))toast('จ้าง '+CLASSES[b.dataset.towerHire].name+' ประจำป้อมแล้ว');}
   else if(b.hasAttribute('data-tower-upgrade')&&!S.night){if(upgradeTower(S.towers[S.selectedTower]))toast('เพิ่มความทนทานป้อมแล้ว');}
@@ -1600,6 +1666,7 @@ wallButton.addEventListener('blur',()=>{S.wallPreview=false;});
 { const l = $('loading'); if (l) l.hidden = true; }
 banner(resumed ? `กลับมาแล้ว · วันที่ ${S.day}` : 'วันที่ 1', resumed ? `บ้าน Lv ${S.warren} · เวฟ ${S.warren}-${S.wave}` : 'กระต่ายฟาร์มเองรอบหมู่บ้าน · คลิกป้อมเพื่อจัดทหารประจำป้อม');
 window.__warren = S; window.__warrenDev = { recruit:(cls)=>recruit(cls,true),spawnMonster:(...args)=>spawnMonster(...args),
+  masteryOnHit:(u,m)=>castMasteryOnBasicHit(u,m),
   castCore:(u,m,skillId)=>{const skill=classActiveCores(S,u?.cls).find(x=>x.id===skillId);return Boolean(u&&m&&skill&&castEquippedCore(u,m,skill));},
   placeTower, canWalkStraight, upgradePerimeter, hurtPerimeter, rebuildPerimeter, perimeterHealth:()=>perimeterHealth(S.fences), renderUi, save, upgradeWarren, hireGarrison:(index,cls)=>hireGarrison(S.towers[index],cls),upgradeTower:index=>upgradeTower(S.towers[index]),
   beginTowerMove,relocateTower,canTowerSpot,upgradeForgeBuilding,upgradeResourceBuilding,useHallHeal,updateWorldLabels,quoteQuickSell:()=>quoteQuickSell(S.inventory,S.sellReserve,S.sellSelected),commitQuickSell:()=>{const q=commitQuickSell(S,S.sellReserve,S.sellSelected);if(q){save();renderUi();}return q;}, craftBatch:(id,n)=>{const pieces=craftBatch(S,id,n);save();renderUi();return pieces;},enhanceAll:cls=>{const r=enhanceAll(S,cls);refreshArmy();save();renderUi();return r;},refineGear:id=>{const r=refineGear(S,id);refreshArmy();save();renderUi();return r;}, craftGear:id=>{const item=craftGear(S,id);refreshArmy();save();renderUi();return item;},enhanceGear:id=>{const r=enhanceGear(S,id);refreshArmy();save();renderUi();return r;},dismantleGear:id=>{const n=dismantleGear(S,id);save();renderUi();return n;},autoEquipBuild:(cls,id)=>{const n=autoEquipBuild(S,cls,id);refreshArmy();save();renderUi();return n;} }; // dev hooks

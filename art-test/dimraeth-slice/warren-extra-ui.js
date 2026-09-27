@@ -2,6 +2,9 @@
 import { gameIcon, itemLabel, esc } from './warren-ui.js';
 import { CLASS_FAMILIES, CLASS_IDS, MAX_FIELD_PER_CLASS, MASTERY_GOLD, WEAPON_MASTERY_MILESTONES, equippedGearIds, recommendations, gearScore } from './warren-progression.js';
 import { masteryXpRequired } from '../../src/simulation/mastery.ts';
+import {WEAPON_SKILLS_BY_FAMILY_V2} from '../../src/simulation/skillEntitlements.ts';
+import {SKILLS_V2} from '../../src/simulation/skills.ts';
+import {WEAPON_PROC_RULES_V2} from '../../src/simulation/engine.ts';
 
 const close='<button class="modal-close" data-modal-close aria-label="ปิดหน้าต่าง">✕</button>';
 const head=(icon,title,info)=>`<header class="bc-modal-header"><div>${gameIcon(icon,'ui','◈','bc-header-icon')}<span><h2>${title}</h2><small>${info}</small></span></div>${close}</header>`;
@@ -41,12 +44,22 @@ export function renderMasteryHtml(s,classes){
   return `<article class="bc-master-step ${done?'unlocked':''}">${gameIcon(CLASS_FAMILIES[cls]+'_'+step.id,'mastery','✦','bc-master-art')}
    <div><b>Lv ${step.level} · ${esc(step.id)}</b><p>${esc(step.description)}</p></div>
    <button data-unlock-mastery="${cls}" ${can?'':'disabled'}>${done?'ปลดล็อกแล้ว':state.level<step.level?'Lv '+step.level:MASTERY_GOLD[step.level]+' Gold'}</button></article>`;}).join('');
+ const actives=(WEAPON_SKILLS_BY_FAMILY_V2[CLASS_FAMILIES[cls]]||[]).map((id,index)=>{
+  const level=[10,20,30][index],skill=SKILLS_V2[id],unlocked=state.unlocked.includes(level),enabled=unlocked&&!state.disabledWeaponSkills?.includes(level);
+  const trigger=index===0?Math.round(WEAPON_PROC_RULES_V2.chance*100)+'% ต่อการโจมตี':index===1?'ทุก '+WEAPON_PROC_RULES_V2.everyNthHit+' ครั้งที่โจมตี':'สะสม '+WEAPON_PROC_RULES_V2.gaugeHits+' ครั้งที่โจมตี';
+  return `<article class="bc-mastery-active ${enabled?'unlocked':''}">${gameIcon(id,'skill','✦','bc-master-art')}
+   <div><b>Lv ${level} · ${esc(skill.name)}</b><p>${trigger} · ${skill.hitCount||1} Hit · คูลดาวน์ ${skill.cooldownMs/1000}s</p></div>
+   <button data-mastery-active-level="${level}" data-mastery-active-class="${cls}" ${!unlocked||s.night?'disabled':''}>${!unlocked?'ยังไม่ปลดล็อก':enabled?'ใช้งานอยู่ · กดปิด':'ปิดอยู่ · กดเปิด'}</button></article>`;
+ }).join('');
  return `${head('skill','Class Mastery','สะสม EXP จากมอนสเตอร์ · ใช้ Gold ปลดล็อกทุก 10 ระดับ')}
  <div class="bc-modal-body"><nav class="bc-class-tabs">${tabs}</nav><div class="bc-mastery-progress">
  <div><h3>${esc(classes[cls].name)} · Mastery Lv ${state.level}/50</h3>
  <p>EXP ${Math.floor(state.xp)} / ${need} ${[10,20,30,40,50].includes(state.level)&&!state.unlocked.includes(state.level)?'· รอใช้ Gold ปลดขั้น':''}</p></div>
  <div class="bc-exp"><i style="width:${state.level===50?100:Math.min(100,state.xp/need*100)}%"></i></div></div>
- <div class="bc-master-list">${milestones}</div></div>`;
+ <div class="bc-master-list">${milestones}</div>
+ <section class="bc-mastery-actives"><h3>Weapon Mastery Active · 3 ช่องแยกจาก Skill Core</h3>
+ <p class="bc-help">ปลดล็อกพร้อม Mastery Lv10/20/30 · ทำงานอัตโนมัติเมื่อโจมตีปกติ ตามกฎเกมหลัก ไม่ใช้ SP หรือช่อง Skill Core</p>
+ ${actives}</section></div>`;
 }
 const rarities=['normal','good','rare','epic','legend','mythic','whiteAscended'];
 const rarityLabel={normal:'Normal',good:'Good',rare:'Rare',epic:'Epic',legend:'Legend',mythic:'Mythic',whiteAscended:'White Ascended'};

@@ -175,6 +175,16 @@ export class BunnySimulation implements AuthoritativeSimulation {
     return result;
   }
 
+  /** Host-only hook for games (such as Burrow) that resolve their ordinary hit locally
+   * but delegate learned Weapon Mastery procs to the same authoritative simulation.
+   * This is intentionally not a SimulationCommand: no untrusted client can request
+   * an extra proc through dispatch, and the host calls it only after a real basic hit. */
+  triggerWeaponMasteryOnHit(playerId:EntityId,targetId:EntityId):readonly SimulationEvent[]{
+    const player=this.world.players.get(playerId),target=this.world.monsters.get(targetId);
+    if(!player?.alive||!target?.alive)return[];
+    return this.weaponSkillProcs(player,target);
+  }
+
   /**
    * Weapon Mastery skills are not pressed: they fire from basic attacks.
    * Slot 1 (Lv10) = chance per hit, slot 2 (Lv20) = every Nth hit, slot 3 (Lv30) = charge gauge.

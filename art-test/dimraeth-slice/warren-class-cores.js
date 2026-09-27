@@ -57,6 +57,13 @@ export function applyBurrowSkillCommand(s,cls,command,rng=Math.random){
  if(s.warren<CLASS_CORE_UNLOCK)throw Error('warren-core-locked');
  if(command.type==='equipModifier'&&s.warren<CLASS_MOD_UNLOCKS[command.modSlot])throw Error('warren-mod-locked');
  if(command.type==='equipCore'){
+  // Burrow deliberately forbids duplicate Core IDs within one class, even if
+  // inventory contains multiple physical copies. Main game's service normally
+  // *moves* an existing Core between slots; Burrow requires unequip first.
+  const currently=s.classSkills?.[cls]?.active||[];
+  const targetSlot=command.slot??currently.findIndex(id=>!id);
+  if(currently.some((id,slot)=>id===command.coreId&&slot!==targetSlot))
+   throw new Error('skill-core-already-equipped');
   const def=SKILLS_V2[command.coreId];
   if(def?.compatibleWeaponFamilies?.length&&!def.compatibleWeaponFamilies.includes(CLASS_FAMILIES[cls]))
    throw Error('incompatible-weapon-family');

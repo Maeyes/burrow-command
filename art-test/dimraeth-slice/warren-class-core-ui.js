@@ -1,5 +1,6 @@
 // Uses the same core/mod/item definitions, duplicate costs and slot contract as Bunny World.
-import {CLASS_IDS,CLASS_FAMILIES} from './warren-progression.js';
+import {CLASS_IDS,CLASS_FAMILIES,classWeaponMasterySkills,MASTERY_ACTIVE_LEVELS} from './warren-progression.js';
+import {WEAPON_SKILLS_BY_FAMILY_V2} from '../../src/simulation/skillEntitlements.ts';
 import {CLASS_CORE_UNLOCK,CLASS_MOD_UNLOCKS,classSkillProxy,classSkillQuote} from './warren-class-cores.js';
 import {SKILLS_V2} from '../../src/simulation/skills.ts';
 import {SKILL_MODIFIERS_V2} from '../../src/simulation/skillModifiersV2.ts';
@@ -57,6 +58,14 @@ export function renderClassCoreHtml(s,classes){
   (movement?upgrade(s,cls,movement):'<p>Dash / Blink ใช้ช่องแยกตามเกมหลัก</p>')+'</div></section>';
  const knownItems=Object.keys(s.inventory||{}).filter(id=>skillUpgradeKind(id)&&
   (state.inventory[id]??0)>=0).sort();
+ const masterySlots=classWeaponMasterySkills(s,cls),masterySkills=WEAPON_SKILLS_BY_FAMILY_V2[CLASS_FAMILIES[cls]]||[];
+ const masteryHtml='<section class="bc-mastery-actives"><h3>Weapon Mastery Active · ไม่ใช้ช่อง Skill Core</h3>'+
+  '<p class="bc-help">สกิลอาวุธที่ปลดล็อกจาก Mastery Lv10/20/30 จะทำงานอัตโนมัติเมื่อโจมตีปกติ</p>'+
+  masterySkills.map((id,index)=>'<div class="bc-mastery-active '+(masterySlots[index]?'unlocked':'')+'">'+
+   gameIcon(id,'skill','✦','bc-master-art')+'<div><b>Lv '+MASTERY_ACTIVE_LEVELS[index]+' · '+esc(SKILLS_V2[id].name)+'</b>'+
+   '<p>'+(masterySlots[index]?'ใช้งานอยู่':s.mastery?.[cls]?.unlocked?.includes(MASTERY_ACTIVE_LEVELS[index])?'ปิดอยู่':'ยังไม่ปลดล็อก')+
+   ' · '+((SKILLS_V2[id].cooldownMs||0)/1000)+'s</p></div></div>').join('')+
+  '<button data-open-mastery="'+cls+'">จัดการ Weapon Mastery</button></section>';
  const recycling='<details class="bc-core-recycling"><summary>♻ Skill Core / Mod Shards · ย่อยสำเนาและแลกไอเทมที่เคยพบ</summary>'+
   '<p class="bc-help">สำเนาที่ติดตั้งอยู่กับคลาสอื่นจะถูกกันไว้ด้วย · ย่อยหนึ่งชิ้นได้ 1 Shard · แลกไอเทมที่เคยพบใช้ '+
   SHARD_EXCHANGE_COST+' Shards (กฎเดียวกับเกมหลัก)</p>'+
@@ -75,5 +84,5 @@ export function renderClassCoreHtml(s,classes){
   '<p class="bc-help">ปลดล็อก Core เมื่อ Warren Lv '+CLASS_CORE_UNLOCK+' · Mod 1 Lv '+CLASS_MOD_UNLOCKS[0]+
   ' · Mod 2 Lv '+CLASS_MOD_UNLOCKS[1]+'. ระบบสวมใส่และตี Rarity ใช้กฎเดียวกับเกมหลัก ของที่ดรอปใช้ร่วมกันทุกคลาส'+
   (unlocked?'':' · 🔒 ยังไม่ถึงระดับปลดล็อก')+'</p>'+cards+movementHtml+
-  recycling+'<p class="bc-help">อัปเกรดใช้สำเนา/Shard และ Gold ตามกฎ Skill Core ของเกมหลัก ไม่ได้เพิ่มสกิลพิเศษเฉพาะ Burrow</p></div>';
+  masteryHtml+recycling+'<p class="bc-help">อัปเกรดใช้สำเนา/Shard และ Gold ตามกฎ Skill Core ของเกมหลัก ไม่ได้เพิ่มสกิลพิเศษเฉพาะ Burrow</p></div>';
 }

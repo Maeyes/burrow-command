@@ -6,6 +6,7 @@ import { rollRarity, EQUIPMENT_RARITY_STAT_MULTIPLIER, enhancementRequirement, d
 import { inventoryItemMeta } from '../../src/simulation/itemTagsV2.ts';
 import { masteryXpRequired, masteryContribution, masteryLevelMultiplier } from '../../src/simulation/mastery.ts';
 import { WEAPON_MASTERY_MILESTONES } from '../../src/simulation/masteryMilestones.ts';
+import { WEAPON_SKILLS_BY_FAMILY_V2 } from '../../src/simulation/skillEntitlements.ts';
 import {perimeterBlueprint,perimeterTier,normalizeGateSelections} from './warren-perimeter.js';
 import {buildingLevel,forgeRarityRoll} from './warren-village-buildings.js';
 import {normalizeClassSkills} from './warren-class-cores.js';
@@ -29,6 +30,24 @@ export const SAVE_KEY='burrow-command-save-v3', PRIOR_SAVE_KEY='burrow-command-s
 export const BUNNY_NAMES=['โมจิ','มะลิ','ถั่วแดง','ปุยฝ้าย','ข้าวปั้น','นุ่มนิ่ม','ตังเม','พุดดิ้ง','คุกกี้','จันทร์เจ้า','Mochi','Clover','Pip','Mallow','Hazel','Luna','Poppy','Basil','Maple','Biscuit'];
 // Field squad slots open at Warren Lv 5/7/9. Garrison recruits occupy tower slots, never field slots.
 export const MAX_FIELD_PER_CLASS=2, MASTERY_GOLD={10:180,20:600,30:1750,40:4400,50:11500};
+export const MASTERY_ACTIVE_LEVELS=Object.freeze([10,20,30]);
+// One canonical weapon skill per tier for each fixed Burrow class. Missing saved toggles
+// default to enabled, so existing players receive earned Lv10/20/30 actives without re-unlocking.
+export function classWeaponMasterySkills(s,cls){
+ const m=s.mastery?.[cls],family=CLASS_FAMILIES[cls];
+ return (WEAPON_SKILLS_BY_FAMILY_V2[family]||[]).map((id,index)=>{
+  const level=MASTERY_ACTIVE_LEVELS[index];
+  return m?.unlocked?.includes(level)&&!m?.disabledWeaponSkills?.includes(level)?id:null;
+ });
+}
+export function toggleMasteryWeaponSkill(s,cls,level){
+ const m=s.mastery?.[cls];
+ if(s.night||!CLASS_FAMILIES[cls]||!MASTERY_ACTIVE_LEVELS.includes(level)||!m?.unlocked?.includes(level))return false;
+ const disabled=new Set(m.disabledWeaponSkills||[]);
+ if(disabled.has(level))disabled.delete(level);else disabled.add(level);
+ m.disabledWeaponSkills=[...disabled].sort((a,b)=>a-b);
+ return true;
+}
 export const FIELD_SQUAD_GATES=Object.freeze([{level:1,slots:7},{level:5,slots:9},{level:7,slots:11},{level:9,slots:14}]);
 export const fieldSquadCap=warren=>FIELD_SQUAD_GATES.reduce((cap,gate)=>warren>=gate.level?gate.slots:cap,7);
 export const fieldClassCap=warren=>warren>=5?MAX_FIELD_PER_CLASS:1;
@@ -85,8 +104,12 @@ export function migrateSave(raw){
     refine:Math.max(0,Math.min(15,Math.floor(old?.refine??piece.refine??0)))};
   }
   const old=raw.mastery?.[cls]??{};
+  const unlocked=(old.unlocked||[]).filter(x=>[10,20,30,40,50].includes(x));
   mastery[cls]={level:Math.max(1,Math.min(50,Math.floor(old.level||1))),
-   xp:Math.max(0,Number(old.xp)||0),unlocked:(old.unlocked||[]).filter(x=>[10,20,30,40,50].includes(x))};
+   xp:Math.max(0,Number(old.xp)||0),unlocked,
+   ...(Array.isArray(old.disabledWeaponSkills)&&old.disabledWeaponSkills.length?{
+    disabledWeaponSkills:[...new Set(old.disabledWeaponSkills.filter(x=>MASTERY_ACTIVE_LEVELS.includes(x)&&unlocked.includes(x)))]
+   }:{})};
  }
  // Keep existing field recruits first, favoring one of each class before filling duplicate slots.
  // Extra old recruits go to reserve rather than disappearing when the current Warren squad is full.

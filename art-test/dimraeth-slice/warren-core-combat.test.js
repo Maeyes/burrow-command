@@ -24,6 +24,22 @@ describe('Burrow uses the main BunnySimulation skill executor rather than homebr
   if(id==='barrier')expect(result.player.barrierHp).toBeGreaterThan(0);
   else expect(result.world.monsters.get('burrow-monster-1').hp).toBeLessThan(5000);
  });
+ it('auto-casts every ready active Core, including previously elite-reserved or AoE-only ones',()=>{
+  const s=state('mage','fireball'),u=unit('mage'),m=monster();
+  s.inventory.iceLance=1;s.inventory.cyclone=1;s.inventory.bladeRush=1;
+  applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'iceLance',slot:1});
+  applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'cyclone',slot:2});
+  expect(chooseBurrowCore(s,u,m,[m])?.id).toBe('fireball');
+  u.nextCoreSlot=1;expect(chooseBurrowCore(s,u,m,[m])?.id).toBe('iceLance');
+  u.nextCoreSlot=2;expect(chooseBurrowCore(s,u,m,[m])?.id).toBe('cyclone');
+  // Cyclone's original minimum three-target hint no longer prevents casting.
+  u.coreCooldowns={fireball:s.time+3,iceLance:s.time+3};
+  u.nextCoreSlot=0;expect(chooseBurrowCore(s,u,m,[m])?.id).toBe('cyclone');
+  const scout=state('scout','bladeRush'),rabbit=unit('scout');
+  expect(chooseBurrowCore(scout,rabbit,m,[m])?.id).toBe('bladeRush');
+  rabbit.coreCooldowns={bladeRush:scout.time+5};
+  expect(chooseBurrowCore(scout,rabbit,m,[m])).toBeNull();
+ });
  it('never charges SP or mutates combat on rejected casts; enforces level and inventory',()=>{
   const s=state('mage','fireball'),u=unit(),m=monster();
   s.warren=9;expect(resolveBurrowCore(s,u,m,[m],'fireball',()=>.5)).toMatchObject({accepted:false});

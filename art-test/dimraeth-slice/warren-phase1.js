@@ -12,6 +12,19 @@ export const FUTURE_REGIONS=Object.freeze([
  {min:41,max:50,biome:'snow',tier:5},{min:51,max:60,biome:'underwater',tier:6},
  {min:61,max:70,biome:'asgard',tier:6},
 ]);
+// Difficulty is based exclusively on the Warren's *five-level band*, not on
+// rabbit level, current night, or every single Warren level. Existing four
+// playable stages therefore have base monster HP/ATK ×1, ×2, ×4 and ×8.
+export function warrenStageDifficulty(level){
+ const n=Math.max(1,Math.min(PHASE1_MAX_LEVEL,Math.floor(Number(level)||1)));
+ return 2**Math.floor((n-1)/5);
+}
+// This stat function is used by real spawns as well as balancing tests, so
+// all three ranks gain the same relative HP and ATK at each Warren band.
+export function warrenMonsterStats(rank,power=1){
+ const base=rank==='boss'?{hp:300,atk:15}:rank==='elite'?{hp:110,atk:11}:{hp:45,atk:6};
+ return {hp:Math.round(base.hp*power),atk:base.atk*power};
+}
 export function stageForWarren(level){
  const n=Math.max(1,Math.min(PHASE1_MAX_LEVEL,Math.floor(Number(level)||1)));
  return PHASE1_STAGES.find(stage=>n>=stage.min&&n<=stage.max);

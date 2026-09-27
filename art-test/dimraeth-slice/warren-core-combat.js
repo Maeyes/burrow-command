@@ -6,6 +6,8 @@ import {SKILLS_V2,skillSpCostV2} from '../../src/simulation/skills.ts';
 import {MONSTERS_V2} from '../../src/simulation/monsterDataV2.ts';
 import {skillCoreDamageMultiplier,movementSkillDistanceBonus} from '../../src/simulation/skillCoreService.ts';
 import {classSkillProxy,CLASS_CORE_UNLOCK} from './warren-class-cores.js';
+import {classWeaponMasterySkills} from './warren-progression.js';
+import {WEAPON_MASTERY_MILESTONES} from '../../src/simulation/masteryMilestones.ts';
 
 const FAMILIES={guard:'swordShield',archer:'bow',scout:'dagger',brute:'hammer',axe:'axe',vanguard:'greatsword',mage:'staff'};
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
@@ -18,20 +20,24 @@ export function regenBurrowSp(u,dt,resting=false){
 export function chooseBurrowCore(s,u,target,monsters){
  if(s.warren<CLASS_CORE_UNLOCK||u.down||!target||target.dead)return null;
  const equipped=s.classSkills?.[u.cls]?.active??[];
- for(const id of equipped){
+ // Every equipped active Core is auto-castable, including those marked manual
+ // in the main game's UI. Rotate priority after a successful cast so Slot 1
+ // cannot starve ready Cores in Slot 2/3.
+ for(let offset=0;offset<equipped.length;offset++){
+  const id=equipped[((u.nextCoreSlot||0)+offset)%equipped.length];
   const skill=SKILLS_V2[id];
-  if(!skill||skill.kind!=='active'||!skill.auto?.canAutoUse)continue;
+  if(!skill||skill.kind!=='active')continue;
   if(skill.compatibleWeaponFamilies?.length&&!skill.compatibleWeaponFamilies.includes(FAMILIES[u.cls]))continue;
   if((u.coreCooldowns?.[id]??0)>s.time||u.sp<skillSpCostV2(skill))continue;
   const nearby=monsters.filter(m=>!m.dead&&distance(m,skill.targeting==='selfArea'?u:target)<=((skill.radius??0)||110));
-  const expected=skill.auto.minimumExpectedTargets??skill.auto.minimumEnemyCount??1;
-  if(skill.auto.reserveForEliteBoss&&!target.elite&&!target.boss)continue;
+  // Do not reserve a ready Core for elite/boss or a larger pack; readiness,
+  // sufficient SP and one valid target are enough to fire in Burrow.
   if(skill.id==='healingPulse'&&u.hp>=u.maxHp*.72)continue;
   if(skill.id==='barrier'&&(u.coreBarrierHp??0)>0&&(u.coreBarrierUntil??0)>s.time)continue;
   if(skill.id==='valkyriesCall'&&(u.coreValkyrieUntil??0)>s.time)continue;
   if(skill.scaling&&skill.targeting!=='selfArea'&&distance(u,target)>(skill.range??110))continue;
   if(skill.scaling&&skill.targeting==='selfArea'&&nearby.length===0)continue;
-  if(skill.scaling&&expected>1&&nearby.length<expected)continue;
+
   return skill;
  }
  return null;
@@ -40,6 +46,11 @@ function combatPlayer(s,u,skill){
  const state=classSkillProxy(s,u.cls),installed=state.skills.active.filter(Boolean);
  const stats={level:u.level,str:5,agi:5,vit:5,int:5,dex:5,luk:u.luk||0};
  const coreCooldowns=Object.fromEntries(Object.entries(u.coreCooldowns||{}).map(([id,at])=>[id,Math.max(0,(at-s.time)*1000)]));
+ const priorProc=u.weaponProc||{hits:0,gauge:0,readyAt:{}};
+ const weaponProc={hits:priorProc.hits||0,gauge:priorProc.gauge||0,
+  readyAtMs:Object.fromEntries(Object.entries(priorProc.readyAt||{}).map(([id,at])=>[id,Math.max(0,(at-s.time)*1000)]))};
+ const family=FAMILIES[u.cls],masteryPassives=(WEAPON_MASTERY_MILESTONES[family]||[])
+  .filter(entry=>s.mastery?.[u.cls]?.unlocked?.includes(entry.level)).map(entry=>family+':'+entry.id);
  const installedModifiers=Object.fromEntries(installed.map(id=>[id,state.skills.modifiersByActive?.[id]||[]]));
  const multipliers=Object.fromEntries(installed.map(id=>[id,skillCoreDamageMultiplier(state,id)]));
  const modMultipliers=Object.fromEntries([...new Set(Object.values(installedModifiers).flat().filter(Boolean))]
@@ -51,8 +62,13 @@ function combatPlayer(s,u,skill){
   weaponFamily:FAMILIES[u.cls],weaponAtk:u.cls==='mage'?0:base,weaponMatk:u.cls==='mage'?base:0,
   equipmentDef:u.def||0,equipmentMdef:0,hitBonus:35,fleeBonus:0,critBonusPercent:u.critBonus||0,equipmentAspd:0,
   attackRange:220,moveSpeed:100,dodgeDistance:0,dodgeCooldownMs:1000,nextDodgeAtMs:0,
+  weaponProc,masteryPassives,
+  resonanceReadyAtMs:Math.max(0,((u.coreResonanceReadyAt||0)-s.time)*1000),
+  surgeCasts:(u.coreSurgeCasts||[]).map(x=>({id:x.id,at:(x.at-s.time)*1000})),
+  arcaneSurgeUntilMs:Math.max(0,((u.coreArcaneSurgeUntil||0)-s.time)*1000),
   lastClientSequence:0,nextBasicAttackAtMs:0,cooldowns:coreCooldowns,
-  skillEntitlements:{active:installed,movement:state.skills.movement??undefined,passive:state.skills.passive||[],weaponSkills:[],modifiersByActive:installedModifiers},
+  skillEntitlements:{active:installed,movement:state.skills.movement??undefined,passive:state.skills.passive||[],
+   weaponSkills:classWeaponMasterySkills(s,u.cls),modifiersByActive:installedModifiers},
   skillCoreDamageMultipliers:multipliers,skillModifierMultipliers:modMultipliers,
   movementSkillDistanceBonuses:state.skills.movement?{[state.skills.movement]:movementSkillDistanceBonus(state,state.skills.movement)}:{},
   barrierHp:(u.coreBarrierUntil||0)>s.time?(u.coreBarrierHp||0):0,
@@ -61,6 +77,16 @@ function combatPlayer(s,u,skill){
   barrierBreakHeal:(u.coreBarrierUntil||0)>s.time?(u.coreBarrierBreakHeal||0):0,
   valkyrieUntilMs:(u.coreValkyrieUntil||0)>s.time?(u.coreValkyrieUntil-s.time)*1000:0,
  };
+}
+/** Keep the main simulation's on-hit hit count, gauge and cooldowns across
+ * Burrow's isolated combat snapshots (including Staff Spell Chain from a Core cast). */
+export function persistBurrowMasteryRuntime(s,u,player){
+ if(player.weaponProc){u.weaponProc={hits:player.weaponProc.hits,gauge:player.weaponProc.gauge,
+  readyAt:Object.fromEntries(Object.entries(player.weaponProc.readyAtMs||{})
+   .map(([id,at])=>[id,s.time+at/1000]))};}
+ u.coreResonanceReadyAt=player.resonanceReadyAtMs?s.time+player.resonanceReadyAtMs/1000:0;
+ u.coreSurgeCasts=(player.surgeCasts||[]).map(x=>({id:x.id,at:s.time+x.at/1000}));
+ u.coreArcaneSurgeUntil=player.arcaneSurgeUntilMs?s.time+player.arcaneSurgeUntilMs/1000:0;
 }
 function combatEnemy(m,u){
  const meta=MONSTERS_V2[m.type]||{};
@@ -94,6 +120,20 @@ export function resolveBurrowMovement(s,u,target,walkable,rng=Math.random){
  });
  const result=sim.dispatch({type:'castSkill',playerId:player.id,skillId:id,clientSequence:1,direction:dir});
  return{...result,player,skill};
+}
+/** The host already applied the Burrow basic swing. Trigger ONLY the main
+ * game's Weapon Mastery on-hit resolver, so the basic hit is never counted twice. */
+export function resolveBurrowMasteryOnHit(s,u,target,monsters,rng=Math.random){
+ if(u.down||!target||target.dead||!classWeaponMasterySkills(s,u.cls).some(Boolean))
+  return{accepted:false,reason:'no-weapon-mastery',events:[]};
+ const world=createWorldState('burrow'),player=combatPlayer(s,u),enemyById=new Map();
+ addPlayer(world,player);
+ for(const m of monsters.filter(m=>!m.dead&&distance(m,u)<500)){
+  const snapshot=combatEnemy(m,u);addMonster(world,snapshot);enemyById.set(snapshot.id,m);
+ }
+ const sim=new BunnySimulation(world,rng);
+ const events=sim.triggerWeaponMasteryOnHit(player.id,'burrow-monster-'+target.id);
+ return{accepted:true,events,player,enemyById,world};
 }
 export function resolveBurrowCore(s,u,target,monsters,skillId,rng=Math.random){
  const skill=SKILLS_V2[skillId];
