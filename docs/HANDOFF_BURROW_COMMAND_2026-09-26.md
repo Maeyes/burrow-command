@@ -4,6 +4,8 @@
 
 ## LOCAL RELEASE — v0.4.0 Arcane Defense (28 Sep 2026)
 
+Implementation commit: `9fe8c07` (`Burrow v0.4.0 arcane defense and in-game guide`)
+
 - In-game Guide now contains the former compact guide plus current rules: day/night loop, boss gate, defeat behavior, morning revival, Hero cap, recruitment gates, buildings, walls, defenses, Economy, controls, Armory/Mastery/Core separation, and mobile gestures.
 - Guide and Patch Notes launchers live in the top-left corner; mobile also retains access from the Village drawer. Warren level-ups list newly unlocked systems in the banner/toast.
 - Recruitment: squad caps 7/9/11/14/21 at Warren Lv1/5/7/9/15; Lv5 allows two per class and Lv15 removes the per-class cap.
