@@ -5,7 +5,7 @@ import {createWorldState,addPlayer,addMonster} from '../../src/simulation/world.
 import {SKILLS_V2,skillSpCostV2} from '../../src/simulation/skills.ts';
 import {MONSTERS_V2} from '../../src/simulation/monsterDataV2.ts';
 import {skillCoreDamageMultiplier,movementSkillDistanceBonus} from '../../src/simulation/skillCoreService.ts';
-import {classSkillProxy,CLASS_CORE_UNLOCK} from './warren-class-cores.js';
+import {classSkillProxy,CLASS_CORE_UNLOCK,CORE_SLOT_UNLOCKS} from './warren-class-cores.js';
 import {classWeaponMasterySkills} from './warren-progression.js';
 import {WEAPON_MASTERY_MILESTONES} from '../../src/simulation/masteryMilestones.ts';
 
@@ -19,7 +19,8 @@ export function regenBurrowSp(u,dt,resting=false){
 }
 export function chooseBurrowCore(s,u,target,monsters){
  if(s.warren<CLASS_CORE_UNLOCK||u.down||!target||target.dead)return null;
- const equipped=s.classSkills?.[u.cls]?.active??[];
+ const equipped=(s.classSkills?.[u.cls]?.active??[])
+  .map((id,slot)=>s.warren>=CORE_SLOT_UNLOCKS[slot]?id:null);
  // Every equipped active Core is auto-castable, including those marked manual
  // in the main game's UI. Rotate priority after a successful cast so Slot 1
  // cannot starve ready Cores in Slot 2/3.
@@ -43,7 +44,8 @@ export function chooseBurrowCore(s,u,target,monsters){
  return null;
 }
 function combatPlayer(s,u,skill){
- const state=classSkillProxy(s,u.cls),installed=state.skills.active.filter(Boolean);
+ const state=classSkillProxy(s,u.cls),installed=state.skills.active
+  .filter((id,slot)=>s.warren>=CORE_SLOT_UNLOCKS[slot]&&Boolean(id));
  const stats={level:u.level,str:5,agi:5,vit:5,int:5,dex:5,luk:u.luk||0};
  const coreCooldowns=Object.fromEntries(Object.entries(u.coreCooldowns||{}).map(([id,at])=>[id,Math.max(0,(at-s.time)*1000)]));
  const priorProc=u.weaponProc||{hits:0,gauge:0,readyAt:{}};

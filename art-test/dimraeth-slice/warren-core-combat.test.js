@@ -6,7 +6,7 @@ const BASE={warren:10,time:120,night:false,gold:50000};
 const state=(cls,id,mod)=>{
  const s={...BASE,inventory:{[id]:3,[mod||'lifeDrain']:2},classSkills:defaultClassSkills()};
  applyBurrowSkillCommand(s,cls,{type:'equipCore',coreId:id,slot:0});
- if(mod){s.warren=20;applyBurrowSkillCommand(s,cls,{type:'equipModifier',coreId:id,modifierId:mod,modSlot:0});}
+ if(mod)applyBurrowSkillCommand(s,cls,{type:'equipModifier',coreId:id,modifierId:mod,modSlot:0});
  return s;
 };
 const unit=(cls='mage')=>({cls,level:15,atk:100,maxHp:250,hp:250,sp:100,maxSp:100,x:1200,y:1200,down:false,luk:0,critBonus:0});
@@ -27,11 +27,18 @@ describe('Burrow uses the main BunnySimulation skill executor rather than homebr
  it('auto-casts every ready active Core, including previously elite-reserved or AoE-only ones',()=>{
   const s=state('mage','fireball'),u=unit('mage'),m=monster();
   s.inventory.iceLance=1;s.inventory.cyclone=1;s.inventory.bladeRush=1;
+  s.warren=30;
   applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'iceLance',slot:1});
   applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'cyclone',slot:2});
   expect(chooseBurrowCore(s,u,m,[m])?.id).toBe('fireball');
   u.nextCoreSlot=1;expect(chooseBurrowCore(s,u,m,[m])?.id).toBe('iceLance');
   u.nextCoreSlot=2;expect(chooseBurrowCore(s,u,m,[m])?.id).toBe('cyclone');
+  // Existing equipped Cores stay in saved slots; locked slots cannot cast.
+  s.warren=10;u.nextCoreSlot=1;
+  expect(chooseBurrowCore(s,u,m,[m])?.id).toBe('fireball');
+  expect(resolveBurrowCore(s,u,m,[m],'iceLance',()=>.5).accepted).toBe(false);
+  s.warren=20;expect(chooseBurrowCore(s,u,m,[m])?.id).toBe('iceLance');
+  s.warren=30;
   // Cyclone's original minimum three-target hint no longer prevents casting.
   u.coreCooldowns={fireball:s.time+3,iceLance:s.time+3};
   u.nextCoreSlot=0;expect(chooseBurrowCore(s,u,m,[m])?.id).toBe('cyclone');

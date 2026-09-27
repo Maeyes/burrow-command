@@ -31,7 +31,9 @@ try{
  check('Skill Core surplus uses the main salvage service for exactly one Core Shard',await p.evaluate(()=>
   __warren.inventory.fireball===2&&__warren.inventory.coreShard===1));
  await p.evaluate(()=>{__warren.inventory.coreShard=3;__warrenDev.renderUi()});
- await p.locator('#skillCorePanel .bc-core-recycling summary').click();
+ // The upgraded UI intentionally keeps the recycling section expanded on re-render.
+ if(!(await p.locator('#skillCorePanel .bc-core-recycling').evaluate(el=>el.open)))
+  await p.locator('#skillCorePanel .bc-core-recycling summary').click();
  await p.locator('#skillCorePanel [data-skill-exchange=fireball]').click();
  check('discovered Core exchanges the original three shards for one physical copy',
   await p.evaluate(()=>__warren.inventory.fireball===3&&__warren.inventory.coreShard===0));

@@ -34,7 +34,7 @@ import {NPC_COMMON_PRICES,quoteQuickSell,commitQuickSell} from './warren-quick-s
 import {renderQuickSellHtml} from './warren-quick-sell-ui.js';
 import {FORGE_COST,RESOURCE_COST,applyMonsterResourceBonus,castWarrenHeal,BUILDING_LEVEL_MAX} from './warren-village-buildings.js';
 import {renderHallBuildingHtml,renderBlacksmithBuildingHtml,renderResourceBuildingHtml} from './warren-building-ui.js';
-import {defaultClassSkills,applyBurrowSkillCommand,classActiveCores} from './warren-class-cores.js';
+import {defaultClassSkills,applyBurrowSkillCommand,classSkillQuote,classActiveCores} from './warren-class-cores.js';
 import {skillUpgradeKind} from '../../src/simulation/skillCoreService.ts';
 import {regenBurrowSp,chooseBurrowCore,resolveBurrowCore,resolveBurrowMovement,resolveBurrowMasteryOnHit,persistBurrowMasteryRuntime} from './warren-core-combat.js';
 import {SKILLS_V2} from '../../src/simulation/skills.ts';
@@ -1176,9 +1176,11 @@ function renderUi() {
     // Combat rewards may update the HUD while the player is reading or scrolling a modal.
     // Preserve BOTH its main scroll and nested recipe list instead of replacing the nodes at scroll=0.
     const scrolls=scrollSelectors.map(sel=>[sel,panel.querySelector(sel)?.scrollTop??0]);
+    const coreRecyclingOpen=type==='skillCore'&&panel.querySelector('.bc-core-recycling')?.open;
     panel.hidden=S.modal!==type;
     if(!panel.hidden){
       panel.innerHTML=render();
+      if(coreRecyclingOpen)panel.querySelector('.bc-core-recycling')?.setAttribute('open','');
       for(const [sel,top] of scrolls){const el=panel.querySelector(sel);if(el)el.scrollTop=top;}
       if(type==='hero'&&S.armoryScrollToResults){
         const results=panel.querySelector('.bc-armory-results'),body=panel.querySelector('.bc-modal-body');
@@ -1249,7 +1251,23 @@ document.body.addEventListener('click', e => {
   else if(b.dataset.coreClass){S.coreClass=b.dataset.coreClass;renderUi();}
   else if(b.dataset.skillSalvage){const id=b.dataset.skillSalvage;try{applyBurrowSkillCommand(S,S.coreClass,{type:'salvageSkillItem',itemId:id,qty:1});save();renderUi();toast('ย่อย '+id+' ได้ Shard +1');}catch(e){toast('ย่อยไม่ได้: '+String(e.message||e));}}
   else if(b.dataset.skillExchange){const id=b.dataset.skillExchange;try{applyBurrowSkillCommand(S,S.coreClass,{type:'exchangeShards',itemId:id});save();renderUi();toast('แลก '+id+' สำเร็จ');}catch(e){toast('แลกไม่ได้: '+String(e.message||e));}}
-  else if(b.dataset.skillUpgrade){const id=b.dataset.skillUpgrade;try{const kind=skillUpgradeKind(id);if(!kind)throw Error('invalid-skill-item');applyBurrowSkillCommand(S,S.coreClass,kind==='modifier'?{type:'upgradeModifier',modifierId:id}:kind==='movement'?{type:'upgradeMovementCore',coreId:id}:{type:'upgradeCore',coreId:id});save();renderUi();toast('อัปเกรด '+id+' เสร็จแล้ว');}catch(e){toast('อัปเกรดไม่ได้: '+String(e.message||e));}}
+  else if(b.dataset.skillUpgrade){
+    const id=b.dataset.skillUpgrade;
+    try{
+      const kind=skillUpgradeKind(id),quote=classSkillQuote(S,S.coreClass,id);
+      if(!kind||!quote)throw Error('invalid-skill-upgrade');
+      const before=S.classSkills[S.coreClass]?.coreRarity?.[id]??'normal';
+      const command=kind==='modifier'?{type:'upgradeModifier',modifierId:id}:
+        kind==='movement'?{type:'upgradeMovementCore',coreId:id}:{type:'upgradeCore',coreId:id};
+      applyBurrowSkillCommand(S,S.coreClass,command);
+      const after=S.classSkills[S.coreClass]?.coreRarity?.[id]??'normal',success=before!==after;
+      const label=kind==='modifier'?'Skill Mod':kind==='movement'?'Movement Core':'Skill Core';
+      const msg=success?'✦ '+label+' '+id+' '+before+' → '+after+' สำเร็จ!':
+        label+' '+id+' อัปเกรดไม่สำเร็จ · คงระดับ '+before+' (ใช้ Gold และวัสดุแล้ว)';
+      S.skillUpgradeFeedback={id,success,text:msg};
+      save();renderUi();toast(msg);
+    }catch(e){toast('อัปเกรดไม่ได้: '+String(e.message||e));}
+  }
   else if(b.dataset.openMastery){S.masteryClass=b.dataset.openMastery;S.modal='mastery';renderUi();}
   else if(b.hasAttribute('data-modal-close')){S.modal=null;S.itemDetailId=null;renderUi();}
   else if(b.hasAttribute('data-item-close')){S.itemDetailId=null;S.itemProtect=false;renderUi();}

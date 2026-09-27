@@ -131,7 +131,9 @@ export function applySkillCoreCommand(state:CharacterStateV2,command:SkillCoreCo
    const free=availableSkillUpgradeCopies(state,command.modifierId);
    if(!sameSlot&&free<1)throw new Error('skill-mod-not-owned');
    mods[command.modSlot]=command.modifierId;
-  }else mods.splice(command.modSlot,1);
+  }else mods[command.modSlot]=''; // Vacate this index; do not splice or shift Mod 2.
+  // Clearing Mod 1 must NEVER shift equipped Mod 2 into Mod 1. These are two
+  // persistent physical slots shared by both Bunny World and Burrow.
   skills.modifiersByActive[command.coreId]=mods.slice(0,2);
   return{...state,skills};
  }

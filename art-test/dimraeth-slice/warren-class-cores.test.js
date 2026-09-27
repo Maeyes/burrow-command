@@ -1,5 +1,5 @@
 import {describe,it,expect} from 'vitest';
-import {CLASS_CORE_UNLOCK,CLASS_MOD_UNLOCKS,defaultClassSkills,normalizeClassSkills,classSkillProxy,classSkillQuote,applyBurrowSkillCommand,classActiveCores} from './warren-class-cores.js';
+import {CLASS_CORE_UNLOCK,CORE_SLOT_UNLOCKS,CLASS_MOD_UNLOCKS,defaultClassSkills,normalizeClassSkills,classSkillProxy,classSkillQuote,applyBurrowSkillCommand,classActiveCores} from './warren-class-cores.js';
 import {renderClassCoreHtml} from './warren-class-core-ui.js';
 import {SKILLS_V2} from '../../src/simulation/skills.ts';
 import {SKILL_MODIFIERS_V2} from '../../src/simulation/skillModifiersV2.ts';
@@ -8,29 +8,46 @@ import {HIT_COLORS,BASE_CRIT_DAMAGE,rollWarrenCrit,rollMasteryProc,hitFeedback} 
 const state=()=>({warren:10,night:false,gold:40000,inventory:{fireball:3,lifeDrain:2,dash:1,piercingShot:1,rapidCasting:1},classSkills:defaultClassSkills()});
 const classes=Object.fromEntries(['guard','archer','scout','brute','axe','vanguard','mage'].map(cls=>[cls,{name:cls,icon:'🐰'}]));
 describe('Burrow reuses main-game Skill Core and Modifier authority',()=>{
- it('uses real main-game Core/Mods, three slots, independent movement, and Warren 10/20/30 gates',()=>{
+ it('unlocks a whole Core plus two Mods at each Warren 10 / 20 / 30 milestone',()=>{
   expect(CLASS_CORE_UNLOCK).toBe(10);
-  expect(CLASS_MOD_UNLOCKS).toEqual([20,30]);
+  expect(CORE_SLOT_UNLOCKS).toEqual([10,20,30]);
+  expect(CLASS_MOD_UNLOCKS).toEqual([10,20,30]);
   expect(defaultClassSkills().mage.active).toEqual([null,null,null]);
   expect(SKILLS_V2.fireball.kind).toBe('active');
   expect(SKILL_MODIFIERS_V2.lifeDrain.name).toBe('Life Drain');
-  expect(SKILLS_V2.arcBolt.kind).toBe('weapon'); // not an invented core
-  const s=state();s.warren=9;
+  expect(SKILLS_V2.arcBolt.kind).toBe('weapon'); // not an invented Core
+  const s=state();
+  Object.assign(s.inventory,{iceLance:1,cyclone:1,lingering:2,echo:2,rapidCasting:2});
+  s.warren=9;
   expect(()=>applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'fireball',slot:0})).toThrow('warren-core-locked');
   s.warren=10;
   applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'fireball',slot:0});
-  expect(classActiveCores(s,'mage')[0]).toBe(SKILLS_V2.fireball);
-  expect(()=>applyBurrowSkillCommand(s,'mage',{type:'equipModifier',coreId:'fireball',modifierId:'lifeDrain',modSlot:0})).toThrow('warren-mod-locked');
-  s.warren=20;
   applyBurrowSkillCommand(s,'mage',{type:'equipModifier',coreId:'fireball',modifierId:'lifeDrain',modSlot:0});
-  expect(()=>applyBurrowSkillCommand(s,'mage',{type:'equipModifier',coreId:'fireball',modifierId:'rapidCasting',modSlot:1})).toThrow('warren-mod-locked');
-  s.warren=30;
   applyBurrowSkillCommand(s,'mage',{type:'equipModifier',coreId:'fireball',modifierId:'rapidCasting',modSlot:1});
+  expect(s.classSkills.mage.modifiersByActive.fireball).toEqual(['lifeDrain','rapidCasting']);
+  expect(classActiveCores(s,'mage')).toEqual([SKILLS_V2.fireball]);
+  expect(()=>applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'iceLance',slot:1})).toThrow('warren-core-slot-locked');
+  expect(()=>applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'cyclone',slot:2})).toThrow('warren-core-slot-locked');
+  s.warren=20;
+  applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'iceLance',slot:1});
+  applyBurrowSkillCommand(s,'mage',{type:'equipModifier',coreId:'iceLance',modifierId:'lingering',modSlot:0});
+  applyBurrowSkillCommand(s,'mage',{type:'equipModifier',coreId:'iceLance',modifierId:'echo',modSlot:1});
+  expect(s.classSkills.mage.modifiersByActive.iceLance).toEqual(['lingering','echo']);
+  expect(()=>applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'cyclone',slot:2})).toThrow('warren-core-slot-locked');
+  s.warren=30;
+  applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'cyclone',slot:2});
+  expect(classActiveCores(s,'mage')).toEqual([SKILLS_V2.fireball,SKILLS_V2.iceLance,SKILLS_V2.cyclone]);
   applyBurrowSkillCommand(s,'mage',{type:'equipMovementCore',coreId:'dash'});
-  expect(s.classSkills.mage.movement).toBe('dash');
   const recovered=normalizeClassSkills(JSON.parse(JSON.stringify(s.classSkills)));
   expect(recovered.mage.modifiersByActive.fireball).toEqual(['lifeDrain','rapidCasting']);
+  expect(recovered.mage.modifiersByActive.iceLance).toEqual(['lingering','echo']);
   expect(recovered.mage.movement).toBe('dash');
+  s.warren=10; // A pre-existing slot-2 loadout is stored, never silently unequipped.
+  expect(classActiveCores(s,'mage')).toEqual([SKILLS_V2.fireball]);
+  expect(s.classSkills.mage.active).toEqual(['fireball','iceLance','cyclone']);
+  expect(()=>applyBurrowSkillCommand(s,'mage',{type:'upgradeModifier',modifierId:'lingering'})).toThrow('warren-mod-locked');
+  s.warren=20;
+  expect(classActiveCores(s,'mage')).toEqual([SKILLS_V2.fireball,SKILLS_V2.iceLance]);
  });
  it('uses actual monster-owned items, family compatibility and global copy reservations',()=>{
   const s=state();
@@ -45,7 +62,7 @@ describe('Burrow reuses main-game Skill Core and Modifier authority',()=>{
   expect(()=>applyBurrowSkillCommand(s,'archer',{type:'equipCore',coreId:'fireball',slot:0})).toThrow('daytime-only');
  });
  it('forbids a duplicate Core inside one class even with multiple owned copies and heals corrupt saves',()=>{
-  const s=state();s.inventory.fireball=4;
+  const s=state();s.warren=30;s.inventory.fireball=4;
   applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'fireball',slot:0});
   expect(()=>applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'fireball',slot:1}))
     .toThrow('skill-core-already-equipped');
@@ -63,6 +80,37 @@ describe('Burrow reuses main-game Skill Core and Modifier authority',()=>{
   applyBurrowSkillCommand(s,'mage',{type:'unequipCore',slot:0});
   applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'fireball',slot:1});
   expect(s.classSkills.mage.active).toEqual([undefined,'fireball',null]);
+ });
+ it('keeps both equipped Mod slots stable when Mod 1 is removed, replaced or upgraded, including after reload',()=>{
+  const s=state();s.gold=200000;s.inventory.lifeDrain=7;s.inventory.rapidCasting=1;s.inventory.echo=1;
+  applyBurrowSkillCommand(s,'mage',{type:'equipCore',coreId:'fireball',slot:0});
+  applyBurrowSkillCommand(s,'mage',{type:'equipModifier',coreId:'fireball',modifierId:'lifeDrain',modSlot:0});
+  applyBurrowSkillCommand(s,'mage',{type:'equipModifier',coreId:'fireball',modifierId:'rapidCasting',modSlot:1});
+  const quote=classSkillQuote(s,'mage','lifeDrain');
+  expect(quote).toMatchObject({kind:'modifier',duplicateQty:6,availableDuplicates:6,gold:10000,successRate:1});
+  const originalGold=s.gold;
+  applyBurrowSkillCommand(s,'mage',{type:'upgradeModifier',modifierId:'lifeDrain'},()=>0);
+  expect(s.gold).toBe(originalGold-quote.gold);
+  expect(s.inventory.lifeDrain).toBe(1);
+  expect(s.classSkills.mage.coreRarity.lifeDrain).toBe('good');
+  expect(s.classSkills.mage.modifiersByActive.fireball).toEqual(['lifeDrain','rapidCasting']);
+  s.inventory.modShard=12;
+  const next=classSkillQuote(s,'mage','lifeDrain');
+  expect(next).toMatchObject({kind:'modifier',gold:30000,shardsNeeded:12,successRate:.7});
+  const beforeFailed=s.gold;
+  applyBurrowSkillCommand(s,'mage',{type:'upgradeModifier',modifierId:'lifeDrain'},()=>.99);
+  expect(s.gold).toBe(beforeFailed-30000);
+  expect(s.inventory.modShard).toBe(0);
+  expect(s.classSkills.mage.coreRarity.lifeDrain).toBe('good'); // Failed upgrade still consumes materials.
+  expect(s.classSkills.mage.modifiersByActive.fireball).toEqual(['lifeDrain','rapidCasting']);
+  applyBurrowSkillCommand(s,'mage',{type:'unequipModifier',coreId:'fireball',modSlot:0});
+  expect(s.classSkills.mage.modifiersByActive.fireball[1]).toBe('rapidCasting');
+  expect(s.classSkills.mage.modifiersByActive.fireball[0]).toBeFalsy();
+  applyBurrowSkillCommand(s,'mage',{type:'equipModifier',coreId:'fireball',modifierId:'echo',modSlot:0});
+  expect(s.classSkills.mage.modifiersByActive.fireball).toEqual(['echo','rapidCasting']);
+  const raw=JSON.parse(JSON.stringify(s.classSkills));
+  expect(normalizeClassSkills(raw).mage.modifiersByActive.fireball).toEqual(['echo','rapidCasting']);
+  expect(s.classSkills.mage.active[0]).toBe('fireball');
  });
  it('main service authorizes exact Core rarity cost, duplicate consumption and Gold',()=>{
   const s=state();

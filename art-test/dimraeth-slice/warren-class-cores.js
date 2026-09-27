@@ -6,8 +6,11 @@ import {applySkillCoreCommand,skillItemUpgradeQuote,equippedSkillItemCount} from
 
 const CLASS_FAMILIES={guard:'swordShield',archer:'bow',scout:'dagger',brute:'hammer',axe:'axe',vanguard:'greatsword',mage:'staff'};
 export const CORE_CLASS_IDS=Object.keys(CLASS_FAMILIES);
-export const CLASS_CORE_UNLOCK=10;
-export const CLASS_MOD_UNLOCKS=Object.freeze([20,30]);
+// Every five-house-level milestone unlocks one COMPLETE Core build: one
+// active Core and both Mod slots. Earlier unlocks never move equipped items.
+export const CORE_SLOT_UNLOCKS=Object.freeze([10,20,30]);
+export const CLASS_CORE_UNLOCK=CORE_SLOT_UNLOCKS[0];
+export const CLASS_MOD_UNLOCKS=CORE_SLOT_UNLOCKS;
 const RARITIES=['normal','good','rare','epic','legend','mythic','whiteAscended'];
 const validCore=id=>SKILLS_V2[id]&&['active','passive'].includes(SKILLS_V2[id].kind);
 const blank=()=>({active:[null,null,null],movement:null,passive:[],modifiersByActive:{},slotMods:[[],[],[]],coreRarity:{}});
@@ -55,15 +58,22 @@ export function applyBurrowSkillCommand(s,cls,command,rng=Math.random){
  if(!CORE_CLASS_IDS.includes(cls))throw Error('invalid-class');
  if(s.night)throw Error('daytime-only');
  if(s.warren<CLASS_CORE_UNLOCK)throw Error('warren-core-locked');
- if(command.type==='equipModifier'&&s.warren<CLASS_MOD_UNLOCKS[command.modSlot])throw Error('warren-mod-locked');
+ if(command.type==='equipModifier'||command.type==='unequipModifier'||command.type==='upgradeModifier'){
+  const id=command.coreId??s.classSkills?.[cls]?.active?.find(id=>id&&s.classSkills[cls].modifiersByActive?.[id]?.includes(command.modifierId));
+  const slot=s.classSkills?.[cls]?.active?.indexOf(id)??-1;
+  if(command.type!=='upgradeModifier'&&(![0,1].includes(command.modSlot)||slot<0))throw Error('invalid-mod-slot');
+  if(slot<0||s.warren<CORE_SLOT_UNLOCKS[slot])throw Error('warren-mod-locked');
+ }
  if(command.type==='equipCore'){
+  const active=s.classSkills?.[cls]?.active??[];
+  const targetSlot=command.slot??active.findIndex((id,slot)=>!id&&s.warren>=CORE_SLOT_UNLOCKS[slot]);
+  if(targetSlot<0||targetSlot>2||s.warren<CORE_SLOT_UNLOCKS[targetSlot])throw Error('warren-core-slot-locked');
   // Burrow deliberately forbids duplicate Core IDs within one class, even if
   // inventory contains multiple physical copies. Main game's service normally
   // *moves* an existing Core between slots; Burrow requires unequip first.
-  const currently=s.classSkills?.[cls]?.active||[];
-  const targetSlot=command.slot??currently.findIndex(id=>!id);
-  if(currently.some((id,slot)=>id===command.coreId&&slot!==targetSlot))
+  if(active.some((id,slot)=>id===command.coreId&&slot!==targetSlot))
    throw new Error('skill-core-already-equipped');
+  command={...command,slot:targetSlot};
   const def=SKILLS_V2[command.coreId];
   if(def?.compatibleWeaponFamilies?.length&&!def.compatibleWeaponFamilies.includes(CLASS_FAMILIES[cls]))
    throw Error('incompatible-weapon-family');
@@ -80,5 +90,7 @@ export function applyBurrowSkillCommand(s,cls,command,rng=Math.random){
 }
 export function classActiveCores(s,cls){
  if(s.warren<CLASS_CORE_UNLOCK)return[];
- return (s.classSkills?.[cls]?.active||[]).filter(id=>validCore(id)).map(id=>SKILLS_V2[id]);
+ return (s.classSkills?.[cls]?.active||[])
+  .filter((id,slot)=>s.warren>=CORE_SLOT_UNLOCKS[slot]&&validCore(id))
+  .map(id=>SKILLS_V2[id]);
 }
