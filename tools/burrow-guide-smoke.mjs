@@ -14,7 +14,7 @@ try{
  await page.locator('#guidePanel [data-modal-close]').click();
  await page.click('[data-mobile-open="village"]');
  await page.locator('.mobile-village-shortcuts [data-open-patch-notes]').click();
- check('Patch Notes displays the current version and gameplay changes',await page.locator('#patchNotesPanel').isVisible()&&/v0\.4\.0/.test(await page.locator('#patchNotesPanel').innerText())&&/รถยิงเวทย์/.test(await page.locator('#patchNotesPanel').innerText()));
+ check('Patch Notes displays the current version and gameplay changes',await page.locator('#patchNotesPanel').isVisible()&&/v0\.4\.1/.test(await page.locator('#patchNotesPanel').innerText())&&/ทิศเหนือ/.test(await page.locator('#patchNotesPanel').innerText())&&/รถยิงเวทย์/.test(await page.locator('#patchNotesPanel').innerText()));
  check('guide and patch modals fit the mobile viewport',await page.locator('#patchNotesPanel').evaluate(el=>{const r=el.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight;}));
  const unlockMessage=await page.evaluate(()=>{
   __warren.modal=null;__warren.warren=4;__warren.cleared=true;__warren.night=false;__warren.inventory.livingMoss=10000;

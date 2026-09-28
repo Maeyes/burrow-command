@@ -28,7 +28,7 @@ import { itemLabel, gameIcon, renderSquadHtml, renderForgeHtml, renderHeroHtml, 
 import { renderTowerHtml,renderMagicCartHtml, renderMasteryHtml, renderBatchHtml } from './warren-extra-ui.js';
 import { selectNightDefenseTarget, chooseRaidGate, nearestClosedGate, assignedGateDefensePost } from './warren-defense-ai.js';
 import {renderArmoryHtml,visibleArmoryInventory} from './warren-armory-ui.js';
-import {PHASE1_MAX_LEVEL,stageForWarren,warrenStageDifficulty,warrenMonsterStats,frontierStage,lureQuote,LURE_MODES} from './warren-phase1.js';
+import {PHASE1_MAX_LEVEL,NIGHT_INVASION_DIRECTIONS,stageForWarren,warrenStageDifficulty,warrenMonsterStats,frontierStage,lureQuote,LURE_MODES} from './warren-phase1.js';
 import {renderLureHtml} from './warren-lure-ui.js';
 import {NPC_COMMON_PRICES,quoteQuickSell,commitQuickSell} from './warren-quick-sell.js';
 import {renderQuickSellHtml} from './warren-quick-sell-ui.js';
@@ -602,7 +602,7 @@ function fieldPoint() {
   }
   return null;
 }
-const edgePoints = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(([ax, ay]) => ({ x: CENTER.x + ax * 1100, y: CENTER.y + ay * 1100 }));
+const edgePoints = NIGHT_INVASION_DIRECTIONS.map(({side,ax,ay}) => ({side,x:CENTER.x+ax*1100,y:CENTER.y+ay*1100}));
 function killMonster(m, by) {
   m.dead = true; S.kills++;
   (m.boss ? combatFX.playBossDeath : combatFX.playNormalDeath).call(combatFX, m.x, m.y, { visualScale: m.actor.visualScale });
@@ -1102,7 +1102,7 @@ function tick(dt) {
     S.waveTimer -= dt;
     if (S.queue.length && S.waveTimer <= 0) {
       S.waveTimer = 1.4 / Math.max(1, (S.nightWave + S.warren - 1) * .5);
-      const e = edgePoints[Math.floor(Math.random() * 4)], type = S.queue.shift();
+      const e = edgePoints[Math.floor(Math.random() * edgePoints.length)], type = S.queue.shift();
       // the boss scales with the warren level only, not with the wave index
       for (let t = 0; t < 10; t++) { const x = e.x + (Math.random() - .5) * 160, y = e.y + (Math.random() - .5) * 160; if (standable(x, y)) { spawnMonster(type, x, y, { night: true, power: type === bossId ? levelPower() : S.wavePower }); break; } }
     }

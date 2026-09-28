@@ -1,7 +1,12 @@
 import {describe,it,expect} from 'vitest';
 import {unlockedTier,giveBunnyExp} from './warren-progression.js';
-import {PHASE1_MAX_LEVEL,PHASE1_STAGES,FUTURE_REGIONS,warrenStageDifficulty,warrenMonsterStats,stageForWarren,frontierStage,lureQuote,LURE_MODES} from './warren-phase1.js';
+import {PHASE1_MAX_LEVEL,PHASE1_STAGES,FUTURE_REGIONS,NIGHT_INVASION_DIRECTIONS,warrenStageDifficulty,warrenMonsterStats,stageForWarren,frontierStage,lureQuote,LURE_MODES} from './warren-phase1.js';
 describe('Burrow Command Phase 1 world and lure plan',()=>{
+ it('uses only east, west and south monster entrances in every biome',()=>{
+  expect(NIGHT_INVASION_DIRECTIONS.map(x=>x.side)).toEqual(['east','west','south']);
+  expect(NIGHT_INVASION_DIRECTIONS.some(x=>x.ay<0)).toBe(false);
+  for(const region of [...PHASE1_STAGES,...FUTURE_REGIONS])expect(NIGHT_INVASION_DIRECTIONS).toHaveLength(3);
+ });
  it('alternates maps every five Warren levels with one equipment tier per ten levels',()=>{
   expect(PHASE1_MAX_LEVEL).toBe(20);
   expect(PHASE1_STAGES.map(s=>[s.min,s.max,s.mapId,s.tier])).toEqual([

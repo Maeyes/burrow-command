@@ -2,6 +2,12 @@
 
 > Release policy (28 Sep 2026): every future Gameplay/UI update must increment the in-game semantic version and add a player-facing Patch Notes entry in `warren-guide.js`. Keep the full Guide and Warren-level unlock messages synchronized with implemented rules.
 
+## LOCAL / UNCOMMITTED — v0.4.1 North Approach Closed (28 Sep 2026)
+
+- Night invasion spawning is now limited to east, west and south. The north approach is excluded by the shared `NIGHT_INVASION_DIRECTIONS`, so the rule applies to Forest, Desert and all reserved future biome themes without per-map exceptions.
+- The in-game Guide and Patch Notes are updated to v0.4.1. Daytime hunting monsters may still live around the wider forest; this change specifically closes the northern **night invasion entrance**.
+- Not pushed or deployed. The prior committed local release remains `9fe8c07` plus handoff commit `b520a37`.
+
 ## LOCAL RELEASE — v0.4.0 Arcane Defense (28 Sep 2026)
 
 Implementation commit: `9fe8c07` (`Burrow v0.4.0 arcane defense and in-game guide`)

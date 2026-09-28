@@ -1,5 +1,10 @@
 // Burrow Command: stage gates. Only Forest/Desert are playable during the first 20 Warren levels.
 export const PHASE1_MAX_LEVEL=20;
+// The north edge is reserved for the future mountain/back-wall expansion.
+// Every biome uses the same three invasion lanes: east, west and south only.
+export const NIGHT_INVASION_DIRECTIONS=Object.freeze([
+ {side:'east',ax:1,ay:0},{side:'west',ax:-1,ay:0},{side:'south',ax:0,ay:1},
+]);
 export const PHASE1_STAGES=Object.freeze([
  {min:1,max:5,biome:'forest',roster:'forest',mapId:'forest1',name:'Forest I',tier:1},
  {min:6,max:10,biome:'forest',roster:'forest',mapId:'forest2',name:'Forest II',tier:1},
