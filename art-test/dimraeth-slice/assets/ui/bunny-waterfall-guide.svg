@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="875" viewBox="0 0 1200 875" role="img" aria-labelledby="title desc">
+<title id="title">คู่มือสร้างน้ำตก Burrow Command</title>
+<desc id="desc">ภาพคู่มือสองรูปแบบ แบบสร้างเนินเองต้องมีเนินติดกันสามช่องและระบายน้ำบนช่องกลางของเนิน ต่อเนื่องลงบ่อรับน้ำและแม่น้ำ แบบหน้าผาธรรมชาติระดับสามต้องซื้อและขยายพื้นที่เหนือครบสองช่วง หน้าผามีต้นน้ำในตัว ให้ระบายบ่อรับน้ำที่แถวแรกใต้หน้าผาและแม่น้ำอีกสองช่อง แล้วคลิกบ่อรับน้ำแถวแรกด้วยเครื่องมือน้ำตก หลังวาดพื้นทุกครั้งต้องกดยืนยันและรอโหลดฉาก</desc>
+<defs>
+ <linearGradient id="back" x2="0" y2="1"><stop stop-color="#24362b"/><stop offset="1" stop-color="#111a18"/></linearGradient>
+ <linearGradient id="panel" x2="0" y2="1"><stop stop-color="#2a3f34"/><stop offset="1" stop-color="#1c2c27"/></linearGradient>
+ <linearGradient id="water" x2="0" y2="1"><stop stop-color="#76d6dd"/><stop offset="1" stop-color="#236b9a"/></linearGradient>
+ <pattern id="pixels" width="28" height="28" patternUnits="userSpaceOnUse"><rect x="4" y="5" width="2" height="2" fill="#5b8763" opacity=".35"/><rect x="23" y="16" width="3" height="2" fill="#f7df96" opacity=".12"/></pattern>
+ <g id="grassTile"><rect width="112" height="73" rx="5" fill="#466d42" stroke="#a4c080" stroke-width="2"/><path d="M13 25l4-8 5 8 4-12 3 12M75 54l4-8 5 8 4-12 3 12" stroke="#92b76b" stroke-width="3" fill="none"/><rect x="42" y="16" width="5" height="5" fill="#e5ca7d" opacity=".5"/></g>
+ <g id="hillTile"><rect width="112" height="73" rx="5" fill="#63744b" stroke="#d9c18a" stroke-width="2"/><path d="M0 48h112v24H0Z" fill="#85664a"/><path d="M0 47h112" stroke="#e2c994" stroke-width="5"/><rect x="16" y="16" width="8" height="5" fill="#a3ad69"/><rect x="86" y="26" width="12" height="5" fill="#a3ad69"/><path d="M6 57h19m39 6h22" stroke="#af8a62" stroke-width="3"/></g>
+ <g id="waterTile"><rect width="112" height="73" rx="5" fill="#27677e" stroke="#95d4cb" stroke-width="2"/><path d="M9 23q14-11 29 0t28 0t33 1 M7 54q16-10 31-1t28-1t37 1" fill="none" stroke="#74d4d3" stroke-width="4"/><path d="M17 39h20m43 3h23" stroke="#b6eee4" stroke-width="2"/></g>
+ <g id="sourceTile"><rect width="112" height="73" rx="5" fill="#496d51" stroke="#e3cc94" stroke-width="2"/><path d="M0 49h112v24H0Z" fill="#85664a"/><path d="M2 46h108" stroke="#e2c994" stroke-width="4"/><path d="M5 23q14-11 29 0t28 0t43 1M8 40q15-8 34-1t38-2t27-1" fill="none" stroke="#70d6e1" stroke-width="7"/><circle cx="56" cy="29" r="10" fill="#beeef1" opacity=".75"/></g>
+ <g id="arrow"><path d="M0-12v26m-10-8L0 18 10 6" stroke="#f5d07d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></g>
+ <style>
+ text{font-family:Tahoma,"Noto Sans Thai","Leelawadee UI",sans-serif}
+ .heading{font-size:42px;font-weight:900;fill:#fff0c3}
+ .sub{font-size:18px;fill:#c4d9c5}
+ .panelTitle{font-size:26px;font-weight:800;fill:#ffe4a1}
+ .note{font-size:17px;fill:#d8e8d6}
+ .small{font-size:14px;fill:#e4f0d9}
+ .tilelabel{font-size:16px;font-weight:800;fill:#fff8e1;paint-order:stroke;stroke:#234538;stroke-width:3px;stroke-linejoin:round}
+ .step{font-size:18px;font-weight:800;fill:#fff0c5}
+ .stepSmall{font-size:14px;fill:#d4e7d3}
+ </style>
+</defs>
+<rect width="1200" height="875" fill="url(#back)"/><rect width="1200" height="875" fill="url(#pixels)"/>
+<rect x="28" y="18" width="1144" height="108" rx="12" fill="#304b39" stroke="#b7ae6d" stroke-width="3"/>
+<path d="M47 104h1105" stroke="#66875f" stroke-width="2"/>
+<text class="heading" x="59" y="70">WATERFALL BUILDER  ·  คู่มือสร้างน้ำตก</text>
+<text class="sub" x="62" y="101">ต้องมีต้นน้ำบนที่สูง → บ่อรับน้ำด้านล่าง → แม่น้ำที่ต่อเนื่อง ก่อนกดสร้างน้ำตก</text>
+<rect x="31" y="145" width="552" height="520" rx="10" fill="url(#panel)" stroke="#8fa87a" stroke-width="3"/>
+<rect x="598" y="145" width="570" height="520" rx="10" fill="url(#panel)" stroke="#8fa87a" stroke-width="3"/>
+<rect x="46" y="161" width="521" height="53" rx="7" fill="#415b43"/>
+<text class="panelTitle" x="60" y="197">A. น้ำตกจากเนินที่สร้างเอง</text>
+<text class="note" x="63" y="240">ซื้อ Plot เหนือ + ย้ายกำแพงก่อน แล้วจัด 3 ช่องเนินติดกัน</text>
+<!-- Four-row top-down grid accurately mirrors the build rules. -->
+<g transform="translate(111 254)">
+ <use href="#hillTile" x="0" y="0"/><use href="#sourceTile" x="118" y="0"/><use href="#hillTile" x="236" y="0"/>
+ <use href="#grassTile" x="0" y="79"/><use href="#waterTile" x="118" y="79"/><use href="#grassTile" x="236" y="79"/>
+ <use href="#grassTile" x="0" y="158"/><use href="#waterTile" x="118" y="158"/><use href="#grassTile" x="236" y="158"/>
+ <use href="#grassTile" x="0" y="237"/><use href="#waterTile" x="118" y="237"/><use href="#grassTile" x="236" y="237"/>
+ <text class="tilelabel" x="56" y="40" text-anchor="middle">เนิน</text>
+ <text class="tilelabel" x="174" y="40" text-anchor="middle">ต้นน้ำ</text>
+ <text class="tilelabel" x="292" y="40" text-anchor="middle">เนิน</text>
+ <text class="tilelabel" x="174" y="119" text-anchor="middle">บ่อรับน้ำ</text>
+ <text class="tilelabel" x="174" y="198" text-anchor="middle">แม่น้ำ</text>
+ <text class="tilelabel" x="174" y="277" text-anchor="middle">แม่น้ำ</text>
+</g>
+<rect x="58" y="576" width="498" height="71" rx="7" fill="#365044" stroke="#7faf83"/>
+<text class="note" x="72" y="603" font-weight="800">สำคัญ: ลงน้ำบนช่องกลางของเนินด้วย</text>
+<text class="small" x="72" y="628">ต้องมีน้ำบนยอดเนิน + บ่อที่ต่ำกว่า + น้ำไหลต่อเนื่อง</text>
+<!-- Natural cliff layout -->
+<rect x="612" y="161" width="541" height="53" rx="7" fill="#415b43"/>
+<text class="panelTitle" x="626" y="197">B. น้ำตกจากหน้าผาธรรมชาติ Lv 3</text>
+<text class="note" x="628" y="240">ซื้อเหนือสองช่วง และขยายจนชนหน้าผาด้านบนสุด</text>
+<rect x="665" y="257" width="435" height="132" rx="7" fill="#725d4d" stroke="#d3ba91" stroke-width="3"/>
+<path d="M665 275h435v-18H665Z" fill="#70915e"/>
+<path d="M677 305h411M691 337h390M677 369h411" stroke="#b19270" stroke-width="5" stroke-dasharray="26 12"/>
+<path d="M855 264q-24 36-8 70t-5 51h93q-12-33 5-58t-6-63Z" fill="url(#water)" stroke="#b8e9ea" stroke-width="5"/>
+<path d="M874 269q-15 32-5 59t-3 51m45-111q-9 33-1 62t0 49" stroke="#d3f6ee" stroke-width="5" fill="none" stroke-dasharray="16 11"/>
+<rect x="679" y="286" width="170" height="42" rx="5" fill="#314638" stroke="#a7c89a" stroke-width="2"/>
+<text class="tilelabel" x="763" y="313" text-anchor="middle">ต้นน้ำมีให้แล้ว</text>
+<text class="tilelabel" x="964" y="332" text-anchor="middle">หน้าผา Lv 3</text>
+<use href="#grassTile" x="721" y="401"/><use href="#waterTile" x="839" y="401"/><use href="#grassTile" x="957" y="401"/>
+<use href="#grassTile" x="721" y="480"/><use href="#waterTile" x="839" y="480"/><use href="#grassTile" x="957" y="480"/>
+<use href="#grassTile" x="721" y="559"/><use href="#waterTile" x="839" y="559"/><use href="#grassTile" x="957" y="559"/>
+<text class="tilelabel" x="895" y="442" text-anchor="middle">บ่อรับน้ำ</text>
+<text class="tilelabel" x="895" y="521" text-anchor="middle">แม่น้ำ</text>
+<text class="tilelabel" x="895" y="600" text-anchor="middle">แม่น้ำ</text>
+<text class="small" x="626" y="644">เปิดโหมดน้ำตก แล้วแตะบ่อรับน้ำแถวแรกใต้หน้าผา</text>
+<!-- Practical workflow -->
+<rect x="31" y="682" width="1137" height="173" rx="10" fill="#34493c" stroke="#b7ae6d" stroke-width="3"/>
+<text x="54" y="717" fill="#fff0c4" font-family="Tahoma, sans-serif" font-size="24" font-weight="900">ขั้นตอนในเกม</text>
+<g>
+ <rect x="53" y="734" width="203" height="100" rx="7" fill="#223a33" stroke="#78977a"/>
+ <rect x="275" y="734" width="203" height="100" rx="7" fill="#223a33" stroke="#78977a"/>
+ <rect x="497" y="734" width="203" height="100" rx="7" fill="#223a33" stroke="#78977a"/>
+ <rect x="719" y="734" width="203" height="100" rx="7" fill="#223a33" stroke="#78977a"/>
+ <rect x="941" y="734" width="203" height="100" rx="7" fill="#223a33" stroke="#d9bd76"/>
+ <text class="step" x="66" y="765">1  ซื้อ Plot เหนือ</text><text class="stepSmall" x="66" y="790">ขยายกำแพงเหนือ</text><text class="stepSmall" x="66" y="812">ตามช่วงที่เลือก</text>
+ <text class="step" x="288" y="765">2  ยกพื้นทำเนิน</text><text class="stepSmall" x="288" y="790">อย่างน้อย 3 ช่อง</text><text class="stepSmall" x="288" y="812">หรือถึงหน้าผา Lv 3</text>
+ <text class="step" x="510" y="765">3  วาดน้ำให้ครบ</text><text class="stepSmall" x="510" y="790">ต้นน้ำ + บ่อรับน้ำ</text><text class="stepSmall" x="510" y="812">+ แม่น้ำต่อเนื่อง</text>
+ <text class="step" x="732" y="765">4  กดยืนยัน Terrain</text><text class="stepSmall" x="732" y="790">รอเกมสร้างพื้นใหม่</text><text class="stepSmall" x="732" y="812">ก่อนสร้างน้ำตก</text>
+ <text class="step" x="954" y="765">5  เลือก Waterfall</text><text class="stepSmall" x="954" y="790">แบบ A แตะต้นน้ำ</text><text class="stepSmall" x="954" y="812">แบบ B แตะบ่อแถวแรก</text>
+</g>
+</svg>

@@ -29,7 +29,11 @@ export function assignedGateDefensePost(unit,units,sections,center,tile=64,range
  * Other gates and standard perimeter gaps remain traversable by normal A* if no built gate qualifies. */
 export function chooseRaidGate(raider,segments,center,tile=64){
  const d=distance(raider,center);
- if(raider.passedGate||d<235||d>700)return null;
+ const perimeterReach=(segments||[]).reduce((max,f)=>{
+  const x=(f.x+(f.axis==='x'?(f.len||1)/2:0))*tile,y=(f.y+(f.axis==='y'?(f.len||1)/2:0))*tile;
+  return Math.max(max,Math.hypot(x-center.x,y-center.y));
+ },520);
+ if(raider.passedGate||d<235||d>Math.max(700,perimeterReach+200))return null;
  const mid=f=>({x:(f.x+(f.axis==='x'?(f.len||1)/2:0))*tile,y:(f.y+(f.axis==='y'?(f.len||1)/2:0))*tile});
  if(!segments.some(f=>f.kind!=='gate'&&f.hp!==0&&distance(raider,mid(f))<145))return null;
  const gates=segments.filter(f=>f.kind==='gate'&&!f.closed&&f.hp!==0).map(mid);

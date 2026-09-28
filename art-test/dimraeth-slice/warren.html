@@ -643,6 +643,171 @@
     .bc-core-mods{grid-template-columns:1fr}
   }
 
+  /* Home Builder lives alongside the world, never beneath the modal scrim. */
+  #homeOpen{border-color:#a6bd83;background:#294331}
+  #homeOpen.on{border-color:#bce6a7;background:#386045}
+  .bc-home-panel{position:fixed;right:18px;top:105px;width:min(360px,calc(100vw - 28px));max-height:min(72vh,680px);overflow:auto;z-index:35;background:#1b2920;border:2px solid #a5be83;border-radius:13px;box-shadow:0 9px 35px #000b;padding:12px;display:flex;flex-direction:column;gap:10px}
+  .bc-home-panel[hidden]{display:none!important}
+  .bc-home-head,.bc-home-actions,.bc-home-placed{display:flex;align-items:center;justify-content:space-between;gap:7px}
+  .bc-home-head strong{font-size:16px;color:#e2f1cc}
+  .bc-home-head button{min-width:40px;min-height:40px}
+  .bc-home-info,.bc-home-warning{font-size:11px;line-height:1.45;color:#ccdbbb}
+  .bc-home-tabs{display:flex;gap:5px;flex-wrap:wrap}
+  .bc-home-tabs button{font-size:11px;padding:6px;flex:1 1 40%;min-height:34px}
+  .bc-home-panel button.active{border-color:#a9e690;background:#405c39;color:#fff}
+  .bc-home-catalog{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-height:185px;overflow:auto}
+  .bc-home-item{display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:9px 6px;gap:2px;min-height:52px;white-space:normal}
+  .bc-home-item b{font-size:11px}.bc-home-item small{font-size:10px;color:#c0d0b5}
+  .bc-home-actions{flex-wrap:wrap;padding:8px;background:#25392a;border-radius:8px}
+  .bc-home-actions span{font-size:11px;flex:1 1 100%}
+  .bc-home-placed-list{max-height:155px;overflow:auto;border-top:1px solid #57714f;padding-top:5px}
+  .bc-home-placed-list>strong{font-size:12px}
+  .bc-home-placed{padding:4px 0;border-bottom:1px solid #455644;font-size:11px}
+  .bc-home-placed span{flex:1;min-width:0}.bc-home-placed button{min-height:34px;padding:4px 8px}
+  @media(max-width:760px),(max-height:500px) and (pointer:coarse){
+    .bc-home-panel{left:5px;right:5px;top:auto;bottom:calc(61px + env(safe-area-inset-bottom,0px));width:auto;max-height:42dvh;max-height:42vh;z-index:38;border-radius:14px 14px 9px 9px;padding:9px;gap:6px}
+    .bc-home-catalog{max-height:96px}
+    .bc-home-placed-list{max-height:58px}
+    .bc-home-tabs button{flex:1 1 auto}
+  }
+  .bc-home-land{border:1px solid #697d58;border-radius:9px;background:#23382b;padding:7px}
+  .bc-home-land summary{font-size:12px;font-weight:700;color:#d7ecbc;cursor:pointer;padding:5px}
+  .bc-home-land-side{padding:7px 3px;border-top:1px solid #52684e;display:grid;gap:5px}
+  .bc-home-land-side strong{font-size:11px;color:#dceacb}
+  .bc-home-plots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+  .bc-home-plots button,.bc-home-wall-actions button{min-width:0;min-height:39px;font-size:10px;white-space:normal;padding:5px 3px}
+  .bc-home-owned{display:grid;place-items:center;color:#a4e29d;font-size:11px}
+  .bc-home-wall-actions{display:flex;gap:5px}.bc-home-wall-actions button{flex:1}
+  .bc-home-terrain-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+  .bc-home-terrain-tools button{font-size:10px;padding:7px 5px;min-height:36px;white-space:normal}
+  .bc-home-land>p{margin:5px 0}
+  #homePanel .bc-home-warning{color:#ffd49e}
+  /* All release notes live in the same scroll container and use the framed
+     card treatment established by the original v0.6.0 Homestead notes. */
+  #patchNotesPanel .bc-patch-notes{display:flex;flex-direction:column;gap:13px;min-height:0;padding:17px 18px 24px;overflow-y:auto;overflow-x:hidden}
+  #patchNotesPanel .bc-patch-card{display:block;flex:0 0 auto;min-width:0;margin:0;border:1px solid #667d54;border-radius:11px;background:linear-gradient(150deg,#283d31,#1e3028);padding:15px 17px;box-shadow:inset 0 1px rgba(247,223,158,.09)}
+  #patchNotesPanel .bc-patch-card:first-child{border-color:#bda975;background:linear-gradient(145deg,#38513c,#273c32)}
+  #patchNotesPanel .bc-patch-card h3{display:flex;align-items:center;gap:9px;margin:0 0 10px;color:#f7dc9f;font-size:16px;line-height:1.45;overflow-wrap:anywhere}
+  #patchNotesPanel .bc-patch-card:first-child h3{color:#ffefbf}
+  #patchNotesPanel .bc-patch-card p{margin:0;font-size:13px;line-height:1.8;color:#deead8;overflow-wrap:anywhere}
+  #patchNotesPanel .bc-patch-card ul{margin:6px 0 0;padding-left:24px;color:#deead8;font-size:13px;line-height:1.8}
+  #patchNotesPanel .bc-patch-card li+li{margin-top:5px}
+  @media(max-width:760px){
+    #patchNotesPanel .bc-patch-notes{padding:12px 11px 22px;gap:10px}
+    #patchNotesPanel .bc-patch-card{padding:13px 12px}
+    #patchNotesPanel .bc-patch-card h3{font-size:14px}
+    #patchNotesPanel .bc-patch-card p,#patchNotesPanel .bc-patch-card ul{font-size:12px;line-height:1.72}
+  }
+  /* Guide uses the same framed, scrollable card hierarchy as Patch Notes.
+     The first Ancient Dragon section must be INSIDE this body, not above it. */
+  #guidePanel .bc-guide-body{display:flex;flex-direction:column;gap:13px;min-height:0;padding:17px 18px 24px;overflow-y:auto;overflow-x:hidden}
+  #guidePanel .bc-guide-card{display:block;flex:0 0 auto;min-width:0;margin:0;border:1px solid #667d54;border-radius:11px;background:linear-gradient(150deg,#283d31,#1e3028);padding:15px 17px;box-shadow:inset 0 1px rgba(247,223,158,.09)}
+  #guidePanel .bc-guide-card:first-child{border-color:#bda975;background:linear-gradient(145deg,#38513c,#273c32)}
+  #guidePanel .bc-guide-card h3{display:block;margin:0 0 10px;color:#f7dc9f;font-size:16px;line-height:1.45;overflow-wrap:anywhere}
+  #guidePanel .bc-guide-card:first-child h3{color:#ffefbf}
+  #guidePanel .bc-guide-card p{margin:0;font-size:13px;line-height:1.8;color:#deead8;overflow-wrap:anywhere}
+  #guidePanel .bc-guide-card button{margin:11px 0 0;max-width:100%;white-space:normal}
+  @media(max-width:760px){
+    #guidePanel .bc-guide-body{padding:12px 11px 22px;gap:10px}
+    #guidePanel .bc-guide-card{padding:13px 12px}
+    #guidePanel .bc-guide-card h3{font-size:14px}
+    #guidePanel .bc-guide-card p{font-size:12px;line-height:1.72}
+  }
+  /* Image-first one-time update guide. Reuses the existing modal scrim / focus styles. */
+  .bc-waterfall-guide-modal{width:min(1120px,calc(100vw - 24px));height:min(92dvh,950px);height:min(92vh,950px);border-color:#96ad7c}
+  .bc-waterfall-header{flex-shrink:0;background:linear-gradient(115deg,#3a6351,#1d3438)}
+  .bc-waterfall-guide-body{padding:12px 16px;overflow-y:auto;overscroll-behavior:contain}
+  .bc-waterfall-figure{margin:0;padding:8px;background:#142723;border:1px solid #718e6c;border-radius:10px;overflow-x:auto}
+  .bc-waterfall-figure img{display:block;width:100%;max-width:100%;height:auto;border-radius:7px}
+  .bc-waterfall-figure figcaption{padding:8px 4px 2px;color:#d9e9d5;font-size:12px;line-height:1.6}
+  .bc-waterfall-figure a{color:#fae7ad;text-underline-offset:3px}
+  .bc-waterfall-guide-notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+  .bc-waterfall-guide-notes section{background:#273c31;border:1px solid #617d61;border-radius:9px;padding:12px;min-width:0}
+  .bc-waterfall-guide-notes h3{font-size:16px;color:#ffe2a1;margin:0 0 6px}
+  .bc-waterfall-guide-notes p{font-size:12px;line-height:1.85;color:#dcebd9;margin:5px 0}
+  .bc-waterfall-guide-notes strong{color:#fff0af}
+  .bc-waterfall-cost,.bc-waterfall-caution{font-size:12px;line-height:1.7;padding:9px 12px;border-radius:8px;margin:10px 0 0}
+  .bc-waterfall-cost{color:#f7e0ab;background:#3a422d;border:1px solid #9b8c56}
+  .bc-waterfall-caution{color:#f1c8ad;background:#43342b;border:1px solid #8f6853}
+  .bc-waterfall-guide-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;flex-shrink:0;background:#23382e;border-top:1px solid #5c806b}
+  .bc-waterfall-guide-footer small{font-size:11px;line-height:1.5;color:#d7e4d1;flex:1}
+  .bc-waterfall-guide-footer button{min-height:44px;min-width:132px;background:#527a4c;border-color:#9eb784;color:#ffefbd;font-weight:750}
+  #guidePanel [data-open-waterfall-guide]{margin:8px 0;min-height:44px;background:#315a51;border:1px solid #86ae9b;color:#faf0cf;font-size:13px}
+  @media(max-width:760px){
+    .bc-waterfall-guide-modal{left:0;right:0;top:auto;bottom:0;transform:none;width:100%;height:min(94dvh,900px);max-height:calc(100dvh - env(safe-area-inset-top,0px) - 8px);border-radius:18px 18px 0 0}
+    .bc-waterfall-guide-body{padding:8px}
+    .bc-waterfall-figure{padding:5px}
+    .bc-waterfall-figure img{max-width:none;width:720px}
+    .bc-waterfall-guide-notes{grid-template-columns:1fr}
+    .bc-waterfall-header h2{font-size:15px}
+    .bc-waterfall-guide-footer{padding:7px 10px;gap:8px}
+    .bc-waterfall-guide-footer button{min-width:110px}
+  }
+  /* Mythic Archive: the launcher sits immediately beneath the engine minimap. */
+  #relicLauncher{position:fixed;top:165px;right:16px;z-index:25;width:220px;box-sizing:border-box}
+  #relicLauncher button{display:flex;gap:8px;align-items:center;justify-content:center;width:100%;padding:8px 10px;
+    background:linear-gradient(125deg,rgba(47,55,37,.95),rgba(23,37,31,.97));border:1.5px solid #c5a365;
+    border-radius:8px;box-shadow:0 3px 12px #0009;color:#ffecbb;font-weight:800;letter-spacing:.02em;text-align:center}
+  #relicLauncher img{height:29px;width:29px;object-fit:contain;image-rendering:pixelated}
+  #relicLauncher small{font-size:10px;color:#e5d4ab;margin-left:auto}
+  #relicCollectionPanel{width:min(1050px,calc(100vw - 28px));height:min(88vh,820px);border-color:#ad9460;background:#16251e}
+  .bc-archive-header{background:linear-gradient(110deg,#334b35,#29392e 55%,#4e3b2b)}
+  .bc-archive-sigil{display:grid;place-items:center;width:48px;height:48px;border:2px solid #c2a163;border-radius:50%;color:#ffe2a0;font-size:30px;background:radial-gradient(circle,#5d4730,#27392c)}
+  .bc-archive-body{display:flex;flex-direction:column;gap:16px;padding:16px 18px 22px}
+  .bc-archive-overview{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(180px,1fr);gap:12px}
+  .bc-archive-overview>div{background:linear-gradient(145deg,#304331,#1c3027);border:1px solid #71845a;border-radius:12px;padding:15px}
+  .bc-archive-overview small,.bc-relic-eyebrow{font-size:10px;letter-spacing:.11em;font-weight:800;color:#d9c28f}
+  .bc-archive-overview h3{font-size:29px;line-height:1.2;margin:7px 0 11px;color:#fff0bd;font-variant-numeric:tabular-nums}
+  .bc-archive-overview h3 span{font-size:13px;color:#d6d4b4}
+  .bc-archive-overview p{font-size:11px;line-height:1.6;color:#d8e2d0;margin:10px 0 0}
+  .bc-archive-progress{height:10px;border-radius:20px;overflow:hidden;background:#0f1d16;border:1px solid #567253}
+  .bc-archive-progress i{display:block;height:100%;background:linear-gradient(90deg,#8abf8f,#eac773);border-radius:20px;transition:width .2s}
+  .bc-archive-reward{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;background:linear-gradient(140deg,#332f26,#433b2c)!important;border-color:#927951!important}
+  .bc-archive-reward.unlocked{background:linear-gradient(140deg,#3a5236,#645236)!important;border-color:#edcc75!important}
+  .bc-archive-reward b{font-size:10px;letter-spacing:.08em;color:#e7cb8b}.bc-archive-reward span{font:700 21px Georgia,serif;color:#ffe6a7}
+  .bc-archive-portrait-frame{width:56px;height:56px;display:grid;place-items:center;font-size:34px;color:#fff2cc;border:5px double #857553;background:#243427;transform:rotate(45deg);border-radius:12px;box-shadow:0 0 0 2px #28372c}
+  .bc-archive-portrait-frame span{display:block;transform:rotate(-45deg);font:34px/1 system-ui}
+  .bc-archive-reward.unlocked .bc-archive-portrait-frame,.bc-collector-frame{border-color:#ffda76!important;box-shadow:0 0 0 2px #6a7f5b,0 0 16px #e5c97977!important}
+  .bc-collector-title{display:flex;align-items:center;gap:7px;color:#ffe0a0;font-size:11px;font-weight:700}.bc-collector-frame{display:grid;place-items:center;width:32px;height:32px;flex:none;border:3px double #f0cc72;border-radius:8px;background:#425336;transform:rotate(45deg)}.bc-collector-frame img{transform:rotate(-45deg);width:23px;height:23px}
+  .bc-archive-reward small{line-height:1.5;color:#dfd7bd;letter-spacing:0;font-weight:400}
+  .bc-archive-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;flex-shrink:0;scrollbar-width:thin}
+  .bc-archive-tabs button{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:4px;font-size:11px;font-weight:700;max-width:195px;min-height:48px;white-space:normal;text-align:left;padding:8px 10px;background:#22382b;border:1px solid #537355}
+  .bc-archive-tabs button small{font-size:10px;color:#bcd4b2}.bc-archive-tabs button.active{border-color:#ffdc87;background:#4a5334;color:#fff1be}
+  .bc-archive-section-title{display:flex;justify-content:space-between;align-items:center;gap:9px}
+  .bc-archive-section-title h3{font:700 18px Georgia,serif;color:#f6df9d;margin:0 0 3px}
+  .bc-archive-section-title p{font-size:11px;color:#bdcbb7;margin:0}
+  .bc-archive-section-title strong{white-space:nowrap;color:#ffe3ac;font-size:17px}
+  .bc-archive-layout{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(235px,1fr);gap:14px;align-items:start}
+  .bc-relic-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+  .bc-relic-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;min-height:152px;border:1px solid #506950;border-radius:10px;background:#223327;padding:11px 5px 9px;text-align:center}
+  .bc-relic-card:hover{border-color:#cbaa70}.bc-relic-card.selected{border-color:#ffe49b;background:#394935;box-shadow:inset 0 0 0 1px #ad955c}
+  .bc-relic-card.owned{background:linear-gradient(145deg,#41472b,#2c422d);border-color:#d9b86d}
+  .bc-relic-icon{display:grid;place-items:center;flex:none;width:62px;height:62px;max-width:100%;object-fit:contain;image-rendering:pixelated}
+  .bc-relic-glyph{font-size:40px;border-radius:9px;background:radial-gradient(circle,#3e5d48,#192820);border:1px solid #596a53}
+  .bc-relic-icon.large{width:124px;height:124px;font-size:62px;max-width:100%}
+  .bc-relic-name{display:block;min-width:0;width:100%}.bc-relic-name b{display:block;font-size:11px;line-height:1.4;color:#ffe1a4;overflow-wrap:anywhere}
+  .bc-relic-name small{display:block;color:#b7cbb3;font-size:10px;line-height:1.5}
+  .bc-relic-state{font-size:9px;letter-spacing:.03em;font-weight:800;color:#c9beaa;margin-top:auto}
+  .bc-relic-card.owned .bc-relic-state{color:#f3df91}
+  .bc-relic-detail{display:flex;flex-direction:column;min-width:0;gap:7px;border:1px solid #657b5b;background:linear-gradient(155deg,#2b4030,#1d2e24);border-radius:12px;padding:15px}
+  .bc-relic-preview{display:flex;flex-direction:column;align-items:center;gap:6px;padding:9px;background:radial-gradient(circle,#52664b,#1a3025 72%);border-radius:10px}
+  .bc-relic-preview>span:last-child{font-size:10px;letter-spacing:.05em;font-weight:800}.bc-archive-owned{color:#ffdf8e}.bc-archive-locked{color:#c5cfb7}
+  .bc-relic-detail h3{font:700 23px Georgia,serif;color:#ffe3aa;margin:0;overflow-wrap:anywhere}
+  .bc-relic-origin{margin:0;color:#f4d89d;font-size:13px}.bc-relic-mechanic{margin:3px 0 8px;color:#cbdcc6;line-height:1.5}
+  .bc-relic-detail dl{display:grid;gap:2px;margin:0}.bc-relic-detail dl div{display:flex;justify-content:space-between;gap:12px;align-items:start;border-bottom:1px solid #4d674f;padding:7px 0;font-size:11px}
+  .bc-relic-detail dt{color:#b9c9af}.bc-relic-detail dd{margin:0;text-align:right;color:#ffdfa2;max-width:60%}
+  .bc-archive-note{font-size:11px;line-height:1.65;color:#e6cda2;background:#38422e;border-radius:6px;padding:8px;margin:5px 0 0}
+  .bc-archive-footer{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;padding-top:12px;border-top:1px solid #50694b;font-size:11px;color:#d6c79e}
+  @media(max-width:840px){.bc-relic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bc-archive-layout{grid-template-columns:minmax(0,1fr) minmax(205px,.85fr)}}
+  @media(max-width:760px),(max-height:500px) and (pointer:coarse){
+    #relicLauncher{display:none!important}#relicCollectionPanel{width:100%;height:min(90dvh,900px)}
+    .bc-archive-overview{grid-template-columns:1fr}.bc-archive-body{padding:11px;gap:12px}
+    .bc-archive-layout{grid-template-columns:1fr}.bc-relic-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+    .bc-relic-card{min-height:143px;padding:7px 3px}.bc-relic-icon{width:49px;height:49px}
+    .bc-relic-name b{font-size:10px}.bc-relic-name small{font-size:9px}.bc-relic-state{font-size:8px}
+    .bc-relic-detail{padding:12px}.bc-relic-preview .bc-relic-icon.large{width:90px;height:90px}
+  }
+  @media(max-width:380px){.bc-relic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -652,7 +817,8 @@
   <div class="res"><span>🪙 <b id="gold">0</b></span><span title="วัตถุดิบที่ใช้สร้างและอัปบ้าน">🧰 <b id="materials">0</b></span></div>
   <div id="hall"><small>โพรงกระต่าย <span id="burrow-t"></span></small><div><div id="burrow"></div></div></div>
 </div>
-<div id="help" class="panel bc-help-launcher" aria-label="คู่มือและข่าวสาร"><button type="button" data-open-guide>📖 คู่มือ</button><button type="button" data-open-patch-notes>📜 v0.4.2</button></div>
+<div id="help" class="panel bc-help-launcher" aria-label="คู่มือและข่าวสาร"><button type="button" data-open-guide>📖 คู่มือ</button><button type="button" id="patchNotesOpen" data-open-patch-notes>📜 v0.8.3</button></div>
+<div id="relicLauncher"><button type="button" data-open-relic-collection aria-label="เปิด Relic Collection ใต้แผนที่"><img src="./assets/relics/dragon-heart.svg" alt=""> Relic Collection <small id="relicLauncherCount">0/9</small></button></div>
 <div id="shopbox" class="panel"><div class="mobile-drawer-head"><b>🐰 จ้างกระต่าย</b><button type="button" data-mobile-close aria-label="ปิดหน้าจ้างกระต่าย">✕</button></div><details id="recruitDetails" open><summary>จ้างกระต่าย <small id="recruitSummary">0/7</small></summary><div id="shop" aria-label="รายชื่อกระต่ายที่จ้างได้"></div></details></div>
 <div id="side" class="panel">
   <button id="sideToggle" class="bc-collapse-toggle" type="button" aria-expanded="true" aria-label="ย่อแผงจัดการหมู่บ้าน" title="ซ่อน/แสดงแผงจัดการหมู่บ้าน">−</button>
@@ -660,7 +826,9 @@
   <div class="mobile-village-shortcuts" aria-label="อาคารและตลาด">
     <button type="button" data-world="hall">🏠 โพรง</button><button type="button" data-world="blacksmith">⚒ โรงตีเหล็ก</button>
     <button type="button" data-world="resource">📦 โรงผลิต</button><button type="button" data-world="sell">🛒 Quick Sell</button>
+    <button type="button" id="mobileHomeOpen">🔨 Home Builder</button>
     <button type="button" data-open-guide>📖 คู่มือ</button><button type="button" data-open-patch-notes>📜 Patch Notes</button>
+    <button type="button" data-open-relic-collection>✧ Relic Collection</button>
   </div>
   <h3>จัดการหมู่บ้าน</h3>
   <div class="bc-quick-actions">
@@ -676,6 +844,7 @@
   <div class="row"><button id="upgrade"></button></div>
   <div class="row"><button id="build"></button></div>
   <div class="row"><button id="buildMagicCart" title="ปลดล็อกที่บ้าน Lv15 · รับเฉพาะนักเวทประจำรถ"></button></div>
+  <div class="row"><button id="homeOpen" type="button">🔨 Home Builder</button></div>
   <div id="towerMoveNotice" role="status" hidden>📍 ย้ายสิ่งก่อสร้าง: คลิกพื้นใหม่ในเขตป้องกัน · กด Esc เพื่อยกเลิก <button id="cancelTowerMove">ยกเลิก</button></div>
   <div class="row"><button id="fenceBuild" title="รั้วไม้ → กำแพงหิน → กำแพงหินเสริม · ขนาด 15×15 ช่องคงเดิม"></button></div>
   <div id="wallStatus" role="status" aria-live="polite"></div>
@@ -694,6 +863,7 @@
   <button type="button" data-mobile-open="sell" aria-label="Quick Sell ขายของ" aria-pressed="false"><span aria-hidden="true">🛒</span>ขาย</button>
 </nav>
 <div id="mobileTowerMoveNotice" hidden role="status"><span>📍 แตะพื้นเพื่อย้ายสิ่งก่อสร้าง · ลากแผนที่เพื่อหาจุดวาง</span><button id="mobileCancelTowerMove" type="button">ยกเลิก</button></div>
+<section id="homePanel" class="bc-home-panel panel" aria-label="Home Builder" hidden></section>
 <div id="modalScrim" hidden></div>
 <div id="forgePanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="โรงตีเหล็ก"></div>
 <div id="heroPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="จัดการกระต่าย"></div>
@@ -713,6 +883,8 @@
 <div id="blacksmithPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="โรงตีเหล็ก"></div>
 <div id="resourcePanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="โรงผลิตทรัพยากร"></div>
 <div id="guidePanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="คู่มือ Burrow Command"></div>
+<section id="relicCollectionPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="Mythic Archive — Relic Collection"></section>
+<div id="waterfallGuidePanel" class="panel bc-modal bc-waterfall-guide-modal" hidden role="dialog" aria-modal="true" aria-labelledby="waterfallGuideTitle" aria-describedby="waterfallGuideDescription"></div>
 <div id="patchNotesPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="Patch Notes"></div>
 <div id="banner"></div><div id="toast"></div>
 <div id="over" hidden><h2></h2><p></p><button id="again">เล่นอีกครั้ง</button></div>

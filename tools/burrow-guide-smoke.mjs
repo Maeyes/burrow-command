@@ -8,6 +8,7 @@ const check=(name,ok)=>{if(!ok)throw Error('FAIL '+name);console.log('PASS '+nam
 try{
  await page.goto(server.resolvedUrls.local[0]+'art-test/dimraeth-slice/warren.html');
  await page.waitForFunction(()=>window.__warrenDev&&(!document.querySelector('#loading')||document.querySelector('#loading').hidden),null,{timeout:45000});
+ if(await page.locator('#waterfallGuidePanel').isVisible())await page.locator('#waterfallGuidePanel [data-waterfall-guide-close]').first().click();
  check('Guide launcher background hugs its buttons',await page.locator('#help').evaluate(el=>{
   const buttons=[...el.querySelectorAll('button')],buttonWidth=buttons.reduce((sum,button)=>sum+button.getBoundingClientRect().width,0);
   return el.getBoundingClientRect().width<=buttonWidth+24;

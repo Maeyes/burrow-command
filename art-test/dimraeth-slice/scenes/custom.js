@@ -273,7 +273,11 @@ export const slopeStyleOf = data => (data.slopeStyle && data.slopeStyle !== 'aut
 
 export function sceneFromMap(data, opts = {}) {
   const n = data.n || MAP_N, cell = data.cell || MAP_CELL;
-  const level = settleWater(decode(data.level, n), decode(data.water, n), n), water = decode(data.water, n), road = decode(data.road, n), forest = decode(data.forest, n);
+  const water = decode(data.water, n),rawLevel=decode(data.level, n),level=settleWater(rawLevel,water,n),road = decode(data.road, n), forest = decode(data.forest, n);
+  // A wide northern waterfall curtain must not trigger settleWater's heuristic
+  // for flattening long, narrow water-level transitions. Preserve the pre-built
+  // level-3 crest, including the left and right end caps, exactly as authored.
+  if(data.northCliffFixed)for(let y=0;y<10;y++)level.set(rawLevel.subarray(y*n,(y+1)*n),y*n);
   const slope = slopeStyleOf(data);
   const { stairs, taken } = autoStairs(level, road, water, n, cell, slope);
   const bridgeMask = decode(data.bridge, n);
@@ -289,7 +293,7 @@ export function sceneFromMap(data, opts = {}) {
     for (let b = -3; b <= 3; b++) for (let a = -3; a <= 3; a++) { const ii = i + a, jj = j + b; if (ii >= 0 && jj >= 0 && ii < n && jj < n) calm[jj * n + ii] = 1; }
   const warp = data.organic === false ? 0 : 26;
   const idxW = (x, y) => {
-    if (!warp || calm[idx(x, y)]) return idx(x, y);
+    if (!warp || calm[idx(x, y)] || data.northCliffFixed&&y<8*64)return idx(x, y);
     return idx(x + (vnoise(x * .017, y * .017) - .5) * warp * 2, y + (vnoise(x * .017 + 31, y * .017 + 17) - .5) * warp * 2);
   };
   const stoneRoad = road.map(v => (v === 1 ? 1 : 0)), trail = road.map(v => (v === 2 ? 1 : 0));

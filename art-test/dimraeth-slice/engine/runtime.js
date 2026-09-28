@@ -5,6 +5,7 @@ import { buildLibraries } from './sprites.js';
 import { buildTerrain, bakeGround, GROUND, MAT } from './terrain.js';
 import { placeStructures, placeScatter } from './world.js';
 import { biomeOf } from './biomes.js';
+import {zoomViewportIntersects} from './runtime-viewport.js';
 let KIT = biomeOf(null);
 
 const DIRS = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
@@ -244,10 +245,17 @@ function drawIsoLine(x0, y0, x1, y1, z, col) {
   for (let k = 0; k < steps; k++) ctx.fillRect(Math.round(ax + sxs * k), ay + sys * k, Math.ceil(Math.abs(sxs)) || 1, th);
 }
 const playerMask = makeCanvas(64, 64);
+// The Canvas is zoomed around its center. Culling against [0,W]×[0,H]
+// BEFORE that transform discards sprites which still appear inside the zoomed
+// viewport. The error was most noticeable on long stone wall/gate sprites:
+// panning with WASD moved their origins back into the unzoomed window.
+export function inRuntimeZoomViewport(x0,y0,x1=x0,y1=y0,pad=0,zoom=viewZoom){
+ return zoomViewportIntersects(x0,y0,x1,y1,pad,zoom,W,H);
+}
 function drawObject(o, psx, psy, afterPlayer) {
   if (o.kind === 'sprite') {
     const [sx, sy] = toScreen(o.x, o.y, o.z), vs=o.visualScale??1, dw=Math.round(o.img.width*vs), dh=Math.round(o.img.height*vs), ox=Math.round(o.ox*vs), oy=Math.round(o.oy*vs), x=sx-ox, y=sy-oy;
-    if (x > W || y > H || x + dw < 0 || y + dh < 0) return;
+    if (!inRuntimeZoomViewport(x,y,x+dw,y+dh)) return;
     // Fade only the foreground object itself when it overlaps the hero.
     // Never erase the main canvas: destination-out created the old white/transparent halo.
     const overlapsHero=o.fade&&afterPlayer&&psx>x+6&&psx<x+dw-6&&psy-30>y&&psy-30<y+dh-10;
@@ -336,7 +344,7 @@ function drawObject(o, psx, psy, afterPlayer) {
       // Draw the EXACT stoneGateSprite used by the editor. Only the closed door leaf is dynamic.
       const sprite=o.editorStoneSprite,[sx,sy]=toScreen(sprite.x,sprite.y,o.z);
       const x=sx-sprite.ox,y=sy-sprite.oy;
-      if(x>W+80||y>H+80||x+sprite.img.width<-80||y+sprite.img.height<-80)return;
+      if(!inRuntimeZoomViewport(x,y,x+sprite.img.width,y+sprite.img.height,80))return;
       ctx.imageSmoothingEnabled=false;
       ctx.drawImage(sprite.img,Math.round(x),Math.round(y));
       if(o.closed){
@@ -355,7 +363,8 @@ function drawObject(o, psx, psy, afterPlayer) {
     }
     // Wooden Lv1 gate retained for the starter perimeter.
     const [ax,ay]=toScreen(o.x,o.y,o.z);
-    if(ax < -75 || ax > W+75 || ay < -75 || ay > H+75)return;
+    const [bx,by]=toScreen(o.x1,o.y1,o.z);
+    if(!inRuntimeZoomViewport(ax,ay,bx,by,75))return;
     const R=n=>Math.max(1,Math.round(n*K));
     drawIsoLine(o.x,o.y,o.x1,o.y1,o.z+38,'#4a2e1a');
     drawIsoLine(o.x,o.y,o.x1,o.y1,o.z+41,'#b07e4a');
@@ -375,7 +384,8 @@ function drawObject(o, psx, psy, afterPlayer) {
     }
   } else if (o.kind === 'fence') {
     const [ax, ay] = toScreen(o.x, o.y, o.z);
-    if (ax < -40 || ax > W + 40 || ay < -40 || ay > H + 40) return;
+    const [bx,by]=toScreen(o.x1,o.y1,o.z);
+    if(!inRuntimeZoomViewport(ax,ay,bx,by,40))return;
     if (o.x1 !== o.x || o.y1 !== o.y) {
       drawIsoLine(o.x, o.y, o.x1, o.y1, o.z + 17, '#9a6a3c'); drawIsoLine(o.x, o.y, o.x1, o.y1, o.z + 16, '#5a3a22');
       drawIsoLine(o.x, o.y, o.x1, o.y1, o.z + 9, '#8c5c34'); drawIsoLine(o.x, o.y, o.x1, o.y1, o.z + 8, '#4a2e1a');
@@ -740,6 +750,12 @@ function frame(now) {
   for (let r = -shadowRy+1; r < shadowRy; r++) { const hw = Math.round(shadowRx * Math.sqrt(Math.max(0,1-(r/shadowRy)**2))); ctx.fillRect(psx-hw,psy+r-1,hw*2,1); }
   const vis = [];
   for (const o of WS.objects) {
+    // Perimeter sections (including long gate sprites) are dynamic. Their
+    // origin can lie outside the viewport while their image still overlaps it;
+    // origin-only culling made wall sections appear after camera movement.
+    // A village has at most ~100 sections, so sorting all of them is cheaper
+    // and safer than a second incompatible camera-bound culling heuristic.
+    if(o.bcFenceId){vis.push(o);continue;}
     const [sx, sy] = toScreen(o.x, o.y, o.z);
     if (sx < -360 || sx > W + 360 || sy < -80 || sy > H + 420) continue;
     vis.push(o);
@@ -807,6 +823,17 @@ export async function prepare(scene,{canvasEl,loadingEl,renderScale}={}){
   else say('โหลดพื้นจาก cache แล้ว');
   maskStaticObjects();buildOverlays();
   return {WS,bakeMs:Math.round(performance.now()-tStart)};
+}
+
+/** Refresh only editor-authored road fields while retaining actors, camera, props,
+ * collision/nav state and the active render loop. The next frame paints the
+ * newly baked ground without spawning duplicate world objects. */
+export async function repaintRuntimeRoadFields({pavedField=null,trailField=null}={}){
+ if(!WS.scene||!WS.terrain||!WS.ground)return false;
+ const previous={pavedField:WS.scene.pavedField,trailField:WS.scene.trailField};
+ WS.scene.pavedField=pavedField;WS.scene.trailField=trailField;
+ try{await bakeGround();return true;}
+ catch(error){Object.assign(WS.scene,previous);throw error;}
 }
 
 export function renderHosted({cameraX,cameraY,screenCenterY=H/2,playerEntity=null,runtimeActors=null,timeSeconds=0}={}){

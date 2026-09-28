@@ -10,6 +10,9 @@ import { WEAPON_SKILLS_BY_FAMILY_V2 } from '../../src/simulation/skillEntitlemen
 import {perimeterBlueprint,perimeterTier,normalizeGateSelections} from './warren-perimeter.js';
 import {buildingLevel,forgeRarityRoll} from './warren-village-buildings.js';
 import {normalizeMagicCart} from './warren-magic-cart.js';
+import {normalizeHomeBuilder} from './warren-home-builder.js';
+import {homePerimeterBlueprint} from './warren-home-land.js';
+import {normalizeHomeTerrain,makeHomeWaterfall,deriveHomeRivers,migrateLegacyNorthCliffSources,deriveHomeNorthCurtains} from './warren-home-terrain.js';
 import {normalizeClassSkills} from './warren-class-cores.js';
 
 export { EQUIPMENT_MASTER_V2, CRAFT_RECIPES_V2, EQUIPMENT_RARITY_STAT_MULTIPLIER, WEAPON_MASTERY_MILESTONES };
@@ -136,15 +139,28 @@ export function migrateSave(raw){
   if(receipt){for(const [id,qty] of Object.entries(receipt))if(CONSTRUCTION_MATERIAL_IDS.includes(id)&&Number.isInteger(qty)&&qty>0)inventory[id]=(inventory[id]||0)+Math.min(150,qty);}
   else inventory.livingMoss=(inventory.livingMoss||0)+(f.kind==='gate'?150:30);
  }}
+ const homeBuilder=normalizeHomeBuilder(raw.homeBuilder);
+ homeBuilder.terrainEdits=normalizeHomeTerrain(raw.homeBuilder?.terrainEdits,homeBuilder);
+ const oldFalls=Array.isArray(raw.homeBuilder?.waterfalls)?raw.homeBuilder.waterfalls:[];
+ migrateLegacyNorthCliffSources(homeBuilder,oldFalls);
+ homeBuilder.rivers=deriveHomeRivers(homeBuilder.terrainEdits);
+ for(const entry of oldFalls){
+  if(entry?.type==='north-curtain'||entry?.sourceTile?.j===2)continue;
+  const candidate=makeHomeWaterfall(homeBuilder,entry?.sourceTile,homeBuilder.terrainEdits);
+  if(candidate.ok&&!homeBuilder.waterfalls.some(w=>w.sourceTile.i===candidate.waterfall.sourceTile.i&&w.sourceTile.j===candidate.waterfall.sourceTile.j))homeBuilder.waterfalls.push(candidate.waterfall);
+  else homeBuilder.recovery.push({type:'waterfall',data:entry,reason:candidate.reason||'duplicate-waterfall'});
+ }
+ homeBuilder.waterfalls.push(...deriveHomeNorthCurtains(homeBuilder,homeBuilder.terrainEdits));
+ homeBuilder.recovery=homeBuilder.recovery.slice(0,300);
  const stored=new Map((Array.isArray(raw.fences)?raw.fences:[]).map(f=>[f?.axis+':'+f?.x+':'+f?.y,f]));
- const fences=perimeterBlueprint(wallLevel).map(f=>{
+ const fences=homePerimeterBlueprint(wallLevel,homeBuilder).map(f=>{
   const saved=stored.get(f.axis+':'+f.x+':'+f.y);
   return {...f,hp:Number.isFinite(saved?.hp)?Math.max(0,Math.min(f.maxHp,Math.ceil(saved.hp))):f.hp};
  });
  return {v:3,gold:Math.max(0,Math.floor((raw.gold||0)+goldRefund)),warren:Math.max(1,Math.floor(raw.warren||1)),
   wave:Math.max(1,Math.min(5,Math.floor(raw.wave||1))),cleared:!!raw.cleared,day:Math.max(1,raw.day||1),
   kills:Math.max(0,raw.kills||0),losses:Math.max(0,raw.losses||0),burrow:raw.burrow,inventory,gear,builds,progress,mastery,classSkills:normalizeClassSkills(raw.classSkills),
-  reserve,magicCarts,autoDismantle:normalizeAutoDismantleSettings(raw.autoDismantle),
+  reserve,magicCarts,homeBuilder,autoDismantle:normalizeAutoDismantleSettings(raw.autoDismantle),
   fortification:Math.max(0,Math.min(fortificationCap(Math.max(1,Math.floor(raw.warren||1))),Math.floor(raw.fortification||0))),
   lureDay:Math.max(0,Math.floor(raw.lureDay||0)),
   wallLevel,fences,gateClosed:normalizeGateSelections(raw.gateClosed),

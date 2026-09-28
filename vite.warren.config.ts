@@ -9,6 +9,8 @@ import path from 'node:path';
 const COPY = [
   'art-test/monster-generation/pixellab-forest-roster-2026-09-21/objects',
   'art-test/monster-generation/pixellab-desert-roster-2026-09-21/objects',
+  // UI-built relic URLs are runtime strings; Vite does not discover these as imports.
+  'art-test/dimraeth-slice/assets/relics',
 ];
 // Explicit UI-icon allowlist. Never copy public/ wholesale into the standalone game.
 const UI_ICON_FOLDERS=['equipment','items','family'];

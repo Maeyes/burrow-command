@@ -5,12 +5,16 @@
 // losing a night is a setback, not game over, and the same wave comes back until it is beaten.
 // Each warren level has 5 waves (5 = boss); beating the boss unlocks the warren upgrade.
 // Terrain, Blessed Bunny, monster art and FX are the Dimraeth engine's; the rules live here.
-import { setRuntimeZoomRange, getRuntimeZoom, setRuntimeZoom, projectRuntimePoint, boot, setRuntimeActors, setRuntimeActorUpdater, setRuntimePlayerVisual, setRuntimePlayerControl, setRuntimeClickHandler, runtimePointerHit, canRuntimeActorStand, runtimeWalkHeight, resolveRuntimeActor } from './engine/runtime.js';
+import { setRuntimeZoomRange, getRuntimeZoom, setRuntimeZoom, projectRuntimePoint, boot, setRuntimeActors, setRuntimeActorUpdater, setRuntimePlayerVisual, setRuntimePlayerControl, setRuntimeClickHandler, runtimePointerHit, canRuntimeActorStand, runtimeWalkHeight, resolveRuntimeActor, repaintRuntimeRoadFields } from './engine/runtime.js';
 import { emptyMap, sceneFromMap } from './scenes/custom.js';
 import { findPath, canWalkStraight } from './combat/nav.js';
 import { getRoster, monsterPresentation } from './combat/rosters.js';
 import { loadBlessedHero } from './combat/hero.js';
 import { createSkillFx, BASIC_ATTACK_FX } from './combat/skillfx.js';
+import { createMythicCinematic } from './warren-mythic-cinematic.js';
+import {defaultMythic,normalizeMythic,rollMythicOmen,validMythicSquad,defaultMythicSquad,settleMythic,mythicHpMultiplier,MYTHIC_RELICS} from './warren-mythic.js';
+import {archiveProgress} from './warren-relic-archive.js';
+import {renderRelicArchiveHtml} from './warren-relic-ui.js';
 import { createFloaters } from './combat/floaters.js';
 import { combatFX } from './combat/fx.js';
 import { combatSFX } from './combat/sfx.js';
@@ -41,6 +45,14 @@ import {regenBurrowSp,chooseBurrowCore,resolveBurrowCore,resolveBurrowMovement,r
 import {SKILLS_V2} from '../../src/simulation/skills.ts';
 import {renderClassCoreHtml} from './warren-class-core-ui.js';
 import {BURROW_VERSION,renderGuideHtml,renderPatchNotesHtml,unlocksAtWarrenLevel} from './warren-guide.js';
+import {renderWaterfallGuideHtml,shouldShowWaterfallIntro,markWaterfallIntroSeen} from './warren-waterfall-guide.js';
+import {HOME_ITEMS,HOME_CATEGORIES,defaultHomeBuilder,snapHome,validateHomePlacement,normalizeHomeBuilder,refundHome} from './warren-home-builder.js';
+import {homeArt} from './warren-home-art.js';
+import {applyHomeNativePathsToArrays,isHomeNativePath} from './warren-home-paths.js';
+import {validateDefensePlacement,DEFENSE_FOOTPRINT} from './warren-defense-placement.js';
+import {renderHomeBuilderHtml} from './warren-home-ui.js';
+import {HOME_PLOTS,HOME_SIDES,HOME_SIDE_NAMES,HOME_PLOT_COST,HOME_WALL_COST,fullyOwnedSide,homePerimeterBlueprint,homeWallLayoutId,homeOwnedCell,plotForCell,homeWallIntegrity,reconcileHomeWall,HOME_EXPANSION_STAGES,HOME_NORTH_FINAL,homeAtNorthernCliff} from './warren-home-land.js';
+import {HOME_TERRAIN_BRUSHES,applyHomeTerrainBrush,normalizeHomeTerrain,validateHomeTerrainBatch,quoteHomeTerrain,deriveHomeRivers,makeHomeWaterfall,applyHomeTerrainToArrays,applyHomeNorthernCliff,isNorthCliffCrest,migrateLegacyNorthCliffSources,deriveHomeNorthCurtains,quoteNewHomeNorthCurtains} from './warren-home-terrain.js';
 import {BASE_CRIT_DAMAGE,rollWarrenCrit,rollMasteryProc,hitFeedback} from './warren-hit-feedback.js';
 
 // ---------- rules ----------
@@ -68,7 +80,7 @@ const levelPower = () => warrenStageDifficulty(S.warren);
 // Phase 2: ★ class upgrades are replaced with persistent bunny levels and shared class-build gear.
 const HALL = { dmg: 9, cd: 1, range: 300 };
 // archer towers: built with gold + materials around the warren; raiders knock them down on the way in
-const TOWER = { gold: 70, mats: 8, hp: 270, cd: 1.1, range: 305, max: 6, buildR: 520, gap: 80, upgrade: [0,120,320,720,1450], hire: {archer:90,mage:135} };
+const TOWER = { gold: 70, mats: 8, hp: 270, cd: 1.1, range: 305, max: 6, upgrade: [0,120,320,720,1450], hire: {archer:90,mage:135} };
 const TOWER_HP=[270,410,590,820,1120];
 const TOWER_RANGE=[305,330,360,395,435],TOWER_HEIGHT=[62,68,75,83,92];
 const RESOURCE_POS={x:16.2*64,y:17.4*64},FORGE_POS={x:23.8*64,y:17.2*64},SELL_POS={x:23.2*64,y:23.4*64},CART_POS={x:24.8*64,y:20.8*64};
@@ -78,7 +90,7 @@ const T = 64, CENTER = { x: 20 * T, y: 20 * T }, BASE_R = 190;
 const RING = { melee: 235, ranged: 175, zone: 250 };
 
 // ---------- map: a clearing with the warren in the middle, forest all around ----------
-function buildMap(biome='forest') {
+function buildMap(biome='forest',home=initialHomeBuilder) {
   const n = 160, map = emptyMap('warren', biome);
   const level = new Uint8Array(n * n), road = new Uint8Array(n * n), forest = new Uint8Array(n * n), water = new Uint8Array(n * n);
   const rnd = (() => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; })();
@@ -96,8 +108,11 @@ function buildMap(biome='forest') {
     for (let b = -2; b <= 2; b++) { const i = cx + (ay ? b : 0), j = cy + (ax ? b : 0); if (i >= 0 && j >= 0 && i < n && j < n) { road[j * n + i] = 2; forest[j * n + i] = t > 56 ? 2 : 1; } }
   }
   for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) if (Math.hypot(i - 80, j - 80) < 9) road[j * n + i] = 1; // cobbled yard
+  applyHomeTerrainToArrays({level,road,forest,water},home.terrainEdits,n);
+  applyHomeNativePathsToArrays({road,water},home.placedObjects,n);
+  applyHomeNorthernCliff({level,road,forest,water},home,n);
   const enc = a => Array.from(a, v => String.fromCharCode(48 + v)).join('');
-  Object.assign(map, { level: enc(level), road: enc(road), forest: enc(forest), water: enc(water), spawn: { x: 20, y: 22 } });
+  Object.assign(map, { level: enc(level), road: enc(road), forest: enc(forest), water: enc(water), northCliffFixed:true, spawn: { x: 20, y: 22 } });
   const o = (type, x, y, extra = {}) => map.objects.push({ type, x, y, ...extra });
   o('house', 20, 20, { roof: 'green', floors: 2, ridge: 'x' }); // the burrow hall
   o('house', 16.2, 17.4, { roof: 'red', floors: 1, ridge: 'y' }); o('house', 23.8, 17.2, { roof: 'orange', floors: 1, ridge: 'y' });
@@ -116,6 +131,20 @@ const canvas = document.getElementById('scene'),worldLabels=document.getElementB
 const initialWarren=(()=>{for(const key of [SAVE_KEY,PRIOR_SAVE_KEY,LEGACY_SAVE_KEY]){
  try{const raw=JSON.parse(localStorage.getItem(key)||'null');if(raw?.warren)return Math.max(1,Math.floor(raw.warren));}catch{}
 }return 1;})();
+const initialHomeBuilder=(()=>{
+ for(const key of [SAVE_KEY,PRIOR_SAVE_KEY,LEGACY_SAVE_KEY])try{
+  const stored=JSON.parse(localStorage.getItem(key)||'null');if(stored){const home=normalizeHomeBuilder(stored.homeBuilder);home.terrainEdits=normalizeHomeTerrain(stored.homeBuilder?.terrainEdits,home);
+   const prior=Array.isArray(stored.homeBuilder?.waterfalls)?stored.homeBuilder.waterfalls:[];
+   migrateLegacyNorthCliffSources(home,prior);
+   for(const w of prior){
+    if(w?.type==='north-curtain'||w?.sourceTile?.j===2)continue;
+    const result=makeHomeWaterfall(home,w.sourceTile,home.terrainEdits);
+    if(result.ok)home.waterfalls.push(result.waterfall);
+   }
+   home.waterfalls.push(...deriveHomeNorthCurtains(home,home.terrainEdits));
+   return home;}
+ }catch{}return defaultHomeBuilder();
+})();
 const currentStage=stageForWarren(initialWarren);
 const scene = sceneFromMap(buildMap(currentStage.biome));
 const roster = getRoster(currentStage.roster,currentStage.mapId);
@@ -144,13 +173,15 @@ await Promise.all([...normals, ...elites, bossId].filter(Boolean).map(id=>artFor
 
 // ---------- state ----------
 const S = {
-  gold: 20, inventory: {}, gear: [], nextGearId: 0, builds: defaultBuilds(), progress:defaultProgress(), mastery:defaultMastery(), classSkills:defaultClassSkills(),coreClass:'guard',reserve:[],forgeLevel:1,resourceLevel:1,resourceGoldBank:0,resourceMatBank:0,dayHealDay:0,nightHealDay:0,sellReserve:300,sellSelected:Object.keys(NPC_COMMON_PRICES),sellConfirm:false,forgeClass: 'guard', modal: null, selectedTower:-1,selectedMagicCart:-1, heroUnitId: null, heroPortrait: hero.animations.idle.south.frames[0]?.src ?? null,
+  gold: 20, inventory: {}, gear: [], nextGearId: 0, builds: defaultBuilds(), progress:defaultProgress(), mastery:defaultMastery(), classSkills:defaultClassSkills(),coreClass:'guard',reserve:[],forgeLevel:1,resourceLevel:1,resourceGoldBank:0,resourceMatBank:0,dayHealDay:0,nightHealDay:0,sellReserve:300,sellSelected:Object.keys(NPC_COMMON_PRICES),sellConfirm:false,forgeClass: 'guard', modal: null, waterfallGuideSource:null, selectedTower:-1,selectedMagicCart:-1, heroUnitId: null, heroPortrait: hero.animations.idle.south.frames[0]?.src ?? null,
   inventoryFilter: 'All', itemDetailId: null, itemProtect:false, itemTargetClass:'guard', forgeBuildByClass: {},
   armorySlot:'weapon',armoryTab:'craft',armoryRecipe:null,armoryInventoryRarity:'all',armoryNotice:'',refineFeedback:null,
   autoDismantle:defaultAutoDismantleSettings(),armoryInventorySelection:[],batchReport:null,batchExpanded:false,armoryPreserveCraftPosition:false,
   burrow: BURROW_MAX, day: 1, night: false, clock: 0, speed: 1, over: null, batchResults:[],batchFilter:'all',batchSelection:[],batchRecs:[],batchQty:1,batchClass:'guard',batchConfirm:false,
   warren: 1, fortification:0, wave: 1, cleared: false, losses: 0, lureDay:0, // warren level is boss-gated; material-funded fortification is available from day one
-  units: [], monsters: [], towers: [],magicCarts:[], movingTower:-1,movingMagicCart:-1, fences: [], gateClosed:[], wallLevel:0, wallPreview:false, building:false, queue: [], waveTimer: 0, kills: 0, time: 0, events: [],
+  units: [], monsters: [], towers: [],magicCarts:[], movingTower:-1,movingMagicCart:-1, fences: [], gateClosed:[], wallLevel:0, wallPreview:false, building:false,
+  homeBuilder:defaultHomeBuilder(),mythic:defaultMythic(),archiveTab:'first',archiveBossId:null,homeOpen:false,homeGroundBusy:false,homeCategory:'paths',homeSelected:'dirtPath',homeRotation:0,homeAction:'place',homeMovingId:null,homeHover:null,homeUndo:null,homeWallPreview:null,homeWallPreviewData:null,homeTerrainBrush:'grass',homeTerrainDraft:null,homeTerrainNotice:'',homeVariant:0,homeLandOpen:false,homeTerrainOpen:false,homeStoredId:null,
+  queue: [], waveTimer: 0, kills: 0, time: 0, events: [],
 };
 const later = (sec, fn) => S.events.push({ at: S.time + sec, fn }); // game-clock timer (respects speed/pause)
 const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -296,6 +327,10 @@ function installFence(f){
  for(const c of WS.colliders.slice(collidersAt))c.bcFenceId=key;
 }
 function rebuildPerimeter(){
+ const health=homeWallIntegrity(S.wallLevel,S.homeBuilder,S.fences);
+ if(health.missing||health.obsolete||health.actual!==health.expected){
+  S.fences=reconcileHomeWall(S.wallLevel,S.homeBuilder,S.fences);
+ }
  removePerimeterRuntime();
  for(const section of S.fences)installFence(section);
  // Units and monsters will replan with the new collider array automatically.
@@ -327,10 +362,10 @@ function upgradePerimeter(){
  if(next.level<=S.wallLevel)return toast('กำแพงอัปเกรดเต็มระดับแล้ว'),false;
  if(matCount()<next.cost)return toast(`วัตถุดิบไม่พอ · ต้องใช้ ${next.cost} ชิ้น (มี ${matCount()})`),false;
  if(!spendMats(next.cost))return false;
- S.wallLevel=next.level;S.fences=perimeterBlueprint(next.level);
+ S.wallLevel=next.level;S.fences=homePerimeterBlueprint(next.level,S.homeBuilder);
  rebuildPerimeter();save();renderUi();
  combatSFX.playLevelUp?.({volume:.45});
- toast(`${next.material==='wood'?'สร้างรั้วไม้':next.reinforced?'เสริมกำแพงหิน':'อัปเกรดเป็นกำแพงหิน'} Lv ${next.level} · พื้นที่คงเดิม 15×15 ช่อง · ใช้วัตถุดิบ ${next.cost}`);
+ toast(`${next.material==='wood'?'สร้างรั้วไม้':next.reinforced?'เสริมกำแพงหิน':'อัปเกรดเป็นกำแพงหิน'} Lv ${next.level} · รักษาแนวกำแพงที่ซื้อแล้ว · ใช้วัตถุดิบ ${next.cost}`);
  return true;
 }
 function hurtPerimeter(section,damage){
@@ -353,17 +388,23 @@ function placeTower(x, y) {
   if(S.night)return false;
   if (S.towers.length >= towerMax()) return toast(`บ้าน Lv ${S.warren} สร้างได้ ${towerMax()} ป้อม · อัปบ้านเพื่อสร้างเพิ่ม`);
   if (S.gold < TOWER.gold || matCount() < TOWER.mats) return toast(`ต้องใช้ ${TOWER.gold}G + ของ ${TOWER.mats} ชิ้น`);
-  if (dist({ x, y }, CENTER) > TOWER.buildR) return toast('สร้างได้เฉพาะในวงสีเหลืองรอบโพรง');
-  if (dist({ x, y }, CENTER) < 170 || defenseStructures().some(t => dist(t, { x, y }) < TOWER.gap) || !standable(x, y)) return toast('ตรงนี้สร้างไม่ได้');
+  const spot=defenseSpot(x,y,'tower');
+  if(!spot.ok)return toast(spot.reason),false;
   S.gold -= TOWER.gold; spendMats(TOWER.mats);
   createTower(x, y);
   skillFx?.pillar(x, y, { color: '#ffe27a' }); skillFx?.burst(x, y, { color: '#d9c7a8', count: 20, up: 60 }); combatSFX.playLevelUp({ volume: .35 });
   S.building = false;save();toast('สร้างป้อมธนูแล้ว!'); renderUi();
 }
-function canTowerSpot(x,y,index=-1){
- return Number.isFinite(x)&&Number.isFinite(y)&&dist({x,y},CENTER)<=TOWER.buildR&&dist({x,y},CENTER)>=170&&
-  !S.towers.some((t,i)=>i!==index&&dist(t,{x,y})<TOWER.gap)&&!S.magicCarts.some(t=>dist(t,{x,y})<TOWER.gap)&&standable(x,y);
+function defenseSpot(x,y,kind='tower',index=-1){
+ const defenses=[...S.towers.filter((_,i)=>kind!=='tower'||i!==index).map(t=>({x:t.x,y:t.y,kind:'tower'})),
+  ...S.magicCarts.filter((_,i)=>kind!=='magicCart'||i!==index).map(t=>({x:t.x,y:t.y,kind:'magicCart'}))];
+ const decorations=S.homeBuilder.placedObjects.map(o=>({...o,radius:HOME_ITEMS[o.prefab]?.radius??0}));
+ return validateDefensePlacement({x,y,kind,home:S.homeBuilder,walls:S.fences,defenses,
+  colliders:WS.colliders,objects:WS.objects,decorations,
+  occupants:[...S.units.filter(u=>!u.down).map(u=>({x:u.x,y:u.y,r:12})),
+   ...S.monsters.filter(m=>!m.dead).map(m=>({x:m.x,y:m.y,r:14}))],canStand:standable});
 }
+function canTowerSpot(x,y,index=-1){return defenseSpot(x,y,'tower',index).ok;}
 
 function createMagicCart(x,y,hp=MAGIC_CART_COST.hp,garrison=null,level=1){
  magicCartArt??=magicCartSprite();
@@ -381,7 +422,8 @@ function placeMagicCart(x,y){
  if(S.night||S.warren<15)return false;
  if(S.magicCarts.length>=cap)return toast(`บ้าน Lv ${S.warren} สร้างรถยิงเวทย์ได้ ${cap} คัน`),false;
  if(S.gold<MAGIC_CART_COST.gold||matCount()<MAGIC_CART_COST.materials)return toast(`ต้องใช้ ${MAGIC_CART_COST.gold}G + ของ ${MAGIC_CART_COST.materials} ชิ้น`),false;
- if(dist({x,y},CENTER)>TOWER.buildR||dist({x,y},CENTER)<170||defenseStructures().some(t=>dist(t,{x,y})<TOWER.gap)||!standable(x,y))return toast('ตรงนี้สร้างรถยิงเวทย์ไม่ได้'),false;
+ const spot=defenseSpot(x,y,'magicCart');
+ if(!spot.ok)return toast(spot.reason),false;
  S.gold-=MAGIC_CART_COST.gold;spendMats(MAGIC_CART_COST.materials);createMagicCart(x,y);
  S.building=false;skillFx?.pillar(x,y,{color:'#c999ff'});combatSFX.playLevelUp?.({volume:.4});save();renderUi();toast('สร้างรถยิงเวทย์แล้ว · คลิกรถเพื่อจ้างนักเวท');return true;
 }
@@ -396,10 +438,7 @@ function upgradeMagicCart(cart){
  cart.level++;cart.maxHp=MAGIC_CART_HP[cart.level-1];cart.hp=Math.min(cart.maxHp,cart.hp+cart.maxHp-before);
  skillFx?.pillar(cart.x,cart.y,{color:'#c999ff'});save();renderUi();return true;
 }
-function canMagicCartSpot(x,y,index=-1){
- return Number.isFinite(x)&&Number.isFinite(y)&&dist({x,y},CENTER)<=TOWER.buildR&&dist({x,y},CENTER)>=170&&
-  !S.towers.some(t=>dist(t,{x,y})<TOWER.gap)&&!S.magicCarts.some((t,i)=>i!==index&&dist(t,{x,y})<TOWER.gap)&&standable(x,y);
-}
+function canMagicCartSpot(x,y,index=-1){return defenseSpot(x,y,'magicCart',index).ok;}
 function relocateMagicCart(index,x,y){
  const cart=S.magicCarts[index];if(S.night||!cart||!canMagicCartSpot(x,y,index))return false;
  cart.x=x;cart.y=y;cart.actor.x=x-8;cart.actor.y=y-8;S.movingMagicCart=-1;S.towerMoveHover=null;
@@ -408,7 +447,7 @@ function relocateMagicCart(index,x,y){
 function beginMagicCartMove(){
  if(S.night||S.selectedMagicCart<0||!S.magicCarts[S.selectedMagicCart])return false;
  S.movingMagicCart=S.selectedMagicCart;S.movingTower=-1;S.building=false;S.modal=null;renderUi();
- toast('เลือกพื้นใหม่ภายในเขตป้องกัน · กด Esc เพื่อยกเลิก');return true;
+ toast('เลือกพื้นว่างภายในแนวกำแพง · ห้ามทับวัตถุหรือประตู · Esc ยกเลิก');return true;
 }
 function updateMagicCarts(dt){
  for(const cart of S.magicCarts){
@@ -428,8 +467,8 @@ function updateMagicCarts(dt){
 }
 function relocateTower(index,x,y){
  const t=S.towers[index];if(S.night||!t||!Number.isFinite(x)||!Number.isFinite(y))return false;
- if(dist({x,y},CENTER)>TOWER.buildR||dist({x,y},CENTER)<170)return toast('ย้ายได้เฉพาะในเขตสร้างป้อม โดยเว้นพื้นที่รอบโพรง'),false;
- if(!canTowerSpot(x,y,index))return toast('พื้นที่นี้ทับป้อม อาคาร รั้ว หรือพื้นเดินไม่ได้'),false;
+ const spot=defenseSpot(x,y,'tower',index);
+ if(!spot.ok)return toast(spot.reason),false;
  t.x=x;t.y=y;t.actor.x=x-14;t.actor.y=y-14;t.actor.z=runtimeWalkHeight(x,y)??0;t.cd=0;
  S.movingTower=-1;S.towerMoveHover=null;
  skillFx?.pillar(x,y,{color:'#ffe2a2'});
@@ -438,7 +477,7 @@ function relocateTower(index,x,y){
 function beginTowerMove(){
  if(S.night||S.selectedTower<0||!S.towers[S.selectedTower])return false;
  S.movingTower=S.selectedTower;S.movingMagicCart=-1;S.building=false;S.modal=null;renderUi();
- toast('เลือกพื้นใหม่ภายในเขตสร้างป้อม · กด Esc เพื่อยกเลิก');return true;
+ toast('เลือกพื้นว่างภายในแนวกำแพง · ห้ามทับวัตถุหรือประตู · Esc ยกเลิก');return true;
 }
 function upgradeForgeBuilding(){
  const cost=FORGE_COST[S.forgeLevel];if(S.night||!cost||S.forgeLevel>=buildingLevelCap(S.warren)||S.gold<cost)return false;
@@ -513,7 +552,7 @@ function upgradeTower(t){
 let unitSeq = 0;
 function statsOf(cls,level=1,buildId=cls+'-1') {
   const c=CLASSES[cls], gear=buildCombatBonus(S,cls,buildId,level);
-  return {maxHp:Math.round(c.hp+(level-1)*12+gear.maxHp),atk:Math.round((c.atk+(level-1)*.9+gear.atk)*10)/10,def:Math.round(gear.def),critBonus:gear.critBonus||0,luk:Math.floor(level/4)};
+  return {maxHp:Math.round((c.hp+(level-1)*12+gear.maxHp)*mythicHpMultiplier(S.mythic)),atk:Math.round((c.atk+(level-1)*.9+gear.atk)*10)/10,def:Math.round(gear.def),critBonus:gear.critBonus||0,luk:Math.floor(level/4)};
 }
 function refreshArmy() {
   for(const u of S.units){const oldMax=u.maxHp||1,oldHp=u.hp;Object.assign(u,statsOf(u.cls,u.level,u.buildId));u.hp=u.down?0:Math.min(u.maxHp,Math.max(1,Math.round(oldHp/oldMax*u.maxHp)));}
@@ -573,6 +612,45 @@ function unitActor(u) {
 
 // ---------- monsters ----------
 let monSeq = 0;
+let dragonTrial = null;
+let showMythicRewardModal=()=>{};
+let mythicPanel=null;
+function beginDragonTrial(position,frames){
+ const keys=['gold','inventory','progress','mastery','classSkills','kills','time','hallCd'];
+ const state=Object.fromEntries(keys.map(k=>[k,structuredClone(S[k])]));
+ const units=S.units.map(u=>({u,data:{...u,carry:structuredClone(u.carry)}}));
+ const oldMonsters=S.monsters,oldEvents=S.events;
+ const squad=validMythicSquad(S.units,S.mythic.selected),fighters=squad.length?squad:S.units.slice(0,7);
+ const hp=Math.max(1000,S.warren*1000),atk=20+S.warren*5;
+ const m={id:++monSeq,type:'ancientDragonTrial',boss:true,trial:true,night:false,elite:false,x:position.x,y:position.y,home:{...position},r:24,hp,maxHp:hp,atk,range:100,speed:55,cd:1,dead:false,left:false,p:{name:'Ancient Dragon'},specialCd:3,specialIndex:0};
+ const spawn=fieldPoint();if(!standable(m.x,m.y)&&spawn){m.x=spawn.x;m.y=spawn.y;m.home={...spawn};}
+ m.actor={kind:'actor',get x(){return m.x+(m.lx||0)},get y(){return m.y+(m.ly||0)},z:0,r:24,visualScale:1.1,ox:192,oy:472,get dead(){return m.dead},getImage(){const attacking=(m.castUntil||0)>S.time||performance.now()-(m.lunge||0)<360;return frames[(attacking?4:0)+Math.floor(performance.now()/140)%4]},drawOverlay(g,{x,y}){g.fillStyle='#170909';g.fillRect(x-82,y-400,164,10);g.fillStyle='#f66a35';g.fillRect(x-81,y-399,162*Math.max(0,m.hp/m.maxHp),8);g.fillStyle='#ffdd98';g.textAlign='center';g.font='bold 13px system-ui';g.fillText('ANCIENT DRAGON',x,y-408)}};
+ dragonTrial={m,state,units,oldMonsters,oldEvents,fighterIds:new Set(fighters.map(u=>u.id)),resolved:false};S.monsters=[m];S.events=[];
+ for(const u of S.units){u.mythicReserve=!dragonTrial.fighterIds.has(u.id);u.down=u.mythicReserve;u.hp=u.mythicReserve?0:u.maxHp;u.sp=u.maxSp;u.carry={gold:0,items:{}};u.cd=0;}
+ return m;
+}
+function endDragonTrial(){
+ if(!dragonTrial)return;const trial=dragonTrial,completed=trial.m.dead&&!trial.m.trialLost,defeated=!!trial.m.trialLost;dragonTrial=null;trial.m.dead=true;
+ Object.assign(S,trial.state);S.monsters=trial.oldMonsters;S.events=trial.oldEvents;
+ for(const {u,data} of trial.units){for(const key of Object.keys(u))if(!(key in data))delete u[key];Object.assign(u,data);}
+ if(completed||defeated){const result=settleMythic(S.mythic,{won:completed,relicEnabled:true});S.mythic=result.state;S.inventory.optionStone=(S.inventory.optionStone||0)+result.reward.optionStone;S.inventory.reoptionStone=(S.inventory.reoptionStone||0)+result.reward.reoptionStone;refreshArmy();showMythicRewardModal(completed,result.reward);}
+ else toast('ถอนกำลังจาก Mythic Invasion · ไม่ได้รับรางวัล');
+ save();renderUi();
+}
+function updateDragonSkills(m,dt){
+ m.specialCd-=dt;if((m.castUntil||0)>S.time)return true;
+ if(m.specialCd>0)return false;
+ const meteor=m.specialIndex++%2===1,targets=meteor?S.units.filter(u=>!u.down).slice(0,5).map(u=>({x:u.x,y:u.y})):[{x:m.x,y:m.y}];
+ const radius=meteor?95:180,delay=meteor?1.35:1;
+ m.castUntil=S.time+delay;m.specialCd=meteor?8:6;
+ for(const [i,p] of targets.entries()){
+  skillFx?.ring(p.x,p.y,radius,'#ff8d40',delay+i*.15);
+  later(delay+i*.15,()=>{if(!dragonTrial||m.dead||m.trialLost)return;skillFx?.play(meteor?'meteorStorm':'groundSlam',{from:p,to:p,radius});
+   for(const u of S.units)if(!u.down&&dist(u,p)<=radius)hurtUnit(u,m.atk*(meteor?1.8:1.4),m);
+  });
+ }
+ floaters?.text(m.x,m.y,meteor?'METEOR':'GROUND SLAM',{color:'#ffc77a',size:18,lift:95});return true;
+}
 function spawnMonster(type, x, y, { night = false, power = 1 } = {}) {
   const p = monsterArt.get(type); if (!p) return;
   const boss = !!p.isBoss, elite = !!p.elite;
@@ -604,6 +682,7 @@ function fieldPoint() {
 }
 const edgePoints = NIGHT_INVASION_DIRECTIONS.map(({side,ax,ay}) => ({side,x:CENTER.x+ax*1100,y:CENTER.y+ay*1100}));
 function killMonster(m, by) {
+  if(m.trial){if(m.dead)return;m.dead=true;combatFX.playBossDeath(m.x,m.y,{visualScale:1.4});toast('ชนะ Ancient Dragon! ปิดหน้าศึกเพื่อรับรางวัล');return;}
   m.dead = true; S.kills++;
   (m.boss ? combatFX.playBossDeath : combatFX.playNormalDeath).call(combatFX, m.x, m.y, { visualScale: m.actor.visualScale });
   combatSFX.playDeath({ volume: .45 });
@@ -869,7 +948,8 @@ function updateUnit(u, dt, i) {
   const holdsRing=S.night,post=holdsRing?ringPost(u):{x:CENTER.x+(u.id%5-2)*30,y:CENTER.y+150};
   let target = null, goal = null;
   const dusk = !S.night && S.clock > DAY_S - 7;
-  if (holdsRing) {
+  if (dragonTrial&&!dragonTrial.m.dead) target=dragonTrial.m;
+  else if (holdsRing) {
     // Intercept nighttime raiders threatening ANY tower or the hall, not only monsters close
     // to this bunny's ring post. Claim penalties spread defenders across incoming lanes.
     target=selectNightDefenseTarget(u,post,S.monsters,defenseStructures(),CENTER);
@@ -878,9 +958,9 @@ function updateUnit(u, dt, i) {
   else target=pickTarget(u,u,675,m=>!m.night)||pickTarget(u,farmSpot(u),300,m=>!m.night);
   if (target) {
     const d = dist(u, target);
-    const core=(u.coreCastUntil||0)<=S.time?chooseBurrowCore(S,u,target,S.monsters):null;
+    const core=!dragonTrial&&(u.coreCastUntil||0)<=S.time?chooseBurrowCore(S,u,target,S.monsters):null;
     if(core&&castEquippedCore(u,target,core))return;
-    if(d>c.range+95&&castMovementCore(u,target,c))return;
+    if(!dragonTrial&&d>c.range+95&&castMovementCore(u,target,c))return;
     if (d <= c.range*(u.masteryRange?1.1:1)) { u.moving = false; if (u.cd <= 0) strike(u, target); }
     else moveToward(u, target.x, target.y, c.speed, dt, c.range * .8);
     return;
@@ -890,6 +970,7 @@ function updateUnit(u, dt, i) {
 }
 function updateMonster(m, dt) {
   if (m.dead) return;
+  if(m.trial&&updateDragonSkills(m,dt))return;
   m.cd -= dt; m.lx = m.ly = 0;
   // Garrison spells should draw attacks onto their tower, not its bagless
   // stationary occupant. Discard any such aggro retained by an older tick.
@@ -980,7 +1061,7 @@ async function useLure(mode){
 }
 
 function startNight() {
-  S.night = true; S.clock = 0; S.modal=null; S.itemDetailId=null;S.building=false;S.wallPreview=false;S.movingTower=-1;S.movingMagicCart=-1;S.towerMoveHover=null;
+  S.night = true; S.clock = 0; S.modal=null; S.itemDetailId=null;S.building=false;S.wallPreview=false;S.movingTower=-1;S.movingMagicCart=-1;S.towerMoveHover=null;S.homeOpen=false;S.homeHover=null;S.homeMovingId=null;S.homeWallPreview=null;S.homeWallPreviewData=null;
   syncGateRuntime();
   // once the level's boss is beaten the nights replay wave 4 (farmable) until the warren is upgraded
   const n = S.cleared ? WAVES_PER_LEVEL - 1 : S.wave, boss = n === WAVES_PER_LEVEL && !S.cleared;
@@ -1013,6 +1094,9 @@ function endNight(won) {
   }
   S.pendingBanner = true;
   startDay();
+  const before=S.mythic.pending;S.mythic=rollMythicOmen(S.mythic,{won,day:S.day,warren:S.warren});
+  if(!before&&S.mythic.pending){if(!S.mythic.selected.length)S.mythic.selected=defaultMythicSquad(S.units);save();renderUi();}
+  if(!before&&S.mythic.pending){banner('เงาของอสูรกายบินผ่าน…','เตรียมตัวให้พร้อม · BOSS ENCOUNTER!');setTimeout(()=>{if(!mythicCinematic?.start())setTimeout(()=>mythicCinematic?.start(),800);},900);}
 }
 function startDay() {
   S.night = false; S.clock = 0; S.day++;
@@ -1056,11 +1140,312 @@ function upgradeFortification(){
 }
 
 // ---------- save / load (localStorage; versioned for later migrations) ----------
+// Home Builder changes are isolated from the combat save and terrain grids.
+let homeRuntimeReady=false;
+let homeGroundRefresh=Promise.resolve();
+function refreshNativeHomeGround(){
+ S.homeGroundBusy=true;renderUi();
+ homeGroundRefresh=homeGroundRefresh.catch(()=>{}).then(async()=>{
+  const native=sceneFromMap(buildMap(WS.scene?.biome||currentStage.biome,S.homeBuilder));
+  if(!await repaintRuntimeRoadFields(native))throw Error('Terrain renderer not initialized');
+ }).catch(error=>{
+  console.error('[home-builder] native road refresh failed',error);
+  toast('ไม่สามารถรีเฟรชพื้นได้ กรุณาโหลดเกมใหม่เพื่อแสดงทางเดินจาก Map Editor');
+ }).finally(()=>{S.homeGroundBusy=false;renderUi();});
+ return homeGroundRefresh;
+}
+const homeDefenses=()=>[...S.towers,...S.magicCarts].map(t=>({x:t.x,y:t.y,radius:48}));
+function checkHome(prefab,x,y,rotation,ignoreId=null,checkActors=true){
+ // Ignore the object's own collider when moving it onto another snapped tile.
+ const colliders=WS.colliders;
+ if(ignoreId&&homeRuntimeReady)WS.colliders=colliders.filter(c=>c.homeId!==ignoreId);
+ try{
+  const result=validateHomePlacement(S.homeBuilder,prefab,x,y,rotation,{
+   defenses:homeDefenses(),ignoreId,
+   canStand:homeRuntimeReady?(px,py,r)=>[[0,0],[r,0],[-r,0],[0,r],[0,-r]].every(([dx,dy])=>standable(px+dx,py+dy)):null
+  });
+  if(result.ok&&checkActors&&HOME_ITEMS[prefab]?.radius){
+   const blocked=[...S.units.filter(u=>!u.down),...S.monsters.filter(m=>!m.dead)].some(u=>dist(u,result)<HOME_ITEMS[prefab].radius+23);
+   if(blocked)return {ok:false,reason:'มีกระต่ายหรือมอนสเตอร์ยืนอยู่บริเวณนี้'};
+  }
+  return result;
+ }finally{WS.colliders=colliders;}
+}
+// A bad cosmetic sprite must never stop the animation loop or corrupt a save.
+const failedHomeSprites=new Set();
+function safeHomeArt(prefab,rotation=0,variant=0){
+ try{return homeArt(prefab,rotation,variant);}
+ catch(error){
+  const key=prefab+':'+rotation+':'+variant;
+  if(!failedHomeSprites.has(key)){
+   failedHomeSprites.add(key);
+   console.error('[home-builder] failed to render cosmetic sprite',key,error);
+  }
+  return null;
+ }
+}
+function rebuildHomeWorld(){
+ if(!homeRuntimeReady)return;
+ WS.objects=WS.objects.filter(o=>!o.homeId);
+ WS.colliders=WS.colliders.filter(c=>!c.homeId);
+ for(const tile of S.homeBuilder.terrainEdits.filter(e=>e.ground==='sand'&&!e.water)){
+  const x=tile.i*T,y=tile.j*T,sprite=homeArt('sandPatch'),z=runtimeWalkHeight(x,y)??0;
+  WS.objects.push({kind:'sprite',img:sprite.img,ox:sprite.ox,oy:sprite.oy,x,y,z:z+1,homeId:'sand:'+tile.i+':'+tile.j,
+   box:{x0:x-30,x1:x+30,y0:y-30,y1:y+30}});
+ }
+ for(const o of S.homeBuilder.placedObjects){
+  const def=HOME_ITEMS[o.prefab];if(!def||isHomeNativePath(o.prefab))continue;
+  const sprite=safeHomeArt(o.prefab,o.rotation,o.variant);
+  if(!sprite)continue; // Keep the player's object in their save until its art can be rendered.
+  const z=runtimeWalkHeight(o.x,o.y)??0;
+  WS.objects.push({kind:'sprite',img:sprite.img,ox:sprite.ox,oy:sprite.oy,x:o.x,y:o.y,z,
+   box:{x0:o.x-8,x1:o.x+8,y0:o.y-8,y1:o.y+8},homeId:o.id,homePrefab:o.prefab});
+  if(def.radius)WS.colliders.push({type:'c',x:o.x,y:o.y,r:def.radius,homeId:o.id});
+ }
+ for(const actor of [...S.units,...S.monsters]){actor.replan=0;actor.path=null;}
+}
+function restoreHomeWorld(){
+ homeRuntimeReady=true;
+ const loaded=S.homeBuilder.placedObjects.slice();
+ S.homeBuilder.placedObjects=[];
+ for(const obj of loaded){
+  const result=checkHome(obj.prefab,obj.x,obj.y,obj.rotation,null,false);
+  if(result.ok)S.homeBuilder.placedObjects.push(obj);
+  else S.homeBuilder.recovery.push({...obj,reason:result.reason});
+ }
+ rebuildHomeWorld();
+ if(loaded.length!==S.homeBuilder.placedObjects.length){
+  save();toast('พบของตกแต่งที่วางไม่ปลอดภัย ย้ายไป Recovery Storage แล้ว');
+  if(loaded.some(o=>isHomeNativePath(o.prefab)&&!S.homeBuilder.placedObjects.some(v=>v.id===o.id)))refreshNativeHomeGround();
+ }
+}
+function placeHome(x,y){
+ if(!S.homeOpen||S.night||S.homeGroundBusy||S.homeAction!=='place')return false;
+ const def=HOME_ITEMS[S.homeSelected],check=checkHome(S.homeSelected,x,y,S.homeRotation);
+ if(!check.ok){toast(check.reason);return false;}
+ if(!def||S.gold<def.gold||matCount()<def.mats){toast('Gold หรือวัตถุดิบก่อสร้างไม่พอ');return false;}
+ // Build the sprite before charging or mutating the save. A failed asset may
+ // never freeze the game or leave the player with an unpaid/invisible house.
+ if(!isHomeNativePath(S.homeSelected)&&!safeHomeArt(S.homeSelected,S.homeRotation,S.homeVariant)){
+  toast('ไม่สามารถสร้างภาพบ้านนี้ได้ ยังไม่หักวัตถุดิบหรือ Gold');return false;
+ }
+ const receipt=spendMatsWithReceipt(def.mats);if(!receipt)return false;
+ S.gold-=def.gold;
+ const obj={id:'decor-'+S.homeBuilder.nextId++,prefab:S.homeSelected,x:check.x,y:check.y,rotation:S.homeRotation,
+  variant:S.homeVariant,plot:plotForCell(Math.round(check.x/T),Math.round(check.y/T))||'base',spent:receipt,solid:!!def.radius,createdVersion:'0.5.0'};
+ S.homeBuilder.placedObjects.push(obj);S.homeUndo={kind:'place',obj:{...obj}};
+ rebuildHomeWorld();save();
+ if(isHomeNativePath(obj.prefab))refreshNativeHomeGround();
+ renderUi();toast('วาง '+def.name+' แล้ว');return true;
+}
+function moveHome(id,x,y){
+ if(!S.homeOpen||S.night||S.homeGroundBusy)return false;
+ const obj=S.homeBuilder.placedObjects.find(o=>o.id===id);if(!obj)return false;
+ const check=checkHome(obj.prefab,x,y,S.homeRotation,id);
+ if(!check.ok){toast(check.reason);return false;}
+ const before={...obj};Object.assign(obj,{x:check.x,y:check.y,rotation:check.rotation,variant:S.homeVariant,plot:plotForCell(Math.round(check.x/T),Math.round(check.y/T))||'base'});
+ S.homeUndo={kind:'move',before};S.homeAction='place';S.homeMovingId=null;
+ rebuildHomeWorld();save();
+ if(isHomeNativePath(obj.prefab))refreshNativeHomeGround();
+ renderUi();toast('ย้าย '+HOME_ITEMS[obj.prefab].name+' ฟรี');return true;
+}
+function demolishHome(id){
+ if(!S.homeOpen||S.night||S.homeGroundBusy)return false;
+ const index=S.homeBuilder.placedObjects.findIndex(o=>o.id===id);if(index<0)return false;
+ const obj=S.homeBuilder.placedObjects.splice(index,1)[0];
+ const refund=refundHome(obj.spent);
+ for(const [key,qty] of Object.entries(refund))S.inventory[key]=(S.inventory[key]||0)+qty;
+ S.homeUndo={kind:'demolish',obj:{...obj},refund};
+ if(S.homeMovingId===id){S.homeMovingId=null;S.homeAction='place';}
+ rebuildHomeWorld();save();
+ if(isHomeNativePath(obj.prefab))refreshNativeHomeGround();
+ renderUi();toast('รื้อแล้ว · คืนวัตถุดิบประมาณ 75%');return true;
+}
+function undoHome(){
+ const action=S.homeUndo;if(!action||S.night||S.homeGroundBusy)return false;
+ const nativePathChanged=isHomeNativePath(action.kind==='move'?action.before.prefab:action.obj?.prefab);
+ if(action.kind==='recover'){
+  const index=S.homeBuilder.placedObjects.findIndex(o=>o.id===action.obj.id);if(index<0)return false;
+  S.homeBuilder.placedObjects.splice(index,1);S.homeBuilder.recovery.push(action.original);
+ }else if(action.kind==='place'){
+  const id=action.obj.id,index=S.homeBuilder.placedObjects.findIndex(o=>o.id===id);
+  if(index<0)return false;
+  const [obj]=S.homeBuilder.placedObjects.splice(index,1);
+  for(const [key,n] of Object.entries(obj.spent))S.inventory[key]=(S.inventory[key]||0)+n;
+  S.gold+=HOME_ITEMS[obj.prefab].gold;
+ }else if(action.kind==='move'){
+  const current=S.homeBuilder.placedObjects.find(o=>o.id===action.before.id);
+  if(!current)return false;
+  const check=checkHome(action.before.prefab,action.before.x,action.before.y,action.before.rotation,current.id);
+  if(!check.ok){toast('คืนตำแหน่งเดิมไม่ได้: '+check.reason);return false;}
+  Object.assign(current,action.before);
+ }else{
+  const obj=action.obj,check=checkHome(obj.prefab,obj.x,obj.y,obj.rotation);
+  if(!check.ok||Object.entries(action.refund).some(([key,n])=>(S.inventory[key]||0)<n)){
+   toast('Undo ไม่ได้: พื้นที่หรือวัตถุดิบที่คืนไปไม่พร้อมแล้ว');return false;
+  }
+  for(const [key,n] of Object.entries(action.refund))S.inventory[key]-=n;
+  S.homeBuilder.placedObjects.push(obj);
+ }
+ S.homeUndo=null;rebuildHomeWorld();save();
+ if(nativePathChanged)refreshNativeHomeGround();
+ renderUi();toast('ย้อนการกระทำล่าสุดแล้ว');return true;
+}
+function setHomeOpen(open){
+ if(!open&&S.homeGroundBusy){toast('กำลังสร้างพื้นจาก Map Editor กรุณารอสักครู่');return;}
+ if(!open&&S.homeTerrainDraft&&quoteHomeTerrain(S.homeBuilder.terrainEdits,S.homeTerrainDraft).changes&&
+  !confirm('มีร่าง Terrain ที่ยังไม่ได้ยืนยัน ต้องการทิ้งร่างหรือไม่?'))return;
+ if(open&&S.night){toast('Home Builder เปิดได้เฉพาะกลางวัน');return;}
+ S.homeOpen=!!open;S.homeHover=null;S.homeAction='place';S.homeMovingId=null;S.homeStoredId=null;S.homeTerrainDraft=null;S.homeWallPreview=null;S.homeWallPreviewData=null;
+ if(open){S.modal=null;S.itemDetailId=null;S.building=false;S.movingTower=-1;S.movingMagicCart=-1;if(mobileDrawer)closeMobileDrawer();}
+ renderUi();
+}
+
+// Phase 2: land ownership and fixed wall layouts are separate purchases.
+function buyHomePlot(id){
+ const plot=HOME_PLOTS[id];
+ if(!plot||S.night||S.homeBuilder.ownedPlots.includes(id))return false;
+ if(plot.side===HOME_NORTH_FINAL&&!S.homeBuilder.expandedSides.includes('north')){
+  toast('ต้องซื้อและขยายกำแพงเหนือช่วงแรกก่อน');return false;
+ }
+ if(S.gold<HOME_PLOT_COST.gold||matCount()<HOME_PLOT_COST.mats){
+  toast('ซื้อ Plot ต้องใช้ '+HOME_PLOT_COST.gold+' Gold + '+HOME_PLOT_COST.mats+' วัตถุดิบ');return false;
+ }
+ if(!spendMats(HOME_PLOT_COST.mats))return false;
+ S.gold-=HOME_PLOT_COST.gold;
+ S.homeBuilder.ownedPlots.push(id);
+ S.homeUndo=null;save();renderUi();toast('ซื้อ Plot '+HOME_SIDE_NAMES[plot.side]+' #'+plot.index+' แล้ว · ยังอยู่นอกกำแพง');return true;
+}
+function previewHomeWall(side){
+ if(!HOME_EXPANSION_STAGES.includes(side)||!fullyOwnedSide(S.homeBuilder,side)||S.homeBuilder.expandedSides.includes(side)||!S.wallLevel)return null;
+ if(side===HOME_NORTH_FINAL&&!S.homeBuilder.expandedSides.includes('north'))return null;
+ const future={...S.homeBuilder,expandedSides:[...S.homeBuilder.expandedSides,side]};
+ const blueprint=homePerimeterBlueprint(S.wallLevel,future);
+ const current=new Set(S.fences.map(f=>f.axis+':'+f.x+':'+f.y));
+ const added=blueprint.filter(f=>!current.has(f.axis+':'+f.x+':'+f.y));
+ // Candidate geometry must be actually walkable and free of towers and player decorations.
+ const oldColliders=WS.colliders;
+ if(homeRuntimeReady)WS.colliders=oldColliders.filter(c=>!c.bcFenceId);
+ try{
+  for(const f of added){
+   const p=perimeterMid(f,T);
+   if(homeRuntimeReady&&!standable(p.x,p.y))return {ok:false,reason:'แนวกำแพงใหม่ตัดผ่าน Terrain ที่เดินไม่ได้',blueprint};
+   if(defenseStructures().some(o=>dist(p,o)<45))return {ok:false,reason:'มีป้อมหรือรถเวทย์ทับแนวกำแพงใหม่',blueprint};
+   if([...S.units.filter(o=>!o.down),...S.monsters.filter(o=>!o.dead)].some(o=>dist(p,o)<32))return {ok:false,reason:'มีตัวละครยืนบนแนวกำแพงใหม่',blueprint};
+   if(S.homeBuilder.placedObjects.some(o=>HOME_ITEMS[o.prefab]?.radius&&dist(p,o)<HOME_ITEMS[o.prefab].radius+8))
+    return {ok:false,reason:'มีของตกแต่งขวางแนวกำแพงใหม่',blueprint};
+  }
+ }finally{WS.colliders=oldColliders;}
+ const routes=validateHomeTerrainBatch(future,S.homeBuilder.terrainEdits,{...homeTerrainContext(),walls:blueprint});
+ if(!routes.ok)return {ok:false,reason:'แนวกำแพงใหม่ไม่มีเส้นทาง: '+routes.reason,blueprint};
+ return {ok:true,blueprint,layoutId:homeWallLayoutId(future),cost:HOME_WALL_COST};
+}
+function expandHomeWall(side){
+ if(S.night)return false;
+ const proposal=previewHomeWall(side);
+ if(!proposal?.ok){toast(proposal?.reason||'ต้องซื้อ Plot ทั้งสามแปลงของทิศนี้และสร้างกำแพงก่อน');return false;}
+ if(S.gold<HOME_WALL_COST.gold||matCount()<HOME_WALL_COST.mats){toast('วัสดุสำหรับย้ายกำแพงไม่พอ');return false;}
+ if(!spendMats(HOME_WALL_COST.mats))return false;
+ S.gold-=HOME_WALL_COST.gold;
+ S.homeBuilder.expandedSides.push(side);
+ S.fences=reconcileHomeWall(S.wallLevel,S.homeBuilder,S.fences);
+ S.homeBuilder.wallLayoutId=proposal.layoutId;
+ S.homeWallPreview=null;S.homeWallPreviewData=null;S.homeUndo=null;
+ rebuildPerimeter();save();renderUi();
+ toast(side===HOME_NORTH_FINAL?'ถึงหน้าผาเหนือแล้ว · ถอดกำแพงเหนือและใช้หน้าผาระดับ 3 ปิดทางแทน':'ขยายกำแพงทาง'+HOME_SIDE_NAMES[side]+'เรียบร้อย · ประตูสามด้านยังใช้งานได้');return true;
+}
+
+// Phase 3: paint a reversible draft, validate the whole result, then re-bake
+// the real Dimraeth terrain once. No rebuilding meshes or nav during a drag.
+function homeTerrainContext(){
+ return {decorations:S.homeBuilder.placedObjects.map(o=>({...o,radius:HOME_ITEMS[o.prefab]?.radius||0})),
+  defenses:defenseStructures(),walls:S.fences};
+}
+function paintHomeTerrain(x,y){
+ if(!S.homeOpen||S.night||S.homeAction!=='terrain')return false;
+ const i=Math.round(x/T),j=Math.round(y/T);
+ const draft=S.homeTerrainDraft??S.homeBuilder.terrainEdits.map(e=>({...e}));
+ const next=applyHomeTerrainBrush(draft,i,j,S.homeTerrainBrush);
+ if(!next){S.homeTerrainNotice='เลือกพู่กันไม่ถูกต้อง';renderUi();return false;}
+ const check=validateHomeTerrainBatch(S.homeBuilder,next,homeTerrainContext());
+ if(!check.ok){S.homeTerrainNotice=check.reason;renderUi();return false;}
+ S.homeTerrainDraft=next;S.homeTerrainNotice='';
+ renderUi();return true;
+}
+function commitHomeTerrain(){
+ if(S.night||!S.homeOpen||!S.homeTerrainDraft)return false;
+ const check=validateHomeTerrainBatch(S.homeBuilder,S.homeTerrainDraft,homeTerrainContext());
+ if(!check.ok){S.homeTerrainNotice=check.reason;renderUi();return false;}
+ const terrainCost=quoteHomeTerrain(S.homeBuilder.terrainEdits,S.homeTerrainDraft);
+ const newCurtains=deriveHomeNorthCurtains(S.homeBuilder,S.homeTerrainDraft);
+ const oldCurtains=deriveHomeNorthCurtains(S.homeBuilder,S.homeBuilder.terrainEdits);
+ const landmarkCost=quoteNewHomeNorthCurtains(oldCurtains,newCurtains);
+ const cost={mats:terrainCost.mats+landmarkCost.mats,gold:terrainCost.gold+landmarkCost.gold};
+ if(!terrainCost.changes)return false;
+ if(S.gold<cost.gold||matCount()<cost.mats){S.homeTerrainNotice='Gold หรือวัตถุดิบไม่พอ (รวมค่าม่านน้ำตกใหม่)';renderUi();return false;}
+ if(!spendMats(cost.mats))return false;
+ S.gold-=cost.gold;
+ S.homeBuilder.terrainEdits=S.homeTerrainDraft.map(e=>({...e}));
+ S.homeBuilder.rivers=deriveHomeRivers(S.homeBuilder.terrainEdits);
+ const valid=[];
+ for(const fall of S.homeBuilder.waterfalls){
+  if(fall.type==='north-curtain'||fall.sourceTile?.j===2)continue;
+  const test=makeHomeWaterfall(S.homeBuilder,fall.sourceTile,S.homeBuilder.terrainEdits);
+  if(test.ok)valid.push(test.waterfall);
+  else S.homeBuilder.recovery.push({type:'waterfall',data:fall,reason:test.reason});
+ }
+ S.homeBuilder.waterfalls=[...valid,...newCurtains];
+ S.homeTerrainDraft=null;S.homeAction='place';S.homeUndo=null;S.homeTerrainNotice='';
+ save();renderUi();
+ // Ground (including cliffs, water, pathing and waterfalls) is baked by the
+ // engine during boot. A single reload after batch confirmation avoids stale
+ // runtime nav or stacked ground meshes.
+ location.reload();return true;
+}
+function createHomeWaterfall(x,y){
+ if(S.night||!S.homeOpen||S.homeAction!=='waterfall')return false;
+ const source={i:Math.round(x/T),j:Math.round(y/T)};
+ if(homeAtNorthernCliff(S.homeBuilder)&&source.j===3)source.j=2;
+ if(isNorthCliffCrest(S.homeBuilder,source.i,source.j)){
+  toast('ม่านน้ำตกธรรมชาติสร้างอัตโนมัติ: วาดน้ำบนสันหน้าผา บ่อ และแม่น้ำ แล้วกดยืนยัน Terrain');
+  return false;
+ }
+ const check=makeHomeWaterfall(S.homeBuilder,source,S.homeBuilder.terrainEdits);
+ if(!check.ok){toast(check.reason);return false;}
+ if(S.homeBuilder.waterfalls.some(w=>w.sourceTile.i===source.i&&w.sourceTile.j===source.j)){toast('จุดนี้มีน้ำตกอยู่แล้ว');return false;}
+ const fee={gold:35,mats:60};
+ if(S.gold<fee.gold||matCount()<fee.mats){toast('น้ำตกต้องใช้ 35 Gold + 60 วัตถุดิบ');return false;}
+ if(!spendMats(fee.mats))return false;
+ S.gold-=fee.gold;S.homeBuilder.waterfalls.push(check.waterfall);
+ S.homeAction='place';S.homeUndo=null;save();renderUi();
+ toast('ปลดน้ำตกเรียบร้อย · บันทึกต้นน้ำ ขอบเนิน บ่อรับน้ำ และแม่น้ำแล้ว');return true;
+}
+
+function restoreRecoveryHome(x,y){
+ if(S.night||S.homeGroundBusy||!S.homeStoredId)return false;
+ const idx=S.homeBuilder.recovery.findIndex(o=>o.id===S.homeStoredId&&HOME_ITEMS[o.prefab]);
+ if(idx<0)return false;
+ const original=S.homeBuilder.recovery[idx],check=checkHome(original.prefab,x,y,S.homeRotation);
+ if(!check.ok){toast(check.reason);return false;}
+ const id=S.homeBuilder.placedObjects.some(o=>o.id===original.id)?'decor-'+S.homeBuilder.nextId++:original.id;
+ const serial=Number(id.match(/^decor-(\d+)$/)?.[1]);
+ if(Number.isSafeInteger(serial))S.homeBuilder.nextId=Math.max(S.homeBuilder.nextId,serial+1);
+ const spent=Object.fromEntries(Object.entries(original.spent||{}).filter(([key,n])=>CONSTRUCTION_MATERIAL_IDS.includes(key)&&Number.isInteger(n)&&n>0&&n<=1000));
+ const obj={id,prefab:original.prefab,x:check.x,y:check.y,rotation:check.rotation,variant:S.homeVariant,plot:plotForCell(Math.round(check.x/T),Math.round(check.y/T))||'base',spent,
+  solid:!!HOME_ITEMS[original.prefab].radius,createdVersion:'0.6.0'};
+ S.homeBuilder.recovery.splice(idx,1);S.homeBuilder.placedObjects.push(obj);
+ S.homeUndo={kind:'recover',obj:{...obj},original};S.homeStoredId=null;S.homeAction='place';
+ rebuildHomeWorld();save();
+ if(isHomeNativePath(obj.prefab))refreshNativeHomeGround();
+ renderUi();toast('กู้คืนของตกแต่งแล้ว โดยไม่เสียทรัพยากรเพิ่ม');return true;
+}
+
 function save() {
+  if(dragonTrial)return;
   const data={v:3,gold:S.gold,burrow:S.burrow,warren:S.warren,fortification:S.fortification,wallLevel:S.wallLevel,wave:S.wave,cleared:S.cleared,day:S.day,kills:S.kills,losses:S.losses,
     inventory:S.inventory,gear:S.gear,nextGearId:S.nextGearId,builds:S.builds,progress:S.progress,mastery:S.mastery,classSkills:S.classSkills,reserve:S.reserve,
     forgeLevel:S.forgeLevel,resourceLevel:S.resourceLevel,resourceGoldBank:S.resourceGoldBank,resourceMatBank:S.resourceMatBank,resourceBonusVersion:1,dayHealDay:S.dayHealDay,nightHealDay:S.nightHealDay,sellReserve:S.sellReserve,sellSelected:S.sellSelected,
-    autoDismantle:S.autoDismantle,lureDay:S.lureDay,gateClosed:S.gateClosed,
+    autoDismantle:S.autoDismantle,lureDay:S.lureDay,gateClosed:S.gateClosed,homeBuilder:S.homeBuilder,mythic:S.mythic,
     units:S.units.map(u=>({cls:u.cls,name:u.name,level:u.level,exp:u.exp})),
     towers:S.towers.map(t=>({x:t.x,y:t.y,hp:Math.round(t.hp),level:t.level,garrison:t.garrison?{cls:t.garrison.cls,isGarrison:true,name:t.garrison.name,level:t.garrison.level,exp:t.garrison.exp}:null})),
     magicCarts:S.magicCarts.map(t=>({x:t.x,y:t.y,level:t.level,hp:Math.round(t.hp),garrison:t.garrison?{cls:'mage',isGarrison:true,name:t.garrison.name,level:t.garrison.level,exp:t.garrison.exp}:null})),fences:S.fences};
@@ -1074,7 +1459,7 @@ function load() {
   }catch{}
   const d=migrateSave(raw);if(!d)return false;
   Object.assign(S,{gold:d.gold,inventory:d.inventory,gear:d.gear,nextGearId:d.nextGearId,builds:d.builds,progress:d.progress,mastery:d.mastery,classSkills:d.classSkills,
-    reserve:d.reserve,autoDismantle:d.autoDismantle,lureDay:d.lureDay,fences:d.fences,gateClosed:d.gateClosed,wallLevel:d.wallLevel,forgeLevel:d.forgeLevel,resourceLevel:d.resourceLevel,resourceGoldBank:d.resourceGoldBank,resourceMatBank:d.resourceMatBank,dayHealDay:d.dayHealDay,nightHealDay:d.nightHealDay,sellReserve:d.sellReserve,sellSelected:d.sellSelected,warren:d.warren,fortification:d.fortification,wave:d.wave,cleared:d.cleared,day:d.day,kills:d.kills,losses:d.losses});
+    reserve:d.reserve,autoDismantle:d.autoDismantle,homeBuilder:d.homeBuilder,mythic:normalizeMythic(raw.mythic),lureDay:d.lureDay,fences:d.fences,gateClosed:d.gateClosed,wallLevel:d.wallLevel,forgeLevel:d.forgeLevel,resourceLevel:d.resourceLevel,resourceGoldBank:d.resourceGoldBank,resourceMatBank:d.resourceMatBank,dayHealDay:d.dayHealDay,nightHealDay:d.nightHealDay,sellReserve:d.sellReserve,sellSelected:d.sellSelected,warren:d.warren,fortification:d.fortification,wave:d.wave,cleared:d.cleared,day:d.day,kills:d.kills,losses:d.losses});
   S.burrow=Math.min(hallMax(),Number.isFinite(d.burrow)?d.burrow:hallMax());
   for(const x of d.units)recruit(x.cls,true,x);
   for(const t of d.towers||[])createTower(t.x,t.y,t.hp,t.level,t.garrison);
@@ -1086,11 +1471,20 @@ function load() {
 addEventListener('beforeunload', () => { if (!S.night && !S.resetting) save(); }); // leaving by day keeps the day's shopping; leaving at night replays from dawn
 
 function tick(dt) {
+  if(dragonTrial){
+   const m=dragonTrial.m;if(m.dead||m.trialLost)return;
+   pathSearchBudget=2;insideSimulation=true;S.time+=dt;
+   const due=S.events.filter(e=>e.at<=S.time);S.events=S.events.filter(e=>e.at>S.time);for(const e of due)e.fn();
+   const fighters=S.units.filter(u=>dragonTrial.fighterIds.has(u.id));fighters.forEach((u,i)=>updateUnit(u,dt,i));updateMonster(m,dt);separate(fighters,32);keepActorsOutOfWalls(fighters,dt);
+   if(fighters.every(u=>u.down)){m.trialLost=true;S.events=[];}
+   insideSimulation=false;return;
+  }
+  if (mythicCinematic?.active||S.modal==='waterfallGuide') return; // Reading the illustrated update cannot cost a night wave.
   if (S.over) return;
   pathSearchBudget = 1;
   // Let players manage the forge, inventory and hero builds without losing precious daylight.
   // Nighttime combat still advances if they inspect a panel, but changes remain locked.
-  if (!S.night && (S.modal || S.itemDetailId || mobileDrawer)) return;
+  if (!S.night && (S.modal || S.itemDetailId || mobileDrawer || S.homeOpen)) return;
   insideSimulation = true;
   dt *= S.speed; S.clock += dt; S.time += dt;
   if (S.events.length) { const due = S.events.filter(e => e.at <= S.time); S.events = S.events.filter(e => e.at > S.time); for (const e of due) e.fn(); }
@@ -1127,8 +1521,10 @@ function tick(dt) {
 // ---------- camera: WASD / arrows / drag, the runtime player is an invisible camera rig ----------
 const keys = new Set(), cam = { x: CENTER.x + 60, y: CENTER.y + 60 };
 addEventListener('keydown', e => {
+  if(e.code==='Escape'&&S.homeOpen){setHomeOpen(false);return;}
   if(e.code==='Escape'&&(S.movingTower>=0||S.movingMagicCart>=0)){S.movingTower=-1;S.movingMagicCart=-1;S.towerMoveHover=null;renderUi();return;}
   if(e.code==='Escape'&&S.itemDetailId){S.itemDetailId=null;S.itemProtect=false;renderUi();return;}
+  if(e.code==='Escape'&&S.modal==='waterfallGuide'){e.preventDefault();closeWaterfallGuide();return;}
   if(e.code==='Escape'&&S.modal){S.modal=null;renderUi();return;}
   if(e.code==='Escape'&&mobileDrawer){closeMobileDrawer();syncMobileControls();return;}
   if(e.code==='Escape'&&S.building){S.building=false;renderUi();return;}
@@ -1239,12 +1635,37 @@ mobileLayout.addEventListener('change',()=>{setRuntimeZoomRange(mobileLayout.mat
 for(const target of document.querySelectorAll('[data-ui-icon]'))target.innerHTML=gameIcon(target.dataset.uiIcon,'ui',target.textContent);
 function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.h); toast.h = setTimeout(() => el.classList.remove('on'), 2200); }
 function banner(title, sub) { const el = $('banner'); el.innerHTML = `<b>${title}</b><span>${sub}</span>`; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on'); }
+function openWaterfallGuide(source='guide'){
+  if(S.homeOpen)setHomeOpen(false);
+  if(mobileDrawer)closeMobileDrawer();
+  S.waterfallGuideSource=source==='intro'?'intro':'guide';
+  S.modal='waterfallGuide';
+  S.itemDetailId=null;
+  renderUi();
+  $('waterfallGuidePanel').querySelector('[data-waterfall-guide-close]')?.focus();
+}
+function closeWaterfallGuide(){
+  if(S.modal!=='waterfallGuide')return;
+  const source=S.waterfallGuideSource;
+  if(source==='intro')markWaterfallIntroSeen();
+  S.waterfallGuideSource=null;
+  S.modal=source==='guide'?'guide':null;
+  renderUi();
+  (source==='guide'?$('guidePanel').querySelector('[data-open-waterfall-guide]'):$('help').querySelector('[data-open-guide]'))?.focus();
+}
 function renderUi() {
   // AoE kills and simultaneous raider wall hits can request dozens of identical
   // UI rebuilds in one frame. Only paint once after that simulation batch.
   if (insideSimulation) { uiDirty = true; return; }
   uiDirty = false; lastUiPaint = performance.now();
+  if($('relicLauncherCount'))$('relicLauncherCount').textContent=archiveProgress(S.mythic).first+'/9';
   if($('patchNotesOpen'))$('patchNotesOpen').innerHTML=`<span>📜</span> Patch Notes v${BURROW_VERSION}`;
+  $('homeOpen').disabled=S.night;
+  $('homeOpen').classList.toggle('on',S.homeOpen);
+  $('homeOpen').textContent=S.homeOpen?'✖ ปิด Home Builder':'🔨 Home Builder';
+  S.homeWallVisible=new Set(WS.objects.filter(o=>o.bcFenceId).map(o=>o.bcFenceId)).size;
+  const homePanel=$('homePanel');homePanel.hidden=!S.homeOpen||S.night||!!S.modal;
+  if(!homePanel.hidden){const scroll=homePanel.scrollTop;homePanel.innerHTML=renderHomeBuilderHtml(S);homePanel.scrollTop=scroll;}
   $('gold').textContent=S.gold;
   $('materials').textContent=matCount();
   $('burrow').style.width=`${100*S.burrow/hallMax()}%`;
@@ -1279,17 +1700,18 @@ function renderUi() {
   if($('recruitSummary'))$('recruitSummary').textContent=`${S.units.length}/${squadMax()}`;
   $('lureOpen').disabled=S.night||S.lureDay===S.day;
   $('lureOpen').textContent=S.lureDay===S.day?'👾 ล่อมอน · ใช้แล้ววันนี้':'👾 ล่อมอนด้วยวัตถุดิบ';
-  const wall=perimeterHealth(S.fences),next=nextPerimeterTier(S.wallLevel);
+  const wall=perimeterHealth(S.fences),wallIntegrity=homeWallIntegrity(S.wallLevel,S.homeBuilder,S.fences),next=nextPerimeterTier(S.wallLevel);
   const wallFull=S.wallLevel>=PERIMETER_TIERS.length-1;
   $('fenceBuild').disabled=S.night||wallFull;
   const wallName=S.wallLevel===0?'ยังไม่มีรั้ว':S.wallLevel===1?'รั้วไม้':S.wallLevel===2?'กำแพงหิน':'กำแพงหินเสริม';
   const nextName=next.level===1?'🪵 สร้างรั้วไม้':next.level===2?'🪨 อัปเกรดเป็นกำแพงหิน':`🛡 เสริมกำแพงหิน Lv ${next.level}`;
+  const wallFootprint=S.homeBuilder.expandedSides.length?'15×15 + '+S.homeBuilder.expandedSides.map(s=>HOME_SIDE_NAMES[s]).join('/'):'15×15 ช่อง';
   $('fenceBuild').textContent=wallFull?'🛡 กำแพงระดับสูงสุดแล้ว':
-    `${nextName} · 15×15 ช่อง (${next.cost} วัตถุดิบ)`;
-  $('fenceBuild').title=wallFull?'กำแพงระดับสูงสุด · ขนาดคงที่ 15×15 ช่อง':
-    `พรีวิว ${next.material==='wood'?'รั้วไม้':next.reinforced?'กำแพงหินเสริม':'กำแพงหิน'} · ขนาดคงที่ 15×15 ช่อง · ประตู 3 ด้าน`;
+    `${nextName} · ${wallFootprint} (${next.cost} วัตถุดิบ)`;
+  $('fenceBuild').title=wallFull?'กำแพงถึงระดับสูงสุด แต่ย้ายแนวกำแพงได้ผ่าน Home Builder':
+    `อัปเกรดวัสดุกำแพงโดยรักษา Layout ปัจจุบัน · ประตู 3 ด้าน`;
   $('wallStatus').textContent=S.wallLevel?
-    `${wallName} Lv ${S.wallLevel} · 15×15 ช่อง (ไม่ขยาย) · HP ${wall.hp}/${wall.maxHp}${wall.broken?' · พัง '+wall.broken+' ช่วง':''}`:
+    `${wallName} Lv ${S.wallLevel} · ${wallFootprint} · กำแพง ${wallIntegrity.actual}/${wallIntegrity.expected} ส่วน · HP ${wall.hp}/${wall.maxHp}${wall.broken?' · พัง '+wall.broken+' ส่วน (กดซ่อมทั้งหมด)':''}`:
     `ยังไม่มีรั้ว · สร้างรั้วไม้ขนาด 15×15 ช่อง พร้อมประตู 3 ด้าน`;
   $('wallStatus').title=S.wallLevel?'ซ่อมรั้วและประตูที่ถูกทุบได้ด้วยปุ่มซ่อมทั้งหมด':'เลื่อนเมาส์มาที่ปุ่มสร้างรั้วเพื่อดูขอบเขต';
   const gates=$('gateControls');gates.hidden=!S.wallLevel;
@@ -1304,7 +1726,7 @@ function renderUi() {
   }else gates.innerHTML='';
   for(const [type,id,render] of [['hall','hallPanel',()=>renderHallBuildingHtml(S,hallMax(),Math.round(hallMax()*.2))],
     ['blacksmith','blacksmithPanel',()=>renderBlacksmithBuildingHtml(S)],['resource','resourcePanel',()=>renderResourceBuildingHtml(S)],
-    ['sell','sellPanel',()=>renderQuickSellHtml(S)],['forge','forgePanel',()=>renderForgeHtml(S,CLASSES)],['hero','heroPanel',()=>renderArmoryHtml(S,CLASSES)],['inventory','inventoryPanel',()=>renderInventoryHtml(S,CLASSES)],['tower','towerPanel',()=>renderTowerHtml(S,CLASSES)],['magicCart','magicCartPanel',()=>renderMagicCartHtml(S,CLASSES)],['mastery','masteryPanel',()=>renderMasteryHtml(S,CLASSES)],['skillCore','skillCorePanel',()=>renderClassCoreHtml(S,CLASSES)],['batch','batchPanel',()=>renderBatchHtml(S,CLASSES)],['lure','lurePanel',()=>renderLureHtml(S,matCount())],['guide','guidePanel',renderGuideHtml],['patchNotes','patchNotesPanel',renderPatchNotesHtml]]){
+    ['sell','sellPanel',()=>renderQuickSellHtml(S)],['forge','forgePanel',()=>renderForgeHtml(S,CLASSES)],['hero','heroPanel',()=>renderArmoryHtml(S,CLASSES)],['inventory','inventoryPanel',()=>renderInventoryHtml(S,CLASSES)],['tower','towerPanel',()=>renderTowerHtml(S,CLASSES)],['magicCart','magicCartPanel',()=>renderMagicCartHtml(S,CLASSES)],['mastery','masteryPanel',()=>renderMasteryHtml(S,CLASSES)],['skillCore','skillCorePanel',()=>renderClassCoreHtml(S,CLASSES)],['batch','batchPanel',()=>renderBatchHtml(S,CLASSES)],['lure','lurePanel',()=>renderLureHtml(S,matCount())],['guide','guidePanel',renderGuideHtml],['relicCollection','relicCollectionPanel',()=>renderRelicArchiveHtml(S.mythic,S.archiveTab,S.archiveBossId)],['waterfallGuide','waterfallGuidePanel',()=>renderWaterfallGuideHtml({intro:S.waterfallGuideSource==='intro'})],['patchNotes','patchNotesPanel',renderPatchNotesHtml]]){
     const panel=$(id),scrollSelectors=['.bc-modal-body','.bc-armory-recipes','.bc-recipe-list','.bc-batch-expansion','.bc-master-list'];
     // Combat rewards may update the HUD while the player is reading or scrolling a modal.
     // Preserve BOTH its main scroll and nested recipe list instead of replacing the nodes at scroll=0.
@@ -1329,7 +1751,7 @@ function renderUi() {
   $('bunnyMenuPanel').hidden=S.modal!=='bunnyMenu';
   const detail=$('itemDetailPanel');detail.hidden=!S.itemDetailId||S.modal==='hero';
   if(S.itemDetailId){if(S.gear.some(i=>i.id===S.itemDetailId)&&S.modal!=='hero')detail.innerHTML=renderItemDetailHtml(S,S.itemDetailId,CLASSES);else if(!S.gear.some(i=>i.id===S.itemDetailId)){detail.hidden=true;S.itemDetailId=null;}}
-  $('modalScrim').hidden=!S.modal&&!S.itemDetailId;
+  $('modalScrim').hidden=!S.modal&&!S.itemDetailId&&(mythicPanel?.hidden??true);
   syncMobileControls();
   $('forgeOpen').disabled=S.night;
   const movingDefense=S.movingTower>=0||S.movingMagicCart>=0;
@@ -1355,13 +1777,36 @@ function syncClock() {
 }
 document.body.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
+  if(b.id==='homeOpen'||b.id==='mobileHomeOpen'){setHomeOpen(!S.homeOpen);return;}
+  if(b.hasAttribute('data-home-close')){setHomeOpen(false);return;}
+  if(b.dataset.homeCategory){S.homeCategory=b.dataset.homeCategory;renderUi();return;}
+  if(b.dataset.homeType){S.homeSelected=b.dataset.homeType;S.homeAction='place';S.homeMovingId=null;S.homeStoredId=null;S.homeVariant=0;renderUi();return;}
+  if(b.hasAttribute('data-home-rotate')){S.homeRotation=(S.homeRotation+1)%4;renderUi();return;}
+  if(b.hasAttribute('data-home-variant')){S.homeVariant=(S.homeVariant+1)%3;renderUi();return;}
+  if(b.dataset.homeMove){const o=S.homeBuilder.placedObjects.find(v=>v.id===b.dataset.homeMove);if(o){S.homeAction='move';S.homeMovingId=o.id;S.homeRotation=o.rotation;S.homeSelected=o.prefab;S.homeVariant=o.variant||0;toast('แตะพื้นที่ใหม่เพื่อย้าย '+HOME_ITEMS[o.prefab].name);}renderUi();return;}
+  if(b.dataset.homeDemolish){demolishHome(b.dataset.homeDemolish);return;}
+  if(b.hasAttribute('data-home-undo')){undoHome();return;}
+  if(b.dataset.homeRecover){const item=S.homeBuilder.recovery.find(o=>o.id===b.dataset.homeRecover&&HOME_ITEMS[o.prefab]);
+   if(item){S.homeStoredId=item.id;S.homeAction='recover';S.homeSelected=item.prefab;S.homeVariant=item.variant||0;S.homeRotation=item.rotation||0;toast('เลือกจุดวางใหม่ให้ '+HOME_ITEMS[item.prefab].name);renderUi();}return;}
+  if(b.dataset.homePlot){buyHomePlot(b.dataset.homePlot);return;}
+  if(b.dataset.homeWallPreview){S.homeWallPreview=S.homeWallPreview===b.dataset.homeWallPreview?null:b.dataset.homeWallPreview;S.homeWallPreviewData=S.homeWallPreview?previewHomeWall(S.homeWallPreview):null;renderUi();return;}
+  if(b.dataset.homeWallExpand){expandHomeWall(b.dataset.homeWallExpand);return;}
+  if(b.hasAttribute('data-home-wall-rebuild')&&!S.night){rebuildPerimeter();save();renderUi();toast('สร้างกำแพงที่ข้อมูลขาดขึ้นใหม่แล้ว · ส่วนที่ถูกมอนสเตอร์ทุบยังต้องซ่อม');return;}
+  if(b.dataset.homeBrush){S.homeAction='terrain';S.homeTerrainBrush=b.dataset.homeBrush;S.homeTerrainDraft??=S.homeBuilder.terrainEdits.map(e=>({...e}));S.homeTerrainNotice='';renderUi();return;}
+  if(b.hasAttribute('data-home-terrain-apply')){commitHomeTerrain();return;}
+  if(b.hasAttribute('data-home-terrain-cancel')){S.homeTerrainDraft=null;S.homeAction='place';S.homeTerrainNotice='';renderUi();return;}
+  if(b.hasAttribute('data-home-waterfall-mode')){S.homeAction='waterfall';S.homeTerrainDraft=null;toast('เลือกจุดต้นน้ำบนเนินที่สร้างเอง; ม่านน้ำตกเหนือใช้พู่กันน้ำแล้วกดยืนยัน');renderUi();return;}
   if(b.dataset.mobileOpen){openMobileView(b.dataset.mobileOpen);return;}
   if(b.hasAttribute('data-mobile-close')){closeMobileDrawer();syncMobileControls();return;}
   if(b.id==='mobileReset'){$('reset').click();return;}
   if(b.dataset.buy)recruit(b.dataset.buy);
   else if(b.id==='forgeOpen'){S.modal='blacksmith';renderUi();}
   else if(b.hasAttribute('data-open-guide')){S.modal='guide';renderUi();}
+  else if(b.hasAttribute('data-open-waterfall-guide')){openWaterfallGuide('guide');}
   else if(b.hasAttribute('data-open-patch-notes')){S.modal='patchNotes';renderUi();}
+  else if(b.hasAttribute('data-open-relic-collection')){closeMobileDrawer();S.archiveTab='first';S.archiveBossId=null;S.modal='relicCollection';renderUi();}
+  else if(b.dataset.archiveTab){S.archiveTab=b.dataset.archiveTab;S.archiveBossId=null;renderUi();}
+  else if(b.dataset.archiveBoss){S.archiveBossId=b.dataset.archiveBoss;renderUi();}
   else if(b.dataset.world){
     if(S.movingTower>=0||S.movingMagicCart>=0){toast('กำลังย้ายสิ่งก่อสร้างป้องกัน · คลิกพื้นว่างหรือกด Esc ก่อน');return;}
     if(b.dataset.world==='sell')S.sellConfirm=false;
@@ -1417,7 +1862,8 @@ document.body.addEventListener('click', e => {
     }catch(e){toast('อัปเกรดไม่ได้: '+String(e.message||e));}
   }
   else if(b.dataset.openMastery){S.masteryClass=b.dataset.openMastery;S.modal='mastery';renderUi();}
-  else if(b.hasAttribute('data-modal-close')){S.modal=null;S.itemDetailId=null;renderUi();}
+  else if(b.hasAttribute('data-waterfall-guide-close')){closeWaterfallGuide();}
+  else if(b.hasAttribute('data-modal-close')){if(S.modal==='waterfallGuide')closeWaterfallGuide();else{S.modal=null;S.itemDetailId=null;renderUi();}}
   else if(b.hasAttribute('data-item-close')){S.itemDetailId=null;S.itemProtect=false;renderUi();}
   else if(b.dataset.heroUnit){const u=S.units.find(x=>x.id===+b.dataset.heroUnit);if(u){selectArmoryClass(u.cls);S.heroUnitId=u.id;S.modal='hero';renderUi();}}
   else if(b.dataset.openInventory){S.armoryTab='inventory';S.modal='hero';S.itemDetailId=null;renderUi();}
@@ -1600,7 +2046,14 @@ document.body.addEventListener('click', e => {
   else if (b.id === 'reset' && confirm('เริ่มหมู่บ้านใหม่? เซฟเดิมจะหายทั้งหมด')) { try { localStorage.removeItem(SAVE_KEY);localStorage.removeItem(PRIOR_SAVE_KEY);localStorage.removeItem(LEGACY_SAVE_KEY); } catch {} S.resetting = true; location.reload(); }
 });
 
-$('modalScrim').addEventListener('click',()=>{if(S.itemDetailId){S.itemDetailId=null;S.itemProtect=false;}else S.modal=null;renderUi();});
+document.body.addEventListener('toggle',e=>{
+ if(e.target?.classList?.contains('bc-home-land')){
+  if(e.target.querySelector('.bc-home-terrain-tools'))S.homeTerrainOpen=e.target.open;
+  else S.homeLandOpen=e.target.open;
+ }
+},true);
+
+$('modalScrim').addEventListener('click',()=>{if(S.modal==='waterfallGuide'){closeWaterfallGuide();return;}if(S.itemDetailId){S.itemDetailId=null;S.itemProtect=false;}else S.modal=null;renderUi();});
 
 document.body.addEventListener('change',e=>{
   const choice=e.target;
@@ -1659,13 +2112,22 @@ const hallActor = { kind: 'actor', x: CENTER.x + 40, y: CENTER.y + 40, z: 0, r: 
   drawOverlay(g, { x, y }) { if (S.building||S.movingTower>=0||S.movingMagicCart>=0) drawBuildRing(g); const w = 110, q = S.burrow / hallMax(); g.fillStyle = 'rgba(10,12,12,.85)'; g.fillRect(x - w / 2, y - 150, w, 7); g.fillStyle = q > .5 ? '#7ee38a' : q > .25 ? '#ffc94a' : '#ff5a4a'; g.fillRect(x - w / 2 + 1, y - 149, (w - 2) * q, 5); // Name moved to the clickable world label.
   } };
 
-function drawBuildRing(g) { // the build radius as an iso ellipse around the hall
-  const z = runtimeWalkHeight(CENTER.x, CENTER.y) ?? 0, c = projectRuntimePoint(CENTER.x, CENTER.y, z), e = projectRuntimePoint(CENTER.x + TOWER.buildR, CENTER.y - TOWER.buildR, z);
-  const rx = Math.abs(e.x - c.x);
-  g.save(); g.setLineDash([8, 6]); g.strokeStyle = 'rgba(255,214,90,.85)'; g.lineWidth = 2; g.beginPath(); g.ellipse(c.x, c.y, rx, rx / 2, 0, 0, Math.PI * 2); g.stroke();
-  g.fillStyle = 'rgba(255,214,90,.07)'; g.fill(); g.restore();
+function drawBuildRing(g){ // preview the ACTUAL enlarged enclosure, not a stale hall-centered radius
+ const blueprint=S.wallLevel?S.fences:homePerimeterBlueprint(1,S.homeBuilder);
+ g.save();g.setLineDash([8,6]);g.strokeStyle='rgba(255,214,90,.88)';g.lineWidth=2;
+ for(const f of blueprint){
+  const x=f.x*T,y=f.y*T,xx=x+(f.axis==='x'?(f.len||1)*T:0),yy=y+(f.axis==='y'?(f.len||1)*T:0);
+  const a=projectRuntimePoint(x,y,runtimeWalkHeight(x,y)??0),b=projectRuntimePoint(xx,yy,runtimeWalkHeight(xx,yy)??0);
+  g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke();
+ }
+ if(homeAtNorthernCliff(S.homeBuilder)){
+  const x=12.5*T,y=2.5*T,a=projectRuntimePoint(x,y,runtimeWalkHeight(x,y)??0),b=projectRuntimePoint(27.5*T,y,runtimeWalkHeight(27.5*T,y)??0);
+  g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke();
+ }
+ g.restore();
 }
 let skillFx = null, floaters = null, edgeLayer = null, edgeBounds = null;
+let mythicCinematic = null;
 const placementTintCache=new WeakMap();
 function placementGhost(g,art,p,good){
  if(!art?.img)return;
@@ -1680,6 +2142,56 @@ function drawRangeRing(g,x,y,range,good=true){
  g.save();g.strokeStyle=good?'rgba(128,238,154,.92)':'rgba(255,105,94,.9)';g.fillStyle=good?'rgba(100,224,140,.055)':'rgba(255,80,70,.045)';g.lineWidth=1.5;g.setLineDash([7,5]);
  g.beginPath();g.ellipse(c.x,c.y,rx,rx/2,0,0,Math.PI*2);g.fill();g.stroke();g.restore();
 }
+function drawHomeBuilderOverlay(g){
+ if(!S.homeOpen||S.night)return;
+ g.save();g.lineWidth=1;g.strokeStyle='rgba(193,241,157,.38)';
+ for(let i=8;i<=32;i++)for(let j=2;j<=32;j++){
+  if(!homeOwnedCell(S.homeBuilder,i,j)&&!isNorthCliffCrest(S.homeBuilder,i,j))continue;
+  const x=i*T,y=j*T,z=runtimeWalkHeight(x,y)??__slice.terrain?.heightAt(x,y)??0;
+  const points=[[x-32,y-32],[x+32,y-32],[x+32,y+32],[x-32,y+32]].map(([a,b])=>projectRuntimePoint(a,b,z));
+  g.beginPath();points.forEach((p,k)=>k?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y));g.closePath();g.stroke();
+ }
+ if(S.homeWallPreviewData?.blueprint){
+  const proposal=S.homeWallPreviewData;
+  g.save();g.strokeStyle=proposal.ok?'#a6f9ad':'#ff8a83';g.lineWidth=3;g.setLineDash([8,5]);
+  for(const f of proposal.blueprint){const x=f.x*T,y=f.y*T,ex=x+(f.axis==='x'?(f.len||1)*T:0),ey=y+(f.axis==='y'?(f.len||1)*T:0);
+   const a=projectRuntimePoint(x,y,runtimeWalkHeight(x,y)??0),b=projectRuntimePoint(ex,ey,runtimeWalkHeight(ex,ey)??0);
+   g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke();
+  }g.restore();
+ }
+ if(S.homeTerrainDraft){
+  const old=new Map(S.homeBuilder.terrainEdits.map(e=>[e.i+','+e.j,e]));
+  for(const edit of S.homeTerrainDraft){const previous=old.get(edit.i+','+edit.j);
+   if(previous&&previous.ground===edit.ground&&previous.elevation===edit.elevation&&previous.water===edit.water)continue;
+   const x=edit.i*T,y=edit.j*T,z=runtimeWalkHeight(x,y)??__slice.terrain?.heightAt(x,y)??0;
+   const corners=[[x-30,y-30],[x+30,y-30],[x+30,y+30],[x-30,y+30]].map(([a,b])=>projectRuntimePoint(a,b,z));
+   g.fillStyle=edit.water?'rgba(52,161,218,.52)':edit.elevation?'rgba(195,163,107,.58)':edit.ground==='sand'?'rgba(228,194,115,.4)':edit.ground==='dirt'?'rgba(157,112,70,.42)':'rgba(120,180,98,.42)';
+   g.beginPath();corners.forEach((c,k)=>k?g.lineTo(c.x,c.y):g.moveTo(c.x,c.y));g.closePath();g.fill();
+  }
+ }
+ if(S.homeHover){
+  const h=S.homeHover,move=S.homeAction==='move'?S.homeBuilder.placedObjects.find(o=>o.id===S.homeMovingId):null;
+  const type=move?.prefab||S.homeSelected,def=HOME_ITEMS[type],p=snapHome(h.x,h.y);
+  if(def){
+   const result=S.homeAction==='terrain'?validateHomeTerrainBatch(S.homeBuilder,applyHomeTerrainBrush(S.homeTerrainDraft??S.homeBuilder.terrainEdits,Math.round(p.x/T),Math.round(p.y/T),S.homeTerrainBrush)??[],homeTerrainContext()):
+     S.homeAction==='waterfall'?makeHomeWaterfall(S.homeBuilder,{i:Math.round(p.x/T),j:Math.round(p.y/T)},S.homeBuilder.terrainEdits):checkHome(type,p.x,p.y,S.homeRotation,move?.id);
+   const good=result.ok&&(S.homeAction!=='place'||S.gold>=def.gold&&matCount()>=def.mats);
+   const point=projectRuntimePoint(p.x,p.y,runtimeWalkHeight(p.x,p.y)??__slice.terrain?.heightAt(p.x,p.y)??0);
+   if(S.homeAction==='place'||S.homeAction==='move'||S.homeAction==='recover'){
+    if(isHomeNativePath(type)){
+     const z=runtimeWalkHeight(p.x,p.y)??0;
+     const corners=[[p.x-32,p.y-32],[p.x+32,p.y-32],[p.x+32,p.y+32],[p.x-32,p.y+32]].map(([a,b])=>projectRuntimePoint(a,b,z));
+     g.save();g.fillStyle=good?'rgba(110,225,128,.40)':'rgba(236,89,81,.44)';g.strokeStyle=good?'#adf6b8':'#ff8b83';
+     g.beginPath();corners.forEach((c,k)=>k?g.lineTo(c.x,c.y):g.moveTo(c.x,c.y));g.closePath();g.fill();g.stroke();g.restore();
+    }else placementGhost(g,safeHomeArt(type,S.homeRotation,move?.variant??S.homeVariant),point,good);
+   }
+   g.strokeStyle=good?'#a0f4ac':'#ff7777';g.fillStyle=good?'rgba(99,220,121,.22)':'rgba(249,81,81,.26)';
+   g.lineWidth=2;g.beginPath();g.arc(point.x,point.y,12,0,Math.PI*2);g.fill();g.stroke();
+  }
+ }
+ g.restore();
+}
+
 function drawEdgeArrows(viewport) {
   if (!edgeLayer) { edgeLayer = document.createElement('canvas'); edgeLayer.style.cssText = 'position:absolute;pointer-events:none;z-index:6;background:transparent!important'; canvas.after(edgeLayer); }
   const L = edgeLayer, r = viewport?.rect ?? canvas.getBoundingClientRect();
@@ -1692,8 +2204,18 @@ function drawEdgeArrows(viewport) {
   }
   const g = L.getContext('2d'), W = L.width, H = L.height, pad = 26;
   g.clearRect(0, 0, W, H);
+  drawHomeBuilderOverlay(g);
   // The former passive Healing Lodge aura was removed; Heal now belongs to the Warren.
-  if(S.wallPreview&&!S.night&&S.wallLevel<PERIMETER_TIERS.length-1){
+  if(S.wallPreview&&!S.night&&S.wallLevel<PERIMETER_TIERS.length-1&&S.homeBuilder.expandedSides.length){
+  g.save();g.strokeStyle='rgba(187,227,175,.95)';g.lineWidth=2.5;g.setLineDash([9,5]);
+  for(const f of homePerimeterBlueprint(nextPerimeterTier(S.wallLevel).level,S.homeBuilder)){
+   const x=f.x*T,y=f.y*T,ex=x+(f.axis==='x'?(f.len||1)*T:0),ey=y+(f.axis==='y'?(f.len||1)*T:0);
+   const p=projectRuntimePoint(x,y,runtimeWalkHeight(x,y)??0),q=projectRuntimePoint(ex,ey,runtimeWalkHeight(ex,ey)??0);
+   g.beginPath();g.moveTo(p.x,p.y);g.lineTo(q.x,q.y);g.stroke();
+  }
+  g.restore();
+ }
+ if(S.wallPreview&&!S.night&&S.wallLevel<PERIMETER_TIERS.length-1&&!S.homeBuilder.expandedSides.length){
     const radius=nextPerimeterTier(S.wallLevel).radius*T;
     const points=[[-1,-1],[1,-1],[1,1],[-1,1]].map(([dx,dy])=>{
       const x=CENTER.x+dx*radius,y=CENTER.y+dy*radius;
@@ -1750,7 +2272,7 @@ let labelTowerCount=-1;
 const WORLD_NAMES={hall:'🏠 โพรงกระต่าย',blacksmith:'⚒ โรงตีเหล็ก',resource:'📦 โรงผลิตทรัพยากร',sell:'🛒 รถเข็น · Quick Sell'};
 function updateWorldLabels(viewport){
  // During placement all labels remain readable but cannot steal taps/clicks from the map.
- worldLabels.classList.toggle('placement-mode',S.building||S.movingTower>=0||S.movingMagicCart>=0);
+ worldLabels.classList.toggle('placement-mode',S.homeOpen||S.building||S.movingTower>=0||S.movingMagicCart>=0);
  const defenseLabelKey=S.towers.length+':'+S.magicCarts.length;
  if(labelTowerCount!==defenseLabelKey){
   labelTowerCount=defenseLabelKey;
@@ -1792,18 +2314,19 @@ function updateWorldLabels(viewport){
 }
 
 setRuntimePlayerVisual(() => ({ image: null }));
-canvas.addEventListener('pointermove',e=>{if(S.building||S.movingTower>=0||S.movingMagicCart>=0){const hit=runtimePointerHit(e);S.towerMoveHover=hit&&hit.idx>=0?{x:hit.x,y:hit.y}:null;}});
-canvas.addEventListener('pointerleave',()=>{S.towerMoveHover=null;});
+canvas.addEventListener('pointermove',e=>{if(S.building||S.movingTower>=0||S.movingMagicCart>=0||S.homeOpen){const hit=runtimePointerHit(e);if(S.homeOpen)S.homeHover=hit&&hit.idx>=0?{x:hit.x,y:hit.y}:null;else S.towerMoveHover=hit&&hit.idx>=0?{x:hit.x,y:hit.y}:null;}});
+canvas.addEventListener('pointerleave',()=>{S.towerMoveHover=null;S.homeHover=null;});
 const onWorldTap=(hit,e) => {
   if (S.over || S.modal || S.itemDetailId || !hit || hit.idx < 0) return;
+  if(S.homeOpen){if(!S.night){if(S.homeAction==='move'&&S.homeMovingId)moveHome(S.homeMovingId,hit.x,hit.y);else if(S.homeAction==='recover'&&S.homeStoredId)restoreRecoveryHome(hit.x,hit.y);else if(S.homeAction==='terrain')paintHomeTerrain(hit.x,hit.y);else if(S.homeAction==='waterfall')createHomeWaterfall(hit.x,hit.y);else placeHome(hit.x,hit.y);}return;}
   if(S.movingTower>=0){relocateTower(S.movingTower,hit.x,hit.y);return;}
   if(S.movingMagicCart>=0){relocateMagicCart(S.movingMagicCart,hit.x,hit.y);return;}
+  if(S.building==='tower'&&!S.night){placeTower(hit.x,hit.y);return;}
+  if(S.building==='magicCart'&&!S.night){placeMagicCart(hit.x,hit.y);return;}
   const tower=S.towers.findIndex(t=>dist(t,hit)<64);
   if(tower>=0){S.selectedTower=tower;S.modal='tower';renderUi();return;}
   const cart=S.magicCarts.findIndex(t=>dist(t,hit)<64);
   if(cart>=0){S.selectedMagicCart=cart;S.modal='magicCart';renderUi();return;}
-  if(S.building==='tower'&&!S.night){placeTower(hit.x,hit.y);return;}
-  if(S.building==='magicCart'&&!S.night){placeMagicCart(hit.x,hit.y);return;}
   if(dist(SELL_POS,hit)<78||dist(CART_POS,hit)<62){S.sellConfirm=false;S.modal='sell';renderUi();return;}
   if(dist(RESOURCE_POS,hit)<104){S.modal='resource';renderUi();return;}
   if(dist(FORGE_POS,hit)<104){S.modal='blacksmith';renderUi();return;}
@@ -1861,21 +2384,55 @@ setRuntimeActorUpdater(({ player }) => {
   const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;
   setRuntimePlayerControl(true); moveCamera(dt); player.x = cam.x; player.y = cam.y;
   tick(dt); combatFX.update(dt * S.speed);
-  setRuntimeActors([...S.units.map(u => u.actor ??= unitActor(u)), ...S.monsters.filter(m => !m.dead).map(m => m.actor), ...S.towers.map(t => t.actor),...S.magicCarts.map(t=>t.actor), hallActor, ...combatFX.getRuntimeActors()]);
+  setRuntimeActors([...S.units.filter(u=>!dragonTrial||dragonTrial.fighterIds.has(u.id)).map(u => u.actor ??= unitActor(u)), ...S.monsters.filter(m => !m.dead).map(m => m.actor), ...S.towers.map(t => t.actor),...S.magicCarts.map(t=>t.actor), hallActor, ...combatFX.getRuntimeActors()]);
   // One layout snapshot for all overlays avoids repeated forced reflow at high mob counts.
   const viewport={rect:canvas.getBoundingClientRect(),parent:worldLabels.parentElement.getBoundingClientRect()};
+  mythicCinematic?.update(dt);
   skillFx?.update(dt); skillFx?.draw(viewport); floaters?.update(dt); floaters?.draw(viewport);
   drawEdgeArrows(viewport);updateWorldLabels(viewport);syncClock();
   if(uiDirty&&now-lastUiPaint>=120)renderUi();
 });
 skillFx = createSkillFx(canvas); floaters = createFloaters(canvas);
+mythicCinematic = createMythicCinematic(canvas,skillFx,CENTER,{onBattle:beginDragonTrial,onStop:endDragonTrial});
 const resumed = load();
 if (!resumed) { recruit('guard', true); recruit('archer', true); }
 renderUi();
 setRuntimeZoomRange(mobileLayout.matches ? .26 : .45, 1.3); // portrait can pinch farther out to see the whole village
 await boot(scene, { canvasEl: canvas, loadingEl: $('loading'), playerSprites: null, worldScale: 1.45, zoom: mobileLayout.matches ? .45 : .62 });
+// The runtime minimap occupies canvas pixels x=1044..1264, y=16..156.
+// Anchor the Relic Collection launcher immediately beneath it, respecting letterboxing.
+function alignRelicLauncher(){
+  const dock=$('relicLauncher'),rect=canvas.getBoundingClientRect(),scale=rect.width/1280;
+  if(!dock)return;
+  dock.style.left=(rect.left+1044*scale)+'px';
+  dock.style.top=(rect.top+165*scale)+'px';
+  dock.style.width=(220*scale)+'px';
+}
+alignRelicLauncher();addEventListener('resize',alignRelicLauncher);
 // Authored fences restore after world placement; live fences use exactly the same engine primitives.
 for(const fence of S.fences)installFence(fence);
+restoreHomeWorld();
+mythicPanel=document.createElement('div');mythicPanel.className='panel bc-modal';mythicPanel.hidden=true;mythicPanel.setAttribute('role','dialog');mythicPanel.setAttribute('aria-modal','true');document.body.append(mythicPanel);
+function renderMythicPanel(){
+ const pending=S.mythic.pending,chosen=new Set(S.mythic.selected),relic=MYTHIC_RELICS.dragonHeart,units=S.units.map(u=>`<label style="display:flex;gap:9px;align-items:center;padding:9px;border:1px solid #52634b;border-radius:8px"><input type="checkbox" data-mythic-unit="${u.id}" ${chosen.has(u.id)?'checked':''}><span>${CLASSES[u.cls]?.icon||'🐰'} ${u.name} · ${CLASSES[u.cls]?.name||u.cls} Lv${u.level}</span></label>`).join('');
+ mythicPanel.innerHTML=`<header class="bc-modal-header"><div><span>🐲</span><span><h2>Mythic Invasion</h2><small>${pending?'ลางร้ายปรากฏแล้ว · เตรียมทีมก่อนรับคำท้า':'Mythic Archive และรางวัลสะสม'}</small></span></div><button data-mythic-close>✕</button></header><div class="bc-modal-body"><section class="bc-guide-card"><h3>${pending?'Ancient Dragon · ประตู'+({west:'ตะวันตก',east:'ตะวันออก',south:'ใต้'}[pending.gate]):'ยังไม่มี Mythic Omen'}</h3><p>ศึกนี้ลงได้สูงสุด 7 ตัวและคลาสละ 1 ตัว ป้อม/รถยิงเวทย์ใช้ Armory และ Mastery ได้ แต่กระต่ายจะไม่ใช้ Skill Core</p></section><section class="bc-guide-card"><h3>จัดกองทัพ ${chosen.size}/7</h3><div style="display:grid;gap:7px">${units||'<p>ยังไม่มีกระต่าย</p>'}</div></section><section class="bc-guide-card"><h3>Mythic Archive</h3><p>Option Stone ${S.mythic.optionStones} · Re-option Stone ${S.mythic.reoptionStones} · Essence ${S.mythic.essence}</p><p>${S.mythic.relics.dragonHeart?'❤️ '+relic.name+' · '+relic.bonus:'ยังไม่มี Legendary Relic · ชนะมีโอกาสดรอป 20%'}</p></section>${pending?'<button data-mythic-start style="width:100%;min-height:48px">⚔️ รับคำท้าและเริ่ม Invasion</button><button data-mythic-decline style="width:100%;margin-top:8px">ปฏิเสธ Omen</button>':'<p style="opacity:.8">มีโอกาส 15% หลังผ่านคืนปกติ ตั้งแต่ Warren Lv5</p>'}</div>`;
+ mythicPanel.querySelector('[data-mythic-close]').onclick=()=>{mythicPanel.hidden=true;$('modalScrim').hidden=true;};
+ mythicPanel.querySelectorAll('[data-mythic-unit]').forEach(x=>x.onchange=()=>{let ids=[...mythicPanel.querySelectorAll('[data-mythic-unit]:checked')].map(x=>+x.dataset.mythicUnit);const valid=validMythicSquad(S.units,ids);if(valid.length!==ids.length){toast('Mythic Squad เลือกได้คลาสละ 1 ตัวเท่านั้น');x.checked=false;}S.mythic.selected=valid.map(u=>u.id);save();renderMythicPanel();});
+ mythicPanel.querySelector('[data-mythic-decline]')?.addEventListener('click',()=>{S.mythic.pending=null;S.mythic.selected=[];save();renderMythicPanel();toast('ปฏิเสธ Mythic Omen แล้ว');});
+ mythicPanel.querySelector('[data-mythic-start]')?.addEventListener('click',()=>{const team=validMythicSquad(S.units,S.mythic.selected);if(!team.length)return toast('เลือกกระต่ายอย่างน้อย 1 ตัว');mythicPanel.hidden=true;$('modalScrim').hidden=true;if(!mythicCinematic.start()){mythicPanel.hidden=false;$('modalScrim').hidden=false;toast('กำลังโหลดเฟรมมังกร ลองอีกครั้ง');}});
+}
+showMythicRewardModal=(won,reward)=>{
+ const item=reward.relic?'<img src="./assets/relics/dragon-heart.svg" alt="Dragon Heart" width="64" height="64" style="image-rendering:pixelated;vertical-align:middle"> '+(reward.duplicate?'Dragon Heart ซ้ำ · แปลงเป็น Essence +1':'✦ NEW! Dragon Heart · Max HP +1%'):
+   won?'รอบนี้ยังไม่พบ Legendary Relic · โอกาสดรอป 20%':'Legendary Relic ดรอปเฉพาะเมื่อพิชิตบอส';
+ mythicPanel.innerHTML=`<header class="bc-modal-header"><div><span>${won?'🏆':'⚔️'}</span><span><h2>${won?'กำจัด Ancient Dragon สำเร็จ!':'กองทัพพ่ายแพ้'}</h2><small>Mythic Invasion Result</small></span></div><button data-reward-close>✕</button></header>
+ <div class="bc-modal-body"><section class="bc-guide-card"><h3>${won?'Victory Rewards':'Participation Rewards'}</h3><p>🔮 Option Stone × ${reward.optionStone}</p><p>♻️ Re-option Stone × ${reward.reoptionStone}</p><p>${item}</p>${won?'<p>🏆 พิชิต Ancient Dragon สะสม '+(S.mythic.defeats.ancientDragon||0)+' ครั้ง</p>':''}</section>
+ <div style="display:flex;gap:9px;flex-wrap:wrap"><button type="button" data-reward-open-archive class="bc-primary" style="flex:1;min-height:46px">✧ ดู Relic Collection</button><button type="button" data-reward-close style="flex:1;min-height:46px">กลับหมู่บ้าน</button></div></div>`;
+ mythicPanel.hidden=false;$('modalScrim').hidden=false;
+ mythicPanel.querySelectorAll('[data-reward-close]').forEach(b=>b.onclick=()=>{mythicPanel.hidden=true;renderUi();});
+ mythicPanel.querySelector('[data-reward-open-archive]').onclick=()=>{mythicPanel.hidden=true;S.archiveTab='first';S.archiveBossId='ancientDragon';S.modal='relicCollection';renderUi();};
+};
+$('modalScrim').addEventListener('click',()=>{mythicPanel.hidden=true;renderUi();});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&!mythicPanel.hidden){mythicPanel.hidden=true;$('modalScrim').hidden=true;}});
 // Hover/focus shows the NEXT automatic perimeter's actual footprint, without extra controls.
 const wallButton=$('fenceBuild');
 wallButton.addEventListener('pointerenter',()=>{S.wallPreview=true;});
@@ -1884,10 +2441,13 @@ wallButton.addEventListener('focus',()=>{S.wallPreview=true;});
 wallButton.addEventListener('blur',()=>{S.wallPreview=false;});
 { const l = $('loading'); if (l) l.hidden = true; }
 banner(resumed ? `กลับมาแล้ว · วันที่ ${S.day}` : 'วันที่ 1', resumed ? `บ้าน Lv ${S.warren} · เวฟ ${S.warren}-${S.wave}` : 'กระต่ายฟาร์มเองรอบหมู่บ้าน · คลิกป้อมเพื่อจัดทหารประจำป้อม');
+if(shouldShowWaterfallIntro()&&!S.mythic.pending)openWaterfallGuide('intro');
+if(S.mythic.pending)setTimeout(()=>{S.modal=null;renderUi();if(!mythicCinematic.start())setTimeout(()=>mythicCinematic.start(),800);},900);
 window.__warren = S; window.__warrenDev = { recruit:(cls)=>recruit(cls,true),spawnMonster:(...args)=>spawnMonster(...args),
   masteryOnHit:(u,m)=>castMasteryOnBasicHit(u,m),
   castCore:(u,m,skillId)=>{const skill=classActiveCores(S,u?.cls).find(x=>x.id===skillId);return Boolean(u&&m&&skill&&castEquippedCore(u,m,skill));},
-  placeTower, canWalkStraight, upgradePerimeter, hurtPerimeter, rebuildPerimeter, perimeterHealth:()=>perimeterHealth(S.fences), renderUi, save, upgradeWarren, hireGarrison:(index,cls)=>hireGarrison(S.towers[index],cls),upgradeTower:index=>upgradeTower(S.towers[index]),
+  placeHome,moveHome,demolishHome,undoHome,checkHome,setHomeOpen,rebuildHomeWorld,waitHomeGround:()=>homeGroundRefresh,buyHomePlot,previewHomeWall,expandHomeWall,paintHomeTerrain,commitHomeTerrain,createHomeWaterfall,restoreRecoveryHome,
+  placeTower, canWalkStraight, canRuntimeActorStand, defenseSpot, upgradePerimeter, hurtPerimeter, rebuildPerimeter, perimeterHealth:()=>perimeterHealth(S.fences), renderUi, save, upgradeWarren, hireGarrison:(index,cls)=>hireGarrison(S.towers[index],cls),upgradeTower:index=>upgradeTower(S.towers[index]),
   beginTowerMove,relocateTower,canTowerSpot,placeMagicCart,hireMagicCartMage,upgradeMagicCart,beginMagicCartMove,relocateMagicCart,canMagicCartSpot,magicCartCap,defensePost:ringPost,upgradeForgeBuilding,upgradeResourceBuilding,useHallHeal,updateWorldLabels,quoteQuickSell:()=>quoteQuickSell(S.inventory,S.sellReserve,S.sellSelected),commitQuickSell:()=>{const q=commitQuickSell(S,S.sellReserve,S.sellSelected);if(q){save();renderUi();}return q;}, craftBatch:(id,n)=>{const pieces=craftBatch(S,id,n);save();renderUi();return pieces;},enhanceAll:cls=>{const r=enhanceAll(S,cls);refreshArmy();save();renderUi();return r;},refineGear:id=>{const r=refineGear(S,id);refreshArmy();save();renderUi();return r;}, craftGear:id=>{const item=craftGear(S,id);refreshArmy();save();renderUi();return item;},enhanceGear:id=>{const r=enhanceGear(S,id);refreshArmy();save();renderUi();return r;},dismantleGear:id=>{const n=dismantleGear(S,id);save();renderUi();return n;},autoEquipBuild:(cls,id)=>{const n=autoEquipBuild(S,cls,id);refreshArmy();save();renderUi();return n;} }; // dev hooks
 window.__warrenStep = // dev: fast-forward the simulation (balance tests)
   sec => { for (let t = 0; t < sec && !S.over; t += 1 / 30) { tick(1 / 30); combatFX.update(1 / 30); } renderUi(); };

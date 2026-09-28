@@ -111,7 +111,9 @@ export function renderArmoryHtml(s,classes){
   '<span><h2>Class Armory · '+esc(classes[cls].name)+'</h2><small>เลือกคลาส → ช่อง → คราฟต์ / คลัง / อัปเกรด → เปรียบเทียบและเลือกใส่</small></span></div>'+
   '<button class="modal-close" data-modal-close aria-label="ปิด">✕</button></header>'+
   '<div class="bc-modal-body bc-armory-body">'+classTabs(s,classes)+
-  '<div class="bc-armory-summary"><b>'+esc(classes[cls].name)+'</b><span>ภาคพื้นดิน '+units.length+'/'+fieldClassCap(s.warren)+
+  '<div class="bc-armory-summary"><b>'+esc(classes[cls].name)+'</b>'+
+  (s.mythic?.collectionRewardClaimed?'<span class="bc-collector-title"><span class="bc-collector-frame">'+gameIcon(CLASS_FAMILIES[cls],'family',classes[cls].icon,'bc-class-icon')+'</span> Mythic Collector</span>':'')+
+  '<span>ภาคพื้นดิน '+units.length+'/'+fieldClassCap(s.warren)+
   (['archer','mage'].includes(cls)?' · ประจำป้อม '+towerCount+' ตัว':'')+'</span></div>'+
   '<details class="bc-armory-roster"><summary>สมาชิกคลาสนี้ · '+units.length+' ตัว</summary>'+
   units.map(u=>'<div class="bc-armory-member">'+gameIcon(CLASS_FAMILIES[cls],'family',classes[cls].icon,'bc-class-icon')+
