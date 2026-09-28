@@ -589,6 +589,7 @@
 
   /* Desktop-only collapsible guide and village manager (persisted in localStorage). */
   #help{padding-right:38px}
+  #help.bc-help-launcher{width:max-content;max-width:calc(100vw - 20px);padding-right:6px}
   .bc-collapse-toggle{position:absolute;top:6px;right:7px;z-index:3;min-width:28px;min-height:26px;
     padding:2px 7px;border:1px solid #718363;background:#29372b;color:#ffebba;font-weight:800}
   #help.is-collapsed{width:120px;max-width:120px;min-height:32px;padding:6px 8px;
@@ -651,7 +652,7 @@
   <div class="res"><span>🪙 <b id="gold">0</b></span><span title="วัตถุดิบที่ใช้สร้างและอัปบ้าน">🧰 <b id="materials">0</b></span></div>
   <div id="hall"><small>โพรงกระต่าย <span id="burrow-t"></span></small><div><div id="burrow"></div></div></div>
 </div>
-<div id="help" class="panel bc-help-launcher" aria-label="คู่มือและข่าวสาร"><button type="button" data-open-guide>📖 คู่มือ</button><button type="button" data-open-patch-notes>📜 v0.4.1</button></div>
+<div id="help" class="panel bc-help-launcher" aria-label="คู่มือและข่าวสาร"><button type="button" data-open-guide>📖 คู่มือ</button><button type="button" data-open-patch-notes>📜 v0.4.2</button></div>
 <div id="shopbox" class="panel"><div class="mobile-drawer-head"><b>🐰 จ้างกระต่าย</b><button type="button" data-mobile-close aria-label="ปิดหน้าจ้างกระต่าย">✕</button></div><details id="recruitDetails" open><summary>จ้างกระต่าย <small id="recruitSummary">0/7</small></summary><div id="shop" aria-label="รายชื่อกระต่ายที่จ้างได้"></div></details></div>
 <div id="side" class="panel">
   <button id="sideToggle" class="bc-collapse-toggle" type="button" aria-expanded="true" aria-label="ย่อแผงจัดการหมู่บ้าน" title="ซ่อน/แสดงแผงจัดการหมู่บ้าน">−</button>

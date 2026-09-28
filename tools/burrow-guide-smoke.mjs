@@ -8,13 +8,17 @@ const check=(name,ok)=>{if(!ok)throw Error('FAIL '+name);console.log('PASS '+nam
 try{
  await page.goto(server.resolvedUrls.local[0]+'art-test/dimraeth-slice/warren.html');
  await page.waitForFunction(()=>window.__warrenDev&&(!document.querySelector('#loading')||document.querySelector('#loading').hidden),null,{timeout:45000});
+ check('Guide launcher background hugs its buttons',await page.locator('#help').evaluate(el=>{
+  const buttons=[...el.querySelectorAll('button')],buttonWidth=buttons.reduce((sum,button)=>sum+button.getBoundingClientRect().width,0);
+  return el.getBoundingClientRect().width<=buttonWidth+24;
+ }));
  await page.click('[data-mobile-open="village"]');
  await page.locator('.mobile-village-shortcuts [data-open-guide]').click();
  check('mobile Guide opens as a readable modal',await page.locator('#guidePanel').isVisible()&&/กองทัพกระต่าย/.test(await page.locator('#guidePanel').innerText()));
  await page.locator('#guidePanel [data-modal-close]').click();
  await page.click('[data-mobile-open="village"]');
  await page.locator('.mobile-village-shortcuts [data-open-patch-notes]').click();
- check('Patch Notes displays the current version and gameplay changes',await page.locator('#patchNotesPanel').isVisible()&&/v0\.4\.1/.test(await page.locator('#patchNotesPanel').innerText())&&/ทิศเหนือ/.test(await page.locator('#patchNotesPanel').innerText())&&/รถยิงเวทย์/.test(await page.locator('#patchNotesPanel').innerText()));
+ check('Patch Notes displays the current version and gameplay changes',await page.locator('#patchNotesPanel').isVisible()&&/v0\.4\.2/.test(await page.locator('#patchNotesPanel').innerText())&&/ทิศเหนือ/.test(await page.locator('#patchNotesPanel').innerText())&&/รถยิงเวทย์/.test(await page.locator('#patchNotesPanel').innerText()));
  check('guide and patch modals fit the mobile viewport',await page.locator('#patchNotesPanel').evaluate(el=>{const r=el.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight;}));
  const unlockMessage=await page.evaluate(()=>{
   __warren.modal=null;__warren.warren=4;__warren.cleared=true;__warren.night=false;__warren.inventory.livingMoss=10000;

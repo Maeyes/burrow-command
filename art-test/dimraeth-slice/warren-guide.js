@@ -1,6 +1,6 @@
 import {esc} from './warren-ui.js';
 
-export const BURROW_VERSION='0.4.1';
+export const BURROW_VERSION='0.4.2';
 export const BURROW_VERSION_NAME='Arcane Defense';
 
 const header=(icon,title,subtitle)=>`<header class="bc-modal-header"><div><span>${icon}</span><span><h2>${title}</h2><small>${subtitle}</small></span></div><button data-modal-close aria-label="ปิด">✕</button></header>`;
@@ -47,7 +47,8 @@ export function renderPatchNotesHtml(){
   'เพิ่มคู่มือทั้งเกมและข้อความแจ้งระบบที่ปลดล็อกเมื่อบ้านเลเวลเพิ่ม',
  ];
  return header('📜',`Patch Notes v${BURROW_VERSION}`,BURROW_VERSION_NAME+' · 28 กันยายน 2026')+
- `<div class="bc-modal-body bc-building-body"><section><h3>v0.4.1</h3><ul>${['ปิดเส้นทางบุกของมอนสเตอร์จากทิศเหนือในทุกธีม; เวฟกลางคืนเข้าจากใต้ ตะวันออก และตะวันตกเท่านั้น'].map(item).join('')}</ul></section>`+
+ `<div class="bc-modal-body bc-building-body"><section><h3>v0.4.2</h3><ul>${['ปรับพื้นหลังปุ่มคู่มือและ Patch Notes ให้พอดีกับเนื้อหา ไม่ล้นเกินปุ่ม'].map(item).join('')}</ul></section>`+
+ `<section><h3>v0.4.1</h3><ul>${['ปิดเส้นทางบุกของมอนสเตอร์จากทิศเหนือในทุกธีม; เวฟกลางคืนเข้าจากใต้ ตะวันออก และตะวันตกเท่านั้น'].map(item).join('')}</ul></section>`+
  `<section><h3>v0.4.0 · Arcane Defense</h3><ul>${previous.map(item).join('')}</ul></section>`+
  '<section><h3>หมายเหตุ</h3><p>ตั้งแต่เวอร์ชันนี้ ทุกการอัปเดต Gameplay/UI จะเพิ่มเลข Version และบันทึก Patch Notes ภายในเกม</p></section></div>';
 }
