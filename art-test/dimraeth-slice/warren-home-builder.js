@@ -1,5 +1,5 @@
 // Safe Home Builder ownership layer. Phase 2 introduces purchased parcels and preset wall expansion.
-import {HOME_PLOTS,HOME_EXPANSION_STAGES,HOME_NORTH_FINAL,HOME_PLOT_COST,HOME_WALL_COST,homeOwnedCell,fullyOwnedSide,homeWallLayoutId} from './warren-home-land.js';
+import {HOME_PLOTS,HOME_EXPANSION_STAGES,HOME_NORTH_FINAL,HOME_PLOT_COST,HOME_WALL_COST,homeOwnedCell,plotForCell,fullyOwnedSide,homeWallLayoutId} from './warren-home-land.js';
 export const HOME_TILE=64,HOME_VERSION=4,HOME_REFUND_RATE=.75;
 const HOME_MATERIAL_IDS=new Set(['livingMoss','brutalSpore','copperOre','duneRunnerClaw','cactusSpine','moonstoneShard']);
 export const HOME_CATEGORIES={paths:'ทางเดิน',nature:'ต้นไม้และพุ่ม',garden:'สวน',village:'ตกแต่ง',houses:'บ้านและอาคาร'};
@@ -83,7 +83,7 @@ export function normalizeHomeBuilder(raw){
   ids.add(id);
   const numericId=Number(id.match(/^decor-(\d+)$/)?.[1]);
   if(Number.isSafeInteger(numericId))home.nextId=Math.max(home.nextId,numericId+1);
-  home.placedObjects.push({id,prefab,x,y,rotation,variant:Number.isInteger(input.variant)?Math.max(0,Math.min(9,input.variant)):0,plot:'base',solid:!!HOME_ITEMS[prefab].radius,createdVersion:String(input.createdVersion||'0.5.0').slice(0,20),spent:Object.fromEntries(Object.entries(input.spent||{}).filter(([k,v])=>HOME_MATERIAL_IDS.has(k)&&Number.isInteger(v)&&v>0&&v<=1000))});
+  home.placedObjects.push({id,prefab,x,y,rotation:check.rotation,variant:Number.isInteger(input.variant)?Math.max(0,Math.min(9,input.variant)):0,plot:plotForCell(cell(x),cell(y))||'base',solid:!!HOME_ITEMS[prefab].radius,createdVersion:String(input.createdVersion||'0.5.0').slice(0,20),spent:Object.fromEntries(Object.entries(input.spent||{}).filter(([k,v])=>HOME_MATERIAL_IDS.has(k)&&Number.isInteger(v)&&v>0&&v<=1000))});
  }
  home.recovery=home.recovery.slice(0,300);
  return home;

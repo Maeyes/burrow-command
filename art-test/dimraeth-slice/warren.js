@@ -205,7 +205,7 @@ const S = {
   burrow: BURROW_MAX, day: 1, night: false, clock: 0, speed: 1, over: null, batchResults:[],batchFilter:'all',batchSelection:[],batchRecs:[],batchQty:1,batchClass:'guard',batchConfirm:false,
   warren: 1, fortification:0, wave: 1, cleared: false, losses: 0, lureDay:0, // warren level is boss-gated; material-funded fortification is available from day one
   units: [], monsters: [], towers: [],magicCarts:[], movingTower:-1,movingMagicCart:-1, fences: [], gateClosed:[], wallLevel:0, wallPreview:false, building:false,
-  homeBuilder:defaultHomeBuilder(),mythic:defaultMythic(),archiveTab:'first',archiveBossId:null,homeOpen:false,homeGroundBusy:false,homeCategory:'paths',homeSelected:'dirtPath',homeRotation:0,homeAction:'place',homeMovingId:null,homeHover:null,homeUndo:null,homeWallPreview:null,homeWallPreviewData:null,homeTerrainBrush:'grass',homeTerrainDraft:null,homeTerrainNotice:'',homeVariant:0,homeLandOpen:false,homeTerrainOpen:false,homeStoredId:null,
+  homeBuilder:defaultHomeBuilder(),mythic:defaultMythic(),archiveTab:'first',archiveBossId:null,homeOpen:false,homeGroundBusy:false,homeCategory:'paths',homeSelected:'dirtPath',homeRotation:0,homeAction:'place',homeMovingId:null,homeHover:null,homeUndo:null,homeWallPreview:null,homeWallPreviewData:null,homeTerrainBrush:'grass',homeTerrainDraft:null,homeTerrainNotice:'',homeVariant:0,homeLandOpen:false,homeTerrainOpen:false,homeStoredId:null,homePane:'decor',homeHelp:false,homeSelectedId:null,
   queue: [], waveTimer: 0, kills: 0, time: 0, events: [],
 };
 const later = (sec, fn) => S.events.push({ at: S.time + sec, fn }); // game-clock timer (respects speed/pause)
@@ -1250,6 +1250,39 @@ function safeHomeArt(prefab,rotation=0,variant=0){
   return null;
  }
 }
+// Catalog cards show the real in-world sprite, rendered once per prefab.
+const homeThumbs=new Map();
+function homeThumb(prefab){
+ if(!homeThumbs.has(prefab)){
+  let url=null;
+  try{const art=isHomeNativePath(prefab)?null:safeHomeArt(prefab,0,0);url=art?.img?.toDataURL?.()||null;}catch{}
+  homeThumbs.set(prefab,url);
+ }
+ return homeThumbs.get(prefab);
+}
+// The placed object under a world point, so tapping existing decor selects it.
+function homeObjectAt(x,y){
+ const p=snapHome(x,y);let best=null,bestD=Infinity;
+ for(const o of S.homeBuilder.placedObjects){
+  const def=HOME_ITEMS[o.prefab];if(!def)continue;
+  const d=Math.hypot(o.x-x,o.y-y),reach=isHomeNativePath(o.prefab)?0:Math.max(def.radius||0,26);
+  const hit=isHomeNativePath(o.prefab)?o.x===p.x&&o.y===p.y:d<=reach;
+  // Paths only win when nothing solid stands on the same spot.
+  const score=isHomeNativePath(o.prefab)?1e6:d;
+  if(hit&&score<bestD){best=o;bestD=score;}
+ }
+ return best;
+}
+function editSelectedHome(change){
+ if(!S.homeOpen||S.night||S.homeGroundBusy)return false;
+ const obj=S.homeBuilder.placedObjects.find(o=>o.id===S.homeSelectedId);if(!obj)return false;
+ const next={...obj,...change};
+ const check=checkHome(obj.prefab,obj.x,obj.y,next.rotation,obj.id,false);
+ if(!check.ok){toast(check.reason);return false;}
+ if(!isHomeNativePath(obj.prefab)&&!safeHomeArt(obj.prefab,next.rotation,next.variant||0)){toast('ไม่สามารถสร้างภาพแบบนี้ได้');return false;}
+ S.homeUndo={kind:'move',before:{...obj}};Object.assign(obj,change);
+ rebuildHomeWorld();save();renderUi();return true;
+}
 function rebuildHomeWorld(){
  if(!homeRuntimeReady)return;
  WS.objects=WS.objects.filter(o=>!o.homeId);
@@ -1323,6 +1356,7 @@ function demolishHome(id){
  for(const [key,qty] of Object.entries(refund))S.inventory[key]=(S.inventory[key]||0)+qty;
  S.homeUndo={kind:'demolish',obj:{...obj},refund};
  if(S.homeMovingId===id){S.homeMovingId=null;S.homeAction='place';}
+ if(S.homeSelectedId===id)S.homeSelectedId=null;
  rebuildHomeWorld();save();
  if(isHomeNativePath(obj.prefab))refreshNativeHomeGround();
  renderUi();toast('รื้อแล้ว · คืนวัตถุดิบประมาณ 75%');return true;
@@ -1362,7 +1396,7 @@ function setHomeOpen(open){
  if(!open&&S.homeTerrainDraft&&quoteHomeTerrain(S.homeBuilder.terrainEdits,S.homeTerrainDraft).changes&&
   !confirm('มีร่าง Terrain ที่ยังไม่ได้ยืนยัน ต้องการทิ้งร่างหรือไม่?'))return;
  if(open&&S.night){toast('Home Builder เปิดได้เฉพาะกลางวัน');return;}
- S.homeOpen=!!open;S.homeHover=null;S.homeAction='place';S.homeMovingId=null;S.homeStoredId=null;S.homeTerrainDraft=null;S.homeWallPreview=null;S.homeWallPreviewData=null;
+ S.homeOpen=!!open;S.homeHover=null;S.homeSelectedId=null;S.homeAction='place';S.homeMovingId=null;S.homeStoredId=null;S.homeTerrainDraft=null;S.homeWallPreview=null;S.homeWallPreviewData=null;
  if(open){S.modal=null;S.itemDetailId=null;S.building=false;S.movingTower=-1;S.movingMagicCart=-1;if(mobileDrawer)closeMobileDrawer();}
  renderUi();
 }
@@ -1488,7 +1522,7 @@ function createHomeWaterfall(x,y){
 }
 
 function restoreRecoveryHome(x,y){
- if(S.night||S.homeGroundBusy||!S.homeStoredId)return false;
+ if(!S.homeOpen||S.night||S.homeGroundBusy||!S.homeStoredId)return false;
  const idx=S.homeBuilder.recovery.findIndex(o=>o.id===S.homeStoredId&&HOME_ITEMS[o.prefab]);
  if(idx<0)return false;
  const original=S.homeBuilder.recovery[idx],check=checkHome(original.prefab,x,y,S.homeRotation);
@@ -1587,7 +1621,16 @@ function tick(dt) {
 // ---------- camera: WASD / arrows / drag, the runtime player is an invisible camera rig ----------
 const keys = new Set(), cam = { x: CENTER.x + 60, y: CENTER.y + 60 };
 addEventListener('keydown', e => {
+  if(e.code==='Escape'&&S.homeOpen&&S.homeAction!=='place'&&S.homeAction!=='terrain'){S.homeAction='place';S.homeMovingId=null;S.homeStoredId=null;renderUi();return;}
+  if(e.code==='Escape'&&S.homeOpen&&S.homeSelectedId){S.homeSelectedId=null;renderUi();return;}
   if(e.code==='Escape'&&S.homeOpen){setHomeOpen(false);return;}
+  // Builder shortcuts: R rotates, Ctrl/Cmd+Z undoes the last placement action.
+  if(S.homeOpen&&!S.night&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)){
+   if(e.code==='KeyR'&&!e.ctrlKey&&!e.metaKey&&S.homeSelectedId){const o=S.homeBuilder.placedObjects.find(v=>v.id===S.homeSelectedId);if(o)editSelectedHome({rotation:((o.rotation||0)+1)%4});return;}
+   if(e.code==='KeyR'&&!e.ctrlKey&&!e.metaKey){S.homeRotation=(S.homeRotation+1)%4;renderUi();return;}
+   if(e.code==='KeyZ'&&(e.ctrlKey||e.metaKey)){e.preventDefault();undoHome();return;}
+   if(e.code==='Delete'&&S.homeSelectedId){demolishHome(S.homeSelectedId);return;}
+  }
   if(e.code==='Escape'&&(S.movingTower>=0||S.movingMagicCart>=0)){S.movingTower=-1;S.movingMagicCart=-1;S.towerMoveHover=null;renderUi();return;}
   if(e.code==='Escape'&&S.itemDetailId){S.itemDetailId=null;S.itemProtect=false;renderUi();return;}
   if(e.code==='Escape'&&S.modal==='waterfallGuide'){e.preventDefault();closeWaterfallGuide();return;}
@@ -1731,7 +1774,7 @@ function renderUi() {
   $('homeOpen').textContent=S.homeOpen?'✖ ปิด Home Builder':'🔨 Home Builder';
   S.homeWallVisible=new Set(WS.objects.filter(o=>o.bcFenceId).map(o=>o.bcFenceId)).size;
   const homePanel=$('homePanel');homePanel.hidden=!S.homeOpen||S.night||!!S.modal;
-  if(!homePanel.hidden){const scroll=homePanel.scrollTop;homePanel.innerHTML=renderHomeBuilderHtml(S);homePanel.scrollTop=scroll;}
+  if(!homePanel.hidden){const scroll=homePanel.scrollTop,catalog=homePanel.querySelector('.bc-home-catalog')?.scrollTop;S.homeMats=matCount();homePanel.innerHTML=renderHomeBuilderHtml(S,{thumb:homeThumb});homePanel.scrollTop=scroll;const next=homePanel.querySelector('.bc-home-catalog');if(next&&catalog)next.scrollTop=catalog;}
   $('gold').textContent=S.gold;
   $('materials').textContent=matCount();
   $('burrow').style.width=`${100*S.burrow/hallMax()}%`;
@@ -1847,11 +1890,17 @@ document.body.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
   if(b.id==='homeOpen'||b.id==='mobileHomeOpen'){setHomeOpen(!S.homeOpen);return;}
   if(b.hasAttribute('data-home-close')){setHomeOpen(false);return;}
+  if(b.dataset.homePane){S.homePane=b.dataset.homePane;if(S.homePane!=='terrain'&&['terrain','waterfall'].includes(S.homeAction))S.homeAction='place';if(S.homePane!=='decor'&&['move','recover'].includes(S.homeAction)){S.homeAction='place';S.homeMovingId=null;S.homeStoredId=null;}if(S.homePane!=='land'){S.homeWallPreview=null;S.homeWallPreviewData=null;}renderUi();return;}
+  if(b.hasAttribute('data-home-help')){S.homeHelp=!S.homeHelp;renderUi();return;}
+  if(b.dataset.homeSelect){S.homeSelectedId=b.dataset.homeSelect;const o=S.homeBuilder.placedObjects.find(v=>v.id===S.homeSelectedId);if(o){cam.x=o.x;cam.y=o.y;}renderUi();return;}
+  if(b.hasAttribute('data-home-deselect')){S.homeSelectedId=null;renderUi();return;}
+  if(b.hasAttribute('data-home-sel-rotate')){const o=S.homeBuilder.placedObjects.find(v=>v.id===S.homeSelectedId);if(o)editSelectedHome({rotation:((o.rotation||0)+1)%4});return;}
+  if(b.hasAttribute('data-home-sel-variant')){const o=S.homeBuilder.placedObjects.find(v=>v.id===S.homeSelectedId);if(o)editSelectedHome({variant:((o.variant||0)+1)%3});return;}
   if(b.dataset.homeCategory){S.homeCategory=b.dataset.homeCategory;renderUi();return;}
-  if(b.dataset.homeType){S.homeSelected=b.dataset.homeType;S.homeAction='place';S.homeMovingId=null;S.homeStoredId=null;S.homeVariant=0;renderUi();return;}
+  if(b.dataset.homeType){S.homeSelected=b.dataset.homeType;S.homeSelectedId=null;S.homeAction='place';S.homeMovingId=null;S.homeStoredId=null;S.homeVariant=0;renderUi();return;}
   if(b.hasAttribute('data-home-rotate')){S.homeRotation=(S.homeRotation+1)%4;renderUi();return;}
   if(b.hasAttribute('data-home-variant')){S.homeVariant=(S.homeVariant+1)%3;renderUi();return;}
-  if(b.dataset.homeMove){const o=S.homeBuilder.placedObjects.find(v=>v.id===b.dataset.homeMove);if(o){S.homeAction='move';S.homeMovingId=o.id;S.homeRotation=o.rotation;S.homeSelected=o.prefab;S.homeVariant=o.variant||0;toast('แตะพื้นที่ใหม่เพื่อย้าย '+HOME_ITEMS[o.prefab].name);}renderUi();return;}
+  if(b.dataset.homeMove){const o=S.homeBuilder.placedObjects.find(v=>v.id===b.dataset.homeMove);if(o){S.homeAction='move';S.homeMovingId=o.id;S.homeSelectedId=null;S.homeRotation=o.rotation;S.homeSelected=o.prefab;S.homeVariant=o.variant||0;toast('แตะพื้นที่ใหม่เพื่อย้าย '+HOME_ITEMS[o.prefab].name);}renderUi();return;}
   if(b.dataset.homeDemolish){demolishHome(b.dataset.homeDemolish);return;}
   if(b.hasAttribute('data-home-undo')){undoHome();return;}
   if(b.dataset.homeRecover){const item=S.homeBuilder.recovery.find(o=>o.id===b.dataset.homeRecover&&HOME_ITEMS[o.prefab]);
@@ -2240,13 +2289,30 @@ function drawHomeBuilderOverlay(g){
    g.beginPath();corners.forEach((c,k)=>k?g.lineTo(c.x,c.y):g.moveTo(c.x,c.y));g.closePath();g.fill();
   }
  }
- if(S.homeHover){
+ const homeRing=(o,color)=>{
+  const def=HOME_ITEMS[o.prefab],c=projectRuntimePoint(o.x,o.y,runtimeWalkHeight(o.x,o.y)??0),rx=Math.max(22,(def?.radius||20)*1.15);
+  g.save();g.strokeStyle=color;g.lineWidth=2.5;g.setLineDash([6,4]);g.beginPath();g.ellipse(c.x,c.y,rx,rx/2,0,0,Math.PI*2);g.stroke();g.restore();
+ };
+ const homeLabel=(point,text,good)=>{
+  g.save();g.font='bold 12px system-ui,sans-serif';const w=g.measureText(text).width+14,x=Math.round(point.x-w/2),y=Math.round(point.y+18);
+  g.fillStyle=good?'rgba(22,52,30,.92)':'rgba(70,18,18,.92)';g.fillRect(x,y,w,22);g.strokeStyle=good?'#a0f4ac':'#ff8b83';g.lineWidth=1;g.strokeRect(x+.5,y+.5,w-1,21);
+  g.fillStyle='#fff';g.textBaseline='middle';g.fillText(text,x+7,y+11);g.restore();
+ };
+ const selectedHome=S.homeOpen&&S.homeBuilder.placedObjects.find(o=>o.id===S.homeSelectedId);
+ if(selectedHome)homeRing(selectedHome,'#ffe27a');
+ const hoverObj=S.homeHover&&S.homeAction==='place'?homeObjectAt(S.homeHover.x,S.homeHover.y):null;
+ if(hoverObj){
+  if(hoverObj.id!==S.homeSelectedId)homeRing(hoverObj,'#bfe9ff');
+  const c=projectRuntimePoint(hoverObj.x,hoverObj.y,runtimeWalkHeight(hoverObj.x,hoverObj.y)??0);
+  homeLabel(c,'แตะเพื่อเลือก '+(HOME_ITEMS[hoverObj.prefab]?.name||''),true);
+ }else if(S.homeHover){
   const h=S.homeHover,move=S.homeAction==='move'?S.homeBuilder.placedObjects.find(o=>o.id===S.homeMovingId):null;
   const type=move?.prefab||S.homeSelected,def=HOME_ITEMS[type],p=snapHome(h.x,h.y);
   if(def){
    const result=S.homeAction==='terrain'?validateHomeTerrainBatch(S.homeBuilder,applyHomeTerrainBrush(S.homeTerrainDraft??S.homeBuilder.terrainEdits,Math.round(p.x/T),Math.round(p.y/T),S.homeTerrainBrush)??[],homeTerrainContext()):
      S.homeAction==='waterfall'?makeHomeWaterfall(S.homeBuilder,{i:Math.round(p.x/T),j:Math.round(p.y/T)},S.homeBuilder.terrainEdits):checkHome(type,p.x,p.y,S.homeRotation,move?.id);
-   const good=result.ok&&(S.homeAction!=='place'||S.gold>=def.gold&&matCount()>=def.mats);
+   const affordable=S.homeAction!=='place'||S.gold>=def.gold&&matCount()>=def.mats;
+   const good=result.ok&&affordable;
    const point=projectRuntimePoint(p.x,p.y,runtimeWalkHeight(p.x,p.y)??__slice.terrain?.heightAt(p.x,p.y)??0);
    if(S.homeAction==='place'||S.homeAction==='move'||S.homeAction==='recover'){
     if(isHomeNativePath(type)){
@@ -2254,10 +2320,12 @@ function drawHomeBuilderOverlay(g){
      const corners=[[p.x-32,p.y-32],[p.x+32,p.y-32],[p.x+32,p.y+32],[p.x-32,p.y+32]].map(([a,b])=>projectRuntimePoint(a,b,z));
      g.save();g.fillStyle=good?'rgba(110,225,128,.40)':'rgba(236,89,81,.44)';g.strokeStyle=good?'#adf6b8':'#ff8b83';
      g.beginPath();corners.forEach((c,k)=>k?g.lineTo(c.x,c.y):g.moveTo(c.x,c.y));g.closePath();g.fill();g.stroke();g.restore();
-    }else placementGhost(g,safeHomeArt(type,S.homeRotation,move?.variant??S.homeVariant),point,good);
+    }else placementGhost(g,safeHomeArt(type,S.homeRotation,S.homeVariant),point,good);
    }
    g.strokeStyle=good?'#a0f4ac':'#ff7777';g.fillStyle=good?'rgba(99,220,121,.22)':'rgba(249,81,81,.26)';
    g.lineWidth=2;g.beginPath();g.arc(point.x,point.y,12,0,Math.PI*2);g.fill();g.stroke();
+   // Say why before the tap, not after it.
+   if(!good)homeLabel(point,result.ok?'Gold หรือวัตถุดิบไม่พอ':(result.reason||'วางไม่ได้'),false);
   }
  }
  g.restore();
@@ -2390,7 +2458,7 @@ canvas.addEventListener('pointermove',e=>{if(S.building||S.movingTower>=0||S.mov
 canvas.addEventListener('pointerleave',()=>{S.towerMoveHover=null;S.homeHover=null;});
 const onWorldTap=(hit,e) => {
   if (S.over || S.modal || S.itemDetailId || !hit || hit.idx < 0) return;
-  if(S.homeOpen){if(!S.night){if(S.homeAction==='move'&&S.homeMovingId)moveHome(S.homeMovingId,hit.x,hit.y);else if(S.homeAction==='recover'&&S.homeStoredId)restoreRecoveryHome(hit.x,hit.y);else if(S.homeAction==='terrain')paintHomeTerrain(hit.x,hit.y);else if(S.homeAction==='waterfall')createHomeWaterfall(hit.x,hit.y);else placeHome(hit.x,hit.y);}return;}
+  if(S.homeOpen){if(!S.night){if(S.homeAction==='move'&&S.homeMovingId)moveHome(S.homeMovingId,hit.x,hit.y);else if(S.homeAction==='recover'&&S.homeStoredId)restoreRecoveryHome(hit.x,hit.y);else if(S.homeAction==='terrain')paintHomeTerrain(hit.x,hit.y);else if(S.homeAction==='waterfall')createHomeWaterfall(hit.x,hit.y);else{const found=homeObjectAt(hit.x,hit.y);if(found){S.homeSelectedId=S.homeSelectedId===found.id?null:found.id;S.homePane='decor';renderUi();}else{S.homeSelectedId=null;placeHome(hit.x,hit.y);}}}return;}
   if(S.movingTower>=0){relocateTower(S.movingTower,hit.x,hit.y);return;}
   if(S.movingMagicCart>=0){relocateMagicCart(S.movingMagicCart,hit.x,hit.y);return;}
   if(S.building==='tower'&&!S.night){placeTower(hit.x,hit.y);return;}

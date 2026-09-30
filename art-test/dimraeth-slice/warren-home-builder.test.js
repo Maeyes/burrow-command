@@ -1,6 +1,6 @@
 import {describe,it,expect} from 'vitest';
 import {HOME_ITEMS,defaultHomeBuilder,snapHome,validateHomePlacement,normalizeHomeBuilder,refundHome,homeMainRoute} from './warren-home-builder.js';
-import {renderHomeBuilderHtml} from './warren-home-ui.js';
+import {renderHomeBuilderHtml,homeModeLabel} from './warren-home-ui.js';
 const tile=(i,j)=>[i*64,j*64];
 const valid=()=>validateHomePlacement(defaultHomeBuilder(),'oak',...tile(15,25));
 describe('Home Builder Foundation v1',()=>{
@@ -63,5 +63,34 @@ describe('Home Builder Foundation v1',()=>{
   expect(html).toContain('data-home-move="decor-1"');
   expect(html).toContain('data-home-demolish="decor-1"');
   expect(html).toContain('data-home-rotate');
+ });
+});
+
+it('normalize keeps a valid rotation and derives plot from position',()=>{
+ const home=normalizeHomeBuilder({placedObjects:[{id:'decor-1',prefab:'bush',x:15*64,y:25*64}]});
+ expect(home.placedObjects[0].rotation).toBe(0);
+ expect(home.placedObjects[0].plot).toBe('base');
+});
+
+describe('home builder panes',()=>{
+ const base={night:false,homeCategory:'nature',homeSelected:'oak',homeAction:'place',homeRotation:0,homeUndo:null,gold:0,homeMats:0,wallLevel:0,fences:[],
+  homeBuilder:{ownedPlots:['base'],expandedSides:[],terrainEdits:[],waterfalls:[],placedObjects:[{id:'decor-1',prefab:'oak',x:960,y:1600}],recovery:[]}};
+ it('shows only the active pane and marks unaffordable cards',()=>{
+  const html=renderHomeBuilderHtml(base);
+  expect(html).toContain('data-home-pane="terrain"');
+  expect(html).not.toContain('data-home-brush');
+  expect(html).toContain('bc-home-item active short');
+  expect(html).toContain('ขาด 5 วัตถุดิบ · 4G');
+  expect(renderHomeBuilderHtml({...base,homePane:'land'})).toContain('data-home-plot="south1"');
+ });
+ it('renders a selection card with object actions and uses thumbnails',()=>{
+  const html=renderHomeBuilderHtml({...base,homeSelectedId:'decor-1'},{thumb:id=>'data:'+id});
+  expect(html).toContain('data-home-sel-rotate');
+  expect(html).toContain('data-home-demolish="decor-1"');
+  expect(html).toContain('src="data:oak"');
+ });
+ it('describes the current mode in one line',()=>{
+  expect(homeModeLabel({...base,homeAction:'move'})).toContain('Esc');
+  expect(homeModeLabel(base)).toContain('ต้นโอ๊กเล็ก');
  });
 });
