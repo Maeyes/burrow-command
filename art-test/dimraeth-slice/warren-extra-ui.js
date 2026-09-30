@@ -1,3 +1,4 @@
+import {equipPlan} from './warren-equip-plan.js';
 import {hudIcon} from './warren-hud.js';
 // Focused windows for tower garrison, healing lodge, mastery and safe batch-craft results.
 import { gameIcon, itemLabel, esc } from './warren-ui.js';
@@ -85,19 +86,32 @@ export function renderMasteryHtml(s,classes){
 }
 const rarities=['normal','good','rare','epic','legend','mythic','whiteAscended'];
 const rarityLabel={normal:'Normal',good:'Good',rare:'Rare',epic:'Epic',legend:'Legend',mythic:'Mythic',whiteAscended:'White Ascended'};
+const roleLabel={tank:'เซ็ท Tank',damage:'เซ็ท Damage',support:'เซ็ท Support'};
+const slotLabel={weapon:'อาวุธ',armor:'เสื้อ',accessory:'เครื่องประดับ'};
+const badge=r=>`<span class="bc-rarity-badge rarity-${r}">${rarityLabel[r]||r}</span>`;
+const PLAN_MIN=['good','rare','epic','legend'];
+// One row per new piece: best class for it, what that class wears now (with grade), and alternatives.
+export function renderEquipPlanHtml(s,classes,items){
+ const min=PLAN_MIN.includes(s.planMinRarity)?s.planMinRarity:'rare';
+ const rows=equipPlan(s,items,{minRarity:min}),picks=rows.filter(r=>r.pick),dis=s.night?'disabled':'';
+ const wearing=x=>x.current?`ใส่อยู่: ${esc(itemLabel(x.current.templateId))} ${badge(x.current.rarity)}`:'ช่องนี้ยังว่าง';
+ const filters=PLAN_MIN.map(r=>`<button class="${min===r?'active':''}" data-plan-min="${r}">${rarityLabel[r]}+ · ${items.filter(p=>rarities.indexOf(p.rarity)>=rarities.indexOf(r)).length}</button>`).join('');
+ const list=rows.map(({item:p,slot,role,pick,options})=>{
+  const head=`${gameIcon(p.templateId,'equipment','◈','bc-plan-icon')}<div class="bc-plan-item"><b>${esc(itemLabel(p.templateId))}</b><span>${badge(p.rarity)} ${slotLabel[slot]||''}${roleLabel[role]?' · '+roleLabel[role]:''}</span></div>`;
+  if(!pick)return `<div class="bc-plan-row none">${head}<div class="bc-plan-target"><small>ทุกคลาสใส่ของที่ดีกว่าอยู่แล้ว</small></div></div>`;
+  const others=options.filter(o=>o.cls!==pick.cls).map(o=>`<button class="bc-plan-alt" data-batch-equip="${o.cls}:${p.id}" ${dis}>${esc(classes[o.cls].name)} +${o.delta}<small>${o.current?rarityLabel[o.current.rarity]:'ว่าง'}</small></button>`).join('');
+  return `<div class="bc-plan-row">${head}<div class="bc-plan-target"><b>→ ${esc(classes[pick.cls].name)} <em>+${pick.delta}</em></b><small>${wearing(pick)}</small>
+   <div class="bc-plan-actions"><button data-batch-equip="${pick.cls}:${p.id}" ${dis}>ใส่ให้ ${esc(classes[pick.cls].name)}</button>${others?`<span>หรือ</span>${others}`:''}</div></div></div>`;
+ }).join('');
+ return `<section class="bc-equip-plan"><header><h3>แจกของให้ทีม</h3>${picks.length>1?`<button data-batch-equip-all ${dis}>ใส่ตามคำแนะนำทั้งหมด (${picks.length})</button>`:''}</header>
+  <p class="bc-help">เทียบกับของที่แต่ละคลาสใส่อยู่ · ตัวเลข + คือพลังที่เพิ่มตามหน้าที่ของคลาส · เปลี่ยนเมื่อคุณกดเท่านั้น ของเดิมกลับเข้าคลัง</p>
+  <nav class="bc-batch-filters">${filters}</nav>${list||'<p class="bc-help">ไม่มีชิ้นระดับนี้ในรอบคราฟต์ล่าสุด</p>'}</section>`;
+}
 export function renderBatchHtml(s,classes,embedded=false){
  const ids=s.batchResults||[],items=ids.map(id=>s.gear.find(p=>p.id===id)).filter(Boolean),
   focus=s.batchClass||s.forgeClass||'guard',rec=recommendations(s,items,focus),used=equippedGearIds(s),selected=s.batchSelection||[],report=s.batchReport;
  const filtered=items.filter(p=>s.batchFilter==='all'||p.rarity===s.batchFilter);
  const filters=['all',...rarities].filter(r=>r==='all'||items.some(p=>p.rarity===r)).map(r=>`<button class="${s.batchFilter===r?'active':''}" data-batch-filter="${r}">${r==='all'?'ทั้งหมด':rarityLabel[r]} · ${r==='all'?items.length:items.filter(p=>p.rarity===r).length}</button>`).join('');
- const recommend=rec.map(r=>{const p=s.gear.find(x=>x.id===r.itemId);
-  const old=s.gear.find(x=>x.id===r.currentId),before=old?gearScore(old,r.cls):0,newScore=gearScore(p,r.cls);
-  return {cls:r.cls,html:`<div class="bc-recommend ${r.cls===focus?'primary':''}">${gameIcon(p.templateId,'equipment','◈','bc-recommend-icon')}
-    <div><b>${esc(classes[r.cls].name)} · ${esc(itemLabel(p.templateId))}</b><small>${rarityLabel[p.rarity]} · เพิ่มค่าเหมาะสมกับคลาส +${r.delta}</small>
-    <small>คะแนนความเหมาะสม ${Math.round(before*10)/10} → ${Math.round(newScore*10)/10} · ${r.currentId?'ของเดิมกลับเข้าคลัง ระดับตีบวกช่องยังอยู่':'ช่องนี้ยังว่าง'}</small></div>
-    <button data-batch-equip="${r.cls}:${p.id}" ${s.night?'disabled':''}>เลือกเปลี่ยน</button></div>`};});
- const primaryRecommend=recommend.filter(x=>x.cls===focus).map(x=>x.html).join('');
- const otherRecommend=recommend.filter(x=>x.cls!==focus).map(x=>x.html).join('');
  const cards=filtered.map(p=>{
   const r=rec.find(x=>x.itemId===p.id),checked=selected.includes(p.id),underReview=report?.review.some(x=>x.id===p.id);
   return `<article class="bc-batch-card rarity-${p.rarity}">
@@ -111,10 +125,7 @@ export function renderBatchHtml(s,classes,embedded=false){
  const salvage=items.filter(p=>selected.includes(p.id)&&!p.locked&&!used.has(p.id)),blocked=salvage.filter(p=>rec.some(r=>r.itemId===p.id));
  const summary=report?`<div class="bc-batch-summary"><span>คราฟต์ <b>${report.made.length}</b> ชิ้น</span><span>เก็บ <b>${report.retained.length}</b> ชิ้น</span><span>รอพิจารณา <b>${report.review.length}</b> ชิ้น</span><span>ย่อยอัตโนมัติ <b>${report.dismantled.length}</b> ชิ้น</span><span>ย่อยเพิ่ม <b>${report.manualDismantled?.length||0}</b> ชิ้น</span><span>Stone Fragments <b>+${report.fragments}</b></span></div>`:'';
  return `${embedded?'<section class="bc-armory-results" aria-label="ผล Batch Craft"><h3>ผล Batch Craft · '+esc(classes[focus].name)+'</h3>':head('craft','Batch Craft Results','คลาส '+esc(classes[focus].name)+' · เลือกใส่เองและยืนยันก่อนแยกชิ้นส่วน')}
- ${embedded?'':'<div class="bc-modal-body">'}${summary}<section class="bc-batch-recommend"><h3>คำแนะนำให้ ${esc(classes[focus].name)}</h3>
- <p class="bc-help">พิจารณา Rarity และค่าสถานะตามหน้าที่ของคลาส · ไม่เปลี่ยนอุปกรณ์อัตโนมัติ</p>
- ${primaryRecommend||'<p class="bc-help">ไม่มีชิ้นใดเพิ่มค่าพลังให้คลาสนี้</p>'}
- ${otherRecommend?`<details class="bc-recommend-other"><summary>ดูคำแนะนำสำหรับคลาสอื่น (${recommend.filter(x=>x.cls!==focus).length})</summary>${otherRecommend}</details>`:''}</section>
+ ${embedded?'':'<div class="bc-modal-body">'}${summary}${renderEquipPlanHtml(s,classes,items)}
  ${report?.review.length?`<p class="bc-review-notice">รอพิจารณา ${report.review.length} ชิ้น: ต่ำกว่า Rarity ขั้นต่ำ แต่ Smart Recommendation แนะนำให้คลาสอื่น จึงไม่ย่อยอัตโนมัติ</p>`:''}
  ${embedded?`<button class="bc-results-toggle" data-batch-expanded>${s.batchExpanded?'ซ่อนรายการอื่น':'ดูของที่เหลือ '+items.length+' ชิ้น · กรอง Rarity / ล็อก / เลือกย่อย'}</button>`:''}
  <div class="bc-batch-expansion" ${embedded&&!s.batchExpanded?'hidden':''}>

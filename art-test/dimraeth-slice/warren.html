@@ -239,6 +239,22 @@
   .bc-inventory-piece>small{font-size:10px;color:#bbbda4}
   img.bc-item-icon{object-fit:contain;padding:5px;image-rendering:pixelated}
   .bc-inventory-piece .bc-item-icon{width:60px;height:60px}
+  /* Batch Craft equip planner: new piece → best class, vs what that class wears now. */
+  .bc-equip-plan{display:grid;gap:6px;margin:8px 0}
+  .bc-equip-plan>header{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.bc-equip-plan h3{margin:0}
+  .bc-plan-row{display:grid;grid-template-columns:40px minmax(0,1fr) minmax(0,1.35fr);gap:8px;align-items:center;padding:7px;border:1px solid #4d5d47;border-radius:9px;background:#1d2a1f}
+  .bc-plan-row.none{opacity:.6}
+  .bc-plan-icon{width:40px;height:40px;image-rendering:pixelated}
+  .bc-plan-item,.bc-plan-target{display:grid;gap:3px;min-width:0;font-size:12px}
+  .bc-plan-item b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bc-plan-item span,.bc-plan-target small{font-size:11px;color:#c9d7bd}
+  .bc-plan-target em{font-style:normal;color:#9df0a6}
+  .bc-plan-actions{display:flex;flex-wrap:wrap;gap:4px;align-items:center}.bc-plan-actions>span{font-size:10px;color:#a9b89c}
+  .bc-plan-actions button{min-height:32px;padding:3px 8px;font-size:11px}
+  .bc-plan-alt{display:inline-flex;flex-direction:column;align-items:center;line-height:1.1}.bc-plan-alt small{font-size:9px;opacity:.8}
+  .bc-rarity-badge{display:inline-block;padding:0 6px;border-radius:999px;border:1px solid;font-size:10px;font-weight:700;line-height:16px;background:#0006}
+  .bc-rarity-badge.rarity-normal{color:#b8c2d6}.bc-rarity-badge.rarity-good{color:#6ee7a0}.bc-rarity-badge.rarity-rare{color:#6aaeff}.bc-rarity-badge.rarity-epic{color:#c38bff}.bc-rarity-badge.rarity-legend{color:#ffbd63}.bc-rarity-badge.rarity-mythic{color:#ff86ae}.bc-rarity-badge.rarity-whiteAscended{color:#fff}
+  @media (max-width:760px){.bc-plan-row{grid-template-columns:34px minmax(0,1fr)}.bc-plan-target{grid-column:1/-1}.bc-plan-icon{width:34px;height:34px}}
   .rarity-normal{border-color:#6c7c70}.rarity-good{border-color:#4cbb6d}.rarity-rare{border-color:#5b9fdf}.rarity-epic{border-color:#bd79ea}.rarity-legend{border-color:#ffbd63}.rarity-mythic,.rarity-whiteAscended{border-color:#ff86ae}
   .bc-item-detail{max-height:calc(88vh - 70px)}
   .bc-item-preview{display:flex;align-items:center;gap:18px}

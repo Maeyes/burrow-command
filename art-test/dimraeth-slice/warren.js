@@ -67,6 +67,7 @@ import {validateDefensePlacement,DEFENSE_FOOTPRINT} from './warren-defense-place
 import {renderHomeBuilderHtml} from './warren-home-ui.js';
 import {createHomeController} from './warren-home-controller.js';
 import {homeBonuses} from './warren-home-bonuses.js';
+import {equipPlan} from './warren-equip-plan.js';
 import {nextGoal} from './warren-next-goal.js';
 import {snapshotNight,summarizeNight,renderNightSummaryHtml} from './warren-night-summary.js';
 import {HOME_PLOTS,HOME_SIDES,HOME_SIDE_NAMES,HOME_PLOT_COST,HOME_WALL_COST,fullyOwnedSide,homePerimeterBlueprint,homeWallLayoutId,homeOwnedCell,plotForCell,homeWallIntegrity,reconcileHomeWall,HOME_EXPANSION_STAGES,HOME_NORTH_FINAL,homeAtNorthernCliff} from './warren-home-land.js';
@@ -1608,6 +1609,14 @@ document.body.addEventListener('click', e => {
   }
   else if(b.hasAttribute('data-batch-expanded')){S.batchExpanded=!S.batchExpanded;renderUi();}
   else if(b.dataset.batchFilter){S.batchFilter=b.dataset.batchFilter;renderUi();}
+  else if(b.dataset.planMin){S.planMinRarity=b.dataset.planMin;renderUi();}
+  else if(b.hasAttribute('data-batch-equip-all')&&!S.night){
+    // Re-plan once, then apply every recommended pick the player just confirmed with this button.
+    const items=(S.batchResults||[]).map(id=>S.gear.find(p=>p.id===id)).filter(Boolean);
+    const picks=equipPlan(S,items,{minRarity:S.planMinRarity||'rare'}).filter(r=>r.pick);
+    let n=0;for(const {item,pick} of picks)if(equipBuildItem(S,pick.cls,null,pick.slot,item.id))n++;
+    if(n){S.armoryNotice=`ใส่อุปกรณ์ใหม่ ${n} ชิ้นตามคำแนะนำ · ของเดิมกลับเข้าคลังแล้ว`;refreshArmy();save();renderUi();toast(S.armoryNotice);}
+  }
   else if(b.dataset.batchEquip&&!S.night){
     const [cls,id]=b.dataset.batchEquip.split(':'),piece=S.gear.find(p=>p.id===id),slot=piece&&gearSlot(piece.templateId),
       oldId=slot&&buildFor(S,cls)?.gear[slot];
