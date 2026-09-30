@@ -1,7 +1,8 @@
 // Burrow Command: four focused RPG windows instead of one giant forge panel.
 // All graphics reuse the MAIN GAME icon manifest and the loaded Blessed Bunny sprite.
 import { iconFor } from '../iso-arena-draft/iconFor.js';
-import { CLASS_FAMILIES, CLASS_IDS, GEAR_SLOTS, AUTO_DISMANTLE_RARITIES, availableRecipes, buildFor, canCraft, equippedGearIds, gearSlot, gearScore, EQUIPMENT_MASTER_V2, unlockedTier, refineQuote, classProgress, MAX_FIELD_PER_CLASS } from './warren-progression.js';
+import { CLASS_FAMILIES, CLASS_IDS, GEAR_SLOTS, AUTO_DISMANTLE_RARITIES, availableRecipes, buildFor, canCraft, equippedGearIds, gearSlot, gearScore, EQUIPMENT_MASTER_V2, unlockedTier, refineQuote, classProgress, MAX_FIELD_PER_CLASS, BURROW_REFINE_FAIL_DROP_CHANCE } from './warren-progression.js';
+import { REFINE_SAFE_FLOORS } from '../../src/simulation/equipmentV2.ts';
 import { enhancementRequirement, EQUIPMENT_RARITY_STAT_MULTIPLIER } from '../../src/simulation/equipmentV2.ts';
 import { inventoryItemMeta } from '../../src/simulation/itemTagsV2.ts';
 
@@ -96,6 +97,36 @@ export function renderInventoryHtml(s,classes){
  <div class="bc-inventory-grid">${gear}${goods||(!gear?'<p class="bc-empty">ไม่มีไอเทมในหมวดนี้</p>':'')}</div></div>`;
 }
 const statNames={atk:'ATK',matk:'MATK',def:'DEF',mdef:'MDEF',maxHp:'HP',crit:'CRI',aspd:'ASPD',hit:'HIT',flee:'FLEE'};
+// Refine card: the jump, the odds as a meter, exactly what happens on failure, and what is missing.
+// Same rules as refineGear(); this only explains them.
+const safeFloorFor=level=>REFINE_SAFE_FLOORS.reduce((f,n)=>n<=level?n:f,0);
+export function renderRefineCard(s,p,{owner,refine,refineReq,prot,protectedAttempt,refineReady}){
+ // The quote reflects the slot of the class that actually wears the piece.
+ if(refineReq)refine=refineReq.target-1;
+ const head=`<h3>✦ REFINE <strong>+${refine}</strong></h3>`;
+ const track=`<ol class="bc-refine-track" aria-label="ระดับ Refine ${refine} จาก 15">${Array.from({length:15},(_,i)=>{const lv=i+1;
+  return `<li class="${lv<=refine?'done':lv===refine+1?'next':''} ${REFINE_SAFE_FLOORS.includes(lv)?'safe':''}" title="+${lv}${REFINE_SAFE_FLOORS.includes(lv)?' · Safe Floor':''}"></li>`}).join('')}</ol>
+  <small class="bc-refine-legend">🛡 Safe Floor +6 / +9 / +12 / +15 · ล้มเหลวจะไม่ลดต่ำกว่าจุดนี้</small>`;
+ if(!owner)return `<section class="bc-upgrade-card bc-refine-card">${head}${track}<p class="bc-refine-note">ใส่ชิ้นนี้ให้คลาสก่อน · Refine เป็นของช่องอุปกรณ์ประจำคลาส</p></section>`;
+ if(!refineReq)return `<section class="bc-upgrade-card bc-refine-card">${head}${track}<p class="bc-refine-note">🎉 ถึงเพดาน +15 แล้ว</p></section>`;
+ const next=refine+1,rate=Math.round(refineReq.rate*100),risk=rate>=70?'low':rate>=35?'mid':'high';
+ const floor=safeFloorFor(refine),dropTo=Math.max(floor,refine-1),drop=Math.round(BURROW_REFINE_FAIL_DROP_CHANCE*100);
+ const fail=protectedAttempt&&prot?`อยู่ที่ +${refine} (ใช้ Protection)`:dropTo===refine?`อยู่ที่ +${refine} (Safe Floor)`:`${drop}% ลดเหลือ +${dropTo} · ${100-drop}% อยู่ที่ +${refine}`;
+ const astra=qty(s,'astraliteStone'),needA=refineReq.astralite,gold=s.gold,needG=refineReq.gold;
+ const protHave=prot?qty(s,prot.id):0,protShort=protectedAttempt&&prot&&protHave<prot.qty;
+ const chip=(ok,icon,label)=>`<span class="bc-cost-chip ${ok?'':'short'}">${icon}${label}</span>`;
+ const missing=[astra<needA?`Astralite ${needA-astra}`:'',gold<needG?`${(needG-gold).toLocaleString()} G`:'',protShort?`Protection ${prot.qty-protHave}`:''].filter(Boolean);
+ const fb=s.refineFeedback?.itemId===p.id?`<p role="status" class="bc-refine-feedback ${s.refineFeedback.success?'success':'failure'}">${esc(s.refineFeedback.text)}</p>`:'';
+ return `<section class="bc-upgrade-card bc-refine-card">${head}${track}
+  <div class="bc-refine-jump"><b>+${refine}</b><span>→</span><b>+${next}</b></div>
+  <div class="bc-refine-rate" data-risk="${risk}" style="--rate:${rate}%"><span>โอกาสสำเร็จ</span><b>${rate}%</b><i></i></div>
+  <ul class="bc-refine-outcomes"><li class="ok">✓ สำเร็จ → +${next}</li><li class="fail">✗ ล้มเหลว → ${fail}</li></ul>
+  <div class="bc-refine-costs">${chip(astra>=needA,gameIcon('astraliteStone','item'),`Astralite ${astra}/${needA}`)}${chip(gold>=needG,'💰',`${needG.toLocaleString()} G`)}
+   ${prot?chip(!protShort,gameIcon(prot.id,'item'),`Protection ${protHave}/${prot.qty}`):''}</div>
+  ${prot?`<label class="bc-protect"><input id="itemProtect" type="checkbox" ${protectedAttempt?'checked':''}> 🛡 ใช้ Protection · ล้มเหลวไม่ลดขั้น</label>`:''}
+  ${fb}
+  <button class="bc-refine-go" data-item-refine="${p.id}" ${s.night||!refineReady?'disabled':''}>${refineReady?`✦ Refine → +${next}`:missing.length?'ขาด '+missing.join(' · '):'Refine ได้ตอนกลางวัน'}</button></section>`;
+}
 export function renderItemDetailHtml(s,itemId,classes){
  const p=s.gear.find(i=>i.id===itemId);if(!p)return '';
  const t=EQUIPMENT_MASTER_V2[p.templateId],slot=gearSlot(p.templateId),eq=[];
@@ -125,11 +156,6 @@ export function renderItemDetailHtml(s,itemId,classes){
    <p>เพิ่มค่าสถานะของช่อง Armory ประจำคลาส · สูงสุด +120 ไม่ติดเลเวลบ้าน</p>
    <div class="bc-upgrade-material">${req?`${gameIcon(req.stoneId,'item')}${esc(itemLabel(req.stoneId))} ${qty(s,req.stoneId)}/${req.stoneQty} · ${req.gold}G`:'ถึงเพดานแล้ว'}</div>
    <button data-item-enhance="${p.id}" ${s.night||!costReady?'disabled':''}>Enhance → +${enhance+1}</button></section>
-   <section class="bc-upgrade-card bc-refine-card"><h3>✦ REFINE <strong>+${refine}</strong></h3>
-   <p>เพิ่มประสิทธิภาพตามค่าตีบวก · ล้มเหลวอาจลด 1 ระดับ (ไม่ต่ำกว่า Safe Floor)</p>
-   <div class="bc-upgrade-material">${refineReq?`${gameIcon('astraliteStone','item')}Astralite ${qty(s,'astraliteStone')}/${refineReq.astralite} · ${refineReq.gold.toLocaleString()} G (มี ${s.gold.toLocaleString()} G) · สำเร็จ ${(refineReq.rate*100).toFixed(0)}% · เมื่อล้มเหลวมีโอกาสลดขั้น 20%`:'ถึงเพดาน +15 แล้ว'}</div>
-   ${s.refineFeedback?.itemId===p.id?`<p role="status" class="bc-refine-feedback ${s.refineFeedback.success?'success':'failure'}">${esc(s.refineFeedback.text)}</p>`:''}
-   ${prot?`<label class="bc-protect"><input id="itemProtect" type="checkbox" ${protectedAttempt?'checked':''}> ใช้ Protection ${gameIcon(prot.id,'item')} ${qty(s,prot.id)}/${prot.qty}</label>`:''}
-   <button data-item-refine="${p.id}" ${s.night||!refineReady?'disabled':''}>Refine → +${refine+1}</button></section></div>
+   ${renderRefineCard(s,p,{owner,refine,refineReq,prot,protectedAttempt,refineReady})}</div>
  </div>`;
 }
