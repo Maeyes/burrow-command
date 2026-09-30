@@ -2545,6 +2545,26 @@ const resumed = load();
 if (!resumed) { recruit('guard', true); recruit('archer', true); }
 renderUi();
 setRuntimeZoomRange(mobileLayout.matches ? .26 : .45, 1.3); // portrait can pinch farther out to see the whole village
+// Loading screen: the engine writes stage messages into #loading; turn them into bar progress.
+const loadingScreen=$('loadingScreen');
+function setLoadingProgress(p){
+ if(!loadingScreen)return;
+ const v=Math.max(0,Math.min(100,Math.round(p)));
+ loadingScreen.style.setProperty('--p',v+'%');loadingScreen.setAttribute('aria-valuenow',v);
+}
+function loadingProgressFor(text){
+ const pct=Number(text.match(/(\d+)%/)?.[1]);
+ if(text.includes('วาดพื้น')&&Number.isFinite(pct))return 35+pct*.55;
+ if(text.includes('ต้นไม้'))return 15;
+ if(text.includes('วางของ'))return 28;
+ if(text.includes('cache'))return text.includes('แล้ว')?88:40;
+ return null;
+}
+if(loadingScreen&&$('loading')){
+ setLoadingProgress(6);
+ new MutationObserver(()=>{const p=loadingProgressFor($('loading')?.textContent||'');if(p!=null)setLoadingProgress(p);})
+  .observe($('loading'),{childList:true,characterData:true,subtree:true});
+}
 await boot(scene, { canvasEl: canvas, loadingEl: $('loading'), playerSprites: null, worldScale: 1.45, zoom: mobileLayout.matches ? .45 : .62 });
 // The runtime minimap occupies canvas pixels x=1044..1264, y=16..156.
 // Anchor the Relic Collection launcher immediately beneath it, respecting letterboxing.
@@ -2589,6 +2609,7 @@ wallButton.addEventListener('pointerleave',()=>{S.wallPreview=false;});
 wallButton.addEventListener('focus',()=>{S.wallPreview=true;});
 wallButton.addEventListener('blur',()=>{S.wallPreview=false;});
 { const l = $('loading'); if (l) l.hidden = true; }
+if(loadingScreen){setLoadingProgress(100);setTimeout(()=>{loadingScreen.classList.add('done');setTimeout(()=>loadingScreen.remove(),500);},250);}
 banner(resumed ? `กลับมาแล้ว · วันที่ ${S.day}` : 'วันที่ 1', resumed ? `บ้าน Lv ${S.warren} · เวฟ ${S.warren}-${S.wave}` : 'กระต่ายฟาร์มเองรอบหมู่บ้าน · คลิกป้อมเพื่อจัดทหารประจำป้อม');
 if(!IS_CINEMATIC_PREVIEW&&shouldShowWaterfallIntro()&&!S.mythic.pending)openWaterfallGuide('intro');
 if(!IS_CINEMATIC_PREVIEW&&S.mythic.pending)setTimeout(()=>{S.modal=null;renderUi();if(!startPendingMythicCinematic())setTimeout(startPendingMythicCinematic,800);},900);
