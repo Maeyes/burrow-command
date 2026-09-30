@@ -2,7 +2,7 @@
 // Pure rules live in warren-home-*.js; this module applies them to the live game state.
 import {sceneFromMap} from './scenes/custom.js';
 import {WS} from './engine/state.js';
-import {runtimeWalkHeight,repaintRuntimeRoadFields} from './engine/runtime.js';
+import {runtimeWalkHeight,repaintRuntimeRoadFields,rebuildRuntimeTerrain} from './engine/runtime.js';
 import {perimeterMid} from './warren-perimeter.js';
 import {CONSTRUCTION_MATERIAL_IDS} from './warren-progression.js';
 import {HOME_ITEMS,snapHome,validateHomePlacement,refundHome} from './warren-home-builder.js';
@@ -304,11 +304,25 @@ function commitHomeTerrain(){
  }
  S.homeBuilder.waterfalls=[...valid,...newCurtains];
  S.homeTerrainDraft=null;S.homeAction='place';S.homeUndo=null;S.homeTerrainNotice='';
- save();renderUi();
- // Ground (including cliffs, water, pathing and waterfalls) is baked by the
- // engine during boot. A single reload after batch confirmation avoids stale
- // runtime nav or stacked ground meshes.
- location.reload();return true;
+ save();
+ refreshHomeTerrainLive();
+ return true;
+}
+// Re-bake cliffs, water, trees, colliders and ground in place; game walls/houses/towers stay.
+// If the live rebuild ever fails, fall back to the old full reload (the save is already written).
+function refreshHomeTerrainLive(){
+ S.homeGroundBusy=true;renderUi();
+ homeGroundRefresh=homeGroundRefresh.catch(()=>{}).then(async()=>{
+  const scene=sceneFromMap(buildMap(WS.scene?.biome||currentStage.biome,S.homeBuilder));
+  if(!await rebuildRuntimeTerrain(scene))throw Error('Terrain runtime not initialized');
+  rebuildPerimeter();   // re-seat wall z/colliders on the new ground, push actors out of new cliffs
+  rebuildHomeWorld();
+  toast('สร้าง Terrain เรียบร้อย');
+ }).catch(error=>{
+  console.error('[home-builder] live terrain rebuild failed',error);
+  location.reload();
+ }).finally(()=>{S.homeGroundBusy=false;renderUi();});
+ return homeGroundRefresh;
 }
 function createHomeWaterfall(x,y){
  if(S.night||!S.homeOpen||S.homeAction!=='waterfall')return false;

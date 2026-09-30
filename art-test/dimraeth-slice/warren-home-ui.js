@@ -6,7 +6,7 @@ import {HOME_TERRAIN_BRUSHES,quoteHomeTerrain,deriveHomeNorthCurtains,quoteNewHo
 export const HOME_PANES={decor:'🪑 ตกแต่ง',terrain:'⛰️ ภูมิประเทศ',land:'🗺 ที่ดิน & กำแพง'};
 const HELP={
  decor:'เลือกของแล้วแตะพื้นเพื่อวาง · แตะของที่วางแล้วเพื่อย้าย/หมุน/รื้อ · ทางเดินใช้พื้นจริงและต่อขอบอัตโนมัติ · R หมุน · Ctrl+Z ย้อน · Esc ยกเลิก',
- terrain:'เลือกพู่กันแล้วแตะพื้นเพื่อร่าง · แก้ได้เฉพาะ Plot ที่ซื้อแล้ว · ยกพื้นได้เฉพาะทางเหนือหลังย้ายกำแพง · กดยืนยันครั้งเดียวเพื่อสร้างจริง (เกมจะโหลดใหม่)',
+ terrain:'เลือกพู่กันแล้วแตะพื้นเพื่อร่าง · แก้ได้เฉพาะ Plot ที่ซื้อแล้ว · ยกพื้นได้เฉพาะทางเหนือหลังย้ายกำแพง · กดยืนยันครั้งเดียวเพื่อสร้างจริง (ไม่ต้องโหลดเกมใหม่)',
  land:'ซื้อ Plot 5×5 ครบสามแปลงของทิศหนึ่งเพื่อย้ายกำแพงออกไป · เหนือช่วงสุดท้ายจะใช้หน้าผาระดับ 3 แทนกำแพง · ทำได้เฉพาะกลางวัน'
 };
 // What the player is doing right now, in one line, with the way out.
@@ -90,7 +90,7 @@ export function renderHomeBuilderHtml(s,{thumb}={}){
  const body=pane==='terrain'?terrainPane(s,disabled):pane==='land'?landPane(s,disabled):decorPane(s,disabled,thumb);
  return `<div class="bc-home-head"><strong>🔨 Home Builder</strong><button data-home-help class="${s.homeHelp?'active':''}" aria-label="วิธีใช้">?</button><button data-home-close aria-label="ปิดโหมดสร้าง" ${s.homeGroundBusy?'disabled':''}>✕</button></div>
  <div class="bc-home-panes" role="tablist">${panes}</div>
- <div class="bc-home-mode" role="status">${s.homeGroundBusy?'⏳ กำลังวาดพื้นทางเดิน…':esc(homeModeLabel(s))}</div>
+ <div class="bc-home-mode" role="status">${s.homeGroundBusy?'⏳ กำลังสร้างพื้นใหม่…':esc(homeModeLabel(s))}</div>
  ${s.homeHelp?`<p class="bc-home-info bc-home-help">${HELP[pane]}</p>`:''}
  ${body}`;
 }

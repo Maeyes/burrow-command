@@ -796,6 +796,10 @@ export function teardown(){
 
 const TERRAIN_CACHE_VERSION='ground-v6';
 function cacheDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open('bunny-world-terrain',1);req.onupgradeneeded=()=>req.result.createObjectStore('ground');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});}
+function groundCacheKey(scene){
+  const propVersion=scene.props?.some(p=>p.type==='rabbitBurrow')?':burrow-v2':'';
+  return scene.cacheKey?`${TERRAIN_CACHE_VERSION}:${scene.cacheKey}:scale:${K}${propVersion}`:null;
+}
 async function readGroundCache(key){
   if(!key||typeof indexedDB==='undefined')return null;
   try{const db=await cacheDb(),row=await new Promise((resolve,reject)=>{const tx=db.transaction('ground','readonly'),r=tx.objectStore('ground').get(key);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});db.close();if(!row)return null;
@@ -815,14 +819,44 @@ export async function prepare(scene,{canvasEl,loadingEl,renderScale}={}){
   await yieldFrame();const tStart=performance.now();say('กำลังสร้างต้นไม้…');await yieldFrame();
   KIT=biomeOf(scene);buildLibraries(KIT);WS.terrain=buildTerrain(scene);placeStructures();say('กำลังวางของ…');await yieldFrame();placeScatter();
   const noCache=new URLSearchParams(location.search).has('nocache');
-  const propVersion=scene.props?.some(p=>p.type==='rabbitBurrow')?':burrow-v2':'';
-  const cacheKey=!noCache&&scene.cacheKey?`${TERRAIN_CACHE_VERSION}:${scene.cacheKey}:scale:${K}${propVersion}`:null;
+  const cacheKey=noCache?null:groundCacheKey(scene);
   WS.ground=null;
   if(cacheKey){say('กำลังโหลดพื้นจาก cache…');WS.ground=await readGroundCache(cacheKey);}
   if(!WS.ground){await bakeGround(p=>say(`กำลังวาดพื้น… ${Math.round(p*100)}%`));if(cacheKey)writeGroundCache(cacheKey,WS.ground);}
   else say('โหลดพื้นจาก cache แล้ว');
   maskStaticObjects();buildOverlays();
+  rememberEngineWorld();
   return {WS,bakeMs:Math.round(performance.now()-tStart)};
+}
+
+// Everything prepare() put into the shared WS lists. Anything added later belongs to the
+// host game (walls, houses, towers…) and must survive a live terrain rebuild.
+const WORLD_LISTS=['objects','colliders','lights','baked','shadows','rectShadows','chimneys','flags','bridges'];
+let engineWorld=null;
+function rememberEngineWorld(){engineWorld=Object.fromEntries(WORLD_LISTS.map(k=>[k,new Set(WS[k])]));}
+
+/** Rebuild terrain, structures, scatter and ground for a new scene WITHOUT a page reload.
+ * Host-added objects/colliders/lights are kept; actors, camera and the render loop continue.
+ * Deterministic placement means the result matches a fresh boot of the same scene. */
+export async function rebuildRuntimeTerrain(scene){
+ if(!WS.scene||!WS.terrain||!engineWorld)return false;
+ const hosted=Object.fromEntries(WORLD_LISTS.map(k=>[k,WS[k].filter(x=>!engineWorld[k].has(x))]));
+ const priorEngine=engineWorld,previous={scene:WS.scene,terrain:WS.terrain,ground:WS.ground,...Object.fromEntries(WORLD_LISTS.map(k=>[k,WS[k]]))};
+ try{
+  for(const k of WORLD_LISTS)WS[k]=[];
+  WS.scene=scene;WS.terrain=buildTerrain(scene);placeStructures();placeScatter();
+  await bakeGround();
+  maskStaticObjects();
+  rememberEngineWorld();
+  for(const k of WORLD_LISTS)WS[k].push(...hosted[k]);
+  if(typeof window!=='undefined'&&window.__slice)window.__slice.terrain=WS.terrain;
+  const cacheKey=groundCacheKey(scene);
+  if(cacheKey)writeGroundCache(cacheKey,WS.ground); // next page load skips the bake
+  return true;
+ }catch(error){
+  Object.assign(WS,previous);engineWorld=priorEngine;
+  throw error;
+ }
 }
 
 /** Refresh only editor-authored road fields while retaining actors, camera, props,
