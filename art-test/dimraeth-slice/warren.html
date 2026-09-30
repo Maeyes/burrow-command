@@ -65,6 +65,9 @@
   .row{display:flex;gap:6px}.row button{flex:1}
   #help{left:10px;top:10px;padding:6px;display:flex;gap:6px;max-width:none;font-size:11px;color:var(--dim);z-index:29}
   #help button{min-height:34px;padding:6px 9px;white-space:nowrap}
+  #mythicTestControls{left:10px;top:58px;padding:7px;display:flex;gap:6px;align-items:center;z-index:29;border-color:#8b7040;background:#172019ed}
+  #mythicTestControls select{min-height:34px;max-width:190px;padding:5px 8px;border:1px solid #6f6847;border-radius:7px;background:#243024;color:var(--ink);font:700 11px system-ui}
+  #mythicTestSummon{min-height:34px;padding:6px 10px;background:#651b13;border-color:#bd7c4d;color:#ffe7ad;font-weight:800;white-space:nowrap}
   #banner{position:fixed;left:50%;top:32%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;opacity:0;z-index:30}
   #banner b{display:block;font:800 44px Georgia,serif;color:#fff1c8;text-shadow:0 3px 0 #3a2616,0 0 30px rgba(255,180,90,.6)}#banner span{color:var(--ink);text-shadow:0 2px 4px #000}
   #banner.on{animation:bn 3.2s ease forwards}@keyframes bn{0%{opacity:0;transform:translate(-50%,-40%)}12%,70%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0}}
@@ -79,7 +82,7 @@
   .forge-row>div:first-child{min-width:0;flex:1}.forge-row small{display:block;font-size:10px;color:var(--dim)}.forge-actions{display:flex;gap:4px}
   .forge-slot{display:flex;align-items:center;gap:8px;padding:4px;border-bottom:1px solid #3a4638}.forge-slot b{min-width:79px}.forge-slot span{flex:1;font-size:11px}
   .forge-inventory{display:flex;flex-wrap:wrap;gap:5px}.forge-inventory span{border:1px solid #4d5d45;background:#30362b;padding:3px 5px;border-radius:5px;font-size:11px}
-  @media (max-width:760px){#help{display:none}#top{gap:8px;font-size:11px;flex-wrap:wrap;white-space:normal;width:calc(100vw - 20px)}#hall{width:110px}#side{width:180px;max-height:50vh}#squad{grid-template-columns:minmax(0,1fr);max-height:130px}#forgePanel{height:89vh}}
+  @media (max-width:760px){#help{display:none}#mythicTestControls{left:6px;top:54px;padding:4px;gap:4px}#mythicTestControls select{max-width:125px}#mythicTestSummon{padding:5px 7px;font-size:10px}#top{gap:8px;font-size:11px;flex-wrap:wrap;white-space:normal;width:calc(100vw - 20px)}#hall{width:110px}#side{width:180px;max-height:50vh}#squad{grid-template-columns:minmax(0,1fr);max-height:130px}#forgePanel{height:89vh}}
   /* Burrow Command: focused modal workflow with main-game pixel artwork. */
   #modalScrim{position:fixed;inset:0;background:rgba(3,7,6,.72);z-index:44;backdrop-filter:blur(3px)}
   #modalScrim[hidden]{display:none}
@@ -660,13 +663,32 @@
   .bc-home-item b{font-size:11px}.bc-home-item small{font-size:10px;color:#c0d0b5}
   .bc-home-actions{flex-wrap:wrap;padding:8px;background:#25392a;border-radius:8px}
   .bc-home-actions span{font-size:11px;flex:1 1 100%}
+  .bc-home-panel>*{flex-shrink:0}.bc-home-head{gap:6px}.bc-home-head strong{flex:1}
+  .bc-home-panes{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:#132019;padding:4px;border-radius:10px}
+  .bc-home-panes button{font-size:11px;min-height:36px;padding:4px 2px;border-color:transparent;background:transparent}
+  .bc-home-mode{font-size:12px;font-weight:700;color:#fff3c4;background:#3b3620;border-left:3px solid #ffd35c;border-radius:6px;padding:7px 9px}
+  .bc-home-help{background:#1f3326;border-radius:7px;padding:7px}
+  .bc-home-catalog{grid-template-columns:repeat(3,minmax(0,1fr));max-height:250px}
+  .bc-home-item{align-items:center;text-align:center;padding:6px 4px;min-height:92px}
+  .bc-home-item.short{opacity:.55}.bc-home-item.short small{color:#ffb39a}
+  .bc-home-thumb{width:100%;height:46px;display:flex;align-items:flex-end;justify-content:center;background:#16241b;border-radius:6px}
+  .bc-home-thumb img{max-width:100%;max-height:46px;image-rendering:pixelated;object-fit:contain}
+  .bc-home-thumb i{font-style:normal;font-size:26px;line-height:44px}
+  .bc-home-selection{display:flex;flex-wrap:wrap;gap:5px;align-items:center;padding:8px;background:#3a3620;border:1px solid #ffe27a;border-radius:9px}
+  .bc-home-selection strong{flex:1 1 100%;font-size:12px;color:#fff1b8}
+  .bc-home-selection button{min-height:36px;padding:4px 9px;font-size:11px}
+  .bc-home-panel button.danger{border-color:#d9776a;color:#ffd0c8}
+  .bc-home-panel button.primary{border-color:#ffd35c;background:#5b5122;color:#fff}
+  .bc-home-list{border-top:1px solid #57714f;padding-top:5px;max-height:190px;overflow:auto}
+  .bc-home-list summary{font-size:12px;font-weight:700;color:#d7ecbc;cursor:pointer;padding:4px}
+  .bc-home-plots button{display:flex;flex-direction:column;font-size:11px;gap:1px}.bc-home-plots button small{font-size:9px;opacity:.8}
   .bc-home-placed-list{max-height:155px;overflow:auto;border-top:1px solid #57714f;padding-top:5px}
   .bc-home-placed-list>strong{font-size:12px}
   .bc-home-placed{padding:4px 0;border-bottom:1px solid #455644;font-size:11px}
   .bc-home-placed span{flex:1;min-width:0}.bc-home-placed button{min-height:34px;padding:4px 8px}
   @media(max-width:760px),(max-height:500px) and (pointer:coarse){
     .bc-home-panel{left:5px;right:5px;top:auto;bottom:calc(61px + env(safe-area-inset-bottom,0px));width:auto;max-height:42dvh;max-height:42vh;z-index:38;border-radius:14px 14px 9px 9px;padding:9px;gap:6px}
-    .bc-home-catalog{max-height:96px}
+    .bc-home-catalog{max-height:118px;grid-template-columns:repeat(4,minmax(0,1fr))}.bc-home-item{min-height:78px}.bc-home-thumb{height:34px}.bc-home-thumb img{max-height:34px}
     .bc-home-placed-list{max-height:58px}
     .bc-home-tabs button{flex:1 1 auto}
   }
@@ -782,6 +804,9 @@
   .bc-relic-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;min-height:152px;border:1px solid #506950;border-radius:10px;background:#223327;padding:11px 5px 9px;text-align:center}
   .bc-relic-card:hover{border-color:#cbaa70}.bc-relic-card.selected{border-color:#ffe49b;background:#394935;box-shadow:inset 0 0 0 1px #ad955c}
   .bc-relic-card.owned{background:linear-gradient(145deg,#41472b,#2c422d);border-color:#d9b86d}
+  .bc-relic-mystery{color:#c1b389;font:bold 44px monospace;text-shadow:3px 3px #101b17;background:linear-gradient(145deg,#31483c,#17281f);border:2px solid #66785b;border-radius:8px}
+  .bc-relic-atlas{background-image:url(/burrow-command/assets/relic-icons-10-eleWDh_N.png);background-size:500% 200%;background-repeat:no-repeat;image-rendering:pixelated}
+  .bc-relic-launcher-icon{display:inline-block;flex:none;width:29px;height:29px;background-position:100% 100%}
   .bc-relic-icon{display:grid;place-items:center;flex:none;width:62px;height:62px;max-width:100%;object-fit:contain;image-rendering:pixelated}
   .bc-relic-glyph{font-size:40px;border-radius:9px;background:radial-gradient(circle,#3e5d48,#192820);border:1px solid #596a53}
   .bc-relic-icon.large{width:124px;height:124px;font-size:62px;max-width:100%}
@@ -809,17 +834,18 @@
   }
   @media(max-width:380px){.bc-relic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
-  <script type="module" crossorigin src="/burrow-command/assets/warren-DOvb5BXH.js"></script>
+  <script type="module" crossorigin src="/burrow-command/assets/warren-CHfUN-lk.js"></script>
+  <link rel="stylesheet" crossorigin href="/burrow-command/assets/warren-BI6qrppq.css">
 </head>
 <body>
 <div id="wrap"><canvas id="scene" width="1280" height="720"></canvas><div id="worldLabels" aria-label="อาคารและป้อมในหมู่บ้าน"></div></div>
 <div id="top" class="panel">
   <div id="clock"><b id="phase">☀️ วันที่ 1</b> <span id="timer"></span><br><small id="wave"></small><div><div id="clockbar"></div></div></div>
-  <div class="res"><span>🪙 <b id="gold">0</b></span><span title="วัตถุดิบที่ใช้สร้างและอัปบ้าน">🧰 <b id="materials">0</b></span></div>
+  <div class="res"><span title="Gold"><i class="bc-hud-icon" style="--hud-position:0% 0%" aria-hidden="true"></i><b id="gold">0</b></span><span title="วัตถุดิบที่ใช้สร้างและอัปบ้าน"><i class="bc-hud-icon" style="--hud-position:33.333333% 0%" aria-hidden="true"></i><b id="materials">0</b></span></div>
   <div id="hall"><small>โพรงกระต่าย <span id="burrow-t"></span></small><div><div id="burrow"></div></div></div>
 </div>
-<div id="help" class="panel bc-help-launcher" aria-label="คู่มือและข่าวสาร"><button type="button" data-open-guide>📖 คู่มือ</button><button type="button" id="patchNotesOpen" data-open-patch-notes>📜 v0.8.3</button></div>
-<div id="relicLauncher"><button type="button" data-open-relic-collection aria-label="เปิด Relic Collection ใต้แผนที่"><img src="data:image/svg+xml,%3csvg%20xmlns='http://www.w3.org/2000/svg'%20width='64'%20height='64'%20viewBox='0%200%2064%2064'%20shape-rendering='crispEdges'%20role='img'%3e%3ctitle%3eBurrow%20Command%20legendary%20relic%3c/title%3e%3cpath%20d='M20%204h24v4h8v8h4v32h-4v8h-8v4H20v-4h-8v-8H8V16h4V8h8z'%20fill='%2313241e'%20stroke='%235f7051'%20stroke-width='2'/%3e%3cpath%20d='M20%208h24v4h8v36h-8v8H20v-8h-8V12h8z'%20fill='%23263527'/%3e%3cpath%20d='M16%2018h4v4h-4zm32%2026h4v4h-4z'%20fill='%238eab78'/%3e%3cpath%20d='M16%2020h8v-4h8v4h8v-4h8v4h4v12h-4v8h-4v4h-4v4h-4v4h-8v-4h-4v-4h-4v-4h-4v-8h-4V20z'%20fill='%23590d1d'/%3e%3cpath%20d='M16%2020h8v-4h8v8h8v-8h8v4h4v12h-4v8h-8v8h-8v4h-4v-4h-8v-8h-4v-8h-4V20z'%20fill='%23d83e49'/%3e%3cpath%20d='M20%2020h8v4h-8zm24%200h4v8h-4z'%20fill='%23ff9a65'/%3e%3cpath%20d='M32%2026h4v8h-4v4h-4v8h4v-4h4v-8h4v-4h-4v-4z'%20fill='%23ffe3a0'/%3e%3c/svg%3e" alt=""> Relic Collection <small id="relicLauncherCount">0/9</small></button></div>
+<div id="help" class="panel bc-help-launcher" aria-label="คู่มือและข่าวสาร"><button type="button" data-open-guide><i class="bc-hud-icon" style="--hud-position:100% 0%" aria-hidden="true"></i> คู่มือ</button><button type="button" id="patchNotesOpen" data-open-patch-notes>📜 v0.8.3</button></div>
+<div id="relicLauncher"><button type="button" data-open-relic-collection aria-label="เปิด Relic Collection ใต้แผนที่"><span class="bc-relic-atlas bc-relic-launcher-icon" aria-hidden="true"></span> Relic Collection <small id="relicLauncherCount">0/9</small></button></div>
 <div id="shopbox" class="panel"><div class="mobile-drawer-head"><b>🐰 จ้างกระต่าย</b><button type="button" data-mobile-close aria-label="ปิดหน้าจ้างกระต่าย">✕</button></div><details id="recruitDetails" open><summary>จ้างกระต่าย <small id="recruitSummary">0/7</small></summary><div id="shop" aria-label="รายชื่อกระต่ายที่จ้างได้"></div></details></div>
 <div id="side" class="panel">
   <button id="sideToggle" class="bc-collapse-toggle" type="button" aria-expanded="true" aria-label="ย่อแผงจัดการหมู่บ้าน" title="ซ่อน/แสดงแผงจัดการหมู่บ้าน">−</button>
@@ -828,16 +854,16 @@
     <button type="button" data-world="hall">🏠 โพรง</button><button type="button" data-world="blacksmith">⚒ โรงตีเหล็ก</button>
     <button type="button" data-world="resource">📦 โรงผลิต</button><button type="button" data-world="sell">🛒 Quick Sell</button>
     <button type="button" id="mobileHomeOpen">🔨 Home Builder</button>
-    <button type="button" data-open-guide>📖 คู่มือ</button><button type="button" data-open-patch-notes>📜 Patch Notes</button>
+    <button type="button" data-open-guide><i class="bc-hud-icon" style="--hud-position:100% 0%" aria-hidden="true"></i> คู่มือ</button><button type="button" data-open-patch-notes>📜 Patch Notes</button>
     <button type="button" data-open-relic-collection>✧ Relic Collection</button>
   </div>
   <h3>จัดการหมู่บ้าน</h3>
   <div class="bc-quick-actions">
-    <button id="heroOpen" class="bc-quick"><span data-ui-icon="gear">🐰</span> Class Armory</button>
+    <button id="heroOpen" class="bc-quick"><span class="bc-hud-icon" style="--hud-position:33.333333333333336% 50%" aria-hidden="true"></span> Class Armory</button>
     <button id="inventoryOpen" class="bc-quick"><span data-ui-icon="gear">🎒</span> คลังเก็บของ</button>
-    <button id="forgeOpen" class="bc-quick"><span data-ui-icon="craft">⚒</span> โรงตีเหล็ก</button>
-    <button id="masteryOpen" class="bc-quick"><span data-ui-icon="skill">✦</span> Class Mastery</button>
-    <button id="skillCoreOpen" class="bc-quick"><span data-ui-icon="skill">✧</span> Class Skill Core</button>
+    <button id="forgeOpen" class="bc-quick"><span class="bc-hud-icon" style="--hud-position:0.0% 100%" aria-hidden="true"></span> โรงตีเหล็ก</button>
+    <button id="masteryOpen" class="bc-quick"><span class="bc-hud-icon" style="--hud-position:66.66666666666667% 50%" aria-hidden="true"></span> Class Mastery</button>
+    <button id="skillCoreOpen" class="bc-quick"><span class="bc-hud-icon" style="--hud-position:100.0% 50%" aria-hidden="true"></span> Class Skill Core</button>
   </div>
   <div id="squad" aria-label="กระต่ายในกองทัพ"></div>
   <div class="row"><button id="fortify" title="เสริมฐานได้ตั้งแต่วันแรก ใช้วัตถุดิบทั่วไปโดยไม่ใช้ Gold"></button></div>
@@ -857,11 +883,11 @@
 </div>
 <div id="mobileDrawerScrim" hidden></div>
 <nav id="mobileDock" aria-label="เมนูสำหรับมือถือ">
-  <button type="button" data-mobile-open="skills" aria-label="กระต่าย: Mastery และ Skill Core" aria-pressed="false"><span aria-hidden="true">🐰</span>กระต่าย</button>
-  <button type="button" data-mobile-open="village" aria-label="หมู่บ้านและสิ่งก่อสร้าง" aria-pressed="false"><span aria-hidden="true">🏠</span>หมู่บ้าน</button>
-  <button type="button" data-mobile-open="recruit" aria-label="จ้างกระต่าย" aria-pressed="false"><span aria-hidden="true">➕</span>จ้าง</button>
-  <button type="button" data-mobile-open="craft" aria-label="Armory และคราฟต์อุปกรณ์" aria-pressed="false"><span aria-hidden="true">⚒</span>อุปกรณ์</button>
-  <button type="button" data-mobile-open="sell" aria-label="Quick Sell ขายของ" aria-pressed="false"><span aria-hidden="true">🛒</span>ขาย</button>
+  <button type="button" data-mobile-open="skills" aria-label="กระต่าย: Mastery และ Skill Core" aria-pressed="false"><span class="bc-hud-icon" style="--hud-position:66.66666666666667% 50%" aria-hidden="true"></span>กระต่าย</button>
+  <button type="button" data-mobile-open="village" aria-label="หมู่บ้านและสิ่งก่อสร้าง" aria-pressed="false"><span class="bc-hud-icon" style="--hud-position:66.66666666666667% 0%" aria-hidden="true"></span>หมู่บ้าน</button>
+  <button type="button" data-mobile-open="recruit" aria-label="จ้างกระต่าย" aria-pressed="false"><img class="bc-mobile-dock-art" src="/assets/icons/family/swordShield.png" alt="">จ้าง</button>
+  <button type="button" data-mobile-open="craft" aria-label="Armory และคราฟต์อุปกรณ์" aria-pressed="false"><span class="bc-hud-icon" style="--hud-position:33.333333333333336% 50%" aria-hidden="true"></span>อุปกรณ์</button>
+  <button type="button" data-mobile-open="sell" aria-label="Quick Sell ขายของ" aria-pressed="false"><span class="bc-relic-atlas bc-relic-launcher-icon" aria-hidden="true"></span>ขาย</button>
 </nav>
 <div id="mobileTowerMoveNotice" hidden role="status"><span>📍 แตะพื้นเพื่อย้ายสิ่งก่อสร้าง · ลากแผนที่เพื่อหาจุดวาง</span><button id="mobileCancelTowerMove" type="button">ยกเลิก</button></div>
 <section id="homePanel" class="bc-home-panel panel" aria-label="Home Builder" hidden></section>
@@ -889,6 +915,6 @@
 <div id="patchNotesPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="Patch Notes"></div>
 <div id="banner"></div><div id="toast"></div>
 <div id="over" hidden><h2></h2><p></p><button id="again">เล่นอีกครั้ง</button></div>
-<div id="loading">กำลังสร้างหมู่บ้าน…</div>
+<div id="loading">กำลังสร้างหมู่บ้าน…</div>
 </body>
 </html>
