@@ -14,7 +14,7 @@ const COPY = [
 ];
 // Explicit UI-icon allowlist. Never copy public/ wholesale into the standalone game.
 const UI_ICON_FOLDERS=['equipment','items','family','mastery','skills'];
-const UI_ICON_NAMES=['gear','craft','skill','home'];
+const UI_ICON_NAMES=['gear','craft','skill','home','monster','settings'];
 
 function copyRosterFrames(): Plugin {
   return {

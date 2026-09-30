@@ -1683,6 +1683,8 @@ function completeArmoryCraft(order){
 
 // ---------- UI ----------
 const $ = id => document.getElementById(id);
+// Static <img> tags in warren.html use root paths; prefix the deploy base (GitHub Pages: /burrow-command/).
+for(const img of document.querySelectorAll('img[src^="/assets/"]'))img.src=import.meta.env.BASE_URL+img.getAttribute('src').slice(1);
 const mobileLayout=matchMedia('(max-width:760px), (max-height:500px) and (pointer:coarse)');
 let mobileDrawer=null;
 // Desktop-only preferences are independent of gameplay saves and never affect the mobile drawer.
