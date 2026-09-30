@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bunny Rig Studio — 2D Bone & Sprite Animation Editor</title>
+<style>
+:root{color-scheme:dark;--bg:#0d1119;--panel:#151c29;--panel2:#1c2635;--border:#304155;--muted:#a4b6c9;--txt:#edf5ff;--accent:#82b5ff;--gold:#ffc56d;--green:#92ddb5;--red:#fa9a9a;--shadow:0 20px 65px #0008}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 45% -35%,#273951,#0b1018 65%);font-family:Inter,ui-sans-serif,system-ui,"Noto Sans Thai",Tahoma,sans-serif;color:var(--txt);font-size:13px}button,input,select{font:inherit}button{cursor:pointer;color:var(--txt);background:#243245;border:1px solid #44566d;border-radius:9px;min-height:34px;padding:6px 11px;transition:.15s}button:hover{background:#344861}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #82b5ff;outline-offset:2px}button.primary{background:#527bc1;border-color:#7eaeff;color:white;font-weight:700}button.primary:hover{background:#628ddb}button.gold{background:#655033;border-color:#ab8957;color:#ffe5ad}button.ghost{background:transparent}button.danger{color:#ffb0a9}button:disabled{opacity:.4;cursor:not-allowed}input,select{background:#101a28;border:1px solid #40516a;color:var(--txt);border-radius:7px;padding:8px;min-width:0}input[type=range]{padding:0;width:100%;accent-color:var(--accent)}input[type=number]{width:100%}input[type=file]{display:none}label{color:#bccadd}small,.muted{color:var(--muted)}strong{font-weight:750}.topbar{height:67px;display:flex;align-items:center;justify-content:space-between;padding:9px 18px;gap:15px;border-bottom:1px solid #354358;background:#121b29e8}.brand{display:flex;align-items:center;gap:12px;white-space:nowrap}.brand-logo{display:grid;place-items:center;background:linear-gradient(145deg,#5f83b8,#243d68);width:44px;height:44px;border-radius:14px;font-size:25px;box-shadow:inset 0 1px #ffffff4d}.brand b{font-size:16px;color:#fff4dc}.brand small{font-size:11px}.top-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.pill{display:inline-flex;gap:5px;align-items:center;background:#202d3d;color:#d5e9fd;border:1px solid #3a526e;border-radius:25px;padding:5px 9px;font-size:11px}.workspace{display:grid;grid-template-columns:254px minmax(420px,1fr) 282px;height:calc(100dvh - 99px);min-height:620px}.sidebar,.inspector{background:#131c2a;overflow-y:auto;min-height:0}.sidebar{border-right:1px solid var(--border)}.inspector{border-left:1px solid var(--border)}.pane-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 13px 10px}.pane-head h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin:0;color:#cbdaf1}.pane-head button{min-height:28px;padding:3px 8px}.section{border-top:1px solid #304052;padding:10px 12px}.section-title{font-size:11px;color:#9cb0c8;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin:1px 0 11px}.clip-list,.part-list{display:flex;flex-direction:column;gap:5px;padding:0 9px 12px}.list-row{display:flex;align-items:center;gap:9px;border:1px solid transparent;border-radius:10px;padding:8px 9px;background:#192434;cursor:pointer;min-height:49px}.list-row:hover{border-color:#547095}.list-row.selected{background:#2b405c;border-color:#8eb8ee}.list-row .mini{flex:1;min-width:0}.list-row b{display:block;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.list-row small{display:block;font-size:10px;margin-top:3px}.thumb{width:34px;height:34px;border-radius:7px;display:grid;place-items:center;background:#2d3e53;border:1px solid #4c6080;flex:0 0 auto;font-size:19px}.list-row img.thumb{object-fit:contain;image-rendering:pixelated;padding:2px}.part-list .list-row{min-height:43px;padding:5px 8px}.part-list .thumb{width:31px;height:31px}.part-parent{color:#8fa6c1;font-size:10px}.layer-index{color:#8ca4c0;font-size:10px}.list-footer{padding:8px 11px}.center{display:flex;flex-direction:column;min-width:0;min-height:0}.tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:#141f30;border-bottom:1px solid var(--border)}.tools .separator{height:23px;border-left:1px solid #41536c;margin:0 4px}.tool.active{background:#4a70a8;border-color:#a0c9ff}.canvas-wrap{position:relative;flex:1;min-height:250px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(#131b29e8,#101723f2),repeating-linear-gradient(0deg,#36516d 0 1px,transparent 1px 29px),repeating-linear-gradient(90deg,#36516d 0 1px,transparent 1px 29px)}canvas#stage{display:block;max-width:100%;max-height:100%;height:auto;aspect-ratio:11/7;image-rendering:pixelated;touch-action:none;cursor:crosshair}.stage-badge{position:absolute;top:14px;left:14px;display:flex;gap:7px;flex-wrap:wrap;pointer-events:none}.stage-help{position:absolute;bottom:12px;left:14px;right:14px;color:#b1c1d4;font-size:11px;pointer-events:none;display:flex;justify-content:space-between;gap:10px}.timeline{height:266px;flex-shrink:0;background:#162131;border-top:1px solid #3d5069;display:flex;flex-direction:column;min-width:0}.transport{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #304459}.transport button{min-height:29px}.transport .frame-time{color:#f9d693;font-variant-numeric:tabular-nums;font-size:12px;font-weight:800}.frame-input{width:72px;text-align:center}.transport .spacer{flex:1}.timeline-tracks{flex:1;min-height:0;overflow:auto}.track-row{display:flex;min-width:560px;border-bottom:1px solid #2b3b4e;height:30px}.track-label{width:140px;flex:0 0 140px;background:#18283a;display:flex;align-items:center;padding:0 12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;border-right:1px solid #314961;font-size:11px}.track-row.active .track-label{color:#ffe2a4;background:#31475c;font-weight:800}.track-lane{position:relative;flex:1;min-width:360px;cursor:crosshair;background-image:repeating-linear-gradient(90deg,#ffffff09 0 1px,transparent 1px calc(100% / var(--frames)));}.track-lane:hover{background-color:#22334b}.playhead{position:absolute;left:0;top:0;bottom:0;width:2px;background:#9bd0ff;pointer-events:none;z-index:4;box-shadow:0 0 7px #58acff66}.keyframe{position:absolute;top:50%;width:11px;height:11px;transform:translate(-50%,-50%) rotate(45deg);border:1px solid #fff1b4;border-radius:1px;background:#e3b860;z-index:5;cursor:pointer;padding:0;min-height:0}.keyframe.selected{background:#b9e0ff;border-color:white;width:13px;height:13px}.track-head .track-lane{background-color:#1e2e40}.tick{position:absolute;top:6px;transform:translateX(-50%);font-size:10px;color:#a8bfda}.inspector-content{padding:0 13px 20px}.notice{color:#c2d2e5;font-size:11px;line-height:1.6;background:#202e40;border:1px solid #43566d;border-radius:8px;padding:10px;margin:0 0 12px}.field{display:flex;flex-direction:column;gap:5px;min-width:0;margin-bottom:11px}.field label{font-size:11px}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 9px}.field-grid .field{min-width:0}.field .unit{font-size:10px;color:#87a7c9}.subbar{display:flex;gap:6px;flex-wrap:wrap}.swatch{border:1px solid #40556c;background:#21354a;border-radius:9px;display:flex;gap:12px;align-items:center;padding:12px}.swatch img{width:56px;height:56px;object-fit:contain;image-rendering:pixelated;background:repeating-conic-gradient(#34455e 0 25%,#203146 0 50%) 50%/16px 16px;border-radius:7px}.swatch b{font-size:13px}.stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.statusbar{height:32px;padding:6px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#101a28;border-top:1px solid #304459;color:#b6c5d7;font-size:11px}.statusbar .ok{color:#9be4b8}.empty{padding:25px 14px;text-align:center;line-height:1.7;color:#9caec6}.kbd{background:#23334a;border:1px solid #3e526e;padding:2px 5px;border-radius:4px;font-size:10px}.hidden{display:none!important}.tip{font-size:11px;line-height:1.7;color:#a8bdd4}.slot-counter{color:#f4c87d;font-weight:800;font-variant-numeric:tabular-nums}.hairline{border-top:1px solid #34475d;margin:11px 0}.inspector h4{margin:10px 0;font-size:12px;color:#efce96}.footer-links{display:flex;align-items:center;gap:7px}.footer-links a{color:#b6daff}.soft-btn{font-size:11px;padding:4px 7px;min-height:29px}.loading{color:#eec78c}
+@media(max-width:1100px){.workspace{grid-template-columns:210px minmax(360px,1fr) 240px}.topbar{height:auto}.brand small{display:none}.timeline{height:240px}.track-label{width:100px;flex-basis:100px}}@media(max-width:830px){.workspace{height:auto;grid-template-columns:minmax(0,1fr);min-height:0}.center{grid-row:1}.sidebar{grid-row:2;border-top:1px solid #40526d;border-right:0}.inspector{grid-row:3;border-top:1px solid #40526d;border-left:0}.canvas-wrap{min-height:320px}.timeline{height:255px}.topbar{align-items:flex-start;flex-wrap:wrap}.tools{gap:5px}.inspector-content{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:12px}.inspector-content>*{min-width:0}.clip-list,.part-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}.stage-help{font-size:10px}.statusbar{height:auto;min-height:32px}}
+.rig-nav{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.rig-nav a{display:inline-flex;align-items:center;min-height:34px;padding:6px 10px;border-radius:9px;text-decoration:none;color:#dce9fa;background:#23344b;border:1px solid #48617c;font-weight:700;font-size:12px}.rig-nav a:hover{background:#344c6b}.rig-nav a.active{border-color:#86b7ee;background:#456b9b;color:white}
+</style>
+</head>
+<body>
+<header class="topbar">
+ <div class="brand"><div class="brand-logo">🐰</div><div><b>Bunny Rig Studio</b><br><small>2D Bone + Keyframe Animation • Offline Editor</small></div><span class="pill" id="projectBadge">DEMO</span></div>
+ <div class="top-actions">
+  <nav class="rig-nav" aria-label="Animation modes"><a class="active" href="./index.html" aria-current="page">🦴 Bone Rig</a><a href="./frame-animation.html">🎞 Frame Animation (4 PNG)</a><a href="./fx-lab.html">✨ FX Lab</a><a href="./unified-studio.html">◎ Unified Studio</a><a href="./rig-proof.html">🧪 Rig QC</a><a href="./cutout-lab.html">✂️ Cutout Lab</a></nav>
+  <button id="newDemo" title="โหลดตัวอย่างใหม่">↺ ตัวอย่างกระต่าย</button><button id="proofRig" title="โหลดตัวละครทดสอบ 19 ชิ้น">🧪 Rig QC</button><button id="cutoutDemo" title="โหลดตัวอย่าง 2D Cutout แบบง่าย 11 Layers">✂️ Cutout 11 Layers</button>
+  <button id="loadProject">📂 เปิดโปรเจกต์</button><button id="saveProject">💾 บันทึก JSON</button>
+  <button id="saveLocal" title="บันทึกในเบราว์เซอร์เครื่องนี้">บันทึกบนเครื่อง</button>
+  <button class="primary" id="exportSheet">↧ Export Sprite Sheet</button>
+ </div>
+</header>
+<div class="workspace">
+<aside class="sidebar">
+ <div class="pane-head"><h3>🎞 Animation Clips</h3><button id="addClip" title="เพิ่มคลิป">＋ คลิป</button></div>
+ <div class="clip-list" id="clipList"></div>
+ <div class="section"><div class="section-title">PNG Layers & Bones</div><div class="subbar"><button class="primary" id="addParts">＋ เพิ่ม PNG</button><button id="showBones" class="soft-btn">● ซ่อนกระดูก</button></div><p class="tip">ภาพแต่ละชิ้นมี Pivot และ Parent ของตัวเอง ลากจุดเชื่อมเพื่อจัดท่าได้</p></div>
+ <div class="part-list" id="partList"></div>
+ <div class="list-footer"><button id="clearSelection" class="ghost">ยกเลิกการเลือก</button></div>
+ <div class="section"><div class="section-title">การใช้งาน</div><div class="tip">1. เพิ่ม PNG แยกหัว แขน ขา อาวุธ<br>2. กำหนด Parent และ Pivot<br>3. เลือกเฟรมแล้วปรับตำแหน่ง/หมุน<br>4. กด <b>◆ เพิ่มคีย์เฟรม</b><br>5. เล่นตัวอย่าง แล้ว Export PNG<br><br>ตัวอย่างมาพร้อม Idle, Walk และ Slash ให้ทดลองได้ทันที</div></div>
+</aside>
+<main class="center">
+ <div class="tools">
+  <button class="tool active" data-tool="move" title="ย้ายชิ้นส่วน">✥ Move <span class="kbd">V</span></button>
+  <button class="tool" data-tool="rotate" title="หมุนชิ้นส่วน">↻ Rotate <span class="kbd">R</span></button>
+  <button class="tool" data-tool="pivot" title="ปรับจุดหมุน">⊕ Pivot <span class="kbd">P</span></button>
+  <span class="separator"></span>
+  <button id="onionBtn" class="ghost" title="แสดงเฟรมก่อนหน้าแบบโปร่งใส">◉ Onion Skin</button>
+  <button id="gridBtn" class="ghost">▦ ซ่อน Grid</button>
+  <span class="separator"></span>
+  <button id="zoomOut">−</button><span id="zoomLabel" class="pill">200%</span><button id="zoomIn">＋</button>
+  <span class="separator"></span><span class="pill">256 × 256 px</span>
+ </div>
+ <div class="canvas-wrap">
+  <div class="stage-badge"><span class="pill" id="clipBadge">IDLE</span><span class="pill" id="toolBadge">✥ MOVE</span></div>
+  <canvas id="stage" width="1100" height="700" aria-label="แคนวาสปรับแต่งตัวละครแบบ Bone Rig"></canvas>
+  <div class="stage-help"><span>คลิกเลือก • ลากขยับ • เลือก Rotate เพื่อหมุน • Pivot เพื่อย้ายจุดหมุน</span><span id="stageCoords">0, 0</span></div>
+ </div>
+ <section class="timeline">
+  <div class="transport">
+    <button id="prevFrame" title="เฟรมก่อนหน้า">⏮</button><button id="playBtn" class="primary" title="Play/Pause (Space)">▶ เล่น</button><button id="nextFrame" title="เฟรมถัดไป">⏭</button>
+    <span class="frame-time" id="timeLabel">F 01 / 24 • 0.00s</span>
+    <span class="spacer"></span>
+    <button id="addKey" class="gold" title="เพิ่มคีย์เฟรม (K)">◆ เพิ่ม Keyframe</button><button id="delKey" title="ลบคีย์เฟรมที่เลือก">◇ ลบ Key</button>
+    <button id="undo" title="Undo Ctrl+Z">↶</button><button id="redo" title="Redo Ctrl+Y">↷</button>
+  </div>
+  <div class="timeline-tracks" id="timeline"></div>
+ </section>
+</main>
+<aside class="inspector">
+ <div class="pane-head"><h3>⚙ Inspector</h3><span class="pill">2D Rig</span></div>
+ <div id="inspectorContent" class="inspector-content"></div>
+</aside>
+</div>
+<footer class="statusbar"><span id="status" class="ok">● พร้อมใช้งาน — ไม่ต้องเชื่อมต่ออินเทอร์เน็ต</span><span>PNG Import • Parent Bones • Keyframes • Sprite Sheet • JSON Project</span></footer>
+<input id="partsInput" type="file" multiple accept="image/png,image/webp,image/jpeg"><input id="projectInput" type="file" accept=".json,application/json">
+<script src="./rig-proof-art.js"></script>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), stage=$('stage'),ctx=stage.getContext('2d');
+const UI={zoom:2.1,tool:'move',selected:null,playing:false,frame:0,onion:false,grid:true,bones:true,drag:null,playAccum:0,lastTime:0};
+const PX=256, RAD=Math.PI/180, MAX_HISTORY=40, STORAGE_KEY='bunny-rig-studio-project-v1';
+let project=null, images=new Map(), history=[], future=[], demoLoading=false;
+function uid(){return 'p_'+Math.random().toString(36).slice(2,11)}
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const poseClone=a=>({x:a.x,y:a.y,r:a.r,sx:a.sx,sy:a.sy});
+const round=(v,d=1)=>Number(v.toFixed(d));
+const activeClip=()=>project?.clips.find(c=>c.id===project.activeClipId)||project?.clips[0];
+const partById=id=>project?.parts.find(p=>p.id===id);
+function updateStatus(text,bad=false){$('status').textContent=(bad?'⚠ ':'● ')+text;$('status').className=bad?'loading':'ok'}
+function serialize(){return JSON.stringify({format:'bunny-rig-studio',version:1,name:project.name,parts:project.parts.map(p=>({id:p.id,name:p.name,src:p.src,parent:p.parent,base:p.base,pivot:p.pivot,visible:p.visible})),clips:project.clips,activeClipId:project.activeClipId})}
+function pushHistory(){if(!project||demoLoading)return;history.push(serialize());if(history.length>MAX_HISTORY)history.shift();future=[];updateUndoButtons()}
+function updateUndoButtons(){$('undo').disabled=!history.length;$('redo').disabled=!future.length}
+let restoring=false;
+async function restoreSnapshot(serialized){const frame=UI.frame,selected=UI.selected;await loadProjectData(JSON.parse(serialized),{keepHistory:true});UI.frame=clamp(frame,0,activeClip()?.frames-1||0);if(partById(selected))UI.selected=selected;renderAll()}
+async function undo(){if(!history.length||UI.playing||restoring)return;restoring=true;try{const snapshot=history.pop();future.push(serialize());await restoreSnapshot(snapshot);updateStatus('Undo ย้อนกลับแล้ว')}finally{restoring=false;updateUndoButtons()}}
+async function redo(){if(!future.length||UI.playing||restoring)return;restoring=true;try{const snapshot=future.pop();history.push(serialize());await restoreSnapshot(snapshot);updateStatus('Redo เรียบร้อย')}finally{restoring=false;updateUndoButtons()}}
+function fetchImg(src){return new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>reject(new Error('โหลดภาพไม่สำเร็จ'));im.src=src})}
+function drawPartAsset(p){return images.get(p.id)}
+async function loadProjectData(data,{keepHistory=false}={}){
+ if(!data||data.format!=='bunny-rig-studio'||!Array.isArray(data.parts)||!Array.isArray(data.clips)||data.parts.length>100)throw Error('ไฟล์โปรเจกต์ไม่ถูกต้อง');
+ UI.playing=false;const nextImages=new Map();
+ await Promise.all(data.parts.map(async p=>{if(typeof p.src==='string'&&p.src.startsWith('data:image/')&&p.src.length<15000000)nextImages.set(p.id,await fetchImg(p.src))}));
+ images=nextImages;
+ const safeParts=data.parts.map(p=>({...p,base:{x:Number(p.base?.x)||0,y:Number(p.base?.y)||0,r:Number(p.base?.r)||0,sx:Number(p.base?.sx)||1,sy:Number(p.base?.sy)||1},pivot:{x:Number(p.pivot?.x)||0,y:Number(p.pivot?.y)||0},visible:p.visible!==false,parent:p.parent||null}));
+ project={format:'bunny-rig-studio',version:1,name:data.name||'Untitled Bunny',parts:safeParts,clips:data.clips,activeClipId:data.activeClipId};
+ if(!activeClip())project.activeClipId=project.clips[0]?.id;
+ if(!keepHistory){history=[];future=[]};UI.frame=0;UI.selected=project.parts.find(p=>p.id===UI.selected)?.id||project.parts.find(p=>p.id==='ลำตัว')?.id||project.parts[0]?.id||null;
+ renderAll();fitStage();updateUndoButtons();
+}
+function keyArray(partId,clip=activeClip()){return clip?.tracks?.[partId]||[]}
+function evaluatePose(partId,frame=UI.frame,clip=activeClip()){
+ const p=partById(partId);if(!p)return {x:0,y:0,r:0,sx:1,sy:1};
+ const k=keyArray(partId,clip);if(!k.length)return poseClone(p.base);
+ if(frame<=k[0].f)return {...(k[0].f===0?k[0].pose:p.base)};
+ if(frame>=k.at(-1).f)return poseClone(k.at(-1).pose);
+ let lo=k[0],hi=k.at(-1);
+ for(let j=1;j<k.length;j++)if(frame<=k[j].f){lo=k[j-1];hi=k[j];break}
+ let t=(frame-lo.f)/(hi.f-lo.f);if(clip?.easing==='smooth')t=t*t*(3-2*t);
+ const out={};for(const f of ['x','y','sx','sy'])out[f]=lo.pose[f]+(hi.pose[f]-lo.pose[f])*t;
+ const delta=((hi.pose.r-lo.pose.r+540)%360)-180;out.r=lo.pose.r+delta*t;
+ return out;
+}
+function writeKey(partId,pose,frame=UI.frame,historyAlready=false){
+ const c=activeClip();if(!c||!partById(partId))return;
+ if(!historyAlready)pushHistory();
+ c.tracks??={};c.tracks[partId]??=[];
+ const a=c.tracks[partId],idx=a.findIndex(k=>k.f===frame),newKey={f:frame,pose:poseClone(pose)};
+ if(idx===-1)a.push(newKey);else a[idx]=newKey;
+ a.sort((x,y)=>x.f-y.f);
+}
+function addKey(){if(!UI.selected)return updateStatus('เลือกชิ้นส่วนก่อนเพิ่ม Keyframe',true);writeKey(UI.selected,evaluatePose(UI.selected));renderTimeline();renderInspector();updateStatus('◆ เพิ่มคีย์เฟรมที่ F'+String(UI.frame+1).padStart(2,'0'))}
+function removeKey(){const c=activeClip();if(!c||!UI.selected)return;const list=keyArray(UI.selected);if(!list.some(k=>k.f===UI.frame))return updateStatus('เฟรมนี้ไม่มี Keyframe',true);pushHistory();c.tracks[UI.selected]=list.filter(k=>k.f!==UI.frame);renderTimeline();renderInspector();updateStatus('ลบ Keyframe แล้ว')}
+function matrices(frame=UI.frame,clip=activeClip()){
+ const cache=new Map(),seen=new Set();
+ function get(id){if(cache.has(id))return cache.get(id);const p=partById(id);if(!p)return new DOMMatrix();if(seen.has(id))return new DOMMatrix();seen.add(id);
+  const v=evaluatePose(id,frame,clip),local=new DOMMatrix().translate(v.x,v.y).rotate(v.r).scale(v.sx,v.sy);
+  const parent=p.parent&&partById(p.parent)?get(p.parent):new DOMMatrix();
+  const m=parent.multiply(local);cache.set(id,m);seen.delete(id);return m;
+ }
+ for(const p of project.parts)get(p.id);return cache;
+}
+function screenToWorld(x,y){return {x:(x-stage.width/2)/UI.zoom,y:(y-stage.height*.58)/UI.zoom}}
+function rootToScreen(x,y){return {x:stage.width/2+x*UI.zoom,y:stage.height*.58+y*UI.zoom}}
+function fitStage(){const area=stage.parentElement?.getBoundingClientRect();if(!area||area.height<10)return;const width=Math.min(area.width,area.height*stage.width/stage.height);stage.style.width=Math.floor(width)+'px';stage.style.height=Math.floor(width*stage.height/stage.width)+'px'}
+new ResizeObserver(fitStage).observe(stage.parentElement);window.addEventListener('resize',fitStage);
+function mousePos(e){const rect=stage.getBoundingClientRect();return {x:(e.clientX-rect.left)*stage.width/rect.width,y:(e.clientY-rect.top)*stage.height/rect.height}}
+function worldPoint(m,x=0,y=0){const pt=new DOMPoint(x,y).matrixTransform(m);return {x:pt.x,y:pt.y}}
+function drawBackground(target,w,h,zoom,preview){if(preview)return;
+ target.save();target.clearRect(0,0,w,h);
+ if(UI.grid){target.strokeStyle='#8fa7c520';target.lineWidth=1;const startX=((w/2)% (16*zoom)+(16*zoom))%(16*zoom),startY=((h*.58)%(16*zoom)+(16*zoom))%(16*zoom);
+  target.beginPath();for(let x=startX;x<w;x+=16*zoom){target.moveTo(Math.round(x)+.5,0);target.lineTo(Math.round(x)+.5,h)}for(let y=startY;y<h;y+=16*zoom){target.moveTo(0,Math.round(y)+.5);target.lineTo(w,Math.round(y)+.5)}target.stroke();
+ }
+ target.beginPath();target.strokeStyle='#93bbda55';target.lineWidth=1;target.moveTo(w/2,0);target.lineTo(w/2,h);target.moveTo(0,h*.58);target.lineTo(w,h*.58);target.stroke();
+ target.setLineDash([7,7]);target.strokeStyle='#ffd07b88';target.lineWidth=1;target.strokeRect(w/2-PX/2*zoom,h*.58-PX*.58*zoom,PX*zoom,PX*zoom);target.restore();
+}
+function renderPuppet(target,w,h,frame,{scale=1,guide=false,alpha=1,clip=activeClip()}={}){
+ const cache=matrices(frame,clip);target.save();target.translate(w/2,h*.58);target.scale(scale,scale);target.imageSmoothingEnabled=false;target.globalAlpha=alpha;
+ for(const p of project.parts){if(!p.visible)continue;const img=drawPartAsset(p);if(!img)continue;const m=cache.get(p.id);if(!m)continue;
+  target.save();target.transform(m.a,m.b,m.c,m.d,m.e,m.f);target.drawImage(img,-p.pivot.x,-p.pivot.y);target.restore();
+ }
+ if(guide&&UI.bones){target.lineWidth=1/scale;for(const p of project.parts){if(!p.visible||!p.parent)continue;const parent=cache.get(p.parent),m=cache.get(p.id);if(!parent||!m)continue;const a=worldPoint(parent),b=worldPoint(m);target.strokeStyle=p.id===UI.selected?'#fbd887b8':'#70b7e16a';target.beginPath();target.moveTo(a.x,a.y);target.lineTo(b.x,b.y);target.stroke()}
+  for(const p of project.parts){if(!p.visible)continue;const m=cache.get(p.id);if(!m)continue;const pt=worldPoint(m);target.beginPath();target.fillStyle=p.id===UI.selected?'#ffd98d':'#83c2eb';target.strokeStyle='#172739';target.lineWidth=1/scale;target.arc(pt.x,pt.y,p.id===UI.selected?3.3/scale:2.3/scale,0,Math.PI*2);target.fill();target.stroke()}
+  const p=partById(UI.selected),m=p&&cache.get(p.id),img=p&&images.get(p.id);
+  if(m&&img){const pose=evaluatePose(p.id,frame,clip),corners=[[-p.pivot.x,-p.pivot.y],[img.width-p.pivot.x,-p.pivot.y],[img.width-p.pivot.x,img.height-p.pivot.y],[-p.pivot.x,img.height-p.pivot.y]].map(pt=>worldPoint(m,...pt));
+   target.beginPath();target.strokeStyle='#ffcd74';target.setLineDash([4/scale,3/scale]);target.lineWidth=1/scale;corners.forEach((pt,i)=>i?target.lineTo(pt.x,pt.y):target.moveTo(pt.x,pt.y));target.closePath();target.stroke();target.setLineDash([]);
+   const handle=worldPoint(m,0,-Math.max(24,img.height*.7));const pivot=worldPoint(m);
+   target.strokeStyle='#eabc6b';target.beginPath();target.moveTo(pivot.x,pivot.y);target.lineTo(handle.x,handle.y);target.stroke();target.fillStyle='#f7ca6b';target.strokeStyle='#fff4d5';target.beginPath();target.arc(handle.x,handle.y,5/scale,0,Math.PI*2);target.fill();target.stroke();
+  }
+ }
+ target.restore();
+}
+function renderStage(){if(!project)return;ctx.clearRect(0,0,stage.width,stage.height);drawBackground(ctx,stage.width,stage.height,UI.zoom,false);
+ if(UI.onion&&UI.frame>0)renderPuppet(ctx,stage.width,stage.height,UI.frame-1,{scale:UI.zoom,guide:false,alpha:.19});
+ renderPuppet(ctx,stage.width,stage.height,UI.frame,{scale:UI.zoom,guide:true});
+}
+function togglePlay(force){UI.playing=typeof force==='boolean'?force:!UI.playing;UI.lastTime=performance.now();$('playBtn').textContent=UI.playing?'⏸ หยุด':'▶ เล่น';$('playBtn').classList.toggle('gold',UI.playing);$('clipBadge').textContent=activeClip()?.name.toUpperCase()||'NONE';}
+function setFrame(f,{fromPlayback=false}={}){const c=activeClip();if(!c)return;UI.frame=clamp(Math.round(f),0,c.frames-1);updateFrameUI();renderStage();if(!fromPlayback)renderInspector()}
+function updateFrameUI(){const c=activeClip();if(!c)return;$('timeLabel').textContent=`F ${String(UI.frame+1).padStart(2,'0')} / ${String(c.frames).padStart(2,'0')} • ${(UI.frame/c.fps).toFixed(2)}s`;
+ for(const el of document.querySelectorAll('.playhead'))el.style.left=((UI.frame+.5)/c.frames*100)+'%';
+ for(const el of document.querySelectorAll('.keyframe'))el.classList.toggle('selected',Number(el.dataset.frame)===UI.frame);
+}
+function raf(time){if(UI.playing&&activeClip()){const c=activeClip();UI.playAccum+=(time-UI.lastTime)/1000;while(UI.playAccum>=1/c.fps){UI.playAccum-=1/c.fps;UI.frame=(UI.frame+1)%c.frames}updateFrameUI();renderStage()}UI.lastTime=time;requestAnimationFrame(raf)}
+function selectPart(id){UI.selected=partById(id)?id:null;renderParts();renderInspector();renderTimeline();renderStage()}
+function setTool(name){UI.tool=name;document.querySelectorAll('.tool').forEach(el=>el.classList.toggle('active',el.dataset.tool===name));$('toolBadge').textContent={move:'✥ MOVE',rotate:'↻ ROTATE',pivot:'⊕ PIVOT'}[name];updateStatus({move:'ลากชิ้นส่วนเพื่อย้าย',rotate:'ลากเพื่อหมุนรอบ Pivot',pivot:'ลากเพื่อปรับจุดหมุน (ภาพจะไม่กระโดด)'}[name])}
+function renderClips(){const list=$('clipList');list.replaceChildren();for(const clip of project.clips){const el=document.createElement('div');el.className='list-row'+(clip.id===project.activeClipId?' selected':'');el.tabIndex=0;el.role='button';el.innerHTML=`<div class="thumb">${({idle:'🌙',walk:'👣',slash:'⚔️',attack:'⚔️'})[clip.name.toLowerCase()]||'🎞'}</div><div class="mini"><b>${esc(clip.name)}</b><small>${clip.frames} frames • ${clip.fps} FPS</small></div><span class="layer-index">${clip.id===project.activeClipId?'●':'›'}</span>`;el.onclick=()=>{project.activeClipId=clip.id;togglePlay(false);UI.frame=0;renderAll()};el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();el.click()}};list.append(el)}}
+function renderParts(){const list=$('partList');list.replaceChildren();[...project.parts].reverse().forEach(p=>{const el=document.createElement('div');el.className='list-row'+(UI.selected===p.id?' selected':'');el.tabIndex=0;el.role='button';const src=p.src;el.innerHTML=`<img class="thumb" alt="" src="${src}"><div class="mini"><b>${esc(p.name)}</b><small class="part-parent">${p.parent?'↳ '+esc(partById(p.parent)?.name||'root'):'● Root'} · ${p.visible?'แสดง':'ซ่อน'}</small></div><span class="layer-index">☷</span>`;el.onclick=()=>selectPart(p.id);el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();el.click()}};list.append(el)})}
+function renderTimeline(){const c=activeClip(),host=$('timeline');host.replaceChildren();if(!c)return;
+ const frames=c.frames;
+ const header=document.createElement('div');header.className='track-row track-head';header.innerHTML=`<div class="track-label">เฟรม / กระดูก</div><div class="track-lane" style="--frames:${frames}">${Array.from({length:frames},(_,f)=>f%4===0?`<span class="tick" style="left:${((f+.5)/frames)*100}%">${f+1}</span>`:'').join('')}<span class="playhead"></span></div>`;header.querySelector('.track-lane').onclick=e=>{if(!e.target.classList.contains('track-lane'))return;setFrame(Math.floor(e.offsetX/e.currentTarget.clientWidth*frames))};host.append(header);
+ for(const p of [...project.parts].reverse()){
+  const row=document.createElement('div');row.className='track-row'+(p.id===UI.selected?' active':'');
+  const lane=document.createElement('div');lane.className='track-lane';lane.style.setProperty('--frames',frames);lane.dataset.id=p.id;
+  for(const key of keyArray(p.id,c))if(key.f<frames){const marker=document.createElement('button');marker.className='keyframe'+(key.f===UI.frame?' selected':'');marker.dataset.frame=String(key.f);marker.title=`${p.name} • เฟรม ${key.f+1}\nคลิกเพื่อเลือก, Shift+คลิกเพื่อลบ`;marker.style.left=((key.f+.5)/frames*100)+'%';marker.onclick=e=>{e.stopPropagation();selectPart(p.id);setFrame(key.f);if(e.shiftKey)removeKey()};lane.append(marker)}
+  const head=document.createElement('div');head.className='track-label';head.textContent=p.name;head.onclick=()=>selectPart(p.id);lane.onclick=e=>{if(e.target!==lane)return;selectPart(p.id);setFrame(Math.floor(e.offsetX/lane.clientWidth*frames))};
+  const playhead=document.createElement('span');playhead.className='playhead';lane.append(playhead);row.append(head,lane);host.append(row);
+ }updateFrameUI();
+}
+function renderInspector(){const host=$('inspectorContent'),p=partById(UI.selected),c=activeClip();if(!c)return;
+ if(!p){host.innerHTML=`<div><div class="section-title">Clip Settings</div>${clipFields(c)}</div><div class="notice">เลือกชิ้นส่วนจากแถบซ้าย แล้วปรับ Pose / Bone / Pivot ตรงนี้</div>`;wireClipFields();return}
+ const im=images.get(p.id),v=evaluatePose(p.id),hasKey=keyArray(p.id).some(k=>k.f===UI.frame);
+ const options=project.parts.filter(other=>other.id!==p.id&&!descendantOf(other.id,p.id)).map(o=>`<option value="${o.id}" ${p.parent===o.id?'selected':''}>${esc(o.name)}</option>`).join('');
+ host.innerHTML=`
+  <div><div class="section-title">Selected Bone & Sprite</div><div class="swatch"><img src="${p.src}" alt=""><div><b>${esc(p.name)}</b><small style="display:block">${im?.width||0} × ${im?.height||0}px</small><div class="stats"><span class="pill">${p.parent?'Child':'Root'}</span><span class="pill">${hasKey?'◆ มี Key':'◇ ไม่มี Key'}</span></div></div></div>
+  <div class="field" style="margin-top:12px"><label for="partName">ชื่อชิ้นส่วน</label><input id="partName" value="${esc(p.name)}" maxlength="60"></div>
+  <div class="field"><label for="partParent">Parent Bone</label><select id="partParent"><option value="">— Root —</option>${options}</select><small>ตำแหน่งของชิ้นลูกอ้างอิงจุดหมุนของ Parent</small></div>
+  <div class="subbar"><button id="toggleVisible">${p.visible?'◉ ซ่อนภาพ':'◌ แสดงภาพ'}</button><button id="layerUp">↑ หน้า</button><button id="layerDown">↓ หลัง</button><button id="deletePart" class="danger">ลบชิ้น</button></div>
+  </div>
+  <div><div class="section-title">Transform · เฟรม ${UI.frame+1}</div><div class="field-grid">
+   ${numberField('poseX','Position X',v.x,1)}${numberField('poseY','Position Y',v.y,1)}
+   ${numberField('poseR','Rotation °',v.r,1)}${numberField('poseSX','Scale X',v.sx,.05)}${numberField('poseSY','Scale Y',v.sy,.05)}</div>
+   <div class="subbar"><button id="resetPose">↺ ตั้งท่าพื้นฐาน</button><button id="inspectorAddKey" class="gold">◆ Key เฟรมนี้</button></div>
+   <div class="hairline"></div><div class="section-title">จุดหมุน (Pivot)</div><div class="field-grid">${numberField('pivotX','Pivot X',p.pivot.x,1)}${numberField('pivotY','Pivot Y',p.pivot.y,1)}</div><p class="tip">คลิกเครื่องมือ ⊕ Pivot แล้วลากจุดวงกลมบนตัวละคร หรือกรอกพิกัด</p>
+   </div>
+   <div><div class="section-title">Clip Settings</div>${clipFields(c)}</div>
+ `;
+ $('partParent').value=p.parent||'';
+ $('partName').onchange=e=>{pushHistory();p.name=e.target.value.trim()||p.name;renderParts();renderTimeline();renderInspector()};
+ $('partParent').onchange=e=>{pushHistory();p.parent=e.target.value||null;renderParts();renderStage()};
+ $('toggleVisible').onclick=()=>{pushHistory();p.visible=!p.visible;renderParts();renderInspector();renderStage()};
+ $('layerUp').onclick=()=>reorderPart(1);$('layerDown').onclick=()=>reorderPart(-1);
+ $('deletePart').onclick=()=>{if(!confirm('ลบชิ้นส่วน '+p.name+'?'))return;pushHistory();project.parts=project.parts.filter(other=>other.id!==p.id);for(const other of project.parts)if(other.parent===p.id)other.parent=null;for(const clip of project.clips)delete clip.tracks[p.id];images.delete(p.id);UI.selected=project.parts.at(-1)?.id||null;renderAll();updateStatus('ลบชิ้นส่วนแล้ว')};
+ for(const [id,field] of [['poseX','x'],['poseY','y'],['poseR','r'],['poseSX','sx'],['poseSY','sy']])$(id).onchange=e=>{const value=Number(e.target.value);if(!Number.isFinite(value)||(field==='sx'||field==='sy')&&Math.abs(value)<.02){renderInspector();return}const pose=evaluatePose(p.id);pose[field]=value;writeKey(p.id,pose);renderTimeline();renderStage();renderInspector()};
+ for(const [id,axis] of [['pivotX','x'],['pivotY','y']])$(id).onchange=e=>{const value=Number(e.target.value),img=images.get(p.id);if(!Number.isFinite(value)||!img)return;changePivot(p,{...p.pivot,[axis]:clamp(value,0,axis==='x'?img.width:img.height)});renderInspector();renderStage()};
+ $('resetPose').onclick=()=>{writeKey(p.id,p.base);renderAll()};$('inspectorAddKey').onclick=addKey;
+ wireClipFields();
+}
+function numberField(id,label,value,step){return `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="number" step="${step}" value="${round(value,2)}"></div>`}
+function clipFields(c){return `<div class="field"><label for="clipName">ชื่อคลิป</label><input id="clipName" value="${esc(c.name)}" maxlength="50"></div><div class="field-grid">${numberField('clipFPS','FPS',c.fps,1)}${numberField('clipFrames','จำนวนเฟรม',c.frames,1)}</div><div class="field"><label for="clipEase">Interpolation</label><select id="clipEase"><option value="linear" ${c.easing!=='smooth'?'selected':''}>Linear (คงที่)</option><option value="smooth" ${c.easing==='smooth'?'selected':''}>Smooth (Ease in/out)</option></select></div><div class="subbar"><button id="duplicateClip">ทำสำเนาคลิป</button><button id="deleteClip" class="danger">ลบคลิป</button></div><div class="hairline"></div><p class="notice">Sprite Sheet จะบันทึกทุกเฟรมตาม FPS และจำนวนเฟรมของคลิปนี้ พื้นหลังโปร่งใสจริง</p><div class="field"><label for="exportCols">คอลัมน์ Sprite Sheet</label><select id="exportCols"><option value="4">4 ช่อง</option><option value="6">6 ช่อง</option><option value="8" selected>8 ช่อง</option><option value="12">12 ช่อง</option></select></div><button id="exportFrame">↧ Export เฟรมปัจจุบัน</button>`}
+function wireClipFields(){const c=activeClip();if(!c)return;$('clipName').onchange=e=>{pushHistory();c.name=e.target.value.trim()||c.name;renderClips();renderInspector();$('clipBadge').textContent=c.name.toUpperCase()};
+ $('clipFPS').onchange=e=>{pushHistory();c.fps=clamp(Math.round(+e.target.value||12),1,60);renderAll()};
+ $('clipFrames').onchange=e=>{pushHistory();c.frames=clamp(Math.round(+e.target.value||16),2,96);UI.frame=clamp(UI.frame,0,c.frames-1);renderAll()};
+ $('clipEase').onchange=e=>{pushHistory();c.easing=e.target.value;renderStage()};
+ $('duplicateClip').onclick=()=>{pushHistory();const copy=JSON.parse(JSON.stringify(c));copy.id=uid();copy.name=c.name+' Copy';project.clips.push(copy);project.activeClipId=copy.id;UI.frame=0;renderAll()};
+ $('deleteClip').onclick=()=>{if(project.clips.length<2)return updateStatus('ต้องเหลืออย่างน้อย 1 คลิป',true);if(!confirm('ลบคลิป '+c.name+'?'))return;pushHistory();project.clips=project.clips.filter(x=>x.id!==c.id);project.activeClipId=project.clips[0].id;UI.frame=0;renderAll()};
+ $('exportFrame').onclick=()=>exportPNG(false);
+}
+function descendantOf(candidate,target){let cur=partById(candidate),n=0;while(cur?.parent&&n++<100){if(cur.parent===target)return true;cur=partById(cur.parent)}return false}
+function reorderPart(delta){const i=project.parts.findIndex(p=>p.id===UI.selected),j=i+delta;if(i<0||j<0||j>=project.parts.length)return;pushHistory();[project.parts[i],project.parts[j]]=[project.parts[j],project.parts[i]];renderParts();renderTimeline();renderStage()}
+function changePivot(p,next,{historyAlready=false,compensate=true,originalPose=null}={}){
+ if(!historyAlready)pushHistory();const old={...p.pivot},v=originalPose||evaluatePose(p.id);const dx=next.x-old.x,dy=next.y-old.y;
+ p.pivot={x:round(next.x,3),y:round(next.y,3)};
+ if(compensate){const a=v.r*RAD;const nextPose={...v,x:v.x+Math.cos(a)*dx*v.sx-Math.sin(a)*dy*v.sy,y:v.y+Math.sin(a)*dx*v.sx+Math.cos(a)*dy*v.sy};writeKey(p.id,nextPose,UI.frame,true)}
+}
+function refreshLabels(){ $('clipBadge').textContent=activeClip()?.name.toUpperCase()||'NONE';$('zoomLabel').textContent=Math.round(UI.zoom*100)+'%';$('projectBadge').textContent=(project?.name||'DEMO').slice(0,19) }
+function renderAll(){renderClips();renderParts();renderTimeline();renderInspector();renderStage();refreshLabels()}
+// Hit-testing uses each bone's world matrix and the PNG's own alpha, not a flat rectangle.
+function pointOnPart(part,wp,matrix){const img=images.get(part.id);if(!img||!part.visible)return false;
+ let local;try{local=new DOMPoint(wp.x,wp.y).matrixTransform(matrix.inverse())}catch{return false}
+ const ix=Math.floor(local.x+part.pivot.x),iy=Math.floor(local.y+part.pivot.y);if(ix<0||iy<0||ix>=img.width||iy>=img.height)return false;
+ const cv=part._hitCanvas||(part._hitCanvas=document.createElement('canvas'));if(!part._hitContext){cv.width=img.width;cv.height=img.height;const hc=cv.getContext('2d',{willReadFrequently:true});hc.drawImage(img,0,0);part._hitContext=hc}
+ try{return part._hitContext.getImageData(ix,iy,1,1).data[3]>14}catch{return true}
+}
+stage.addEventListener('pointerdown',e=>{
+ if(!project)return;togglePlay(false);const pos=mousePos(e),wp=screenToWorld(pos.x,pos.y),cache=matrices();let target=null;
+ if(UI.selected){const p=partById(UI.selected),m=p&&cache.get(p.id),img=p&&images.get(p.id);if(m){const pt=worldPoint(m),h=worldPoint(m,0,-Math.max(24,(img?.height||40)*.7));if(Math.hypot(pos.x-(h.x*UI.zoom+stage.width/2),pos.y-(h.y*UI.zoom+stage.height*.58))<15){target=p;UI.tool='rotate';document.querySelectorAll('.tool').forEach(el=>el.classList.toggle('active',el.dataset.tool==='rotate'));$('toolBadge').textContent='↻ ROTATE'}}}
+ if(!target){for(let k=project.parts.length-1;k>=0;k--){const p=project.parts[k],m=cache.get(p.id);if(m&&pointOnPart(p,wp,m)){target=p;break}}}
+ if(!target&&UI.selected){const p=partById(UI.selected),pt=cache.get(p.id)&&worldPoint(cache.get(p.id));if(pt&&Math.hypot(pos.x-(pt.x*UI.zoom+stage.width/2),pos.y-(pt.y*UI.zoom+stage.height*.58))<16)target=p}
+ if(!target){selectPart(null);return}
+ if(target.id!==UI.selected)selectPart(target.id);
+ const matrix=matrices().get(target.id),pose=evaluatePose(target.id),parent=target.parent?matrices().get(target.parent):new DOMMatrix(),pt=worldPoint(matrix),handle=images.get(target.id);
+ pushHistory();
+ UI.drag={partId:target.id,kind:UI.tool,startWorld:wp,originalPose:pose,originalPivot:{...target.pivot},parentMatrix:parent,partMatrix:matrix,origin:pt,startAngle:Math.atan2(wp.y-pt.y,wp.x-pt.x),changed:false};
+ stage.setPointerCapture(e.pointerId);e.preventDefault()
+});
+stage.addEventListener('pointermove',e=>{
+ const pos=mousePos(e),wp=screenToWorld(pos.x,pos.y);$('stageCoords').textContent=`x ${Math.round(wp.x)} · y ${Math.round(wp.y)}`;
+ const d=UI.drag;if(!d)return;const p=partById(d.partId);if(!p)return;
+ if(d.kind==='move'){
+  const inv=d.parentMatrix.inverse(),a=new DOMPoint(d.startWorld.x,d.startWorld.y).matrixTransform(inv),b=new DOMPoint(wp.x,wp.y).matrixTransform(inv);
+  const v={...d.originalPose,x:round(d.originalPose.x+b.x-a.x,2),y:round(d.originalPose.y+b.y-a.y,2)};writeKey(p.id,v,UI.frame,true);d.changed=true;
+ }else if(d.kind==='rotate'){
+  const angle=Math.atan2(wp.y-d.origin.y,wp.x-d.origin.x);const v={...d.originalPose,r:round(d.originalPose.r+(angle-d.startAngle)/RAD,2)};writeKey(p.id,v,UI.frame,true);d.changed=true;
+ }else if(d.kind==='pivot'){
+  const local=new DOMPoint(wp.x,wp.y).matrixTransform(d.partMatrix.inverse()),img=images.get(p.id);
+  const next={x:clamp(round(d.originalPivot.x+local.x,2),0,img.width),y:clamp(round(d.originalPivot.y+local.y,2),0,img.height)};
+  p.pivot={...d.originalPivot};changePivot(p,next,{historyAlready:true,originalPose:d.originalPose});d.changed=true;
+ }
+ renderStage();updateFrameUI();e.preventDefault();
+});
+stage.addEventListener('pointerup',e=>{if(!UI.drag)return;const changed=UI.drag.changed;UI.drag=null;if(stage.hasPointerCapture(e.pointerId))stage.releasePointerCapture(e.pointerId);if(changed){renderTimeline();renderInspector();updateStatus('อัปเดต Pose และบันทึก Keyframe ที่เฟรม '+(UI.frame+1))}});
+stage.addEventListener('pointercancel',e=>{UI.drag=null;if(stage.hasPointerCapture(e.pointerId))stage.releasePointerCapture(e.pointerId)});
+stage.addEventListener('wheel',e=>{if(e.ctrlKey||e.altKey){e.preventDefault();UI.zoom=clamp(UI.zoom+(e.deltaY<0?.15:-.15),.5,5);refreshLabels();renderStage()}},{passive:false});
+function fileDownload(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}
+async function exportPNG(sheet=true){if(!project||!activeClip())return;togglePlay(false);const clip=activeClip(),col=sheet?clamp(Number($('exportCols')?.value)||8,1,12):1,frameCount=sheet?clip.frames:1,row=Math.ceil(frameCount/col),cv=document.createElement('canvas');cv.width=col*PX;cv.height=row*PX;
+ if(cv.width>8192||cv.height>8192)return updateStatus('Sprite Sheet ใหญ่เกินไป ให้ลดจำนวนคอลัมน์หรือเฟรม',true);
+ const c=cv.getContext('2d');c.imageSmoothingEnabled=false;
+ for(let i=0;i<frameCount;i++){c.save();c.translate((i%col)*PX,Math.floor(i/col)*PX);const frame=sheet?i:UI.frame;renderPuppet(c,PX,PX,frame,{scale:1,guide:false,clip});c.restore()}
+ const blob=await new Promise(resolve=>cv.toBlob(resolve,'image/png'));if(!blob)return updateStatus('Export PNG ไม่สำเร็จ',true);
+ fileDownload(blob,`${safeName(project.name)}_${safeName(clip.name)}_${sheet?'sheet':'frame'+String(UI.frame+1).padStart(2,'0')}.png`);
+ updateStatus(`Export ${sheet?'Sprite Sheet '+frameCount+' เฟรม':'PNG เฟรม '+(UI.frame+1)} สำเร็จ — พื้นหลังโปร่งใส`);return blob
+}
+function safeName(n){return String(n).toLowerCase().trim().replace(/[^a-z0-9ก-๙_-]+/ig,'_').slice(0,60)||'bunny'}
+function saveJSON(){fileDownload(new Blob([serialize()],{type:'application/json'}),safeName(project.name)+'.bunny-rig.json');updateStatus('บันทึกโปรเจกต์ JSON (รวมภาพ PNG ที่ Import)')}
+function saveLocal(){try{localStorage.setItem(STORAGE_KEY,serialize());updateStatus('บันทึกบนเครื่องนี้เรียบร้อยแล้ว')}catch(e){updateStatus('เบราว์เซอร์มีพื้นที่ไม่พอ ให้ใช้ บันทึก JSON',true)}}
+function addClip(){const name=prompt('ชื่อคลิปอนิเมชั่นใหม่','New Clip');if(!name?.trim())return;pushHistory();const c={id:uid(),name:name.trim(),fps:12,frames:24,easing:'smooth',tracks:{}};project.clips.push(c);project.activeClipId=c.id;UI.frame=0;togglePlay(false);renderAll();updateStatus('สร้างคลิป '+c.name)}
+async function addImages(files){if(!files?.length)return;togglePlay(false);pushHistory();let success=0;
+ for(const file of files){if(!file.type.startsWith('image/'))continue;try{const src=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(Error('อ่านไฟล์ไม่ได้'));r.readAsDataURL(file)}),im=await fetchImg(src);if(Math.max(im.width,im.height)>1024)throw Error('ภาพใหญ่กว่า 1024px กรุณาตัดภาพเป็นชิ้นก่อน');const id=uid(),p={id,name:file.name.replace(/\.[^.]+$/,'').slice(0,60),src,parent:null,pivot:{x:Math.round(im.width/2),y:Math.round(im.height/2)},base:{x:success*7,y:success*5,r:0,sx:1,sy:1},visible:true};project.parts.push(p);images.set(id,im);UI.selected=id;success++}catch(error){updateStatus(file.name+': '+error.message,true)}}
+ if(success){renderAll();updateStatus('นำเข้า PNG '+success+' ชิ้น — ตั้ง Parent/Pivot ก่อนทำอนิเมชั่น')}
+}
+function mkCanvas(w,h,fn){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');g.imageSmoothingEnabled=false;fn(g);return c.toDataURL('image/png')}
+const C={outline:'#483b40',white:'#f9f5e8',fur:'#e6e1d8',pink:'#f1a4a8',dark:'#272b3e',red:'#bd4651',redDark:'#782b41',gold:'#ffd17a',brown:'#77513d',boot:'#594638',blue:'#6999cc'};
+function pixelAsset(name){const gCanvas=(w,h,draw)=>mkCanvas(w,h,draw),R=(g,c,x,y,w,h)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+ switch(name){
+ case 'cape':return gCanvas(50,62,g=>{R(g,C.redDark,10,2,25,10);R(g,C.red,5,12,32,26);R(g,C.red,0,34,45,12);R(g,C.redDark,0,45,36,7);R(g,C.red,2,50,23,8);R(g,C.gold,8,8,20,3)});
+ case 'body':return gCanvas(43,44,g=>{R(g,C.outline,6,3,29,36);R(g,C.white,8,5,25,31);R(g,C.brown,8,16,25,17);R(g,C.red,8,4,25,7);R(g,C.gold,9,21,23,4);R(g,C.gold,19,26,5,6);R(g,C.outline,9,36,25,5)});
+ case 'head':return gCanvas(49,47,g=>{R(g,C.outline,8,1,31,38);R(g,C.outline,3,9,43,26);R(g,C.white,9,3,29,33);R(g,C.white,5,12,39,24);R(g,C.fur,8,33,31,5);R(g,C.pink,7,26,8,6);R(g,C.pink,33,26,8,6);R(g,C.dark,13,18,6,9);R(g,C.dark,32,18,6,9);R(g,'#fff',14,19,2,3);R(g,'#fff',33,19,2,3);R(g,C.outline,24,28,4,3);R(g,C.outline,25,32,1,2)});
+ case 'ear':return gCanvas(17,38,g=>{R(g,C.outline,2,0,13,34);R(g,C.white,4,2,9,30);R(g,C.pink,6,5,5,22);R(g,C.fur,4,31,9,4)});
+ case 'arm':return gCanvas(20,35,g=>{R(g,C.outline,3,0,14,34);R(g,C.redDark,5,3,10,12);R(g,C.brown,4,15,12,11);R(g,C.white,5,24,10,8);R(g,C.pink,7,27,6,5)});
+ case 'leg':return gCanvas(22,34,g=>{R(g,C.outline,3,0,15,31);R(g,C.brown,5,2,12,17);R(g,C.boot,4,17,14,9);R(g,C.boot,1,25,20,6);R(g,C.gold,6,16,8,3)});
+ case 'sword':return gCanvas(21,64,g=>{R(g,C.outline,8,1,7,45);R(g,'#eef1f4',9,1,4,41);R(g,'#96bed2',12,4,2,33);R(g,C.gold,2,41,19,5);R(g,C.brown,10,45,4,15);R(g,C.gold,8,56,8,5)});
+ default:return gCanvas(32,32,g=>{R(g,C.red,5,5,22,22)})
+ }
+}
+function makeDemo(){const imageNames={};for(const n of ['cape','leg','arm','body','head','ear','sword'])imageNames[n]=pixelAsset(n);
+ const p=(name,asset,parent,x,y,px,py)=>({id:name,name,src:imageNames[asset],parent,base:{x,y,r:0,sx:1,sy:1},pivot:{x:px,y:py},visible:true});
+ const parts=[p('ผ้าคลุม','cape','ลำตัว',-3,4,27,5),p('ขาหลัง','leg','ลำตัว',12,20,11,4),p('ขาหน้า','leg','ลำตัว',-12,20,11,4),p('แขนหลัง','arm','ลำตัว',15,-11,10,5),p('ลำตัว','body',null,0,0,21,24),p('หูหลัง','ear','หัว',10,-32,8,34),p('หัว','head','ลำตัว',0,-24,25,37),p('หูหน้า','ear','หัว',-12,-33,8,34),p('แขนหน้า','arm','ลำตัว',-17,-10,10,5),p('ดาบ','sword','แขนหน้า',0,25,11,57)];
+ const clip=(name,fps,frames)=>({id:uid(),name,fps,frames,easing:'smooth',tracks:{}});
+ const idle=clip('Idle',12,24),walk=clip('Walk',12,16),slash=clip('Slash',12,12);
+ const k=(c,id,values)=>{const base=parts.find(p=>p.id===id).base;c.tracks[id]=values.map(([f,delta])=>({f,pose:{...base,...delta}}))};
+ k(idle,'ลำตัว',[[0,{y:0}],[6,{y:-2}],[12,{y:0}],[18,{y:1}],[23,{y:0}]]);
+ k(idle,'หัว',[[0,{r:0}],[11,{r:2}],[23,{r:0}]]);
+ k(idle,'หูหน้า',[[0,{r:-5}],[12,{r:8}],[23,{r:-5}]]);
+ k(idle,'หูหลัง',[[0,{r:7}],[12,{r:-10}],[23,{r:7}]]);
+ k(idle,'ผ้าคลุม',[[0,{r:-3}],[11,{r:9}],[23,{r:-3}]]);
+ for(const [name,phase] of [['ขาหน้า',1],['ขาหลัง',-1]])k(walk,name,[[0,{r:23*phase}],[4,{r:0}],[8,{r:-23*phase}],[12,{r:0}],[15,{r:23*phase}]]);
+ for(const [name,phase] of [['แขนหน้า',-1],['แขนหลัง',1]])k(walk,name,[[0,{r:18*phase}],[8,{r:-18*phase}],[15,{r:18*phase}]]);
+ k(walk,'ลำตัว',[[0,{y:-2}],[4,{y:1}],[8,{y:-2}],[12,{y:1}],[15,{y:-2}]]);
+ k(walk,'ผ้าคลุม',[[0,{r:-20}],[4,{r:-5}],[8,{r:-20}],[12,{r:-5}],[15,{r:-20}]]);
+ k(slash,'แขนหน้า',[[0,{r:-65}],[3,{r:-100}],[5,{r:55}],[8,{r:80}],[11,{r:-65}]]);
+ k(slash,'ลำตัว',[[0,{r:-7}],[3,{r:-14}],[5,{r:11,x:5}],[8,{r:5,x:3}],[11,{r:-7,x:0}]]);
+ k(slash,'ผ้าคลุม',[[0,{r:10}],[4,{r:-35}],[7,{r:38}],[11,{r:10}]]);
+ k(slash,'หัว',[[0,{r:0}],[5,{r:-9}],[11,{r:0}]]);
+ return {format:'bunny-rig-studio',version:1,name:'Blessed Bunny • Demo',parts,clips:[idle,walk,slash],activeClipId:idle.id};
+}
+// UI interactions
+$('playBtn').onclick=()=>togglePlay();$('prevFrame').onclick=()=>{togglePlay(false);setFrame(UI.frame-1)};$('nextFrame').onclick=()=>{togglePlay(false);setFrame(UI.frame+1)};
+$('addKey').onclick=addKey;$('delKey').onclick=removeKey;$('undo').onclick=undo;$('redo').onclick=redo;
+$('addParts').onclick=()=>$('partsInput').click();$('partsInput').onchange=async e=>{await addImages([...e.target.files]);e.target.value=''};
+$('loadProject').onclick=()=>$('projectInput').click();$('projectInput').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const data=JSON.parse(await f.text());await loadProjectData(data);updateStatus('เปิดโปรเจกต์ '+project.name)}catch(error){updateStatus('เปิดโปรเจกต์ไม่สำเร็จ: '+error.message,true)}e.target.value=''};
+$('saveProject').onclick=saveJSON;$('saveLocal').onclick=saveLocal;$('exportSheet').onclick=()=>exportPNG(true);
+$('newDemo').onclick=async()=>{if(project&&!confirm('เริ่มโปรเจกต์ตัวอย่างใหม่? หากยังไม่บันทึก การแก้ไขจะหายไป'))return;await loadProjectData(makeDemo());updateStatus('โหลดตัวอย่างกระต่าย 3 Animation Clips แล้ว')};
+$('proofRig').onclick=async()=>{if(project&&!confirm('โหลด Blessed Bunny Rig Geometry Proof ใหม่? หากยังไม่บันทึก งานใน Editor จะถูกแทนที่'))return;
+ try{await loadProjectData(window.BunnyRigProof.createProject());UI.bones=false;$('showBones').textContent='○ แสดงกระดูก';UI.zoom=2;renderAll();fitStage();
+  updateStatus('Proof Bunny: 19 PNG จาก Master เดียว • เลือก Proof Assembly แล้วเทียบภาพที่ rig-proof.html ก่อนทดลอง Raise Arm / Walk');}
+ catch(error){console.error(error);updateStatus('โหลด Proof ไม่สำเร็จ: '+error.message,true)}
+};
+$('cutoutDemo').onclick=async()=>{if(project&&!confirm('โหลดตัวอย่าง Cutout 11 Layers ใหม่? กรุณาบันทึกงานเดิมก่อน'))return;
+ try{await loadProjectData(window.BunnyRigProof.createSimpleProject());UI.bones=false;$('showBones').textContent='○ แสดงกระดูก';renderAll();fitStage();
+ updateStatus('Cutout 11 Layers: เสื้ออยู่บนลำตัวแล้ว • ลากหรือ Rotate แต่ละชิ้น แล้วลอง Idle / Walk / Attack');}
+ catch(error){console.error(error);updateStatus('Cutout Demo โหลดไม่สำเร็จ: '+error.message,true)}
+};
+$('addClip').onclick=addClip;$('clearSelection').onclick=()=>selectPart(null);
+$('showBones').onclick=()=>{UI.bones=!UI.bones;$('showBones').textContent=UI.bones?'● ซ่อนกระดูก':'○ แสดงกระดูก';renderStage()};
+$('onionBtn').onclick=e=>{UI.onion=!UI.onion;e.currentTarget.classList.toggle('active',UI.onion);renderStage()};
+$('gridBtn').onclick=e=>{UI.grid=!UI.grid;e.currentTarget.textContent=UI.grid?'▦ ซ่อน Grid':'▦ แสดง Grid';renderStage()};
+$('zoomOut').onclick=()=>{UI.zoom=clamp(UI.zoom-.25,.5,5);refreshLabels();renderStage()};$('zoomIn').onclick=()=>{UI.zoom=clamp(UI.zoom+.25,.5,5);refreshLabels();renderStage()};
+document.querySelectorAll('.tool').forEach(el=>el.onclick=()=>setTool(el.dataset.tool));
+document.addEventListener('keydown',e=>{const tag=document.activeElement?.tagName;
+ if(e.ctrlKey||e.metaKey){if(e.key.toLowerCase()==='z'){e.preventDefault();if(e.shiftKey)redo();else undo()}else if(e.key.toLowerCase()==='y'){e.preventDefault();redo()}else if(e.key.toLowerCase()==='s'){e.preventDefault();saveJSON()}return}
+ if(['INPUT','TEXTAREA','SELECT'].includes(tag))return;
+ if(e.key===' '){e.preventDefault();togglePlay()}else if(e.key==='ArrowLeft'){togglePlay(false);setFrame(UI.frame-1)}else if(e.key==='ArrowRight'){togglePlay(false);setFrame(UI.frame+1)}else if(e.key.toLowerCase()==='k')addKey();else if(e.key.toLowerCase()==='v')setTool('move');else if(e.key.toLowerCase()==='r')setTool('rotate');else if(e.key.toLowerCase()==='p')setTool('pivot');else if(e.key==='Delete')removeKey()
+});
+// Expose stable, read-only debugging helpers for automated smoke tests.
+window.__rigTest={get project(){return project},get ui(){return UI},get images(){return images},evaluatePose,matrices,serialize,addImages,exportPNG,setFrame,renderStage,makeDemo,loadProjectData,saveJSON,addKey,undo,redo};
+(async()=>{try{demoLoading=true;let stored=null;try{stored=localStorage.getItem(STORAGE_KEY)}catch{}if(new URLSearchParams(location.search).get('cutout')==='1'){
+ await loadProjectData(window.BunnyRigProof.createSimpleProject());UI.bones=false;$('showBones').textContent='○ แสดงกระดูก';
+ updateStatus('✂️ Simple 2D Cutout • 11 ชิ้นจาก Master เดียว • ลอง 02 Idle / 03 Walk / 04 Attack');
+ }else if(new URLSearchParams(location.search).get('proof')==='1'){
+ await loadProjectData(window.BunnyRigProof.createProject());UI.bones=false;$('showBones').textContent='○ แสดงกระดูก';
+ updateStatus('🧪 Rig Geometry Proof • 19 ชิ้นส่วนจาก Master เดียว • เลือก Proof Raise Arm หรือ Proof Walk เพื่อทดสอบ');
+ }else if(stored){try{await loadProjectData(JSON.parse(stored));updateStatus('โหลดงานที่บันทึกในเครื่องแล้ว')}catch{await loadProjectData(makeDemo());updateStatus('เปิดตัวอย่างใหม่ (งานในเครื่องอ่านไม่ได้)',true)}}else{await loadProjectData(makeDemo());updateStatus('พร้อมใช้งาน — เลือก Walk หรือ Slash เพื่อดูตัวอย่าง Rig')}}catch(error){console.error(error);updateStatus('เกิดข้อผิดพลาด: '+error.message,true)}finally{demoLoading=false;updateUndoButtons();requestAnimationFrame(raf)}})();
+</script>
+</body>
+</html>

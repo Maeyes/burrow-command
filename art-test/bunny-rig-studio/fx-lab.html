@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bunny FX Lab — Pixel VFX Editor</title>
+<style>
+:root{color-scheme:dark;--bg:#0f1622;--panel:#182537;--edge:#37516c;--muted:#b0c5db;--white:#ecf4ff;--gold:#ffd18d;--mint:#a0f0c8;--blue:#8bc2ff}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--white);font:13px/1.5 system-ui,"Noto Sans Thai",Tahoma,sans-serif;background:radial-gradient(ellipse at 45% -20%,#304967,#0e1723 60%)}
+button,input,select{font:inherit}
+button,a.nav{color:var(--white);border:1px solid #4e6986;background:#293e54;border-radius:9px;min-height:35px;padding:7px 10px;cursor:pointer;text-decoration:none}
+button:hover,a.nav:hover{background:#355676}button:disabled{opacity:.43;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid #d2e8ff;outline-offset:2px}
+button.active,.nav.active{background:#517eb0;border-color:#abdbff;font-weight:750}
+button.primary{background:#517eb0;border-color:#90c4ff;font-weight:750}
+button.gold{background:#655038;border-color:#bba078;color:#ffead0}
+input,select{background:#101e2d;color:var(--white);border:1px solid #52708f;border-radius:7px;padding:7px;min-width:0}
+input[type=number],input[type=text]{width:100%}input[type=range]{accent-color:#97c6ff;width:100%;padding:0}
+input[type=file]{display:none}input[type=color]{width:47px;height:36px;padding:3px;cursor:pointer}
+input[type=checkbox]{accent-color:#9ddcbf}
+label{color:#c6d8ee;font-size:11px;display:block;margin-bottom:4px}
+header{display:flex;align-items:center;gap:16px;justify-content:space-between;padding:12px 20px;flex-wrap:wrap;border-bottom:1px solid var(--edge);background:#162337df}
+.brand{display:flex;align-items:center;gap:11px}.logo{width:44px;height:44px;display:grid;place-items:center;background:linear-gradient(140deg,#ad744d,#514a8a);border-radius:12px;font-size:25px}
+.brand strong{display:block;font-size:17px;letter-spacing:.03em}.brand small{font-size:10px;color:var(--muted)}
+nav{display:flex;gap:7px;flex-wrap:wrap}.pill{border:1px solid #49687f;border-radius:30px;padding:4px 9px;color:#c7e5e1;font-size:10px;white-space:nowrap}
+.layout{display:grid;grid-template-columns:260px minmax(360px,1fr) 272px;min-height:calc(100dvh - 122px)}
+aside{background:#172436;min-width:0}.left{border-right:1px solid var(--edge)}.right{border-left:1px solid var(--edge)}
+.group{padding:15px 14px;border-bottom:1px solid #374f67}h2{color:#f4e1c5;font-size:13px;margin:0 0 11px}h3{font-size:12px;color:#e1e9f5;margin:15px 0 7px}
+p{font-size:11px;color:var(--muted);line-height:1.7;margin:8px 0}.form2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.form2>*{min-width:0}
+.row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.row>*{min-width:0}
+.full{width:100%;margin-top:7px}.flex{flex:1}
+.tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.tools button{font-size:11px;padding:6px 3px;min-height:50px}
+.palette{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin:9px 0}
+.swatch{width:100%;aspect-ratio:1;min-height:0;padding:0;border-radius:8px;border:2px solid #71849a}
+.swatch.active{outline:2px solid #fff;outline-offset:2px}
+.middle{display:flex;flex-direction:column;min-width:0}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:11px 14px;background:#1a2b40;border-bottom:1px solid var(--edge);flex-wrap:wrap}
+.top strong{font-size:13px}.top label{display:inline-flex;align-items:center;gap:5px;margin:0;font-size:11px}
+.viewer{background:radial-gradient(ellipse at 50% 34%,#324a63,#19293d 65%,#101a29);flex:1;min-height:460px;display:grid;place-items:center;padding:22px 12px}
+.stageBox{width:min(100%,512px);display:grid;place-items:center}
+#fxCanvas{display:block;width:min(100%,512px);aspect-ratio:1;height:auto;touch-action:none;image-rendering:pixelated;cursor:crosshair;border:1px solid #6688a5;box-shadow:0 15px 55px #0008;border-radius:6px}
+.canvasInfo{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;color:#b6d0e8;font-size:11px;margin-top:10px}
+.timelineWrap{background:#1a2b3c;padding:13px;border-top:1px solid #3e5369}
+.transport{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:10px}
+.transport span{font-variant-numeric:tabular-nums;min-width:90px;text-align:center;color:#ffe2ad;font-weight:750}
+.timeline{display:flex;overflow-x:auto;gap:7px;min-height:87px;padding:4px 1px 10px}
+.frame{flex:0 0 78px;position:relative;display:grid;place-items:center;height:76px;padding:5px;background:#25374b;border:1px solid #59748d;border-radius:10px}
+.frame.active{border:2px solid #ffe29b;background:#395773}.frame img{width:54px;height:54px;object-fit:contain;image-rendering:pixelated}
+.frame small{position:absolute;bottom:1px;left:1px;right:1px;text-align:center;background:#142335d9;font-size:9px}
+.timelineActions{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}.timelineActions button{font-size:11px;flex:1}
+.notice{border:1px solid #597089;background:#23394d;padding:10px;border-radius:9px;line-height:1.6}
+.exportButtons{display:grid;grid-template-columns:1fr 1fr;gap:7px}.exportButtons button{min-height:43px;font-size:11px}
+#refDetails{font-size:11px;color:#b9decb;margin-top:8px}
+.status{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:9px 13px;background:#111c2a;border-top:1px solid #37516c;font-size:11px;color:#b9eccc}
+@media(max-width:1030px){.layout{grid-template-columns:215px minmax(360px,1fr) 230px}.group{padding:12px 10px}}
+@media(max-width:835px){.layout{grid-template-columns:minmax(0,1fr)}.middle{grid-row:1}.left{grid-row:2;border:0;border-top:1px solid var(--edge)}.right{grid-row:3;border:0;border-top:1px solid var(--edge)}.viewer{min-height:330px;padding:10px}.tools{grid-template-columns:repeat(6,1fr)}.palette{grid-template-columns:repeat(12,1fr)}}
+.fxLayerList{display:grid;gap:6px;margin:8px 0 10px}.fxLayerRow{display:flex;align-items:center;gap:5px;padding:7px 5px;border:1px solid #4d6783;border-radius:9px;background:#253951;min-width:0}.fxLayerRow.active{border-color:#ffdf9d;background:#365573}.fxLayerRow button{min-height:31px;padding:4px 6px;flex-shrink:0}.fxLayerRow .layerName{background:transparent;border:0;font:inherit;color:inherit;min-width:0;max-width:90px;flex:1;cursor:pointer;text-align:left}.fxLayerRow .layerName:focus{outline:2px solid #a6d6ff}.fxLayerRow .layerName:disabled{opacity:.6;cursor:default}#selectPanel .form2 input{width:100%}#quickPanel button{margin-bottom:5px}.tools{grid-template-columns:repeat(4,minmax(0,1fr))}.tools button{min-height:48px}.group input[type=color]{width:100%;height:35px}@media(max-width:835px){.tools{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:836px){.layout{height:calc(100dvh - 112px);min-height:650px}.layout>aside{max-height:calc(100dvh - 112px);overflow-y:auto}.middle{min-height:0;max-height:calc(100dvh - 112px)}.viewer{min-height:0}}
+.basic #layerPanel,.basic #selectPanel,.basic [data-tool="marquee"]{display:none!important}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="logo">✨</div><div><strong>Bunny FX Lab</strong><small>Pixel VFX • Frame by Frame • Transparent Export</small></div></div>
+ <nav aria-label="Editor modes">
+  <a class="nav" href="./index.html">🦴 Bone Rig</a>
+  <a class="nav" href="./frame-animation.html">🎞 Frame Animator</a>
+  <a class="nav" href="./unified-studio.html">◎ Unified Studio</a>
+  <a class="nav" href="./rig-proof.html">🧪 Rig QC</a><a class="nav" href="./cutout-lab.html">✂️ Cutout Lab</a>
+  <a class="nav active" href="./fx-lab.html" aria-current="page">✨ FX Lab</a>
+ </nav>
+ <span class="pill">OFFLINE • EDITABLE • PNG / GIF / JSON</span>
+</header>
+<div class="layout">
+ <aside class="left">
+  <section class="group">
+   <h2>🎨 เครื่องมือ Pixel Art</h2>
+   <div class="tools" role="group" aria-label="Drawing tools">
+    <button class="active" data-tool="pencil" title="B">✏️ Pencil</button>
+    <button data-tool="eraser" title="E">◻ Eraser</button>
+    <button data-tool="line" title="L">╱ Line</button>
+    <button data-tool="circle" title="C">◯ Circle</button>
+    <button data-tool="fill" title="G">▣ Fill</button>
+    <button data-tool="picker" title="I">◈ Picker</button>
+    <button data-tool="select" title="S">⤧ Select FX</button>
+    <button data-tool="marquee" title="M">▧ Marquee</button>
+   </div>
+   <div class="row" style="margin-top:12px"><label for="artStyle">Art Style</label><select id="artStyle" style="width:100%"><option value="pixel">Pixel Art (crisp)</option><option value="smooth">Smooth (anti-alias)</option><option value="hybrid">Hybrid (pixel + soft FX)</option></select></div>
+   <div class="row" style="margin-top:10px"><button id="undo" class="flex">↶ Undo</button><button id="redo" class="flex">↷ Redo</button></div>
+   <div class="row" style="margin-top:13px"><div class="flex"><label for="fxColor">สี</label><input type="color" id="fxColor" value="#ffd16b"></div><div class="flex"><label for="brushSize">Brush <span id="brushLabel">1 px</span></label><input id="brushSize" type="range" min="1" max="24" value="1"></div></div>
+   <div class="row" style="margin-top:9px"><label for="alpha" class="flex">Opacity <span id="alphaLabel">100%</span></label><input id="alpha" type="range" min="1" max="100" value="100" style="flex:2"></div>
+   <h3>Fantasy FX Palette</h3><div id="fxPalette" class="palette"></div>
+   <p>Shift ไม่จำเป็น: กดค้างแล้วลากเพื่อวาด เส้นและวงกลม Preview ระหว่างลากได้ ไม่เปลี่ยนภาพต้นฉบับ</p>
+  </section>
+  <section class="group">
+   <h2>⚙️ Animation Settings</h2>
+   <div><label for="projectName">ชื่อ FX</label><input id="projectName" type="text" value="wukong-staff-trail" maxlength="60"></div>
+   <div class="form2" style="margin-top:9px">
+    <div><label for="frameWidth">Width (px)</label><input id="frameWidth" type="number" min="8" max="512" value="128"></div>
+    <div><label for="frameHeight">Height (px)</label><input id="frameHeight" type="number" min="8" max="512" value="128"></div>
+   </div>
+   <button id="resizeCanvas" class="full">เปลี่ยน Canvas (ล้างเฟรม)</button>
+   <div class="form2" style="margin-top:11px"><div><label for="fps">FPS</label><input id="fps" type="number" min="1" max="30" value="8"></div>
+    <div><label for="loop">Loop</label><select id="loop" style="width:100%"><option value="1">วนซ้ำ</option><option value="0">เล่นครั้งเดียว</option></select></div>
+    <div><label for="hold">Hold เฟรมนี้ (×)</label><input id="hold" type="number" min="1" max="16" value="1"></div>
+    <div><label for="sheetColumns">Columns</label><input id="sheetColumns" type="number" min="1" max="64" value="4"></div>
+   </div>
+   <h3>คีย์ลัด</h3><p>B Pencil · E Eraser · L Line · C Circle · G Fill · I Picker · Space Play · ← → Frame · Ctrl+Z/Y Undo/Redo</p>
+  </section>
+ </aside>
+ <main class="middle">
+  <div class="top"><div class="row"><strong>🖼 FX Canvas</strong><span class="pill" id="canvasLabel">128 × 128px</span></div>
+   <div class="row"><label><input id="checker" type="checkbox" checked> Checker</label><label><input id="onionPrevious" type="checkbox" checked> 👁 Prev</label><label><input id="onionNext" type="checkbox"> 👁 Next</label><label>Onion <input id="onionAlpha" type="range" min="5" max="75" value="23" style="width:70px"></label></div>
+  </div>
+  <div class="viewer"><div class="stageBox"><canvas id="fxCanvas" width="512" height="512" aria-label="Interactive pixel FX drawing canvas"></canvas>
+   <div class="canvasInfo"><span id="cursor">x – · y –</span><span id="drawState">Transparent FX Layer</span></div>
+  </div></div>
+  <section class="timelineWrap">
+   <div class="transport"><button id="previous" title="Previous">⏮</button><button id="play" class="primary">▶ Play</button><button id="next" title="Next">⏭</button><span id="counter">F 01 / 01</span></div>
+   <div id="timeline" class="timeline" aria-label="VFX frame timeline"></div>
+   <div class="timelineActions"><button id="addFrame" class="primary">＋ Blank Frame</button><button id="duplicateFrame">▣ Duplicate</button><button id="moveLeft">← Move</button><button id="moveRight">Move →</button><button id="deleteFrame">✕ Delete</button></div>
+  </section>
+ </main>
+ <aside class="right">
+  <section class="group" id="layerPanel">
+   <h2>🗂 FX Layers</h2><div id="fxLayers" class="fxLayerList" aria-label="FX layers"></div>
+   <div class="row"><button id="addLayer" class="flex primary">＋ Layer</button><button id="duplicateLayer" class="flex">▣ Duplicate</button></div>
+   <div class="row" style="margin-top:7px"><button id="layerUp" class="flex">↑ Front</button><button id="layerDown" class="flex">↓ Back</button><button id="deleteLayer" class="flex">✕ Delete</button><button id="mergeLayer" class="flex" title="Bake selected layer into layer below">↓ Merge</button></div>
+   <label for="layerOpacity" style="margin-top:10px">Layer Opacity <span id="layerOpacityLabel">100%</span></label><input id="layerOpacity" type="range" min="0" max="100" value="100">
+   <h3>✨ Shadow / Glow / Gradient</h3>
+   <label><input id="shadowOn" type="checkbox"> Drop Shadow</label><div class="form2"><div><label for="shadowX">Offset X</label><input id="shadowX" type="number" min="-64" max="64" value="3"></div><div><label for="shadowY">Offset Y</label><input id="shadowY" type="number" min="-64" max="64" value="3"></div><div><label for="shadowBlur">Blur</label><input id="shadowBlur" type="number" min="0" max="32" value="3"></div><div><label for="shadowColor">Shadow color</label><input id="shadowColor" type="color" value="#30152d"></div></div>
+   <label style="margin-top:9px"><input id="glowOn" type="checkbox"> Outer Glow</label><div class="form2"><div><label for="glowBlur">Glow radius</label><input id="glowBlur" type="number" min="0" max="32" value="8"></div><div><label for="glowColor">Glow color</label><input id="glowColor" type="color" value="#ffd166"></div></div>
+   <label style="margin-top:9px"><input id="gradientOn" type="checkbox"> Gradient Fill</label><div class="form2"><div><label for="gradientType">Type</label><select id="gradientType"><option value="linear">Linear</option><option value="radial">Radial</option></select></div><div><label for="gradientFrom">From</label><input id="gradientFrom" type="color" value="#fff6b2"></div><div><label for="gradientTo">To</label><input id="gradientTo" type="color" value="#ff382d"></div></div>
+  </section>
+  <section class="group" id="selectPanel">
+   <h2>⤧ Selection & Transform</h2><p>กด Select FX แล้วคลิกชิ้นงานบน Canvas ระบบเลือก Layer ที่อยู่ด้านหน้าให้อัตโนมัติ • ลากแล้วปล่อยเพื่อย้ายได้ทันที • Rotate / Scale แล้วกด Apply เมื่อพอใจ</p>
+   <div class="form2"><div><label for="selectRotation">Rotate (°)</label><input id="selectRotation" type="number" min="-360" max="360" value="0"></div><div><label for="selectScale">Scale (%)</label><input id="selectScale" type="number" min="10" max="400" value="100"></div><div><label for="selectX">Move X</label><input id="selectX" type="number" min="-512" max="512" value="0"></div><div><label for="selectY">Move Y</label><input id="selectY" type="number" min="-512" max="512" value="0"></div></div>
+   <div class="row"><button id="selectFlipH" class="flex">↔ Flip H</button><button id="selectFlipV" class="flex">↕ Flip V</button></div>
+   <div class="row" style="margin-top:7px"><button id="applySelection" class="flex primary">✓ Apply</button><button id="copySelection" class="flex">▣ Duplicate</button><button id="cancelSelection" class="flex">✕ Cancel</button></div>
+  </section>
+  <section class="group" id="quickPanel">
+   <h2>✨ Quick FX & Auto Suggest</h2>
+   <div class="form2"><div><label for="editorMode">Mode</label><select id="editorMode"><option value="basic">Basic (quick FX)</option><option value="advanced">Advanced (full editor)</option></select></div><div><label for="fxPreset">FX preset</label><select id="fxPreset"><option value="staff">Gold Staff Trail</option><option value="impact">Impact Burst</option><option value="aura">Holy Aura</option><option value="lightning">Lightning Arc</option></select></div></div>
+   <button id="autoSuggest" class="full gold">✦ Auto Suggest</button><button id="applyPreset" class="full primary">＋ Add FX Preset (new layer)</button>
+   <p id="suggestionText" role="status">Rule-based presets เริ่มต้นได้ทันทีและแก้ต่อใน Layer แยกได้</p>
+  </section>
+  <section class="group">
+   <h2>🐒 Character Reference (optional)</h2>
+   <p>เปิดชุดตัวละครที่ทำเสร็จแล้วเป็น Layer อ้างอิง ตัวละครจะไม่ถูกแก้ไขจาก Brush ใช้เช็กจังหวะกระบองและวาด VFX ทับได้</p>
+   <button id="importReferenceJSON" class="full">📂 Frame Animator JSON</button>
+   <button id="importReferencePNGs" class="full">＋ PNG ตัวละครแยกเฟรม (เลือกหลายไฟล์)</button>
+   <div class="notice" style="margin-top:9px">
+     <label for="referenceGrid">Sprite Sheet ไฟล์เดียว</label>
+     <select id="referenceGrid" style="width:100%"><option value="4x1">4 เฟรม แนวนอน (4×1)</option><option value="8x1">8 เฟรม แนวนอน (8×1)</option><option value="4x2">8 เฟรม (4×2)</option><option value="2x2">4 เฟรม (2×2)</option></select>
+     <button id="importReferenceSheet" class="full primary">＋ นำเข้า Sprite Sheet</button>
+     <p>ภาพใหญ่จะย่อเฉพาะ Reference ให้พอดี Canvas โดยไม่แก้ไฟล์ต้นฉบับ</p>
+   </div>
+   <button id="clearReference" class="full">✕ ปิด Reference</button>
+   <p id="refDetails" role="status" aria-live="polite">ยังไม่มี Reference</p>
+   <p id="refFeedback" role="alert" style="color:#f9d59d">เลือกรูปแบบภาพให้ตรงก่อนนำเข้า ภาพที่นำเข้าจะแสดงซ้อนบน FX Canvas และใน Timeline</p>
+   <label><input id="showReference" type="checkbox" checked> 👁 แสดงตัวละครใน Preview</label>
+   <label style="margin-top:10px"><input id="combineExport" type="checkbox" disabled> รวมตัวละครเมื่อ Export</label>
+   <div class="notice" style="margin-top:10px">ค่าเริ่มต้น Export เฉพาะ FX พื้นหลังโปร่งใส เลือก รวมตัวละคร เมื่อต้องการ Composite เป็นไฟล์เดียวกัน</div>
+  </section>
+  <section class="group">
+   <h2>📦 Export & Project</h2>
+   <div class="exportButtons">
+    <button id="exportPNG" class="primary">↧ Sprite Sheet PNG</button>
+    <button id="exportCurrent">↧ Frame PNG</button>
+    <button id="exportGIF" class="gold">↧ Animated GIF</button>
+    <button id="saveJSON">💾 Save JSON</button>
+    <button id="openJSON">📂 Open FX Project</button>
+    <button id="clearFrame">↺ Clear Frame</button>
+   </div>
+   <p>GIF มีข้อจำกัด 256 สี รวมถึงใช้ Alpha แบบเปิด/ปิด; PNG และ JSON รักษาค่า Alpha เต็มรูปแบบ</p>
+  </section>
+  <section class="group">
+   <h2>💡 Workflow สำหรับซุนหงอคง</h2>
+   <p>Import Walk / Hit JSON, PNG ทั้ง 4 เฟรม หรือ Sprite Sheet 4×1 → ระบบปรับภาพ Reference ให้พอดี Canvas → วาด Trail สีทองในแต่ละเฟรม → เปิด Onion Skin เพื่อเทียบจังหวะ → Preview ที่ FPS เท่าตัวละคร → Export FX-only หรือ Combined</p>
+  </section>
+ </aside>
+</div>
+<div class="status"><span id="status" role="status" aria-live="polite">พร้อมวาด FX บน Layer โปร่งใส</span><span>สูงสุด 64 เฟรม · ใช้งาน Offline</span></div>
+<input id="refJSONFile" type="file" accept=".json,application/json">
+<input id="refPNGFiles" type="file" accept="image/png,image/webp" multiple>
+<input id="refSheetFile" type="file" accept="image/png,image/webp">
+<input id="fxProjectFile" type="file" accept=".json,application/json">
+<script src="./frame-animation-core.js"></script>
+<script src="./fx-core.js"></script>
+<script src="./fx-enhance-core.js"></script>
+<script src="./fx-lab.js"></script>
+</body>
+</html>

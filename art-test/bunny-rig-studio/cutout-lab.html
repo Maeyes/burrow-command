@@ -1,0 +1,103 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blessed Bunny — Simple 2D Cutout Lab</title>
+<style>
+:root{color-scheme:dark;--bg:#101b29;--panel:#1c2c3e;--line:#42617c;--text:#eef6ff;--muted:#b7d0e2;--accent:#ffe1a8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.48 system-ui,Tahoma,sans-serif}
+button,input,select{font:inherit}button,.link{cursor:pointer;border:1px solid #6688a4;background:#304963;color:var(--text);border-radius:9px;min-height:38px;padding:7px 10px;text-decoration:none}
+button:hover,.link:hover{background:#466988}button.active,.link.primary{background:#4e7e97;border-color:#d1e6e1}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:13px 20px;background:#1d3045;border-bottom:1px solid var(--line)}
+header h1{font-size:18px;margin:0}header p{font-size:11px;color:var(--muted);margin:3px 0}
+nav{display:flex;flex-wrap:wrap;gap:7px}.content{max-width:1270px;margin:0 auto;padding:18px}
+.steps{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}.steps button{flex:1;min-width:175px;text-align:left}.steps b{font-size:16px;margin-right:6px}
+.layout{display:grid;grid-template-columns:minmax(350px,1.35fr) minmax(280px,1fr);gap:15px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;min-width:0}
+h2{font-size:17px;color:var(--accent);margin:0 0 8px}
+h3{font-size:13px;margin:10px 0 8px;color:#cce9f2}
+p,small{color:var(--muted)}p{margin:6px 0 12px}.help{font-size:12px}
+.canvas-box{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:12px}
+.canvas-card{min-width:0}.canvas-label{display:flex;align-items:center;justify-content:space-between;color:#dbe7f0;min-height:24px;font-size:12px}
+canvas{display:block;width:100%;height:auto;aspect-ratio:1;image-rendering:pixelated;border:1px solid #7392a4;border-radius:9px;background-color:#23384e;background-image:linear-gradient(45deg,#30465b 25%,transparent 25%,transparent 75%,#30465b 75%),linear-gradient(45deg,#30465b 25%,transparent 25%,transparent 75%,#30465b 75%);background-size:18px 18px;background-position:0 0,9px 9px}
+#scene{touch-action:none;cursor:grab}#scene:active{cursor:grabbing}
+.badge{border-radius:99px;border:1px solid #659988;background:#244d43;padding:3px 8px;font-size:11px;color:#b9f6d7}.badge.warn{background:#584638;border-color:#b98c50;color:#ffe8ba}
+.toolbar,.row{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.toolbar{margin:13px 0}.toolbar button{flex:1}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0}
+label{font-size:12px;color:#cfe2f1;display:block}input,select{width:100%;min-height:37px;padding:6px;border:1px solid #617d99;border-radius:7px;background:#102032;color:var(--text)}
+input[type=range]{min-height:22px;accent-color:#98dbcb}.part-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;max-height:380px;overflow-y:auto;margin:10px 0}
+.part-grid button{display:flex;align-items:center;gap:8px;text-align:left;padding:5px 7px;min-height:52px}
+.part-grid img{height:42px;width:42px;object-fit:contain;image-rendering:pixelated}
+.part-grid small{display:block;font-size:10px;color:var(--muted)}
+.note{border-left:3px solid #8ac6ba;padding:9px;background:#213b49;border-radius:3px;font-size:12px}
+#timeline{display:flex;gap:3px;flex-wrap:wrap;margin:12px 0}.frame{min-width:0;flex:1;padding:5px;border-radius:6px;min-height:37px}.frame.key{border-color:#d4b77f}.frame.active{background:#56889d}
+#status{padding:12px 16px;margin-top:12px;background:#1b3245;border:1px solid #466f7b;border-radius:10px;font-size:12px;min-height:44px}
+#inspection{min-height:120px}#inspectorName{font-size:16px;font-weight:bold}
+#masterPane{display:block}#scenePane{display:block}
+body:not(.step-master) #masterPane{max-width:170px;opacity:.85}
+body:not(.step-master) .canvas-box{grid-template-columns:minmax(0,1fr) 155px}
+body:not(.step-master) #scenePane{order:-1}
+body.step-master #scene{cursor:default}
+body.step-master #editTools,body.step-master #animationTools{display:none}
+body.step-layers #animationTools{display:none}
+body.step-animate #layerIntro{display:none}
+body.step-export #layerIntro{display:none}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.content{padding:12px}.steps button{min-width:140px}body:not(.step-master) .canvas-box{grid-template-columns:minmax(0,1fr) minmax(95px,130px)}}
+</style></head><body class="step-master">
+<header><div><h1>🐰 Blessed Bunny — Simple 2D Cutout</h1><p>วาดตัวเดียว → แยก 11 Layers → หมุนหรือเลื่อนแต่ละชิ้น → เล่น Animation • ไม่มี Mesh</p></div>
+<nav><a class="link" href="./rig-proof.html">เทียบ 19 ชิ้นเดิม</a><a class="link" href="./index.html">Bone Rig Studio</a><a class="link" href="./unified-studio.html">Unified Studio</a></nav></header>
+<main class="content">
+<div class="steps" role="tablist" aria-label="Cutout workflow">
+<button id="stepMaster" class="active" role="tab" aria-selected="true"><b>1</b> วาด Master ก่อน</button>
+<button id="stepLayers" role="tab" aria-selected="false"><b>2</b> แยก Layer + ขยับ</button>
+<button id="stepAnimate" role="tab" aria-selected="false"><b>3</b> Idle / Walk / Attack</button>
+<button id="stepExport" role="tab" aria-selected="false"><b>4</b> Export</button>
+</div>
+<div class="layout">
+<section class="panel">
+<h2 id="stageTitle">1. ภาพต้นแบบกับภาพประกอบกลับ</h2>
+<p class="help" id="stageHelp">Master หนึ่งตัว มุมมองเดียวกัน และเสื้ออยู่ติดกับลำตัวทั้งชิ้น จากนั้นตัดชิ้นส่วนที่ต้องขยับออกจากภาพ Master เดิมจริง ๆ</p>
+<div class="canvas-box">
+<div class="canvas-card" id="masterPane"><div class="canvas-label"><strong>Master</strong><span>ต้นฉบับ</span></div><canvas id="master" width="256" height="256" aria-label="ต้นแบบกระต่าย"></canvas></div>
+<div class="canvas-card" id="scenePane"><div class="canvas-label"><strong>Cutout Rig</strong><span id="frameLabel">Frame 1</span></div><canvas id="scene" width="256" height="256" aria-label="ภาพกระต่ายประกอบจากชิ้นส่วนพร้อมลากและหมุน"></canvas></div>
+</div>
+<p id="qcStatus" aria-live="polite">กำลังตรวจการประกอบ…</p>
+<div id="editTools">
+ <div class="toolbar"><button class="active" id="moveTool">✥ Move (V)</button><button id="rotateTool">↻ Rotate (R)</button><button id="minus15">⟲ −15°</button><button id="plus15">⟳ +15°</button></div>
+ <div class="row"><button id="undo">↶ Undo (Ctrl+Z)</button><button id="redo">↷ Redo (Ctrl+Y)</button><button id="resetPart">↺ Reset ชิ้นนี้</button></div>
+</div>
+<div id="animationTools">
+ <h3>คลิปแอนิเมชัน</h3>
+ <div class="row"><label style="flex:1">Animation Clip<select id="clip"></select></label><button id="play">▶ Play</button><button id="prev">◀</button><button id="next">▶</button></div>
+ <div id="timeline" aria-label="Animation timeline"></div>
+ <p class="help">คลิกเลือกเฟรม แล้วลาก/หมุนชิ้นที่ต้องการ ระบบจะสร้าง Keyframe อัตโนมัติ</p>
+</div>
+<div class="note" id="nextTip">ตรวจว่าภาพทั้งสองฝั่งเหมือนกันทุกพิกเซล แล้วกดขั้นตอนที่ 2 เพื่อแยก Layer</div>
+</section>
+<aside class="panel">
+<h2 id="sideTitle">อะไรอยู่ในตัวกระต่ายบ้าง?</h2>
+<p class="help" id="sideHelp">ตอนนี้เสื้อ เกราะ และเข็มขัดถูกวาดไว้บนลำตัวเดียวกัน ส่วนที่ต้องขยับเท่านั้นจึงแยกเป็นชิ้น</p>
+<div id="layerIntro" class="note">ไม่ต้องเริ่มจาก Bone 19 ชิ้น ให้ลอง Cutout แบบ 11 ชิ้นก่อน: แขนและขาแต่ละข้างเป็นชิ้นเดียว ขยับด้วยการหมุนรอบ Pivot</div>
+<div id="parts" class="part-grid" aria-label="Cutout layer selector"></div>
+<div id="inspection">
+<div id="inspectorName">เลือก Layer เพื่อแก้ไข</div>
+<small id="inspectorParent"></small>
+<div class="field-row"><label>X<input id="posX" type="number" min="-300" max="300" step="1"></label><label>Y<input id="posY" type="number" min="-300" max="300" step="1"></label></div>
+<label>Rotation <span id="rotationLabel">0°</span><input id="rotation" type="range" min="-180" max="180" step="1" value="0"></label>
+<div class="row" style="margin-top:10px"><button id="hideLayer">◉ ซ่อน/แสดง Layer</button><button id="resetAll">↺ Reset ทุกชิ้น</button></div>
+</div>
+<div id="exportActions" style="margin-top:18px">
+<h3>บันทึกงาน</h3>
+<div class="row">
+<button id="exportJSON">💾 Bone Rig JSON</button>
+<button id="exportSheet">↧ Sprite Sheet PNG</button>
+<button id="exportMaster">↧ Master PNG</button>
+<a class="link primary" href="./index.html?cutout=1">เปิดใน Rig Studio ตัวเต็ม ↗</a>
+</div>
+<p class="help">JSON เก็บ PNG โปร่งใสของแต่ละชิ้น, Pivot และ Keyframes ไว้แก้ต่อได้; Sprite Sheet รวมภาพสำเร็จสำหรับเกม</p>
+</div>
+</aside>
+</div>
+<div id="status" role="status" aria-live="polite">กำลังเตรียมตัวอย่าง Cutout 11 ชิ้น…</div>
+</main>
+<script src="./rig-proof-art.js"></script><script src="./unified-core.js"></script><script src="./cutout-lab.js"></script>
+</body></html>

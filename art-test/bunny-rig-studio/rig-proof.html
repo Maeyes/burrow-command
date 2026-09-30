@@ -1,0 +1,28 @@
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blessed Bunny — Rig Geometry Proof</title>
+<style>
+:root{color-scheme:dark;--bg:#152233;--box:#22384d;--line:#4c667e;--text:#e9f5ff;--sub:#b9cddd}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 system-ui,Tahoma,sans-serif}main{max-width:1160px;margin:auto;padding:24px}
+h1{font-size:26px;margin:0 0 5px}h2{font-size:17px;color:#ffe0a5}p,small{color:var(--sub)}button,a.action{display:inline-block;cursor:pointer;background:#41698d;border:1px solid #82b2d8;color:white;text-decoration:none;border-radius:8px;padding:10px 15px;font:inherit}
+button:hover,a.action:hover{background:#5b88b0}.actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.card{background:var(--box);border:1px solid var(--line);border-radius:12px;padding:17px}
+canvas{display:block;margin:auto;max-width:100%;width:min(100%,430px);image-rendering:pixelated;aspect-ratio:1;background-color:#2c465b;background-image:linear-gradient(45deg,#345068 25%,transparent 25%,transparent 75%,#345068 75%),linear-gradient(45deg,#345068 25%,transparent 25%,transparent 75%,#345068 75%);background-size:24px 24px;background-position:0 0,12px 12;border:1px solid #506c83;border-radius:5px}
+#parts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.part{background:var(--box);border:1px solid var(--line);border-radius:8px;padding:10px}.part img{display:block;margin:3px auto;max-width:90px;height:90px;object-fit:contain;image-rendering:pixelated}.part button{width:100%;margin-top:8px;font-size:12px;padding:7px}.pass{color:#8ff2b9}.fail{color:#ffafa5}
+@media(max-width:740px){.grid{grid-template-columns:1fr}main{padding:14px}}
+</style></head><body><main>
+<h1>🐰 Blessed Bunny — Rig Geometry Proof V1</h1>
+<p>ตัวทดสอบที่สร้างจากรูปต้นแบบเดียวกันจริง ๆ ไม่ใช่ภาพ AI ที่สุ่มวาดชิ้นส่วนแยกอิสระ รูปทุกชิ้นมีตำแหน่งอ้างอิง Pivot และ PNG พื้นหลังโปร่งใส</p>
+<div class="actions">
+ <a class="action" href="./index.html?proof=1">🦴 เปิด Rig-ready Bunny ใน Rig Studio</a>
+ <button id="downloadJSON">💾 ดาวน์โหลด Rig JSON (รวม PNG)</button>
+ <button id="downloadMaster">↧ ดาวน์โหลด Master PNG</button>
+ <a class="action" href="./index.html">↩ Bone Rig เดิม</a><a class="action" href="./cutout-lab.html">✂️ ลอง Cutout 11 ชิ้นแบบง่าย</a>
+</div>
+<div class="grid">
+ <section class="card"><h2>Master — ภาพต้นแบบ</h2><canvas id="master" width="256" height="256" aria-label="ภาพกระต่ายต้นฉบับบน Canvas 256"></canvas><p>ทุกชิ้นใช้ Master Coordinate System 256×256 เดียวกัน</p></section>
+ <section class="card"><h2>Reassembled — ภาพที่ Rig ประกอบจริง</h2><canvas id="assembled" width="256" height="256" aria-label="ภาพประกอบกลับจาก PNG แยกทุกชิ้น"></canvas><p id="result" aria-live="polite">กำลังตรวจเปรียบเทียบพิกเซล…</p></section>
+</div>
+<h2>PNG แยกแต่ละชิ้น (19 Parts)</h2>
+<p>สังเกตว่าแต่ละชิ้นถูก Crop แต่มีพิกัด Pivot / Parent เก็บไว้ครบ ดาวน์โหลดแต่ละ PNG ได้ หรือใช้ Rig JSON ที่รวมทุกภาพให้ในไฟล์เดียว</p>
+<div id="parts"></div>
+<p id="status" aria-live="polite">กำลังโหลด…</p>
+</main><script src="./rig-proof-art.js"></script><script src="./rig-proof-page.js"></script></body></html>

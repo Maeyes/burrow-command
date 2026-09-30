@@ -16,3 +16,9 @@ test-result.txt
 *.zip
 dist-warren/
 .deploy-warren/
+
+# Local scratch / review output (kept on disk, not in the repo)
+/ChatGPT Image *.png
+art-test/arthur-review/
+artifacts/burrow-assets/
+art-test/dimraeth-slice/maps/test*.json

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Frame Animator — Bunny Rig Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#0d121b;--panel:#171f2c;--panel2:#1e2c3d;--edge:#35475e;--text:#eef5ff;--muted:#a8bad0;--blue:#81b9ff;--mint:#8cddb5;--gold:#ffd58d;--red:#ff9d9d}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 52% -20%,#283a51,#0c121a 60%);color:var(--text);font:13px/1.5 system-ui,"Noto Sans Thai",Tahoma,sans-serif;min-height:100vh}
+button,input,select{font:inherit}button,.navlink{border:1px solid #496077;color:#edf5ff;background:#25364b;border-radius:9px;padding:8px 11px;min-height:38px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button:hover,.navlink:hover{background:#34506c}button:disabled{cursor:not-allowed;opacity:.4}button:focus-visible,input:focus-visible,select:focus-visible,.navlink:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.primary{background:#537dbc;border-color:#84b9ff;font-weight:750}.gold{background:#705737;border-color:#bd9962;color:#ffefc5;font-weight:700}
+input,select{background:#121e2d;border:1px solid #475e7a;color:var(--text);border-radius:8px;padding:8px;min-width:0}input[type=number]{width:100%}input[type=file]{display:none}input[type=checkbox]{accent-color:#85bafe}
+label{display:block;font-size:11px;color:#bed0e3;margin-bottom:5px}
+small,.muted{color:var(--muted)}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px;background:#151f2de8;border-bottom:1px solid #34485e;flex-wrap:wrap}
+.brand{display:flex;gap:12px;align-items:center}.logo{display:grid;place-items:center;width:43px;height:43px;border-radius:13px;background:linear-gradient(145deg,#6b8ec0,#283f65);font-size:26px}.brand b{font-size:16px}.brand small{display:block;font-size:10px}.nav{display:flex;gap:7px;flex-wrap:wrap}.navlink.active{background:#476a95;border-color:#8fb7e6}.pill{background:#233647;border:1px solid #405975;padding:4px 8px;border-radius:30px;color:#d5e5f4;font-size:10px;font-weight:700;white-space:nowrap}
+.layout{display:grid;grid-template-columns:270px minmax(420px,1fr) 275px;min-height:calc(100dvh - 113px)}
+.pane{background:#141d2a;min-width:0}.left{border-right:1px solid var(--edge)}.right{border-left:1px solid var(--edge)}.middle{display:flex;flex-direction:column;min-width:0}
+section.group{border-bottom:1px solid #36485b;padding:17px 15px}h2{margin:0 0 11px;font-size:13px;color:#e4eef9;letter-spacing:.01em}h3{font-size:12px;margin:0 0 8px;color:#f6daa2}p{margin:7px 0 12px;color:#b4c8de;font-size:12px;line-height:1.7}
+.drop{border:2px dashed #6986a7;background:linear-gradient(150deg,#263b51,#1a2c3d);min-height:115px;border-radius:13px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;text-align:center;padding:14px;cursor:pointer}
+.drop.dragover{border-color:#a5efc4;background:#335449}.drop strong{color:#f1f7ff;font-size:13px}.drop span{font-size:11px;color:#b9cddd}
+.gridForm{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:11px 0}.gridForm > div{min-width:0}.presets,.actions,.transport{display:flex;flex-wrap:wrap;gap:7px}.presets button{flex:1;white-space:nowrap;min-width:65px;padding:7px 5px;font-size:11px}
+.actions button{flex:1}.help{background:#24354a;border:1px solid #405a73;border-radius:10px;padding:10px;line-height:1.7;font-size:11px}
+.sheetPreview{width:100%;max-height:140px;object-fit:contain;image-rendering:pixelated;background:repeating-conic-gradient(#2d4054 0 25%,#192736 0 50%) 50%/20px 20px;border-radius:8px;border:1px solid #405b6f;margin-top:12px}
+.frameList{display:grid;gap:7px;max-height:46vh;overflow-y:auto;padding:2px 2px 14px}
+.frameRow{display:grid;grid-template-columns:45px 1fr auto;align-items:center;gap:9px;padding:7px;background:#1b2a3a;border:1px solid #324a62;border-radius:10px;cursor:pointer}
+.frameRow.active{background:#2b435b;border-color:#97c6ff}.frameRow img{width:44px;height:44px;object-fit:contain;image-rendering:pixelated;background:repeating-conic-gradient(#415266 0 25%,#293a50 0 50%) 50%/10px 10px;border:1px solid #60758d;border-radius:6px}
+.frameName{min-width:0}.frameName strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}.frameName small{display:block;font-size:10px}
+.rowbuttons{display:grid;grid-template-columns:repeat(3,25px);gap:3px}.rowbuttons button{min-height:25px;width:25px;padding:0;font-size:12px;background:#2d4054}
+.topinfo{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:14px;border-bottom:1px solid var(--edge);background:#182331}
+.viewer{flex:1;min-height:400px;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 37%,#34465c,#182334 65%,#101a28)}
+.viewer canvas{display:block;max-width:100%;max-height:min(61vh,540px);width:min(100%,520px);height:auto;aspect-ratio:1;image-rendering:pixelated;touch-action:none;border:1px solid #667f9b;border-radius:10px;box-shadow:0 20px 60px #0008;background:#1a2938}
+.viewer-note{text-align:center;font-size:11px;color:#a8c1d9;margin-top:10px}
+.playbar{background:#192637;border-top:1px solid #374a60;padding:14px;display:grid;gap:11px}
+.transport{align-items:center;justify-content:center}.transport button{min-width:49px}.transport span{color:#ffdfa1;font-weight:750;font-variant-numeric:tabular-nums;padding:0 6px}
+.frameTimeline{display:flex;overflow-x:auto;gap:4px;padding:6px 3px;min-height:77px}
+.timelineCell{position:relative;border:1px solid #506882;border-radius:8px;min-width:68px;width:68px;height:67px;display:grid;place-items:center;background:#213246;cursor:pointer;padding:0;overflow:hidden}
+.timelineCell.active{border:2px solid #ffe2a8;background:#36516c}.timelineCell img{width:42px;height:42px;object-fit:contain;image-rendering:pixelated}.timelineCell small{position:absolute;bottom:0;left:0;right:0;background:#0e1b2acc;text-align:center;font-size:9px;padding:1px}
+.row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.row label{margin:0}.range{width:100%;accent-color:#87bdff}
+.notice{padding:10px;border-radius:9px;border:1px solid #56728c;background:#253b50;color:#dce9f5;font-size:11px}.warn{color:#ffe3ab;background:#594728;border-color:#b89157}
+.status{background:#101927;border-top:1px solid #34475e;padding:9px 14px;font-size:11px;color:#aaddbf;min-height:35px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+@media(max-width:1100px){.layout{grid-template-columns:235px minmax(345px,1fr) 235px}.viewer{min-height:360px}}
+@media(max-width:825px){.layout{grid-template-columns:minmax(0,1fr)}.middle{grid-row:1}.left{grid-row:2;border-right:0;border-top:1px solid var(--edge)}.right{grid-row:3;border-left:0;border-top:1px solid var(--edge)}.viewer{min-height:350px}.frameList{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));max-height:none}.gridForm{grid-template-columns:repeat(2,minmax(0,1fr))}.topinfo{padding:10px}.brand small{display:none}}
+
+/* Auto Extract is deliberately separate from the animation timeline. */
+.extractStudio[hidden]{display:none!important}
+.extractStudio{position:fixed;inset:0;z-index:100;background:#0d1721ec;display:grid;place-items:center;padding:12px;overflow:auto}
+.extractShell{width:min(1500px,100%);max-height:calc(100dvh - 24px);overflow:auto;background:#172436;border:1px solid #6b8bad;border-radius:14px;box-shadow:0 22px 100px #000b}
+.extractHeader,.extractFooter{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 16px;background:#21344b}
+.extractHeader h2{margin:0;font-size:17px;color:#f5e5c6}
+.extractLayout{display:grid;grid-template-columns:155px minmax(400px,1fr) 275px;gap:0}
+.extractSide,.extractInspector{padding:13px;background:#18283c}
+.extractSide{border-right:1px solid #3e566d}.extractInspector{border-left:1px solid #3e566d}
+.extractFrameList{display:grid;gap:5px;max-height:50vh;overflow:auto}
+.extractFrameButton{width:100%;font-size:11px;min-height:31px}
+.extractFrameButton.active{background:#466d97;border-color:#ffdb93}
+.extractCenter{min-width:0;padding:12px;display:flex;align-items:center;flex-direction:column;gap:12px}
+.extractBar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;width:100%;justify-content:center}
+.extractBar label{display:flex;align-items:center;gap:5px;margin:0}
+.extractBar input[type=range]{width:92px}
+#extractCanvas{width:min(100%,640px);height:auto;aspect-ratio:4/3;image-rendering:pixelated;touch-action:none;border:1px solid #8aa5c4;cursor:crosshair;border-radius:7px}
+.extractRegionList{display:grid;gap:4px;max-height:170px;overflow:auto;margin:6px 0;font-size:11px}
+.extractRegion{display:flex;align-items:center;gap:6px;background:#263d53;padding:5px;border-radius:5px;margin:0;cursor:pointer}
+.extractHint{font-size:11px;color:#b6cce4;line-height:1.7}
+@media(max-width:1000px){.extractLayout{grid-template-columns:1fr}.extractSide{border-right:0;border-bottom:1px solid #40586d}.extractInspector{border-left:0;border-top:1px solid #40586d}.extractFrameList{display:flex;max-height:95px;overflow-x:auto}.extractFrameButton{width:auto;white-space:nowrap}.extractStudio{display:block}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="logo">🐰</div><div><b>Bunny Rig Studio</b><small>2D Character & Sprite Animation Workshop</small></div></div>
+ <nav class="nav" aria-label="Editor modes">
+  <a class="navlink" href="./index.html">🦴 Bone Rig</a>
+  <a class="navlink active" href="./frame-animation.html" aria-current="page">🎞 Frame Animation</a>
+  <a class="navlink" href="./fx-lab.html">✨ FX Lab</a>
+  <a class="navlink" href="./unified-studio.html">◎ Unified Studio</a>
+  <a class="navlink" href="./rig-proof.html">🧪 Rig QC</a><a class="navlink" href="./cutout-lab.html">✂️ Cutout Lab</a>
+ </nav>
+ <div class="pill">OFFLINE • PNG • GIF • JSON</div>
+</header>
+<div class="layout">
+ <aside class="pane left">
+  <section class="group">
+   <h2>📥 1. นำเข้าเฟรม</h2>
+   <div id="dropZone" class="drop" tabindex="0" role="button" aria-label="เพิ่ม Sprite Sheet 4 หรือ 8 เฟรม หรือภาพ PNG แยกเฟรม"><div style="font-size:30px">🎞</div><strong>ลากภาพมาวางตรงนี้</strong><span>Sprite Sheet 4 / 8 เฟรมในไฟล์เดียว หรือ PNG แยกเฟรม</span><span>คลิกเพื่อเลือกไฟล์</span></div>
+   <div class="actions" style="margin-top:10px"><button id="pickSheet" class="primary">＋ Sprite Sheet</button><button id="pickFrames">＋ PNG หลายไฟล์</button></div>
+   <button id="demoFrames" style="width:100%;margin-top:8px">🐰 ทดลองอนิเมชั่น 4 เฟรม</button>
+   <img id="sheetPreview" class="sheetPreview" hidden alt="ภาพต้นฉบับ Sprite Sheet">
+   <div id="sheetOptions" hidden>
+    <h3 style="margin-top:16px">✂️ ตั้งค่าตัดภาพเป็นเฟรม</h3>
+    <div class="presets"><button data-grid="4x1">4 แนวนอน</button><button data-grid="2x2">2 × 2</button><button data-grid="1x4">4 แนวตั้ง</button></div>
+    <div class="presets" style="margin-top:7px"><button data-grid="8x1" class="gold">8 แนวนอน</button><button data-grid="4x2" class="gold">8 (4 × 2)</button><button data-grid="2x4">8 (2 × 4)</button><button data-grid="1x8">8 แนวตั้ง</button></div>
+    <div class="gridForm">
+     <div><label for="cols">Columns</label><input type="number" id="cols" value="4" min="1" max="64"></div>
+     <div><label for="rows">Rows</label><input type="number" id="rows" value="1" min="1" max="64"></div>
+     <div><label for="margin">Margin (px)</label><input type="number" id="margin" value="0" min="0" max="128"></div>
+     <div><label for="spacing">Spacing (px)</label><input type="number" id="spacing" value="0" min="0" max="128"></div>
+    </div>
+    <p id="gridHint">จะแบ่งภาพเป็น 4 ช่องเท่ากัน</p>
+    <button class="primary" id="sliceBtn" style="width:100%">✂️ ตัดและเพิ่มเฟรม</button><button id="autoExtractBtn" class="gold" style="width:100%;margin-top:8px">✂️ Auto Extract • ตรวจ Mask / Crop ก่อนนำเข้า</button>
+   </div>
+  </section>
+  <section class="group">
+   <h2>🧩 2. ลำดับเฟรม <span class="pill" id="frameCount">0 เฟรม</span></h2>
+   <p>คลิกเพื่อเลือกเฟรม ใช้ ↑ ↓ เพื่อเรียงใหม่ หรือ ✕ เพื่อลบ</p>
+   <div id="framesList" class="frameList"><p class="muted">นำเข้าภาพก่อน แล้วเฟรมจะปรากฏที่นี่</p></div>
+   <div class="actions" style="margin:9px 0"><button id="frameUndo" title="Ctrl+Z" disabled>↶ Undo</button><button id="frameRedo" title="Ctrl+Y / Ctrl+Shift+Z" disabled>↷ Redo</button></div>
+   <button id="clearFrames">↺ ล้างเฟรมทั้งหมด</button>
+  </section>
+ </aside>
+ <main class="middle">
+  <div class="topinfo"><div class="row"><strong>🖼 Preview</strong><span class="pill" id="sizeLabel">ยังไม่มีเฟรม</span></div><div class="row"><label><input type="checkbox" id="onion"> Onion Skin</label><label><input type="checkbox" id="checker" checked> ตาหมากรุก</label></div></div>
+  <div class="viewer"><div style="width:100%;max-width:520px"><canvas id="preview" width="512" height="512" aria-label="ตัวอย่างอนิเมชั่นพื้นหลังโปร่งใส"></canvas><div class="viewer-note">ภาพที่นำเข้าจะไม่ถูกยืดสัดส่วน • PNG Export รักษาความโปร่งใส</div></div></div>
+  <section class="playbar">
+   <div class="transport"><button id="previous" aria-label="Previous frame">⏮</button><button class="primary" id="play">▶ Play</button><button id="next" aria-label="Next frame">⏭</button><span id="counter" aria-live="polite">F 00 / 00</span></div>
+   <div id="timeline" class="frameTimeline" aria-label="Frame timeline"></div>
+  </section>
+ </main>
+ <aside class="pane right">
+  <section class="group">
+   <h2>⚙️ 3. Animation Settings</h2>
+   <div class="gridForm"><div><label for="fps">FPS</label><input id="fps" type="number" min="1" max="30" value="8"></div><div><label for="loop">Loop</label><select id="loop"><option value="1">วนซ้ำ</option><option value="0">เล่นครั้งเดียว</option></select></div></div>
+   <p>4 เฟรมที่ 8 FPS = 0.5 วินาที • 8 เฟรมที่ 8 FPS = 1 วินาทีต่อรอบ</p>
+   <h3>ตำแหน่งของเฟรมที่เลือก</h3>
+   <div class="gridForm">
+    <div><label for="offsetX">เลื่อน X (px)</label><input type="number" id="offsetX" value="0" min="-512" max="512"></div>
+    <div><label for="offsetY">เลื่อน Y (px)</label><input type="number" id="offsetY" value="0" min="-512" max="512"></div>
+    <div><label for="hold">แสดงซ้ำ (×)</label><input type="number" id="hold" value="1" min="1" max="16"></div>
+    <div><label for="selectedLabel">ชื่อเฟรม</label><input id="selectedLabel" placeholder="frame_1"></div>
+   </div>
+   <button id="applyFrame" style="width:100%">✓ ปรับเฟรม</button>
+   <h3 style="margin-top:20px">ขนาด Canvas ที่ส่งออก</h3>
+   <div class="gridForm"><div><label for="cellWidth">Frame Width</label><input id="cellWidth" type="number" value="256" min="1" max="1024"></div><div><label for="cellHeight">Frame Height</label><input id="cellHeight" type="number" value="256" min="1" max="1024"></div></div>
+   <div class="notice">ภาพขนาดต่างกันจะถูกจัดให้อยู่กึ่งกลางแนวนอน และให้เท้าอยู่ตรงแนวล่างของเฟรมโดยอัตโนมัติ ปรับ X/Y เพิ่มได้ทีละภาพ</div>
+  </section>
+  <section class="group">
+   <h2>📦 4. ส่งออก Animation</h2>
+   <div class="gridForm"><div><label for="exportColumns">Sprite Sheet Columns</label><input type="number" id="exportColumns" value="4" min="1" max="64"></div><div><label for="projectName">ชื่อ Animation</label><input id="projectName" value="bunny-walk" maxlength="60"></div></div>
+   <div class="actions"><button id="exportPNG" class="primary">↧ Sprite Sheet PNG</button><button id="exportGIF" class="gold">↧ Animated GIF</button></div><button id="exportFramePNG" style="width:100%;margin-top:8px">↧ PNG เฟรมที่เลือก (โปร่งใส)</button>
+   <div class="actions" style="margin-top:8px"><button id="saveJSON">💾 Save Project</button><button id="loadJSON">📂 Open Project</button></div>
+   <p>PNG ใช้สำหรับเกม ส่วน GIF ใช้ดูหรือแชร์อนิเมชั่น (จำกัดสี 256 สีเพื่อรองรับ GIF)</p>
+  </section>
+  <section class="group">
+   <h2>💡 วิธีใช้งาน</h2>
+   <div class="help">ภาพที่เจนมาเป็น <strong>Sprite Sheet 4 หรือ 8 ช่องในไฟล์เดียว</strong>: กด Sprite Sheet → เลือกรูปแบบ 4 แนวนอน / 2×2 หรือ 8 แนวนอน / 4×2 → ตัดภาพ → Play → ตั้ง FPS → Export<br><br>ภาพแยก 4 ไฟล์: กด PNG หลายไฟล์ → ปรับลำดับ → Play → Export<br><br>ถ้าภาพต้นฉบับไม่มีพื้นหลัง PNG ที่ส่งออกจะโปร่งใสจริงเหมือนเดิม</div>
+  </section>
+ </aside>
+</div>
+<div id="extractStudio" class="extractStudio" role="dialog" aria-modal="true" aria-label="Auto Extract Main Sprite" hidden>
+ <div class="extractShell">
+  <div class="extractHeader"><div><h2>✂ Auto Extract Main Sprite</h2><small>ตรวจทุกเฟรมก่อนนำเข้า • Crop และ Mask ไม่แก้ไข PNG ต้นฉบับ</small></div>
+   <div class="row"><button id="extractUndo">↶ Undo</button><button id="extractRedo">↷ Redo</button><button id="extractClose">✕ ปิด</button></div>
+  </div>
+  <div class="extractLayout">
+   <aside class="extractSide">
+    <h3>เฟรมจาก Grid</h3><div id="extractFrames" class="extractFrameList"></div>
+    <p class="extractHint">เลือกเฟรมเพื่อปรับ Crop ได้อิสระ รวมถึงพื้นที่ที่ยื่นเข้าช่องข้างเคียง</p>
+    <p class="extractHint">สีเขียว = จุดอ้างอิงตัวละคร / ระดับเท้า สามารถปรับได้ทีละเฟรม</p>
+   </aside>
+   <main class="extractCenter">
+    <div class="extractBar"><label>เครื่องมือ <select id="extractTool"><option value="crop">Crop / ลากขอบ</option><option value="exclude">Eraser / ซ่อนพิกเซล</option><option value="include">Restore / คืนพิกเซล</option></select></label><label>Brush <input type="range" id="extractBrush" min="0" max="32" value="4"></label><label>Zoom <input id="extractZoom" type="range" min=".5" max="4" step=".25" value="1"></label></div>
+    <canvas id="extractCanvas" width="640" height="480" aria-label="ปรับ Crop และระบาย Mask ของเฟรมที่เลือก"></canvas>
+    <div class="extractBar"><label><input id="eyeSource" type="checkbox" checked> 👁 ต้นฉบับ</label><label><input id="eyePrevious" type="checkbox"> 👁 เฟรมก่อน</label><label><input id="eyeNext" type="checkbox"> 👁 เฟรมถัดไป</label><label>Opacity <input id="extractOpacity" type="range" min="5" max="90" value="32"></label></div>
+    <div id="extractScale" class="extractHint" aria-live="polite"></div>
+    <p class="extractHint">เลื่อนกรอบ Crop หรือปรับขอบ L/R/T/B บนภาพ • Eraser ซ่อนเศษเฟรมข้างเคียง • Restore คืนพิกเซลต้นฉบับ • Overlay เฟรมข้างเคียงอิงจุด Anchor/เท้า</p>
+   </main>
+   <aside class="extractInspector">
+    <h3>1. Crop รายเฟรม (px)</h3>
+    <div class="gridForm"><div><label for="extractX">X</label><input id="extractX" type="number" min="0"></div><div><label for="extractY">Y</label><input id="extractY" type="number" min="0"></div><div><label for="extractW">Width</label><input id="extractW" type="number" min="1" max="1024"></div><div><label for="extractH">Height</label><input id="extractH" type="number" min="1" max="1024"></div></div>
+    <button id="extractTrim" style="width:100%">▢ Trim Transparent</button>
+    <h3 style="margin-top:15px">2. Main Object Detection</h3>
+    <div class="actions"><button id="extractDetect">⌕ Detect</button><button id="extractResetMask">↺ คืน Mask</button></div>
+    <div id="extractRegions" class="extractRegionList">กด Detect เพื่อดูกลุ่มพิกเซล</div>
+    <button id="extractMain" style="width:100%">★ เลือกเฉพาะ Main (ยืนยันก่อน)</button>
+    <p class="extractHint">ทุก Connected Component ถูกเก็บไว้ก่อนเสมอ ตรวจหาง กระบอง อาวุธ ผ้าคลุม และ VFX ก่อนซ่อนกลุ่มอื่น</p>
+    <h3 style="margin-top:15px">3. Frame Alignment</h3>
+    <div class="gridForm">
+     <div><label for="extractAnchorX">Pivot X</label><input id="extractAnchorX" type="number" step=".5"></div>
+     <div><label for="extractFootY">Foot Y</label><input id="extractFootY" type="number" step=".5"></div>
+     <div><label for="extractOffsetX">Offset X</label><input id="extractOffsetX" type="number" value="0"></div>
+     <div><label for="extractOffsetY">Offset Y</label><input id="extractOffsetY" type="number" value="0"></div>
+    </div>
+   </aside>
+  </div>
+  <div class="extractFooter"><span id="extractNote" role="status">Original PNG preserved</span><div class="row"><button id="extractSelectedPNG">↧ PNG เฟรมนี้ (Trimmed)</button><button id="extractCommit" class="primary">✓ เพิ่มทุกเฟรมเข้า Timeline</button></div></div>
+ </div>
+</div>
+<div class="status"><span id="status" role="status" aria-live="polite">พร้อมใช้งาน • Sprite Sheet 4 / 8 เฟรม หรือ PNG แยกภาพ</span><span>สูงสุด 64 เฟรมต่อคลิป • ออฟไลน์ได้</span></div>
+<input type="file" id="sheetInput" accept="image/png,image/webp,image/jpeg">
+<input type="file" id="framesInput" multiple accept="image/png,image/webp,image/jpeg">
+<input type="file" id="projectInput" accept=".json,application/json">
+<script src="./frame-animation-core.js"></script>
+<script src="./auto-extract-core.js"></script>
+<script src="./auto-extract.js"></script>
+<script src="./frame-animation.js"></script>
+</body>
+</html>
