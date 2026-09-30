@@ -42,7 +42,7 @@ import { CLASS_FAMILIES, LEGACY_SAVE_KEY, SAVE_KEY, bunnyName, expRequired, give
 const IS_CINEMATIC_PREVIEW=globalThis.location?.hash==='#cinematic-preview';
 import { inventoryItemMeta } from '../../src/simulation/itemTagsV2.ts';
 import { MONSTERS_V2 as MONSTER_XP } from '../../src/simulation/monsterDataV2.ts';
-import { itemLabel, gameIcon, renderSquadHtml, renderForgeHtml, renderHeroHtml, renderInventoryHtml, renderItemDetailHtml } from './warren-ui.js';
+import { esc, itemLabel, gameIcon, renderSquadHtml, renderForgeHtml, renderHeroHtml, renderInventoryHtml, renderItemDetailHtml } from './warren-ui.js';
 import { renderTowerHtml,renderMagicCartHtml, renderMasteryHtml, renderBatchHtml } from './warren-extra-ui.js';
 import { selectNightDefenseTarget, chooseRaidGate, nearestClosedGate, assignedGateDefensePost } from './warren-defense-ai.js';
 import {renderArmoryHtml,visibleArmoryInventory} from './warren-armory-ui.js';
@@ -66,6 +66,9 @@ import {applyHomeNativePathsToArrays,isHomeNativePath} from './warren-home-paths
 import {validateDefensePlacement,DEFENSE_FOOTPRINT} from './warren-defense-placement.js';
 import {renderHomeBuilderHtml} from './warren-home-ui.js';
 import {createHomeController} from './warren-home-controller.js';
+import {homeBonuses} from './warren-home-bonuses.js';
+import {nextGoal} from './warren-next-goal.js';
+import {snapshotNight,summarizeNight,renderNightSummaryHtml} from './warren-night-summary.js';
 import {HOME_PLOTS,HOME_SIDES,HOME_SIDE_NAMES,HOME_PLOT_COST,HOME_WALL_COST,fullyOwnedSide,homePerimeterBlueprint,homeWallLayoutId,homeOwnedCell,plotForCell,homeWallIntegrity,reconcileHomeWall,HOME_EXPANSION_STAGES,HOME_NORTH_FINAL,homeAtNorthernCliff} from './warren-home-land.js';
 import {HOME_TERRAIN_BRUSHES,applyHomeTerrainBrush,normalizeHomeTerrain,validateHomeTerrainBatch,quoteHomeTerrain,deriveHomeRivers,makeHomeWaterfall,applyHomeTerrainToArrays,applyHomeNorthernCliff,isNorthCliffCrest,migrateLegacyNorthCliffSources,deriveHomeNorthCurtains,quoteNewHomeNorthCurtains} from './warren-home-terrain.js';
 import {BASE_CRIT_DAMAGE,rollWarrenCrit,rollMasteryProc,hitFeedback} from './warren-hit-feedback.js';
@@ -302,8 +305,11 @@ function towerArtFor(level=1){level=Math.max(1,Math.min(5,level));if(!towerArtBy
 let magicCartArt = null;
 const defenseStructures=()=>[...S.towers,...S.magicCarts];
 // Village perimeter lives in warren-perimeter-controller.js.
-const perimeterController=createPerimeterController({S,T,toast,save,renderUi,matCount,spendMats,keepActorsOutOfWalls,skillFx:()=>skillFx,floaters:()=>floaters});
-const {installFence,rebuildPerimeter,syncGateRuntime,selectGate,upgradePerimeter,hurtPerimeter}=perimeterController;
+// House bonuses only change when the layout changes; the home controller clears this cache.
+let houseBonusCache=null;
+const houseBonus=()=>houseBonusCache??=homeBonuses(S.homeBuilder);
+const perimeterController=createPerimeterController({S,T,toast,save,renderUi,matCount,spendMats,keepActorsOutOfWalls,wallHpBonus:()=>houseBonus().wallHp,skillFx:()=>skillFx,floaters:()=>floaters});
+const {applyWallHpBonus,installFence,rebuildPerimeter,syncGateRuntime,selectGate,upgradePerimeter,hurtPerimeter}=perimeterController;
 function placeTower(x, y) {
   if(S.night)return false;
   if (S.towers.length >= towerMax()) return toast(`บ้าน Lv ${S.warren} สร้างได้ ${towerMax()} ป้อม · อัปบ้านเพื่อสร้างเพิ่ม`);
@@ -374,7 +380,7 @@ function updateMagicCarts(dt){
   if(!cart.garrison||cart.hp<=0)continue;
   const g=cart.garrison,c=CLASSES.mage,st=statsOf('mage',g.level);Object.assign(g,{x:cart.x,y:cart.y,...st});g.hp=Math.min(g.maxHp,g.hp??g.maxHp);
   cart.cd-=dt;if(cart.cd>0)continue;const target=nearestMonster(cart,MAGIC_CART_RANGE[cart.level-1]);if(!target)continue;
-  cart.cd=MAGIC_CART_COST.cooldown;const gear=buildCombatBonus(S,'mage',null,g.level),damage=Math.max(1,Math.round((c.atk+(g.level-1)*.9+gear.atk)*1.35));
+  cart.cd=MAGIC_CART_COST.cooldown;const gear=buildCombatBonus(S,'mage',null,g.level),damage=Math.max(1,Math.round((c.atk+(g.level-1)*.9+gear.atk)*1.35*(1+houseBonus().cartDamage)));
   skillFx?.play('arcBolt',{from:{x:cart.x,y:cart.y},to:{x:target.x,y:target.y}});
   later(.28,()=>{if(target.dead||cart.hp<=0)return;skillFx?.burst(target.x,target.y,{color:'#b67cff',count:15,up:48});
    for(const m of S.monsters.filter(m=>!m.dead&&dist(m,target)<=MAGIC_CART_COST.splash)){
@@ -599,13 +605,14 @@ function killMonster(m, by) {
   const loot=monsterLoot(m.type,Math.random,1.35);
   // Burrow's own flat region/rank reward; never scale Gold by the home's level or main-game loot range.
   loot.gold=burrowMonsterGold(m.type);
-  applyMonsterResourceBonus(S,loot,CONSTRUCTION_MATERIAL_IDS);
+  const houses=houseBonus();
+  applyMonsterResourceBonus(S,loot,CONSTRUCTION_MATERIAL_IDS,{gold:houses.goldRate,mats:houses.matRate});
   const drops=[{label:`${loot.gold} G`,tier:'gold'},...Object.entries(loot.items).map(([id,q])=>({label:`${itemLabel(id)} ×${q}`,tier:m.elite||m.boss?'blue':'green'}))];
   floaters?.loot(m.x,m.y,drops);
   const u=by&&!by.down?by:null;
   if(u){const def=MONSTER_XP[m.type],enemyLevel=def?.level||1,rank=m.boss?'boss':m.elite?'elite':'normal';
     const baseXp=Math.max(2,Math.round(enemyLevel*(m.boss?12:m.elite?6:2)));
-    const xp=Math.max(1,Math.round(baseXp*(u.level>enemyLevel+20?.10:u.level>enemyLevel+10?.45:1)));
+    const xp=Math.max(1,Math.round(baseXp*(u.level>enemyLevel+20?.10:u.level>enemyLevel+10?.45:1)*(1+houses.exp)));
     if(giveBunnyExp(u,xp,S.warren*3)){
       if(!u.isGarrison){Object.assign(u,statsOf(u.cls,u.level,u.buildId));u.hp=u.maxHp;floaters?.text(u.x,u.y,`Lv ${u.level}!`,{color:'#ffe27a',size:16});}
     }
@@ -854,7 +861,7 @@ function updateUnit(u, dt, i) {
   const c = CLASSES[u.cls], atHome = dist(u, CENTER) < BASE_R;
   u.masteryRange=c.fam==='bow'&&(S.mastery[u.cls]?.unlocked||[]).includes(30);
   if (atHome && carried(u)) deposit(u);
-  if (atHome && !S.night && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * .08 * dt); // rest in the warren
+  if (atHome && !S.night && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * .08 * (1 + houseBonus().restHeal) * dt); // rest in the warren
   const holdsRing=S.night,post=holdsRing?ringPost(u):{x:CENTER.x+(u.id%5-2)*30,y:CENTER.y+150};
   let target = null, goal = null;
   const dusk = !S.night && S.clock > DAY_S - 7;
@@ -986,6 +993,7 @@ async function useLure(mode){
 function startNight() {
   S.night = true; S.clock = 0; S.modal=null; S.itemDetailId=null;S.building=false;S.wallPreview=false;S.movingTower=-1;S.movingMagicCart=-1;S.towerMoveHover=null;S.homeOpen=false;S.homeHover=null;S.homeMovingId=null;S.homeWallPreview=null;S.homeWallPreviewData=null;
   syncGateRuntime();
+  S.nightSnap=snapshotNight(S,matCount());hideNightSummary();
   // once the level's boss is beaten the nights replay wave 4 (farmable) until the warren is upgraded
   const n = S.cleared ? WAVES_PER_LEVEL - 1 : S.wave, boss = n === WAVES_PER_LEVEL && !S.cleared;
   const count = 3 + n * 2 + (S.warren - 1) * 3, power = (1 + (n - 1) * .2) * levelPower();
@@ -1015,11 +1023,21 @@ function endNight(won) {
     combatSFX.playDeath({ volume: .7 });
     banner('โพรงแตก…', `เสียค่าซ่อมเท่านั้น · ฟาร์มกลางวันแล้วสู้เวฟ ${S.warren}-${S.cleared ? WAVES_PER_LEVEL - 1 : S.wave} อีกครั้งคืนนี้`);
   }
+  // Measure before startDay() revives rabbits and clears the field.
+  const report=summarizeNight(S.nightSnap,S,matCount(),won);S.nightSnap=null;
   S.pendingBanner = true;
   startDay();
+  showNightSummary(report);
   const before=S.mythic.pending;S.mythic=rollMythicOmen(S.mythic,{won,day:S.day,warren:S.warren});
   if(!before&&S.mythic.pending){if(!S.mythic.selected.length)S.mythic.selected=defaultMythicSquad(S.units);save();renderUi();}
   if(!IS_CINEMATIC_PREVIEW&&!before&&S.mythic.pending){banner('เงาของอสูรกายบินผ่าน…','เตรียมตัวให้พร้อม · BOSS ENCOUNTER!');setTimeout(()=>{if(!startPendingMythicCinematic())setTimeout(startPendingMythicCinematic,800);},900);}
+}
+let nightSummaryTimer=0;
+function hideNightSummary(){const el=$('nightSummary');if(el)el.hidden=true;clearTimeout(nightSummaryTimer);}
+function showNightSummary(report){
+  const el=$('nightSummary');if(!el||!report)return;
+  el.innerHTML=renderNightSummaryHtml(report,esc);el.dataset.won=report.won?'1':'0';el.hidden=false;
+  clearTimeout(nightSummaryTimer);nightSummaryTimer=setTimeout(hideNightSummary,12000);
 }
 function startDay() {
   S.night = false; S.clock = 0; S.day++;
@@ -1064,7 +1082,8 @@ function upgradeFortification(){
 
 // ---------- save / load (localStorage; versioned for later migrations) ----------
 // Home Builder lives in warren-home-controller.js.
-const homeController=createHomeController({S,T,save,renderUi,toast,buildMap,currentStage,standable,dist,matCount,spendMats,spendMatsWithReceipt,closeMobileDrawer,defenseStructures,rebuildPerimeter,mobileDrawer:()=>mobileDrawer});
+const homeController=createHomeController({S,T,save,renderUi,toast,buildMap,currentStage,standable,dist,matCount,spendMats,spendMatsWithReceipt,closeMobileDrawer,defenseStructures,rebuildPerimeter,mobileDrawer:()=>mobileDrawer,
+ onHomeChanged:()=>{houseBonusCache=null;applyWallHpBonus();}});
 const {refreshNativeHomeGround,checkHome,safeHomeArt,homeThumb,homeObjectAt,editSelectedHome,rebuildHomeWorld,restoreHomeWorld,placeHome,moveHome,demolishHome,undoHome,setHomeOpen,buyHomePlot,previewHomeWall,expandHomeWall,homeTerrainContext,paintHomeTerrain,commitHomeTerrain,createHomeWaterfall,restoreRecoveryHome}=homeController;
 function save() {
   if(dragonTrial)return;
@@ -1400,12 +1419,27 @@ function renderUi() {
   decorateHud();
   syncClock();
 }
+function syncNextGoal(left){
+  const el=$('nextGoal');if(!el)return;
+  // Only classes recruit() would accept right now (per-class field cap).
+  const prices=Object.keys(CLASSES).filter(k=>S.units.filter(u=>u.cls===k).length<fieldClassCap(S.warren)).map(priceOf).filter(Number.isFinite);
+  const next=PERIMETER_TIERS[1],wc=warrenCost();
+  const goal=nextGoal({over:S.over||!!dragonTrial,night:S.night,left,enemies:S.queue.length+S.monsters.filter(m=>m.night&&!m.dead).length,
+   units:S.units.length,squadMax:squadMax(),recruitPrice:prices.length?Math.min(...prices):null,gold:Math.floor(S.gold),
+   wallLevel:S.wallLevel,wallCost:next?.cost||0,mats:matCount(),towers:S.towers.length,towerMax:towerMax(),towerGold:TOWER.gold,towerMats:TOWER.mats,
+   cleared:S.cleared,warren:S.warren,maxWarren:PHASE1_MAX_LEVEL,warrenMats:wc.mats,wave:S.wave});
+  const text=goal?.text||'';
+  if(el.textContent!==text)el.textContent=text;
+  if(el.dataset.tone!==(goal?.tone||''))el.dataset.tone=goal?.tone||'';
+  el.hidden=!goal;
+}
 function syncClock() {
   const total = S.night ? NIGHT_S : DAY_S, left = Math.max(0, Math.ceil(total - S.clock));
   const phase=S.night ? `🌙 คืนที่ ${S.day}` : `☀️ วันที่ ${S.day}`;
   const timer=S.night ? `เหลือมอน ${S.queue.length + S.monsters.filter(m => m.night && !m.dead).length}` : `ค่ำใน ${left}s`;
   if($('phase').textContent!==phase)$('phase').textContent=phase;
   if($('timer').textContent!==timer)$('timer').textContent=timer;
+  syncNextGoal(left);
   const liveGold=String(Math.floor(S.gold)),liveMats=String(matCount());
   if($('gold').textContent!==liveGold)$('gold').textContent=liveGold;
   if($('materials').textContent!==liveMats)$('materials').textContent=liveMats;
@@ -1418,6 +1452,7 @@ document.body.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || b.disabled) return;
   if(b.id==='homeOpen'||b.id==='mobileHomeOpen'){setHomeOpen(!S.homeOpen);return;}
   if(b.hasAttribute('data-home-close')){setHomeOpen(false);return;}
+  if(b.hasAttribute('data-night-summary-close')){hideNightSummary();return;}
   if(b.dataset.homePane){S.homePane=b.dataset.homePane;if(S.homePane!=='terrain'&&['terrain','waterfall'].includes(S.homeAction))S.homeAction='place';if(S.homePane!=='decor'&&['move','recover'].includes(S.homeAction)){S.homeAction='place';S.homeMovingId=null;S.homeStoredId=null;}if(S.homePane!=='land'){S.homeWallPreview=null;S.homeWallPreviewData=null;}renderUi();return;}
   if(b.hasAttribute('data-home-help')){S.homeHelp=!S.homeHelp;renderUi();return;}
   if(b.dataset.homeSelect){S.homeSelectedId=b.dataset.homeSelect;const o=S.homeBuilder.placedObjects.find(v=>v.id===S.homeSelectedId);if(o){cam.x=o.x;cam.y=o.y;}renderUi();return;}
@@ -2068,6 +2103,7 @@ wukongCinematic=createWukongCinematic({onBattle:()=>beginMythicTrial(wukongBattl
 const arthurBattleEntry={...wukongBattleEntry};
 arthurCinematic=createArthurCinematic({onBattle:()=>beginMythicTrial(arthurBattleEntry,{walk:arthurWalkFrames,attack:arthurAttackFrames},'kingArthur'),onStop:endDragonTrial});
 const resumed = load();
+houseBonusCache=null; // the save may bring houses that change village bonuses
 if (!resumed) { recruit('guard', true); recruit('archer', true); }
 renderUi();
 setRuntimeZoomRange(mobileLayout.matches ? .26 : .45, 1.3); // portrait can pinch farther out to see the whole village
@@ -2103,6 +2139,7 @@ function alignRelicLauncher(){
 }
 alignRelicLauncher();addEventListener('resize',alignRelicLauncher);
 // Authored fences restore after world placement; live fences use exactly the same engine primitives.
+applyWallHpBonus();
 for(const fence of S.fences)installFence(fence);
 restoreHomeWorld();
 mythicPanel=document.createElement('div');mythicPanel.className='panel bc-modal';mythicPanel.hidden=true;mythicPanel.setAttribute('role','dialog');mythicPanel.setAttribute('aria-modal','true');document.body.append(mythicPanel);
@@ -2137,7 +2174,9 @@ wallButton.addEventListener('blur',()=>{S.wallPreview=false;});
 { const l = $('loading'); if (l) l.hidden = true; }
 if(loadingScreen){setLoadingProgress(100);setTimeout(()=>{loadingScreen.classList.add('done');setTimeout(()=>loadingScreen.remove(),500);},250);}
 banner(resumed ? `กลับมาแล้ว · วันที่ ${S.day}` : 'วันที่ 1', resumed ? `บ้าน Lv ${S.warren} · เวฟ ${S.warren}-${S.wave}` : 'กระต่ายฟาร์มเองรอบหมู่บ้าน · คลิกป้อมเพื่อจัดทหารประจำป้อม');
-if(!IS_CINEMATIC_PREVIEW&&shouldShowWaterfallIntro()&&!S.mythic.pending)openWaterfallGuide('intro');
+// Update news is for returning players; a brand-new village starts straight in the game.
+if(!resumed)markWaterfallIntroSeen();
+else if(!IS_CINEMATIC_PREVIEW&&shouldShowWaterfallIntro()&&!S.mythic.pending)openWaterfallGuide('intro');
 if(!IS_CINEMATIC_PREVIEW&&S.mythic.pending)setTimeout(()=>{S.modal=null;renderUi();if(!startPendingMythicCinematic())setTimeout(startPendingMythicCinematic,800);},900);
 function startMythicTestBoss(bossId){
  if(!MYTHIC_BOSSES[bossId]||dragonTrial||mythicCinematic?.active||wukongCinematic?.active||arthurCinematic?.active)return false;

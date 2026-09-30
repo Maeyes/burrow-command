@@ -91,6 +91,7 @@ function editSelectedHome(change){
  rebuildHomeWorld();save();renderUi();return true;
 }
 function rebuildHomeWorld(){
+ ctx.onHomeChanged?.();
  if(!homeRuntimeReady)return;
  WS.objects=WS.objects.filter(o=>!o.homeId);
  WS.colliders=WS.colliders.filter(c=>!c.homeId);

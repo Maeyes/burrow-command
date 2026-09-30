@@ -17,10 +17,11 @@ export function forgeRarityRoll(roll,level){
  * and only its common construction-material drops. Fractional bonuses accumulate across kills
  * so small drops still earn a real bonus over time. This mutates the loot BEFORE it is either
  * sent to storage or assigned to a rabbit's carrying bag; never also pay the state directly. */
-export function applyMonsterResourceBonus(s,loot,eligibleMaterials){
- const rate=resourceBonusRate(s.resourceLevel);
+// extra.gold / extra.mats add Home Builder house bonuses on top of the workshop rate.
+export function applyMonsterResourceBonus(s,loot,eligibleMaterials,extra={}){
+ const rate=resourceBonusRate(s.resourceLevel),goldRate=rate+(Number(extra.gold)||0),matRate=rate+(Number(extra.mats)||0);
  const baseGold=Number.isSafeInteger(loot.gold)&&loot.gold>0?loot.gold:0;
- const goldTotal=(Number(s.resourceGoldBank)||0)+baseGold*rate;
+ const goldTotal=(Number(s.resourceGoldBank)||0)+baseGold*goldRate;
  const extraGold=Math.floor(goldTotal+1e-9);
  s.resourceGoldBank=Math.max(0,goldTotal-extraGold);
  loot.gold+=extraGold;
@@ -28,7 +29,7 @@ export function applyMonsterResourceBonus(s,loot,eligibleMaterials){
  let matTotal=Number(s.resourceMatBank)||0,extraMaterials=0;
  for(const [id,qty] of Object.entries(loot.items||{})){
   if(!allowed.has(id)||!Number.isSafeInteger(qty)||qty<=0)continue;
-  matTotal+=qty*rate;
+  matTotal+=qty*matRate;
   const bonus=Math.floor(matTotal+1e-9);
   matTotal=Math.max(0,matTotal-bonus);
   if(bonus){loot.items[id]+=bonus;extraMaterials+=bonus;}

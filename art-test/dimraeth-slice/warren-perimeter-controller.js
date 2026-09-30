@@ -8,11 +8,22 @@ import {stoneWallSprite,stoneGateSprite} from './engine/sprites.js';
 import {biomeOf} from './engine/biomes.js';
 import {fenceRun} from './engine/world.js';
 import * as PAL from './engine/palettes.js';
-import {nextPerimeterTier,perimeterMid,toggleGateSelection,gateShouldClose} from './warren-perimeter.js';
+import {nextPerimeterTier,perimeterTier,perimeterMid,toggleGateSelection,gateShouldClose} from './warren-perimeter.js';
 import {homePerimeterBlueprint,homeWallIntegrity,reconcileHomeWall} from './warren-home-land.js';
 
 export function createPerimeterController(ctx){
  const {S,T,toast,save,renderUi,matCount,spendMats,keepActorsOutOfWalls}=ctx;
+ // Smith house: scale max HP by the home bonus, keeping each section's current HP percentage.
+ function applyWallHpBonus(){
+  const bonus=Number(ctx.wallHpBonus?.())||0;
+  for(const f of S.fences){
+   const cfg=perimeterTier(f.tier||S.wallLevel),base=f.kind==='gate'?cfg.gateHp:cfg.sectionHp;
+   if(!base)continue;
+   const max=Math.round(base*(1+bonus));if(f.maxHp===max)continue;
+   const ratio=f.maxHp>0?Math.max(0,Math.min(1,f.hp/f.maxHp)):1;
+   f.maxHp=max;f.hp=f.hp<=0?0:Math.max(1,Math.round(max*ratio));
+  }
+ }
 // One-click village perimeter. No manual painting, starter fences or invisible placement restrictions.
 const fenceKey=f=>f.axis+':'+f.x+':'+f.y;
 // Exact same asset generators that scene editor stoneWall / stoneGate props use.
@@ -70,6 +81,7 @@ function rebuildPerimeter(){
  if(health.missing||health.obsolete||health.actual!==health.expected){
   S.fences=reconcileHomeWall(S.wallLevel,S.homeBuilder,S.fences);
  }
+ applyWallHpBonus();
  removePerimeterRuntime();
  for(const section of S.fences)installFence(section);
  // Units and monsters will replan with the new collider array automatically.
@@ -123,5 +135,5 @@ function hurtPerimeter(section,damage){
  renderUi();return true;
 }
 
- return {fenceKey,editorStoneSprites,editorStoneSprite,removePerimeterRuntime,installFence,rebuildPerimeter,syncGateRuntime,selectGate,upgradePerimeter,hurtPerimeter};
+ return {applyWallHpBonus,fenceKey,editorStoneSprites,editorStoneSprite,removePerimeterRuntime,installFence,rebuildPerimeter,syncGateRuntime,selectGate,upgradePerimeter,hurtPerimeter};
 }

@@ -1,5 +1,6 @@
 import {esc} from './warren-ui.js';
 import {HOME_ITEMS,HOME_CATEGORIES} from './warren-home-builder.js';
+import {HOME_HOUSE_BONUSES,activeHomeBonusLabels} from './warren-home-bonuses.js';
 import {HOME_SIDES,HOME_SIDE_NAMES,HOME_PLOT_COST,HOME_WALL_COST,sidePlots,fullyOwnedSide,homeWallIntegrity,HOME_NORTH_FINAL,homeAtNorthernCliff} from './warren-home-land.js';
 import {HOME_TERRAIN_BRUSHES,quoteHomeTerrain,deriveHomeNorthCurtains,quoteNewHomeNorthCurtains} from './warren-home-terrain.js';
 export const HOME_PANES={decor:'🪑 ตกแต่ง',terrain:'⛰️ ภูมิประเทศ',land:'🗺 ที่ดิน & กำแพง'};
@@ -24,10 +25,12 @@ const costLine=(item,s)=>{
 };
 function decorPane(s,disabled,thumb){
  const tabs=Object.entries(HOME_CATEGORIES).map(([id,name])=>`<button data-home-category="${id}" class="${s.homeCategory===id?'active':''}">${name}</button>`).join('');
+ const built=new Set((s.homeBuilder?.placedObjects||[]).map(o=>o.prefab));
  const catalog=Object.entries(HOME_ITEMS).filter(([,item])=>item.group===s.homeCategory).map(([id,item])=>{
-  const cost=costLine(item,s),src=thumb?.(id);
+  const cost=costLine(item,s),src=thumb?.(id),bonus=HOME_HOUSE_BONUSES[id];
+  const perk=bonus?`<em class="bc-home-perk ${built.has(id)?'on':''}">${built.has(id)?'✓ ':'★ '}${esc(bonus.label)}</em>`:'';
   return `<button data-home-type="${id}" class="bc-home-item ${s.homeSelected===id&&s.homeAction==='place'?'active':''} ${cost.ok?'':'short'}" ${disabled} title="${esc(item.name)}">
-   <span class="bc-home-thumb">${src?`<img src="${src}" alt="">`:`<i>${item.icon}</i>`}</span><b>${esc(item.name)}</b><small>${esc(cost.text)}</small></button>`;
+   <span class="bc-home-thumb">${src?`<img src="${src}" alt="">`:`<i>${item.icon}</i>`}</span><b>${esc(item.name)}</b>${perk}<small>${esc(cost.text)}</small></button>`;
  }).join('');
  const sel=(s.homeBuilder?.placedObjects||[]).find(o=>o.id===s.homeSelectedId);
  const selItem=sel&&HOME_ITEMS[sel.prefab];
@@ -41,7 +44,9 @@ function decorPane(s,disabled,thumb){
  }).join('');
  const recovered=(s.homeBuilder?.recovery||[]).filter(o=>HOME_ITEMS[o.prefab]).slice(0,16).map(o=>`<div class="bc-home-placed"><span>📦 ${esc(HOME_ITEMS[o.prefab].name)} <small>${esc(o.reason||'รอจัดวางใหม่')}</small></span><button data-home-recover="${esc(o.id)}" ${disabled}>วางใหม่</button></div>`).join('');
  const houseMode=s.homeCategory==='houses'||(s.homeAction==='move'||s.homeAction==='recover')&&HOME_ITEMS[s.homeSelected]?.group==='houses';
- return `${selection}<div class="bc-home-tabs">${tabs}</div><div class="bc-home-catalog">${catalog}</div>
+ const perks=activeHomeBonusLabels(s.homeBuilder);
+ const perkLine=perks.length?`<div class="bc-home-perks"><strong>★ โบนัสหมู่บ้าน</strong>${perks.map(p=>`<span>${esc(p)}</span>`).join('')}</div>`:(s.homeCategory==='houses'?'<div class="bc-home-perks"><small>บ้านแต่ละแบบให้โบนัสหมู่บ้าน 1 อย่าง · สร้างซ้ำแบบเดิมไม่ซ้อนโบนัส</small></div>':'');
+ return `${selection}${perkLine}<div class="bc-home-tabs">${tabs}</div><div class="bc-home-catalog">${catalog}</div>
  <div class="bc-home-actions"><button data-home-rotate title="R" ${disabled}>↻ ${(s.homeRotation||0)*90}°</button>
  ${houseMode?`<button data-home-variant ${disabled}>🎨 แบบ ${(s.homeVariant||0)+1}/3</button>`:''}
  <button data-home-undo title="Ctrl+Z" ${disabled||!s.homeUndo?'disabled':''}>↶ Undo</button></div>
