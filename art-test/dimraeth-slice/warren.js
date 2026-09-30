@@ -1117,7 +1117,9 @@ addEventListener('beforeunload', () => { if (!S.night && !S.resetting) save(); }
 
 function tick(dt) {
   if(dragonTrial){
-   const m=dragonTrial.m;if(m.dead||m.trialLost)return;
+   const m=dragonTrial.m;
+   // Safety net: a finished trial must always close, even if its cinematic is no longer running.
+   if(m.dead||m.trialLost){if(!mythicCinematic?.active&&!wukongCinematic?.active&&!arthurCinematic?.active)endDragonTrial();return;}
    pathSearchBudget=2;insideSimulation=true;S.time+=dt;
    const due=S.events.filter(e=>e.at<=S.time);S.events=S.events.filter(e=>e.at>S.time);for(const e of due)e.fn();
    const fighters=S.units.filter(u=>dragonTrial.fighterIds.has(u.id));fighters.forEach((u,i)=>updateUnit(u,dt,i));updateMonster(m,dt);separate(fighters,32);keepActorsOutOfWalls(fighters,dt);

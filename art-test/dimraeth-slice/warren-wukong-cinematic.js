@@ -62,7 +62,7 @@ export function createWukongCinematic({onBattle=()=>null,onStop=()=>{}}={}){
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  const plantedStaff='translate(-94%,-50%) rotate(78deg) scale(.72)';
  let active=false,time=0,previousFocus=null,finishTimer=0,mode='intro',boss=null;
- function stop(){if(!active)return;active=false;root.hidden=true;root.style.transform='';narration.hidden=true;battleStatus.hidden=true;clearTimeout(finishTimer);onStop();previousFocus?.focus?.()}
+ function stop(){if(!active)return;active=false;root.hidden=true;root.style.transform='';narration.hidden=true;battleStatus.hidden=true;clearTimeout(finishTimer);finishTimer=0;onStop();previousFocus?.focus?.()}
  function enterBattle(){if(!active)return;boss=onBattle();if(!boss){active=false;root.hidden=true;previousFocus?.focus?.();return}mode='battle';root.style.pointerEvents='none';skip.hidden=true;narration.hidden=true;battleStatus.hidden=false;}
  skip.addEventListener('click',stop);
  root.addEventListener('keydown',event=>{if(event.key==='Escape'){event.stopPropagation();stop()}if(event.key==='Tab'){event.preventDefault();skip.focus()}});
