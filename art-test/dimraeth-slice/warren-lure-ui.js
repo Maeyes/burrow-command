@@ -7,7 +7,7 @@ export function renderLureHtml(s,materials){
   elite:'เพิ่มจำนวน Elite จากภูมิภาคปัจจุบัน · ศัตรูโจมตีแรงขึ้น',
   frontier:'เรียกมอนสเตอร์จากโซนถัดไปก่อนปลดล็อก · ไม่มีบอส'};
  const disabledReason=mode=>s.night?'ใช้ได้เฉพาะกลางวัน':s.lureDay===s.day?'ใช้เหยื่อล่อของวันนี้แล้ว':mode==='frontier'&&!next?'ยังไม่มี Frontier ใน Phase 1':'';
- return '<header class="bc-modal-header"><div>'+gameIcon('skull','ui','◈','bc-header-icon')+
+ return '<header class="bc-modal-header"><div>'+gameIcon('monster','ui','◈','bc-header-icon')+
   '<span><h2>Threat Lure · ล่อมอนสเตอร์</h2><small>ลงทุนวัตถุดิบทั่วไปเพื่อเลือกความยากของการฟาร์ม</small></span></div>'+
   '<button class="modal-close" data-modal-close aria-label="ปิดหน้าต่าง">✕</button></header>'+
   '<div class="bc-modal-body bc-lure-body"><p class="bc-help">โซน '+current.name+

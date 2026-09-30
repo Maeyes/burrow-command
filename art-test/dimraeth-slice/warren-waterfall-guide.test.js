@@ -15,16 +15,16 @@ describe('Waterfall update modal and in-game Guide',()=>{
   expect(shouldShowWaterfallIntro(store)).toBe(false);
   expect(store.getItem('burrow-command-save-v3')).toBeNull();
  });
- it('renders the same real infographic in the startup and reopened Guide modal',()=>{
-  const intro=renderWaterfallGuideHtml({intro:true}),reopened=renderWaterfallGuideHtml({intro:false});
-  const src=html=>html.match(/<img src="([^"]+)"/)?.[1];
-  expect(src(intro)).toBeTruthy();
-  expect(src(intro)).toBe(src(reopened));
-  expect(src(intro)).toMatch(/bunny_world_waterfall_update_guide\.png/);
-  expect(intro).toContain('อัปเดตใหม่!');
-  expect(reopened).toContain('กลับไปคู่มือ');
+ it('shows both update images and accurate encounter odds while retaining the detailed guide',()=>{
+  const intro=renderWaterfallGuideHtml({intro:true}),guide=renderWaterfallGuideHtml();
+  expect(intro).toContain('world-boss-update.png');
+  expect(intro).toContain('waterfall-update.png');
+  expect(intro).toContain('15%');
+  expect(intro).toContain('ตัวละ 1 ใน 3');
+  expect(intro).toContain('Lv 5');
   expect(intro).toContain('data-waterfall-guide-close');
-  expect(intro).toContain('id="waterfallGuideTitle"');
+  expect(guide).toContain('bunny_world_waterfall_update_guide.png');
+  expect(renderPatchNotesHtml()).toContain('data-open-update-news');
  });
  it('explains the mandatory water source on self-built hills and the natural cliff exception',()=>{
   const html=renderWaterfallGuideHtml();

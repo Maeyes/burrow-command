@@ -1,0 +1,610 @@
+[
+  {
+    "file": "assets/shard-00.png",
+    "w": 1002,
+    "h": 750,
+    "x": 609.0,
+    "y": 822.0,
+    "pixels": 204077
+  },
+  {
+    "file": "assets/shard-01.png",
+    "w": 625,
+    "h": 663,
+    "x": 888.5,
+    "y": 388.5,
+    "pixels": 89707
+  },
+  {
+    "file": "assets/shard-02.png",
+    "w": 378,
+    "h": 344,
+    "x": 297.0,
+    "y": 821.0,
+    "pixels": 31678
+  },
+  {
+    "file": "assets/shard-03.png",
+    "w": 485,
+    "h": 293,
+    "x": 377.5,
+    "y": 294.5,
+    "pixels": 28988
+  },
+  {
+    "file": "assets/shard-04.png",
+    "w": 254,
+    "h": 272,
+    "x": 346.0,
+    "y": 469.0,
+    "pixels": 22558
+  },
+  {
+    "file": "assets/shard-05.png",
+    "w": 190,
+    "h": 236,
+    "x": 339.0,
+    "y": 1041.0,
+    "pixels": 10348
+  },
+  {
+    "file": "assets/shard-06.png",
+    "w": 109,
+    "h": 218,
+    "x": 534.5,
+    "y": 199.0,
+    "pixels": 7704
+  },
+  {
+    "file": "assets/shard-07.png",
+    "w": 182,
+    "h": 195,
+    "x": 1123.0,
+    "y": 843.5,
+    "pixels": 7069
+  },
+  {
+    "file": "assets/shard-08.png",
+    "w": 130,
+    "h": 183,
+    "x": 717.0,
+    "y": 570.5,
+    "pixels": 6970
+  },
+  {
+    "file": "assets/shard-09.png",
+    "w": 115,
+    "h": 189,
+    "x": 135.5,
+    "y": 440.5,
+    "pixels": 5931
+  },
+  {
+    "file": "assets/shard-10.png",
+    "w": 122,
+    "h": 185,
+    "x": 975.0,
+    "y": 259.5,
+    "pixels": 5919
+  },
+  {
+    "file": "assets/shard-11.png",
+    "w": 135,
+    "h": 141,
+    "x": 483.5,
+    "y": 903.5,
+    "pixels": 5690
+  },
+  {
+    "file": "assets/shard-12.png",
+    "w": 140,
+    "h": 96,
+    "x": 899.0,
+    "y": 1067.0,
+    "pixels": 4301
+  },
+  {
+    "file": "assets/shard-13.png",
+    "w": 124,
+    "h": 133,
+    "x": 281.0,
+    "y": 779.5,
+    "pixels": 3160
+  },
+  {
+    "file": "assets/shard-14.png",
+    "w": 76,
+    "h": 91,
+    "x": 1007.0,
+    "y": 687.5,
+    "pixels": 2344
+  },
+  {
+    "file": "assets/shard-15.png",
+    "w": 57,
+    "h": 77,
+    "x": 560.5,
+    "y": 1121.5,
+    "pixels": 1651
+  },
+  {
+    "file": "assets/shard-16.png",
+    "w": 70,
+    "h": 62,
+    "x": 611.0,
+    "y": 567.0,
+    "pixels": 1604
+  },
+  {
+    "file": "assets/shard-17.png",
+    "w": 57,
+    "h": 77,
+    "x": 746.5,
+    "y": 694.5,
+    "pixels": 1514
+  },
+  {
+    "file": "assets/shard-18.png",
+    "w": 52,
+    "h": 75,
+    "x": 83.0,
+    "y": 757.5,
+    "pixels": 1447
+  },
+  {
+    "file": "assets/shard-19.png",
+    "w": 55,
+    "h": 71,
+    "x": 1008.5,
+    "y": 989.5,
+    "pixels": 1376
+  },
+  {
+    "file": "assets/shard-20.png",
+    "w": 54,
+    "h": 72,
+    "x": 623.0,
+    "y": 183.0,
+    "pixels": 1328
+  },
+  {
+    "file": "assets/shard-21.png",
+    "w": 51,
+    "h": 76,
+    "x": 645.5,
+    "y": 390.0,
+    "pixels": 1324
+  },
+  {
+    "file": "assets/shard-22.png",
+    "w": 41,
+    "h": 64,
+    "x": 835.5,
+    "y": 492.0,
+    "pixels": 1287
+  },
+  {
+    "file": "assets/shard-23.png",
+    "w": 46,
+    "h": 45,
+    "x": 228.0,
+    "y": 297.5,
+    "pixels": 1079
+  },
+  {
+    "file": "assets/shard-24.png",
+    "w": 32,
+    "h": 32,
+    "x": 1164.0,
+    "y": 614.0,
+    "pixels": 1024
+  },
+  {
+    "file": "assets/shard-25.png",
+    "w": 51,
+    "h": 39,
+    "x": 762.5,
+    "y": 415.5,
+    "pixels": 920
+  },
+  {
+    "file": "assets/shard-26.png",
+    "w": 38,
+    "h": 51,
+    "x": 109.0,
+    "y": 345.5,
+    "pixels": 848
+  },
+  {
+    "file": "assets/shard-27.png",
+    "w": 32,
+    "h": 31,
+    "x": 965.0,
+    "y": 582.5,
+    "pixels": 810
+  },
+  {
+    "file": "assets/shard-28.png",
+    "w": 45,
+    "h": 44,
+    "x": 971.5,
+    "y": 965.0,
+    "pixels": 744
+  },
+  {
+    "file": "assets/shard-29.png",
+    "w": 47,
+    "h": 25,
+    "x": 392.5,
+    "y": 364.5,
+    "pixels": 685
+  },
+  {
+    "file": "assets/shard-30.png",
+    "w": 32,
+    "h": 26,
+    "x": 585.0,
+    "y": 643.0,
+    "pixels": 685
+  },
+  {
+    "file": "assets/shard-31.png",
+    "w": 35,
+    "h": 38,
+    "x": 398.5,
+    "y": 1044.0,
+    "pixels": 685
+  },
+  {
+    "file": "assets/shard-32.png",
+    "w": 38,
+    "h": 33,
+    "x": 881.0,
+    "y": 259.5,
+    "pixels": 665
+  },
+  {
+    "file": "assets/shard-33.png",
+    "w": 33,
+    "h": 25,
+    "x": 444.5,
+    "y": 192.5,
+    "pixels": 661
+  },
+  {
+    "file": "assets/shard-34.png",
+    "w": 35,
+    "h": 51,
+    "x": 818.5,
+    "y": 884.5,
+    "pixels": 649
+  },
+  {
+    "file": "assets/shard-35.png",
+    "w": 26,
+    "h": 32,
+    "x": 1103.0,
+    "y": 798.0,
+    "pixels": 581
+  },
+  {
+    "file": "assets/shard-36.png",
+    "w": 29,
+    "h": 38,
+    "x": 656.5,
+    "y": 122.0,
+    "pixels": 490
+  },
+  {
+    "file": "assets/shard-37.png",
+    "w": 27,
+    "h": 25,
+    "x": 801.5,
+    "y": 192.5,
+    "pixels": 480
+  },
+  {
+    "file": "assets/shard-38.png",
+    "w": 39,
+    "h": 19,
+    "x": 310.5,
+    "y": 131.5,
+    "pixels": 462
+  },
+  {
+    "file": "assets/shard-39.png",
+    "w": 20,
+    "h": 26,
+    "x": 541.0,
+    "y": 884.0,
+    "pixels": 441
+  },
+  {
+    "file": "assets/shard-40.png",
+    "w": 27,
+    "h": 32,
+    "x": 795.5,
+    "y": 640.0,
+    "pixels": 419
+  },
+  {
+    "file": "assets/shard-41.png",
+    "w": 25,
+    "h": 26,
+    "x": 1096.5,
+    "y": 250.0,
+    "pixels": 399
+  },
+  {
+    "file": "assets/shard-42.png",
+    "w": 26,
+    "h": 24,
+    "x": 264.0,
+    "y": 548.0,
+    "pixels": 389
+  },
+  {
+    "file": "assets/shard-43.png",
+    "w": 24,
+    "h": 25,
+    "x": 397.0,
+    "y": 999.5,
+    "pixels": 335
+  },
+  {
+    "file": "assets/shard-44.png",
+    "w": 23,
+    "h": 25,
+    "x": 575.5,
+    "y": 339.5,
+    "pixels": 331
+  },
+  {
+    "file": "assets/shard-45.png",
+    "w": 20,
+    "h": 19,
+    "x": 1191.0,
+    "y": 569.5,
+    "pixels": 325
+  },
+  {
+    "file": "assets/shard-46.png",
+    "w": 20,
+    "h": 19,
+    "x": 67.0,
+    "y": 620.5,
+    "pixels": 301
+  },
+  {
+    "file": "assets/shard-47.png",
+    "w": 21,
+    "h": 19,
+    "x": 805.5,
+    "y": 1149.5,
+    "pixels": 292
+  },
+  {
+    "file": "assets/shard-48.png",
+    "w": 19,
+    "h": 19,
+    "x": 727.5,
+    "y": 1143.5,
+    "pixels": 279
+  },
+  {
+    "file": "assets/shard-49.png",
+    "w": 19,
+    "h": 19,
+    "x": 1060.5,
+    "y": 214.5,
+    "pixels": 276
+  },
+  {
+    "file": "assets/shard-50.png",
+    "w": 19,
+    "h": 19,
+    "x": 202.5,
+    "y": 1015.5,
+    "pixels": 272
+  },
+  {
+    "file": "assets/shard-51.png",
+    "w": 18,
+    "h": 19,
+    "x": 1087.0,
+    "y": 964.5,
+    "pixels": 268
+  },
+  {
+    "file": "assets/shard-52.png",
+    "w": 20,
+    "h": 19,
+    "x": 695.0,
+    "y": 742.5,
+    "pixels": 261
+  },
+  {
+    "file": "assets/shard-53.png",
+    "w": 19,
+    "h": 19,
+    "x": 655.5,
+    "y": 227.5,
+    "pixels": 257
+  },
+  {
+    "file": "assets/shard-54.png",
+    "w": 20,
+    "h": 19,
+    "x": 904.0,
+    "y": 791.5,
+    "pixels": 254
+  },
+  {
+    "file": "assets/shard-55.png",
+    "w": 18,
+    "h": 19,
+    "x": 93.0,
+    "y": 817.5,
+    "pixels": 254
+  },
+  {
+    "file": "assets/shard-56.png",
+    "w": 19,
+    "h": 19,
+    "x": 313.5,
+    "y": 380.5,
+    "pixels": 239
+  },
+  {
+    "file": "assets/shard-57.png",
+    "w": 19,
+    "h": 19,
+    "x": 476.5,
+    "y": 469.5,
+    "pixels": 237
+  },
+  {
+    "file": "assets/shard-58.png",
+    "w": 19,
+    "h": 19,
+    "x": 540.5,
+    "y": 996.5,
+    "pixels": 237
+  },
+  {
+    "file": "assets/shard-59.png",
+    "w": 20,
+    "h": 19,
+    "x": 406.0,
+    "y": 163.5,
+    "pixels": 230
+  },
+  {
+    "file": "assets/shard-60.png",
+    "w": 18,
+    "h": 19,
+    "x": 1029.0,
+    "y": 1041.5,
+    "pixels": 228
+  },
+  {
+    "file": "assets/shard-61.png",
+    "w": 18,
+    "h": 19,
+    "x": 573.0,
+    "y": 945.5,
+    "pixels": 226
+  },
+  {
+    "file": "assets/shard-62.png",
+    "w": 19,
+    "h": 18,
+    "x": 183.5,
+    "y": 932.0,
+    "pixels": 225
+  },
+  {
+    "file": "assets/shard-63.png",
+    "w": 20,
+    "h": 19,
+    "x": 307.0,
+    "y": 176.5,
+    "pixels": 211
+  },
+  {
+    "file": "assets/shard-64.png",
+    "w": 19,
+    "h": 20,
+    "x": 825.5,
+    "y": 253.0,
+    "pixels": 206
+  },
+  {
+    "file": "assets/shard-65.png",
+    "w": 15,
+    "h": 13,
+    "x": 250.5,
+    "y": 1063.5,
+    "pixels": 194
+  },
+  {
+    "file": "assets/shard-66.png",
+    "w": 18,
+    "h": 15,
+    "x": 579.0,
+    "y": 1004.5,
+    "pixels": 192
+  },
+  {
+    "file": "assets/shard-67.png",
+    "w": 19,
+    "h": 19,
+    "x": 1157.5,
+    "y": 329.5,
+    "pixels": 189
+  },
+  {
+    "file": "assets/shard-68.png",
+    "w": 16,
+    "h": 19,
+    "x": 1069.0,
+    "y": 278.5,
+    "pixels": 186
+  },
+  {
+    "file": "assets/shard-69.png",
+    "w": 14,
+    "h": 19,
+    "x": 842.0,
+    "y": 582.5,
+    "pixels": 180
+  },
+  {
+    "file": "assets/shard-70.png",
+    "w": 16,
+    "h": 19,
+    "x": 88.0,
+    "y": 652.5,
+    "pixels": 179
+  },
+  {
+    "file": "assets/shard-71.png",
+    "w": 13,
+    "h": 13,
+    "x": 1186.5,
+    "y": 655.5,
+    "pixels": 167
+  },
+  {
+    "file": "assets/shard-72.png",
+    "w": 13,
+    "h": 12,
+    "x": 524.5,
+    "y": 1019.0,
+    "pixels": 151
+  },
+  {
+    "file": "assets/shard-73.png",
+    "w": 12,
+    "h": 13,
+    "x": 557.0,
+    "y": 1178.5,
+    "pixels": 151
+  },
+  {
+    "file": "assets/shard-74.png",
+    "w": 13,
+    "h": 14,
+    "x": 788.5,
+    "y": 680.0,
+    "pixels": 129
+  },
+  {
+    "file": "assets/shard-75.png",
+    "w": 13,
+    "h": 12,
+    "x": 323.5,
+    "y": 352.0,
+    "pixels": 121
+  }
+]

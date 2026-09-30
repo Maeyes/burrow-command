@@ -1,0 +1,5 @@
+# Village HUD icons — v0.8.5
+
+Built-in imagegen output, transparent atlas, 4 columns × 3 rows. Integrated through warren-hud.css and warren-hud.js. UI direction follows user references: walnut wood, brass edging, parchment actions, illustrated icon menu tiles. Existing mobile drawer rules remain in effect.
+
+Prompt: One transparent fantasy village strategy game HUD icon atlas, exactly 4 columns x 3 rows equal square cells, isolated centered icons with 15% empty padding per cell. Crisp detailed pixel art, readable at 32px, hard pixel edges, dark outlines, warm gold accents, emerald forest and walnut medieval palette. Row1: stacked gold coins; wooden crate of pink crystals and logs; rabbit village cottage green roof; open parchment guide book. Row2: rolled parchment patch notes with wax seal; silver breastplate; glowing blue mastery star medallion; purple skill-core crystal. Row3: blacksmith gold hammer; archer watchtower; magic wagon purple orb; moon crescent with small star. No text no borders no lettering no background. Actual transparency. Consistent visual scale, exactly 12 icons in uniform 4x3 grid.

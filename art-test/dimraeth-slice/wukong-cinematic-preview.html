@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sun Wukong · World Boss Cinematic Preview</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#07090b;color:#fff1c8;font-family:system-ui,sans-serif}.village{position:fixed;inset:0;width:100%;height:100%;border:0;pointer-events:none;background:#07090b}.boss-tools{position:fixed;z-index:160;left:50%;bottom:20px;transform:translateX(-50%);display:flex;gap:8px;padding:8px;border:1px solid #9e8248;border-radius:13px;background:#111a14ee;box-shadow:0 8px 24px #0009}.boss-tools select,.boss-tools button{min-height:42px;border:1px solid #b99b55;border-radius:8px;background:#273529;color:#fff0c4;padding:7px 12px;font:800 13px system-ui}.boss-tools button{cursor:pointer;background:#651b13}.boss-tools button:hover{background:#8b2418}.boss-tools button:disabled{opacity:.5;cursor:wait}
+</style></head><body><iframe class="village" id="village" src="./warren.html#cinematic-preview" title="หมู่บ้านกระต่าย" tabindex="-1" aria-hidden="true"></iframe><div class="boss-tools" aria-label="เครื่องมือเรียกบอสทดสอบ"><select id="bossSelect" aria-label="เลือกบอส"></select><button id="summon">⚔ เรียกบอสทดสอบ</button><button id="launch">▶ เล่น Wukong Preview</button></div>
+<script type="module">
+import {createWukongCinematic} from './warren-wukong-cinematic.js';
+import {MYTHIC_BOSSES} from './warren-mythic.js';
+const cinematic=createWukongCinematic(),launch=document.getElementById('launch'),summon=document.getElementById('summon'),bossSelect=document.getElementById('bossSelect'),village=document.getElementById('village');
+bossSelect.innerHTML=Object.values(MYTHIC_BOSSES).map(boss=>`<option value="${boss.id}">${boss.name} · ${boss.nameTh}</option>`).join('');
+let last=performance.now(),autoStarted=false,villageReadyTimer=0;
+function frame(now){cinematic.update(Math.min(.05,(now-last)/1000));last=now;requestAnimationFrame(frame)}
+launch.onclick=()=>cinematic.start();
+summon.onclick=()=>{const dev=village.contentWindow?.__warrenDev;if(!dev)return;summon.disabled=true;cinematic.stop();const started=dev.startMythicTestBoss(bossSelect.value);summon.textContent=started?'✓ เรียกบอสแล้ว':'ลองใหม่อีกครั้ง';setTimeout(()=>{summon.disabled=false;summon.textContent='⚔ เรียกบอสทดสอบ'},1200)};
+function villageIsReady(){
+  try{
+    const doc=village.contentDocument,loading=doc?.getElementById('loading');
+    if(!doc||doc.readyState!=='complete')return false;
+    if(!loading)return true;
+    const style=village.contentWindow.getComputedStyle(loading);
+    return loading.hidden||style.display==='none'||style.visibility==='hidden';
+  }catch{return false}
+}
+function waitForVillage(){
+  clearTimeout(villageReadyTimer);
+  if(autoStarted)return;
+  if(villageIsReady()){
+    autoStarted=true;
+    villageReadyTimer=setTimeout(()=>cinematic.start(),1000);
+    return;
+  }
+  villageReadyTimer=setTimeout(waitForVillage,150);
+}
+village.addEventListener('load',waitForVillage,{once:true});requestAnimationFrame(frame);
+</script></body></html>

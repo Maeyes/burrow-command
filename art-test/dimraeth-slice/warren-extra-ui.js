@@ -1,3 +1,4 @@
+import {hudIcon} from './warren-hud.js';
 // Focused windows for tower garrison, healing lodge, mastery and safe batch-craft results.
 import { gameIcon, itemLabel, esc } from './warren-ui.js';
 import { CLASS_FAMILIES, CLASS_IDS, MAX_FIELD_PER_CLASS, MASTERY_GOLD, WEAPON_MASTERY_MILESTONES, equippedGearIds, recommendations, gearScore } from './warren-progression.js';
@@ -8,7 +9,7 @@ import {WEAPON_PROC_RULES_V2} from '../../src/simulation/engine.ts';
 import {MAGIC_CART_COST,MAGIC_CART_HP,MAGIC_CART_RANGE,MAGIC_CART_UPGRADE} from './warren-magic-cart.js';
 
 const close='<button class="modal-close" data-modal-close aria-label="ปิดหน้าต่าง">✕</button>';
-const head=(icon,title,info)=>`<header class="bc-modal-header"><div>${gameIcon(icon,'ui','◈','bc-header-icon')}<span><h2>${title}</h2><small>${info}</small></span></div>${close}</header>`;
+const head=(icon,title,info)=>`<header class="bc-modal-header"><div>${hudIcon(title.startsWith('Class Mastery')?6:title.startsWith('ป้อม')?9:icon==='staff'?10:icon==='home'?2:8)}<span><h2>${title}</h2><small>${info}</small></span></div>${close}</header>`;
 const fam=(cls,classes)=>gameIcon(CLASS_FAMILIES[cls],'family',classes[cls].icon,'bc-class-icon');
 const TOWER_UPGRADE=[0,120,320,720,1450],TOWER_HP=[270,410,590,820,1120],HIRE={archer:90,mage:135};
 const TOWER_RANGE=[305,330,360,395,435];

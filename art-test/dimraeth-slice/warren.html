@@ -65,6 +65,9 @@
   .row{display:flex;gap:6px}.row button{flex:1}
   #help{left:10px;top:10px;padding:6px;display:flex;gap:6px;max-width:none;font-size:11px;color:var(--dim);z-index:29}
   #help button{min-height:34px;padding:6px 9px;white-space:nowrap}
+  #mythicTestControls{left:10px;top:58px;padding:7px;display:flex;gap:6px;align-items:center;z-index:29;border-color:#8b7040;background:#172019ed}
+  #mythicTestControls select{min-height:34px;max-width:190px;padding:5px 8px;border:1px solid #6f6847;border-radius:7px;background:#243024;color:var(--ink);font:700 11px system-ui}
+  #mythicTestSummon{min-height:34px;padding:6px 10px;background:#651b13;border-color:#bd7c4d;color:#ffe7ad;font-weight:800;white-space:nowrap}
   #banner{position:fixed;left:50%;top:32%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;opacity:0;z-index:30}
   #banner b{display:block;font:800 44px Georgia,serif;color:#fff1c8;text-shadow:0 3px 0 #3a2616,0 0 30px rgba(255,180,90,.6)}#banner span{color:var(--ink);text-shadow:0 2px 4px #000}
   #banner.on{animation:bn 3.2s ease forwards}@keyframes bn{0%{opacity:0;transform:translate(-50%,-40%)}12%,70%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0}}
@@ -79,7 +82,7 @@
   .forge-row>div:first-child{min-width:0;flex:1}.forge-row small{display:block;font-size:10px;color:var(--dim)}.forge-actions{display:flex;gap:4px}
   .forge-slot{display:flex;align-items:center;gap:8px;padding:4px;border-bottom:1px solid #3a4638}.forge-slot b{min-width:79px}.forge-slot span{flex:1;font-size:11px}
   .forge-inventory{display:flex;flex-wrap:wrap;gap:5px}.forge-inventory span{border:1px solid #4d5d45;background:#30362b;padding:3px 5px;border-radius:5px;font-size:11px}
-  @media (max-width:760px){#help{display:none}#top{gap:8px;font-size:11px;flex-wrap:wrap;white-space:normal;width:calc(100vw - 20px)}#hall{width:110px}#side{width:180px;max-height:50vh}#squad{grid-template-columns:minmax(0,1fr);max-height:130px}#forgePanel{height:89vh}}
+  @media (max-width:760px){#help{display:none}#mythicTestControls{left:6px;top:54px;padding:4px;gap:4px}#mythicTestControls select{max-width:125px}#mythicTestSummon{padding:5px 7px;font-size:10px}#top{gap:8px;font-size:11px;flex-wrap:wrap;white-space:normal;width:calc(100vw - 20px)}#hall{width:110px}#side{width:180px;max-height:50vh}#squad{grid-template-columns:minmax(0,1fr);max-height:130px}#forgePanel{height:89vh}}
   /* Burrow Command: focused modal workflow with main-game pixel artwork. */
   #modalScrim{position:fixed;inset:0;background:rgba(3,7,6,.72);z-index:44;backdrop-filter:blur(3px)}
   #modalScrim[hidden]{display:none}
@@ -782,6 +785,9 @@
   .bc-relic-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;min-height:152px;border:1px solid #506950;border-radius:10px;background:#223327;padding:11px 5px 9px;text-align:center}
   .bc-relic-card:hover{border-color:#cbaa70}.bc-relic-card.selected{border-color:#ffe49b;background:#394935;box-shadow:inset 0 0 0 1px #ad955c}
   .bc-relic-card.owned{background:linear-gradient(145deg,#41472b,#2c422d);border-color:#d9b86d}
+  .bc-relic-mystery{color:#c1b389;font:bold 44px monospace;text-shadow:3px 3px #101b17;background:linear-gradient(145deg,#31483c,#17281f);border:2px solid #66785b;border-radius:8px}
+  .bc-relic-atlas{background-image:url(./assets/relics/relic-icons-10.png);background-size:500% 200%;background-repeat:no-repeat;image-rendering:pixelated}
+  .bc-relic-launcher-icon{display:inline-block;flex:none;width:29px;height:29px;background-position:100% 100%}
   .bc-relic-icon{display:grid;place-items:center;flex:none;width:62px;height:62px;max-width:100%;object-fit:contain;image-rendering:pixelated}
   .bc-relic-glyph{font-size:40px;border-radius:9px;background:radial-gradient(circle,#3e5d48,#192820);border:1px solid #596a53}
   .bc-relic-icon.large{width:124px;height:124px;font-size:62px;max-width:100%}
@@ -809,16 +815,17 @@
   }
   @media(max-width:380px){.bc-relic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
+<link rel="stylesheet" href="./warren-hud.css">
 </head>
 <body>
 <div id="wrap"><canvas id="scene" width="1280" height="720"></canvas><div id="worldLabels" aria-label="อาคารและป้อมในหมู่บ้าน"></div></div>
 <div id="top" class="panel">
   <div id="clock"><b id="phase">☀️ วันที่ 1</b> <span id="timer"></span><br><small id="wave"></small><div><div id="clockbar"></div></div></div>
-  <div class="res"><span>🪙 <b id="gold">0</b></span><span title="วัตถุดิบที่ใช้สร้างและอัปบ้าน">🧰 <b id="materials">0</b></span></div>
+  <div class="res"><span title="Gold"><i class="bc-hud-icon" style="--hud-position:0% 0%" aria-hidden="true"></i><b id="gold">0</b></span><span title="วัตถุดิบที่ใช้สร้างและอัปบ้าน"><i class="bc-hud-icon" style="--hud-position:33.333333% 0%" aria-hidden="true"></i><b id="materials">0</b></span></div>
   <div id="hall"><small>โพรงกระต่าย <span id="burrow-t"></span></small><div><div id="burrow"></div></div></div>
 </div>
-<div id="help" class="panel bc-help-launcher" aria-label="คู่มือและข่าวสาร"><button type="button" data-open-guide>📖 คู่มือ</button><button type="button" id="patchNotesOpen" data-open-patch-notes>📜 v0.8.3</button></div>
-<div id="relicLauncher"><button type="button" data-open-relic-collection aria-label="เปิด Relic Collection ใต้แผนที่"><img src="./assets/relics/dragon-heart.svg" alt=""> Relic Collection <small id="relicLauncherCount">0/9</small></button></div>
+<div id="help" class="panel bc-help-launcher" aria-label="คู่มือและข่าวสาร"><button type="button" data-open-guide><i class="bc-hud-icon" style="--hud-position:100% 0%" aria-hidden="true"></i> คู่มือ</button><button type="button" id="patchNotesOpen" data-open-patch-notes>📜 v0.8.3</button></div>
+<div id="relicLauncher"><button type="button" data-open-relic-collection aria-label="เปิด Relic Collection ใต้แผนที่"><span class="bc-relic-atlas bc-relic-launcher-icon" aria-hidden="true"></span> Relic Collection <small id="relicLauncherCount">0/9</small></button></div>
 <div id="shopbox" class="panel"><div class="mobile-drawer-head"><b>🐰 จ้างกระต่าย</b><button type="button" data-mobile-close aria-label="ปิดหน้าจ้างกระต่าย">✕</button></div><details id="recruitDetails" open><summary>จ้างกระต่าย <small id="recruitSummary">0/7</small></summary><div id="shop" aria-label="รายชื่อกระต่ายที่จ้างได้"></div></details></div>
 <div id="side" class="panel">
   <button id="sideToggle" class="bc-collapse-toggle" type="button" aria-expanded="true" aria-label="ย่อแผงจัดการหมู่บ้าน" title="ซ่อน/แสดงแผงจัดการหมู่บ้าน">−</button>
@@ -827,16 +834,16 @@
     <button type="button" data-world="hall">🏠 โพรง</button><button type="button" data-world="blacksmith">⚒ โรงตีเหล็ก</button>
     <button type="button" data-world="resource">📦 โรงผลิต</button><button type="button" data-world="sell">🛒 Quick Sell</button>
     <button type="button" id="mobileHomeOpen">🔨 Home Builder</button>
-    <button type="button" data-open-guide>📖 คู่มือ</button><button type="button" data-open-patch-notes>📜 Patch Notes</button>
+    <button type="button" data-open-guide><i class="bc-hud-icon" style="--hud-position:100% 0%" aria-hidden="true"></i> คู่มือ</button><button type="button" data-open-patch-notes>📜 Patch Notes</button>
     <button type="button" data-open-relic-collection>✧ Relic Collection</button>
   </div>
   <h3>จัดการหมู่บ้าน</h3>
   <div class="bc-quick-actions">
-    <button id="heroOpen" class="bc-quick"><span data-ui-icon="gear">🐰</span> Class Armory</button>
+    <button id="heroOpen" class="bc-quick"><span class="bc-hud-icon" style="--hud-position:33.333333333333336% 50%" aria-hidden="true"></span> Class Armory</button>
     <button id="inventoryOpen" class="bc-quick"><span data-ui-icon="gear">🎒</span> คลังเก็บของ</button>
-    <button id="forgeOpen" class="bc-quick"><span data-ui-icon="craft">⚒</span> โรงตีเหล็ก</button>
-    <button id="masteryOpen" class="bc-quick"><span data-ui-icon="skill">✦</span> Class Mastery</button>
-    <button id="skillCoreOpen" class="bc-quick"><span data-ui-icon="skill">✧</span> Class Skill Core</button>
+    <button id="forgeOpen" class="bc-quick"><span class="bc-hud-icon" style="--hud-position:0.0% 100%" aria-hidden="true"></span> โรงตีเหล็ก</button>
+    <button id="masteryOpen" class="bc-quick"><span class="bc-hud-icon" style="--hud-position:66.66666666666667% 50%" aria-hidden="true"></span> Class Mastery</button>
+    <button id="skillCoreOpen" class="bc-quick"><span class="bc-hud-icon" style="--hud-position:100.0% 50%" aria-hidden="true"></span> Class Skill Core</button>
   </div>
   <div id="squad" aria-label="กระต่ายในกองทัพ"></div>
   <div class="row"><button id="fortify" title="เสริมฐานได้ตั้งแต่วันแรก ใช้วัตถุดิบทั่วไปโดยไม่ใช้ Gold"></button></div>

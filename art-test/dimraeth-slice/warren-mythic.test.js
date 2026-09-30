@@ -1,7 +1,11 @@
 import {describe,it,expect} from 'vitest';
-import {defaultMythic,rollMythicOmen,validMythicSquad,settleMythic,mythicHpMultiplier} from './warren-mythic.js';
+import {defaultMythic,rollMythicOmen,validMythicSquad,settleMythic,mythicHpMultiplier,mythicAtkMultiplier,mythicBossAttack} from './warren-mythic.js';
 describe('mythic invasion',()=>{
+ it('doubles shared boss attack at early and high village levels',()=>{expect(mythicBossAttack(1)).toBe(50);expect(mythicBossAttack(20)).toBe(240);});
  it('unlocks omens at Warren 5 and picks an allowed gate',()=>{expect(rollMythicOmen(defaultMythic(),{won:true,day:7,warren:4,rng:()=>0} ).pending).toBeNull();expect(rollMythicOmen(defaultMythic(),{won:true,day:7,warren:5,rng:()=>0}).pending).toMatchObject({bossId:'ancientDragon',gate:'west'});});
+ it('keeps the omen at 15% total and splits a successful roll across live bosses',()=>{const rolls=[0,.8,0];expect(rollMythicOmen(defaultMythic(),{won:true,day:8,warren:5,rng:()=>rolls.shift()} ).pending).toMatchObject({bossId:'kingArthur',gate:'west'});});
  it('keeps at most one rabbit from each class',()=>{const u=[{id:1,cls:'guard'},{id:2,cls:'guard'},{id:3,cls:'mage'}];expect(validMythicSquad(u,[1,2,3]).map(x=>x.id)).toEqual([1,3]);});
  it('pays stones now and keeps relic drops gated for the later archive system',()=>{const loss=settleMythic(defaultMythic(),{won:false,rng:()=>0});expect(loss.reward).toMatchObject({optionStone:2,reoptionStone:1,relic:null});const gated=settleMythic(defaultMythic(),{won:true,rng:()=>0});expect(gated.reward.relic).toBeNull();const enabled=settleMythic(defaultMythic(),{won:true,rng:()=>.19,relicEnabled:true});expect(enabled.reward.relic).toBe('dragonHeart');expect(mythicHpMultiplier(enabled.state)).toBe(1.01);});
+ it('awards Wukong relics through the live encounter path',()=>{const state={...defaultMythic(),pending:{bossId:'sunWukong',day:9,gate:'west'}};const result=settleMythic(state,{won:true,rng:()=>.1,relicEnabled:true});expect(result.reward.relic).toBe('jinguBang');expect(result.state.defeats.sunWukong).toBe(1);expect(mythicAtkMultiplier(result.state)).toBe(1.01);});
+ it('awards Excalibur through the live Arthur encounter path',()=>{const state={...defaultMythic(),pending:{bossId:'kingArthur',day:10,gate:'west'}};const result=settleMythic(state,{won:true,rng:()=>.1,relicEnabled:true});expect(result.reward.relic).toBe('excalibur');expect(result.state.defeats.kingArthur).toBe(1);expect(mythicAtkMultiplier(result.state)).toBe(1.01);});
 });

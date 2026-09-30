@@ -1,3 +1,4 @@
+import {hudIcon} from './warren-hud.js';
 // Burrow Command's single-screen Class Armory. Legacy RPG windows remain importable for regression tests.
 import {esc,itemLabel,gameIcon,renderItemDetailHtml,armoryGearIcon} from './warren-ui.js';
 import {dismantleFragments} from '../../src/simulation/equipmentV2.ts';
@@ -107,7 +108,7 @@ export function renderArmoryHtml(s,classes){
  const detail=s.itemDetailId&&s.gear.some(p=>p.id===s.itemDetailId)?
   '<section class="bc-armory-detail"><h3>รายละเอียด / เลือกสวมใส่</h3>'+renderItemDetailHtml(s,s.itemDetailId,classes,{embedded:true})+'</section>':'';
  const results=s.batchReport&&s.batchClass===cls?renderBatchHtml(s,classes,true):'';
- return '<header class="bc-modal-header"><div>'+gameIcon('gear','ui','◈','bc-header-icon')+
+ return '<header class="bc-modal-header"><div>'+hudIcon(5)+
   '<span><h2>Class Armory · '+esc(classes[cls].name)+'</h2><small>เลือกคลาส → ช่อง → คราฟต์ / คลัง / อัปเกรด → เปรียบเทียบและเลือกใส่</small></span></div>'+
   '<button class="modal-close" data-modal-close aria-label="ปิด">✕</button></header>'+
   '<div class="bc-modal-body bc-armory-body">'+classTabs(s,classes)+

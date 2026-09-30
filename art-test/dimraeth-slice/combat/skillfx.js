@@ -25,6 +25,7 @@ export const FX_SPECS = {
   lightningField: { kind: 'ground', ms: 900, flat: .5 },
   frostNova: { kind: 'self', ms: 560 },
   cyclone: { kind: 'attach', size: 150, ms: 900 },
+  wukongCyclone: { kind: 'attach', size: 330, ms: 1100, sheet: 'cyclone' },
   groundSlam: { kind: 'self', ms: 620 },
   blackHole: { kind: 'self', ms: 1150, flat: .5 },
   flameTrail: { kind: 'self', ms: 1000 },
@@ -188,6 +189,10 @@ export function createSkillFx(sceneCanvas, { beforeEl = null } = {}) {
     setStatusSource(fn) { statusSource = fn; },
     /** Ground telegraph ring under an area skill's target spot. */
     ring(x, y, radius, color = '#ffd27a', life = .45) { items.push({ id: '__ring', x, y, radius, color, age: 0, life }); trimFx(); },
+    /** Hard-edged pixel telegraph used by pixel-art bosses. */
+    pixelRing(x,y,radius,color='#73b8ff',life=.5){items.push({id:'__pixelRing',x,y,radius,color,age:0,life});trimFx();},
+    /** A supplied pixel sprite flying along a world-space path. */
+    spriteWave(image,from,to,{size=210,life=1.4,baseAngle=Math.PI}={}){items.push({id:'__spriteWave',image,from:{x:from.x,y:from.y},to:{x:to.x,y:to.y},size,life,baseAngle,age:0});trimFx();},
 
     update(dt) {
       for (let i = parts.length - 1; i >= 0; i--) { const q = parts[i]; q.age += dt; if (q.age < 0) continue; if (q.age >= q.life) { parts.splice(i, 1); continue; }
@@ -225,6 +230,18 @@ export function createSkillFx(sceneCanvas, { beforeEl = null } = {}) {
           if (it.solid) { const k = .4 + t * .8; g.beginPath(); g.ellipse(p.x, p.y, r * k, r * k * .5, 0, 0, Math.PI * 2); g.stroke(); g.restore(); continue; }
           g.beginPath(); g.ellipse(p.x, p.y, r, r * .5, 0, 0, Math.PI * 2); g.stroke();
           g.restore(); continue;
+        }
+        if(it.id==='__pixelRing'){
+          const p=proj(it.x,it.y),r=it.radius*pxPerUnit(it.x,it.y),k=.55+t*.45,block=Math.max(4,Math.round(r/15));
+          g.globalAlpha=.9*(1-t);g.fillStyle=it.color;
+          for(let i=0;i<24;i++){const a=i*Math.PI/12,x=Math.round(p.x+Math.cos(a)*r*k),y=Math.round(p.y+Math.sin(a)*r*k*.5);g.fillRect(x-block/2,y-block/2,block,block);}
+          g.restore();continue;
+        }
+        if(it.id==='__spriteWave'){
+          if(!it.image?.complete||!it.image.naturalWidth){g.restore();continue;}
+          const at={x:it.from.x+(it.to.x-it.from.x)*t,y:it.from.y+(it.to.y-it.from.y)*t},p=proj(at.x,at.y),a=proj(it.from.x,it.from.y),b=proj(it.to.x,it.to.y),size=it.size*pxPerUnit(at.x,at.y);
+          g.translate(Math.round(p.x),Math.round(p.y-38));g.rotate(Math.atan2(b.y-a.y,b.x-a.x)-it.baseAngle);g.globalAlpha=Math.min(1,t*12,(1-t)*8);
+          g.drawImage(it.image,-size/2,-size/2,size,size);g.restore();continue;
         }
         const spec = it.spec, sheet = sheets.get(sheetId(it.id));
         const self = it.follow ? it.follow() : it.from;

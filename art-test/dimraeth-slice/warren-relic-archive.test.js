@@ -12,7 +12,7 @@ describe('Mythic Archive',()=>{
   expect(new Set(ALL_ARCHIVE_BOSSES.map(x=>x.relicId)).size).toBe(44);
   expect(FIRST_ARCHIVE_BOSS_IDS).toEqual(['ancientDragon','sunWukong','kingArthur','medusa','fenrir','anubis','yamataNoOrochi','dracula','kraken']);
   expect(FIRST_ARCHIVE_BOSSES).toHaveLength(9);
-  expect(LIVE_ARCHIVE_BOSS_IDS).toEqual(['ancientDragon']);
+  expect(LIVE_ARCHIVE_BOSS_IDS).toEqual(['ancientDragon','sunWukong','kingArthur']);
  });
  it('ships nine distinct original icon assets for the first collection',()=>{
   expect(Object.keys(ARCHIVE_ICON_PATHS)).toHaveLength(9);
@@ -63,15 +63,18 @@ describe('Mythic Archive',()=>{
   const repeat=recordMythicVictory(last.state,{bossId:'kraken',relicDropped:true,allowUnreleased:true});
   expect(repeat.collectionUnlocked).toBe(false);expect(repeat.state.essence).toBe(1);
  });
- it('renders nine focusable first-release cards and seven source tabs with a boss detail view',()=>{
+ it('renders nine focusable cards without future category tabs',()=>{
   const html=renderRelicArchiveHtml(defaultMythic());
   expect((html.match(/data-archive-boss=/g)||[])).toHaveLength(9);
-  expect((html.match(/data-archive-tab=/g)||[])).toHaveLength(8);
+  expect((html.match(/data-archive-tab=/g)||[])).toHaveLength(0);
   expect(html).toContain('Dragon Heart');expect(html).toContain('Mythic Collector');
+  expect((html.match(/bc-relic-mystery/g)||[])).toHaveLength(6);
   expect(html).toContain('PLANNED');expect(html).toContain('LEGENDARY RELIC');
-  expect(renderRelicArchiveHtml(defaultMythic(),'first','sunWukong')).toContain('ENCOUNTER PLANNED');
+  expect(renderRelicArchiveHtml(defaultMythic(),'first','sunWukong')).toContain('Attack +1%');
   const owned=renderRelicArchiveHtml(settleMythic(defaultMythic(),{won:true,relicEnabled:true,rng:()=>0}).state,'greek','medusa');
-  expect(owned).toContain('Greek Mythology');expect(owned).toContain("Gorgon's Eye");
-  expect((owned.match(/data-archive-boss=/g)||[])).toHaveLength(6);
+  expect(owned).not.toContain('Greek Mythology');expect(owned).not.toContain("Gorgon's Eye");
+  expect(owned).not.toContain("Medusa");
+  expect(owned).toContain("ยังไม่เปิดเผย");
+  expect((owned.match(/data-archive-boss=/g)||[])).toHaveLength(9);
  });
 });

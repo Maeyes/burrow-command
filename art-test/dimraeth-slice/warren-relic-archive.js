@@ -37,7 +37,7 @@ export const ALL_ARCHIVE_BOSSES=Object.freeze([ORIGINAL_BOSS,...ARCHIVE_COLLECTI
 export const ARCHIVE_BOSS_BY_ID=Object.freeze(Object.fromEntries(ALL_ARCHIVE_BOSSES.map(entry=>[entry.id,entry])));
 export const FIRST_ARCHIVE_BOSS_IDS=Object.freeze(['ancientDragon','sunWukong','kingArthur','medusa','fenrir','anubis','yamataNoOrochi','dracula','kraken']);
 export const FIRST_ARCHIVE_BOSSES=Object.freeze(FIRST_ARCHIVE_BOSS_IDS.map(id=>ARCHIVE_BOSS_BY_ID[id]));
-export const LIVE_ARCHIVE_BOSS_IDS=Object.freeze(['ancientDragon']); // Add only when an encounter is implemented and wired.
+export const LIVE_ARCHIVE_BOSS_IDS=Object.freeze(['ancientDragon','sunWukong','kingArthur']); // Add only when an encounter is implemented and wired.
 export const ARCHIVE_ICON_PATHS=Object.freeze({dragonHeart:'dragon-heart',jinguBang:'jingu-bang',excalibur:'excalibur',gorgonsEye:'gorgons-eye',fenrirsFang:'fenrirs-fang',heartScale:'heart-scale',orochiScale:'orochi-scale',vampiresHeart:'vampires-heart',abyssalTentacle:'abyssal-tentacle'});
 export const relicIconPath=relicId=>ARCHIVE_ICON_PATHS[relicId]?`./assets/relics/${ARCHIVE_ICON_PATHS[relicId]}.svg`:null;
 export function archiveProgress(state){

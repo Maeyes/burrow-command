@@ -1,8 +1,10 @@
 import waterfallGuideImage from './assets/ui/bunny_world_waterfall_update_guide.png?url';
+import bossUpdateImage from './assets/ui/world-boss-update.png?url';
+import waterfallUpdateImage from './assets/ui/waterfall-update.png?url';
 
 // Independent of save slots and Warren levels: one display per published
 // infographic revision, not once per login or per gameplay version.
-export const WATERFALL_GUIDE_VERSION='waterfall-guide-2026-09-v1';
+export const WATERFALL_GUIDE_VERSION='world-boss-update-2026-09-v1';
 export const WATERFALL_GUIDE_SEEN_KEY='burrow-command:seen:'+WATERFALL_GUIDE_VERSION;
 export function shouldShowWaterfallIntro(storage){
  try{return (storage??globalThis.localStorage)?.getItem(WATERFALL_GUIDE_SEEN_KEY)!=='seen';}
@@ -13,6 +15,13 @@ export function markWaterfallIntroSeen(storage){
  catch{return false;}
 }
 export function renderWaterfallGuideHtml({intro=false}={}){
+ if(intro)return `<header class="bc-modal-header bc-waterfall-header"><div><span>✨</span><span><h2>อัปเดต v0.8.4 · New World Bosses</h2><small>King Arthur · Sun Wukong · ระบบน้ำตก</small></span></div><button type="button" data-waterfall-guide-close aria-label="ปิดประกาศอัปเดต">✕</button></header>
+ <div class="bc-modal-body bc-waterfall-guide-body">
+ <figure class="bc-waterfall-figure"><img src="${bossUpdateImage}" alt="บอสใหม่ King Arthur และ Sun Wukong" /><figcaption><a href="${bossUpdateImage}" target="_blank" rel="noopener noreferrer">เปิดภาพบอสเต็มขนาด</a></figcaption></figure>
+ <p class="bc-waterfall-cost"><strong>บอสใหม่ 2 ตัวเข้าสู่ระบบ!</strong> หลังผ่านคืนปกติ เมื่อหมู่บ้าน Lv 5 ขึ้นไป มีโอกาสพบ World Boss <strong>15%</strong> หากพบ จะสุ่ม Ancient Dragon, Sun Wukong หรือ King Arthur ในโอกาสเท่ากัน <strong>ตัวละ 1 ใน 3</strong> (ประมาณ 5% ต่อคืนสำหรับแต่ละตัว)</p>
+ <figure class="bc-waterfall-figure"><img src="${waterfallUpdateImage}" loading="lazy" alt="คู่มือสร้างน้ำตกใน Home Builder: ซื้อพื้นที่เหนือ ขยายกำแพง วางต้นน้ำและบ่อรับน้ำ แล้วเลือกหน้าผา" /><figcaption><a href="${waterfallUpdateImage}" target="_blank" rel="noopener noreferrer">เปิดภาพน้ำตกเต็มขนาด</a> · ภาพคู่มือระบุ v0.6.5; ขั้นตอนระบบล่าสุดดูในคู่มือน้ำตก</figcaption></figure>
+ <button type="button" data-open-waterfall-guide>🌊 อ่านคู่มือน้ำตกฉบับปัจจุบัน</button>
+ </div><footer class="bc-waterfall-guide-footer"><small>แสดงครั้งเดียวสำหรับอัปเดตนี้ · เปิดซ้ำได้จาก Patch Notes</small><button type="button" data-waterfall-guide-close>เข้าเกม</button></footer>`;
  return `<header class="bc-modal-header bc-waterfall-header"><div><span aria-hidden="true">🌊</span><span><h2 id="waterfallGuideTitle">${intro?'อัปเดตใหม่! คู่มือสร้างน้ำตก':'คู่มือสร้างน้ำตก'}</h2><small>Home Builder · เนินที่สร้างเอง และหน้าผาธรรมชาติ Lv 3</small></span></div><button type="button" data-waterfall-guide-close aria-label="ปิดคู่มือสร้างน้ำตก">✕</button></header>
  <div class="bc-modal-body bc-waterfall-guide-body" id="waterfallGuideDescription">
   <p class="bc-waterfall-cost"><strong>อัปเดต v0.8.3:</strong> ตอนนี้ต้องวาดน้ำบนสันหน้าผาเหนือด้วยตนเอง และสามารถเชื่อมหลายช่องเป็นม่านน้ำตกยาวได้ ภาพ PNG ฝั่งหน้าผาด้านล่างเป็นภาพจากระบบเดิม โปรดยึดขั้นตอนที่อธิบายใต้ภาพเป็นหลัก</p>

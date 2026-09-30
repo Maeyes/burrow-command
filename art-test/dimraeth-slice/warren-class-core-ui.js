@@ -1,3 +1,4 @@
+import {hudIcon} from './warren-hud.js';
 // Uses the same core/mod/item definitions, duplicate costs and slot contract as Bunny World.
 import {CLASS_IDS,CLASS_FAMILIES,classWeaponMasterySkills,MASTERY_ACTIVE_LEVELS} from './warren-progression.js';
 import {WEAPON_SKILLS_BY_FAMILY_V2} from '../../src/simulation/skillEntitlements.ts';
@@ -41,11 +42,11 @@ export function renderClassCoreHtml(s,classes){
    const available=modChoices.filter(d=>d.id===modId||availableSkillUpgradeCopies(state,d.id)>0)
     .map(d=>[d.id,d.name+' ×'+state.inventory[d.id]]);
    if(mod&&!available.some(([id])=>id===modId))available.unshift([modId,mod.name]);
-   return '<div class="bc-core-mod"><b>Mod '+(j+1)+' '+(locked?'🔒 Warren Lv '+level:'')+'</b>'+
+   return '<div class="bc-core-mod"><div class="bc-mod-heading"><div class="bc-core-large-icon bc-mod-art '+(mod?'bc-core-grade rarity-'+esc(tierName(skills.coreRarity?.[modId])):'')+'">'+(mod?gameIcon(modId,'item','◇'):'◇')+'</div><div><b>Mod '+(j+1)+' '+(locked?'🔒 Warren Lv '+level:'')+'</b><small>'+esc(mod?.name||'ยังไม่ติดตั้ง')+'</small></div></div>'+
     select('data-mod-choose="'+slot+':'+j+'" aria-label="Skill Mod '+(j+1)+'"',modId,available,locked||!core||s.night)+
     (mod?'<small>'+esc(mod.description)+'</small>'+upgrade(s,cls,modId,locked):'<small>'+(locked?'ยังไม่ปลดล็อก':'เลือก Skill Mod ที่ได้รับจากมอนสเตอร์')+'</small>')+'</div>';
   }).join('');
-  return '<section class="bc-core-card" data-core-slot="'+slot+'"><div class="bc-core-large-icon">'+(core?gameIcon(coreId,'skill','✦'):'◇')+'</div><div class="bc-core-content">'+
+  return '<section class="bc-core-card" data-core-slot="'+slot+'"><div class="bc-core-large-icon '+(core?'bc-core-grade rarity-'+esc(tierName(skills.coreRarity?.[coreId])):'')+'"'+(core?' title="'+esc(tierName(skills.coreRarity?.[coreId]))+'"':'')+'>'+(core?gameIcon(coreId,'skill','✦'):'◇')+'</div><div class="bc-core-content">'+
    '<h3>Skill Core '+(slot+1)+' · Warren Lv '+level+(locked?' 🔒':'')+(core?' · '+esc(core.name):'')+'</h3>'+picked+
    (core?'<p>'+esc(core.name)+' · '+(core.scaling?Math.round(core.coefficient*100)+'% '+esc(core.scaling):core.barrierMaxHpFraction?'Barrier '+Math.round(core.barrierMaxHpFraction*100)+'% Max HP':core.healMaxHpFraction?'Heal '+Math.round(core.healMaxHpFraction*100)+'% Max HP':'Utility')+
     ' · Cooldown '+((core.cooldownMs||0)/1000)+'s</p>'+upgrade(s,cls,coreId,locked):
@@ -55,7 +56,7 @@ export function renderClassCoreHtml(s,classes){
  const movement=skills.movement,moveChoices=Object.values(SKILLS_V2)
   .filter(d=>d.kind==='movement'&&(state.inventory[d.id]||0)>0).map(d=>[d.id,d.name+' ×'+state.inventory[d.id]]);
  if(movement&&!moveChoices.some(([id])=>id===movement))moveChoices.unshift([movement,SKILLS_V2[movement]?.name||movement]);
- const movementHtml='<section class="bc-core-card"><div class="bc-core-large-icon">➤</div><div class="bc-core-content"><h3>Movement Core</h3>'+
+ const movementHtml='<section class="bc-core-card"><div class="bc-core-large-icon '+(movement?'bc-core-grade rarity-'+esc(tierName(skills.coreRarity?.[movement])):'')+'">'+(movement?gameIcon(movement,'skill','◇'):'◇')+'</div><div class="bc-core-content"><h3>Movement Core'+(movement?' · '+esc(SKILLS_V2[movement]?.name||movement):'')+'</h3>'+
   select('data-movement-choose aria-label="Movement Core"',movement,moveChoices,!unlocked||s.night)+
   (movement?upgrade(s,cls,movement):'<p>Dash / Blink ใช้ช่องแยกตามเกมหลัก</p>')+'</div></section>';
  const knownItems=Object.keys(s.inventory||{}).filter(id=>skillUpgradeKind(id)&&
@@ -79,7 +80,7 @@ export function renderClassCoreHtml(s,classes){
     '<button data-skill-exchange="'+esc(id)+'" '+(!unlocked||s.night||stock<SHARD_EXCHANGE_COST?'disabled':'')+'>แลก '+SHARD_EXCHANGE_COST+' Shards</button></div>';
   }).join('')+
   '<p class="bc-help">Core Shards '+fmt(s.inventory?.coreShard)+' · Mod Shards '+fmt(s.inventory?.modShard)+'</p></details>';
- return '<header class="bc-modal-header"><div><span class="bc-core-icon">✦</span><span><h2>Class Skill Core</h2>' +
+ return '<header class="bc-modal-header"><div>'+hudIcon(7)+'<span><h2>Class Skill Core</h2>' +
   '<small>Warren Lv10 / 20 / 30 · ทุกครั้งได้ 1 Core พร้อม 2 Mod · Movement แยก</small></span></div>'+
   '<button data-modal-close aria-label="ปิด Skill Core">✕</button></header>'+
   '<div class="bc-modal-body bc-core-body"><nav class="bc-class-tabs" aria-label="เลือกคลาส Skill Core">'+tabs+'</nav>'+feedback+

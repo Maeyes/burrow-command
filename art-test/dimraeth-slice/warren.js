@@ -1,3 +1,4 @@
+import {decorateHud} from './warren-hud.js';
 // Burrow Command: a persistent bunny squad defends its warren (Phase 2: individual progression + forge).
 // Day: bunnies farm the field around a flag and carry loot home. Night: waves attack the burrow.
 // Gold only comes from kills. Real forest monster drops feed the forge and construction. Downed bunnies recover at dawn.
@@ -12,8 +13,18 @@ import { getRoster, monsterPresentation } from './combat/rosters.js';
 import { loadBlessedHero } from './combat/hero.js';
 import { createSkillFx, BASIC_ATTACK_FX } from './combat/skillfx.js';
 import { createMythicCinematic } from './warren-mythic-cinematic.js';
-import {defaultMythic,normalizeMythic,rollMythicOmen,validMythicSquad,defaultMythicSquad,settleMythic,mythicHpMultiplier,MYTHIC_RELICS} from './warren-mythic.js';
-import {archiveProgress} from './warren-relic-archive.js';
+import { createWukongCinematic } from './warren-wukong-cinematic.js';
+import { createArthurCinematic } from './warren-arthur-cinematic.js';
+import { arthurSkillAt } from './warren-arthur-skills.js';
+import wukongWalkSheet from '../wukong-staff-vfx/assets/walk.png?url';
+import wukongHitSheet from '../wukong-staff-vfx/assets/hit.png?url';
+import wukongStaffUrl from '../wukong-staff-vfx/assets/wukong-staff-isolated-v1.png?url';
+import wukongCombinedStrikeSheet from '../wukong-staff-vfx/assets/wukong-combined-strike-24f.png?url';
+import arthurWalkSheet from './assets/mythic/king-arthur/arthur-walk-6f-v4.png?url';
+import arthurAttackSheet from './assets/mythic/king-arthur/arthur-attack-4f-v2.png?url';
+import arthurGoldenWaveUrl from './assets/mythic/king-arthur/excalibur-golden-wave.png?url';
+import {defaultMythic,normalizeMythic,rollMythicOmen,validMythicSquad,defaultMythicSquad,settleMythic,mythicHpMultiplier,mythicAtkMultiplier,mythicBossAttack,MYTHIC_RELICS,MYTHIC_BOSSES} from './warren-mythic.js';
+import {archiveProgress,relicIconPath} from './warren-relic-archive.js';
 import {renderRelicArchiveHtml} from './warren-relic-ui.js';
 import { createFloaters } from './combat/floaters.js';
 import { combatFX } from './combat/fx.js';
@@ -26,6 +37,8 @@ import { WS } from './engine/state.js';
 import { K } from './engine/util.js';
 import * as PAL from './engine/palettes.js';
 import { CLASS_FAMILIES, LEGACY_SAVE_KEY, SAVE_KEY, bunnyName, expRequired, giveBunnyExp, migrateSave, monsterLoot, addInventory, craftMaterialCount, spendCraftMaterials, defaultBuilds, unlockedTier, minLevelForTier, buildFor, buildCombatBonus, availableRecipes, canCraft, craftGear, craftBatch, enhanceGear, enhanceAll, refineGear, dismantleGear, dismantleSelection, setGearLock, recommendations, grantClassMastery, unlockClassMastery, unlockedMastery, toggleMasteryWeaponSkill, classProgress, defaultProgress, defaultMastery, burrowMonsterGold, shouldDepositLootDirectly, autoEquipBuild, equipBuildItem, equippedGearIds, gearSlot, EQUIPMENT_MASTER_V2, EQUIPMENT_RARITY_STAT_MULTIPLIER, MAX_FIELD_PER_CLASS, fieldSquadCap, fieldClassCap, FIELD_SQUAD_GATES, CLASS_IDS, GEAR_SLOTS, PRIOR_SAVE_KEY, defaultAutoDismantleSettings, settleBatchCraft, constructionMaterialCount, spendConstructionMaterials, warrenConstructionCost, fortificationCost, fortificationCap, fortificationHpBonus, repairAllQuote, repairEverything, CONSTRUCTION_MATERIAL_IDS, constructionRefund } from './warren-progression.js';
+
+const IS_CINEMATIC_PREVIEW=globalThis.location?.hash==='#cinematic-preview';
 import { inventoryItemMeta } from '../../src/simulation/itemTagsV2.ts';
 import { MONSTERS_V2 as MONSTER_XP } from '../../src/simulation/monsterDataV2.ts';
 import { itemLabel, gameIcon, renderSquadHtml, renderForgeHtml, renderHeroHtml, renderInventoryHtml, renderItemDetailHtml } from './warren-ui.js';
@@ -155,6 +168,18 @@ await combatFX.init({ biome: currentStage.biome, mapId: currentStage.mapId });
 const loadImage = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
 const mirrorCache = new Map();
 const mirrored = img => { let c = mirrorCache.get(img); if (!c) { c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.translate(img.width, 0); g.scale(-1, 1); g.drawImage(img, 0, 0); mirrorCache.set(img, c); } return c; };
+async function loadWukongFrames(){
+ const sheets=await Promise.all([loadImage(wukongWalkSheet),loadImage(wukongHitSheet)]);
+ return sheets.map(sheet=>Array.from({length:4},(_,frame)=>{const cell=sheet.width/4,c=document.createElement('canvas');c.width=cell;c.height=sheet.height;c.getContext('2d').drawImage(sheet,frame*cell,0,cell,sheet.height,0,0,cell,sheet.height);return c;}));
+}
+const [wukongWalkFrames,wukongHitFrames]=await loadWukongFrames();
+async function loadGridFrames(src,columns,rows,scale=1){const sheet=await loadImage(src),cellW=sheet.width/columns,cellH=sheet.height/rows,outW=Math.round(cellW*scale),outH=Math.round(cellH*scale);return Array.from({length:columns*rows},(_,frame)=>{const c=document.createElement('canvas'),sx=frame%columns*cellW,sy=Math.floor(frame/columns)*cellH;c.width=outW;c.height=outH;const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(sheet,sx,sy,cellW,cellH,0,0,outW,outH);return c;});}
+const wukongCombinedStrikeFrames=await loadGridFrames(wukongCombinedStrikeSheet,6,4,.5),wukongCombinedStrikeFramesLeft=wukongCombinedStrikeFrames.map(mirrored);
+const arthurWalkFrames=await loadGridFrames(arthurWalkSheet,6,1),arthurAttackFrames=await loadGridFrames(arthurAttackSheet,4,1);
+const arthurGoldenWave=await loadImage(arthurGoldenWaveUrl);
+const wukongStaffSource=await loadImage(wukongStaffUrl),wukongStaffSprite=document.createElement('canvas');
+wukongStaffSprite.width=360;wukongStaffSprite.height=360;
+{const g=wukongStaffSprite.getContext('2d');g.fillStyle='rgba(12,9,5,.56)';g.beginPath();g.ellipse(180,330,31,9,0,0,Math.PI*2);g.fill();g.fillStyle='#62503a';for(let i=0;i<7;i++){const a=i*Math.PI*2/7,r=17+i%2*8;g.fillRect(176+Math.cos(a)*r,326+Math.sin(a)*r*.35,7,5);}g.translate(180,330);g.rotate(78*Math.PI/180);g.scale(.12,.12);g.drawImage(wukongStaffSource,-wukongStaffSource.width*.94,-wukongStaffSource.height/2);}
 
 const monsterArt = new Map();
 async function artFor(id,source=roster) {
@@ -552,7 +577,7 @@ function upgradeTower(t){
 let unitSeq = 0;
 function statsOf(cls,level=1,buildId=cls+'-1') {
   const c=CLASSES[cls], gear=buildCombatBonus(S,cls,buildId,level);
-  return {maxHp:Math.round((c.hp+(level-1)*12+gear.maxHp)*mythicHpMultiplier(S.mythic)),atk:Math.round((c.atk+(level-1)*.9+gear.atk)*10)/10,def:Math.round(gear.def),critBonus:gear.critBonus||0,luk:Math.floor(level/4)};
+  return {maxHp:Math.round((c.hp+(level-1)*12+gear.maxHp)*mythicHpMultiplier(S.mythic)),atk:Math.round((c.atk+(level-1)*.9+gear.atk)*mythicAtkMultiplier(S.mythic)*10)/10,def:Math.round(gear.def),critBonus:gear.critBonus||0,luk:Math.floor(level/4)};
 }
 function refreshArmy() {
   for(const u of S.units){const oldMax=u.maxHp||1,oldHp=u.hp;Object.assign(u,statsOf(u.cls,u.level,u.buildId));u.hp=u.down?0:Math.min(u.maxHp,Math.max(1,Math.round(oldHp/oldMax*u.maxHp)));}
@@ -612,20 +637,24 @@ function unitActor(u) {
 
 // ---------- monsters ----------
 let monSeq = 0;
+const WUKONG_CLONE_OFFSETS=Object.freeze([{x:-150,y:150},{x:150,y:-150}]);
 let dragonTrial = null;
 let showMythicRewardModal=()=>{};
 let mythicPanel=null;
-function beginDragonTrial(position,frames){
+function beginMythicTrial(position,frames,bossId='ancientDragon'){
  const keys=['gold','inventory','progress','mastery','classSkills','kills','time','hallCd'];
  const state=Object.fromEntries(keys.map(k=>[k,structuredClone(S[k])]));
  const units=S.units.map(u=>({u,data:{...u,carry:structuredClone(u.carry)}}));
  const oldMonsters=S.monsters,oldEvents=S.events;
  const squad=validMythicSquad(S.units,S.mythic.selected),fighters=squad.length?squad:S.units.slice(0,7);
- const hp=Math.max(1000,S.warren*1000),atk=20+S.warren*5;
- const m={id:++monSeq,type:'ancientDragonTrial',boss:true,trial:true,night:false,elite:false,x:position.x,y:position.y,home:{...position},r:24,hp,maxHp:hp,atk,range:100,speed:55,cd:1,dead:false,left:false,p:{name:'Ancient Dragon'},specialCd:3,specialIndex:0};
+ const hp=Math.max(1000,S.warren*1000),atk=mythicBossAttack(S.warren),boss=MYTHIC_BOSSES[bossId]||MYTHIC_BOSSES.ancientDragon,isWukong=bossId==='sunWukong',isArthur=bossId==='kingArthur';
+ const m={id:++monSeq,type:bossId+'Trial',bossId,boss:true,trial:true,night:false,elite:false,x:position.x,y:position.y,home:{...position},r:24,hp,maxHp:hp,atk,range:isWukong?72:isArthur?82:100,speed:isWukong?72:isArthur?62:55,cd:1,dead:false,left:false,p:{name:boss.name},specialCd:3,specialIndex:0};
  const spawn=fieldPoint();if(!standable(m.x,m.y)&&spawn){m.x=spawn.x;m.y=spawn.y;m.home={...spawn};}
- m.actor={kind:'actor',get x(){return m.x+(m.lx||0)},get y(){return m.y+(m.ly||0)},z:0,r:24,visualScale:1.1,ox:192,oy:472,get dead(){return m.dead},getImage(){const attacking=(m.castUntil||0)>S.time||performance.now()-(m.lunge||0)<360;return frames[(attacking?4:0)+Math.floor(performance.now()/140)%4]},drawOverlay(g,{x,y}){g.fillStyle='#170909';g.fillRect(x-82,y-400,164,10);g.fillStyle='#f66a35';g.fillRect(x-81,y-399,162*Math.max(0,m.hp/m.maxHp),8);g.fillStyle='#ffdd98';g.textAlign='center';g.font='bold 13px system-ui';g.fillText('ANCIENT DRAGON',x,y-408)}};
- dragonTrial={m,state,units,oldMonsters,oldEvents,fighterIds:new Set(fighters.map(u=>u.id)),resolved:false};S.monsters=[m];S.events=[];
+ m.actor={kind:'actor',isBoss:true,get x(){return m.x+(m.lx||0)},get y(){return m.y+(m.ly||0)},z:0,r:24,visualScale:isWukong?.46:isArthur?.48:1.1,ox:isWukong?305:isArthur?224:192,oy:isWukong?425:isArthur?440:472,get dead(){return m.dead},getImage(){const attacking=(m.castUntil||0)>S.time||performance.now()-(m.lunge||0)<360;if(isArthur){const usingAttack=(m.skillAnimUntil||0)>S.time||attacking,age=Math.max(0,S.time-(m.skillAnimStart||S.time));if(usingAttack){const frame=Math.min(3,Math.floor(age*5));this.visualScale=.45;this.ox=264.5;this.oy=472;return frames.attack[frame]}const frame=Math.floor(performance.now()/125)%6;this.visualScale=.48;this.ox=224;this.oy=440;return frames.walk[frame]}if(!isWukong)return frames[(attacking?4:0)+Math.floor(performance.now()/140)%4];if((m.skillAnimUntil||0)>S.time){const frame=Math.min(23,Math.max(0,Math.floor((S.time-m.skillAnimStart)*30)));this.visualScale=1.1;this.ox=154.5;this.oy=257.5;return frames.combined[frame]}this.visualScale=.46;const frame=Math.floor(performance.now()/140)%4,thisFrames=attacking?frames.hit:frames.walk,anchors=attacking?[[300,864],[330,859],[280,875],[370,872]]:[[305,425],[325,420],[335,423],[330,417]];this.ox=anchors[frame][0];this.oy=anchors[frame][1];return thisFrames[frame]},drawOverlay(g,{x,y}){const barY=y-(isWukong?225:isArthur?215:400);g.fillStyle='#170909';g.fillRect(x-82,barY,164,10);g.fillStyle=isWukong?'#e6b62e':isArthur?'#e9cf68':'#f66a35';g.fillRect(x-81,barY+1,162*Math.max(0,m.hp/m.maxHp),8);g.fillStyle='#ffedb0';g.textAlign='center';g.font='bold 13px system-ui';g.fillText(boss.name.toUpperCase(),x,barY-8)}};
+ const staffGround={x:CENTER.x+250,y:CENTER.y+250};
+ const staffActor=isWukong?{kind:'actor',x:staffGround.x,y:staffGround.y,z:0,r:8,visualScale:1,ox:180,oy:330,img:wukongStaffSprite,get dead(){return m.dead||m.trialLost}}:null;
+ const cloneActors=isWukong?WUKONG_CLONE_OFFSETS.map((offset,index)=>({kind:'actor',get x(){return m.x+offset.x},get y(){return m.y+offset.y},z:0,r:18,visualScale:1.04,ox:154.5,oy:257.5,get dead(){return m.dead||m.trialLost||S.time<(m.cloneStart||Infinity)||S.time>=(m.cloneUntil||0)},getImage(){const frame=Math.min(23,Math.max(0,Math.floor((S.time-m.cloneStart)*30)));return (index===1?frames.combinedLeft:frames.combined)[frame]}})):[];
+ dragonTrial={m,bossId,staffActor,cloneActors,state,units,oldMonsters,oldEvents,fighterIds:new Set(fighters.map(u=>u.id)),resolved:false};S.monsters=[m];S.events=[];
  for(const u of S.units){u.mythicReserve=!dragonTrial.fighterIds.has(u.id);u.down=u.mythicReserve;u.hp=u.mythicReserve?0:u.maxHp;u.sp=u.maxSp;u.carry={gold:0,items:{}};u.cd=0;}
  return m;
 }
@@ -633,13 +662,37 @@ function endDragonTrial(){
  if(!dragonTrial)return;const trial=dragonTrial,completed=trial.m.dead&&!trial.m.trialLost,defeated=!!trial.m.trialLost;dragonTrial=null;trial.m.dead=true;
  Object.assign(S,trial.state);S.monsters=trial.oldMonsters;S.events=trial.oldEvents;
  for(const {u,data} of trial.units){for(const key of Object.keys(u))if(!(key in data))delete u[key];Object.assign(u,data);}
- if(completed||defeated){const result=settleMythic(S.mythic,{won:completed,relicEnabled:true});S.mythic=result.state;S.inventory.optionStone=(S.inventory.optionStone||0)+result.reward.optionStone;S.inventory.reoptionStone=(S.inventory.reoptionStone||0)+result.reward.reoptionStone;refreshArmy();showMythicRewardModal(completed,result.reward);}
+ if(completed||defeated){const result=settleMythic(S.mythic,{won:completed,relicEnabled:true});S.mythic=result.state;S.inventory.optionStone=(S.inventory.optionStone||0)+result.reward.optionStone;S.inventory.reoptionStone=(S.inventory.reoptionStone||0)+result.reward.reoptionStone;refreshArmy();showMythicRewardModal(completed,result.reward,trial.bossId);}
  else toast('ถอนกำลังจาก Mythic Invasion · ไม่ได้รับรางวัล');
  save();renderUi();
 }
-function updateDragonSkills(m,dt){
+function updateMythicSkills(m,dt){
  m.specialCd-=dt;if((m.castUntil||0)>S.time)return true;
  if(m.specialCd>0)return false;
+ if(m.bossId==='sunWukong'){
+  const clones=m.specialIndex++%2===1,live=S.units.filter(u=>!u.down),targets=clones?live.slice(0,3).map(u=>({x:u.x,y:u.y})):[{x:m.x,y:m.y}],radius=clones?82:175,delay=clones?.42:.48;
+  m.castUntil=S.time+delay;m.specialCd=clones?7:5;m.skillAnimStart=S.time;m.skillAnimUntil=S.time+.8;
+  if(clones){m.cloneStart=S.time;m.cloneUntil=S.time+.82;for(const offset of WUKONG_CLONE_OFFSETS){const p={x:m.x+offset.x,y:m.y+offset.y};skillFx?.ring(p.x,p.y,58,'#fff1a0',.48);skillFx?.pillar(p.x,p.y,{color:'#ffd84d',count:18,life:.7});}}else{skillFx?.play('wukongCyclone',{from:m,follow:()=>({x:m.x,y:m.y}),radius,color:'#ffd84d'});for(let i=0;i<4;i++)later(i*.16,()=>dragonTrial&&!m.dead&&skillFx?.ring(m.x,m.y,80+i*38,'#ffe36b',.68));}
+  for(const [i,p] of targets.entries()){skillFx?.ring(p.x,p.y,radius,'#ffd84d',delay+i*.12);later(delay+i*.12,()=>{if(!dragonTrial||m.dead||m.trialLost)return;skillFx?.play('groundSlam',{from:p,to:p,radius});for(const u of S.units)if(!u.down&&dist(u,p)<=radius)hurtUnit(u,m.atk*(clones?1.25:1.5),m);});}
+  floaters?.text(m.x,m.y,clones?'CLONE SMASH':'CYCLONE',{color:'#ffe173',size:18,lift:90});return true;
+ }
+ if(m.bossId==='kingArthur'){
+  const skill=arthurSkillAt(m.specialIndex++),excalibur=skill.id==='excalibur',bowling=skill.id==='bowlingBash',live=S.units.filter(u=>!u.down),aim=live.reduce((best,u)=>!best||dist(m,u)<dist(m,best)?u:best,null)||CENTER,target={x:aim.x,y:aim.y},delay=skill.delay,radius=skill.radius;
+  m.castUntil=S.time+delay+(bowling?.2:0);m.specialCd=skill.cooldown;m.skillAnimStart=S.time;m.skillAnimUntil=S.time+.85;
+  if(excalibur){
+   skillFx?.pixelRing(target.x,target.y,72,'#9ed7ff',delay);
+   const dx=target.x-m.x,dy=target.y-m.y,length=Math.hypot(dx,dy)||1,direction={x:length===1&&dx===0&&dy===0?1:dx/length,y:dy/length},origin={x:m.x,y:m.y},end={x:m.x+direction.x*1100,y:m.y+direction.y*1100};
+   later(delay,()=>{if(!dragonTrial||m.dead||m.trialLost)return;skillFx?.spriteWave(arthurGoldenWave,origin,end,{size:240,life:1.65});});
+  }else if(bowling){
+   skillFx?.pixelRing(target.x,target.y,radius,'#ffe799',delay);
+   for(const [index,offset] of [0,.18].entries())later(delay+offset,()=>{if(!dragonTrial||m.dead||m.trialLost)return;skillFx?.pixelRing(target.x,target.y,radius*(index?1:.7),'#fff4c4',.5);skillFx?.burst(target.x,target.y,{color:'#ffe178',color2:'#90cfff',count:32,size:6,up:95,life:.65});skillFx?.spriteWave(arthurGoldenWave,{x:target.x-60,y:target.y},{x:target.x+60,y:target.y},{size:300,life:.42});for(const u of S.units)if(!u.down&&dist(u,target)<=radius)hurtUnit(u,m.atk*.8,m);});
+  }else{
+   for(let i=0;i<8;i++){const a=i*Math.PI/4,p={x:target.x+Math.cos(a)*radius,y:target.y+Math.sin(a)*radius*.55};later(i*.055,()=>{if(!dragonTrial||m.dead)return;skillFx?.burst(p.x,p.y,{color:i%2?'#6daeff':'#ffe178',count:7,size:5,speed:34,up:55,life:.5});});}
+   skillFx?.pixelRing(target.x,target.y,radius,'#6daeff',delay);
+  }
+  if(!bowling)later(delay,()=>{if(!dragonTrial||m.dead||m.trialLost)return;skillFx?.pixelRing(target.x,target.y,radius*.72,'#e9f7ff',.42);skillFx?.burst(target.x,target.y,{color:'#fff5bd',color2:'#4289df',count:excalibur?24:18,size:5,up:70,life:.7});for(const u of S.units)if(!u.down&&dist(u,target)<=radius)hurtUnit(u,m.atk*(excalibur?1.75:1.35),m);});
+  floaters?.text(m.x,m.y,skill.label,{color:'#ffe799',size:18,lift:95});return true;
+ }
  const meteor=m.specialIndex++%2===1,targets=meteor?S.units.filter(u=>!u.down).slice(0,5).map(u=>({x:u.x,y:u.y})):[{x:m.x,y:m.y}];
  const radius=meteor?95:180,delay=meteor?1.35:1;
  m.castUntil=S.time+delay;m.specialCd=meteor?8:6;
@@ -682,7 +735,7 @@ function fieldPoint() {
 }
 const edgePoints = NIGHT_INVASION_DIRECTIONS.map(({side,ax,ay}) => ({side,x:CENTER.x+ax*1100,y:CENTER.y+ay*1100}));
 function killMonster(m, by) {
-  if(m.trial){if(m.dead)return;m.dead=true;combatFX.playBossDeath(m.x,m.y,{visualScale:1.4});toast('ชนะ Ancient Dragon! ปิดหน้าศึกเพื่อรับรางวัล');return;}
+  if(m.trial){if(m.dead)return;m.dead=true;combatFX.playBossDeath(m.x,m.y,{visualScale:1.4});toast(`ชนะ ${MYTHIC_BOSSES[m.bossId]?.name||'Mythic Boss'}! ปิดหน้าศึกเพื่อรับรางวัล`);return;}
   m.dead = true; S.kills++;
   (m.boss ? combatFX.playBossDeath : combatFX.playNormalDeath).call(combatFX, m.x, m.y, { visualScale: m.actor.visualScale });
   combatSFX.playDeath({ volume: .45 });
@@ -970,7 +1023,7 @@ function updateUnit(u, dt, i) {
 }
 function updateMonster(m, dt) {
   if (m.dead) return;
-  if(m.trial&&updateDragonSkills(m,dt))return;
+  if(m.trial&&updateMythicSkills(m,dt))return;
   m.cd -= dt; m.lx = m.ly = 0;
   // Garrison spells should draw attacks onto their tower, not its bagless
   // stationary occupant. Discard any such aggro retained by an older tick.
@@ -1023,7 +1076,20 @@ function updateMonster(m, dt) {
   const d = dist(m, target);
   m.left = screenLeft(target.x - m.x, target.y - m.y);
   if (d > m.range) moveToward(m, target.x, target.y, m.speed, dt, m.range * .8);
-  else if (m.cd <= 0) { m.cd = 1.25; m.lunge = performance.now(); m.lungeTo = { x: target.x, y: target.y }; later(.18, () => { if (!m.dead && dist(m, target) < m.range + 20) { hurtUnit(target, m.atk, m); combatFX.playTackle(target.x, target.y, { visualScale: 1 }); } }); }
+  else if (m.cd <= 0) {
+    const wukongStrike=m.bossId==='sunWukong',arthurStrike=m.bossId==='kingArthur',mythicStrike=wukongStrike||arthurStrike;
+    m.cd=wukongStrike?1.05:arthurStrike?1.18:1.25;m.lunge=performance.now();m.lungeTo={x:target.x,y:target.y};
+    if(mythicStrike){
+      m.skillAnimStart=S.time;m.skillAnimUntil=S.time+.8;
+    }
+    later(wukongStrike?.42:arthurStrike?.58:.18,()=>{
+      if(!m.dead&&dist(m,target)<m.range+20){
+        hurtUnit(target,m.atk,m);combatFX.playTackle(target.x,target.y,{visualScale:mythicStrike?1.35:1});
+        if(wukongStrike)skillFx?.burst(target.x,target.y,{color:'#fff4ad',color2:'#ff9d19',count:8,up:38,life:.38});
+        if(arthurStrike)skillFx?.burst(target.x,target.y,{color:'#fff7c9',color2:'#4c91e8',count:9,up:42,life:.42});
+      }
+    });
+  }
   lunge(m);
 }
 function lunge(m) { // short hop toward the target so the attack reads
@@ -1096,7 +1162,7 @@ function endNight(won) {
   startDay();
   const before=S.mythic.pending;S.mythic=rollMythicOmen(S.mythic,{won,day:S.day,warren:S.warren});
   if(!before&&S.mythic.pending){if(!S.mythic.selected.length)S.mythic.selected=defaultMythicSquad(S.units);save();renderUi();}
-  if(!before&&S.mythic.pending){banner('เงาของอสูรกายบินผ่าน…','เตรียมตัวให้พร้อม · BOSS ENCOUNTER!');setTimeout(()=>{if(!mythicCinematic?.start())setTimeout(()=>mythicCinematic?.start(),800);},900);}
+  if(!IS_CINEMATIC_PREVIEW&&!before&&S.mythic.pending){banner('เงาของอสูรกายบินผ่าน…','เตรียมตัวให้พร้อม · BOSS ENCOUNTER!');setTimeout(()=>{if(!startPendingMythicCinematic())setTimeout(startPendingMythicCinematic,800);},900);}
 }
 function startDay() {
   S.night = false; S.clock = 0; S.day++;
@@ -1479,7 +1545,7 @@ function tick(dt) {
    if(fighters.every(u=>u.down)){m.trialLost=true;S.events=[];}
    insideSimulation=false;return;
   }
-  if (mythicCinematic?.active||S.modal==='waterfallGuide') return; // Reading the illustrated update cannot cost a night wave.
+  if (mythicCinematic?.active||wukongCinematic?.active||arthurCinematic?.active||S.modal==='waterfallGuide') return; // Reading the illustrated update cannot cost a night wave.
   if (S.over) return;
   pathSearchBudget = 1;
   // Let players manage the forge, inventory and hero builds without losing precious daylight.
@@ -1659,7 +1725,7 @@ function renderUi() {
   if (insideSimulation) { uiDirty = true; return; }
   uiDirty = false; lastUiPaint = performance.now();
   if($('relicLauncherCount'))$('relicLauncherCount').textContent=archiveProgress(S.mythic).first+'/9';
-  if($('patchNotesOpen'))$('patchNotesOpen').innerHTML=`<span>📜</span> Patch Notes v${BURROW_VERSION}`;
+  if($('patchNotesOpen'))$('patchNotesOpen').innerHTML=`<i class="bc-hud-icon" style="--hud-position:0% 50%" aria-hidden="true"></i> Patch Notes v${BURROW_VERSION}`;
   $('homeOpen').disabled=S.night;
   $('homeOpen').classList.toggle('on',S.homeOpen);
   $('homeOpen').textContent=S.homeOpen?'✖ ปิด Home Builder':'🔨 Home Builder';
@@ -1759,6 +1825,8 @@ function renderUi() {
   $('mobileTowerMoveNotice').hidden=!movingDefense||!mobileLayout.matches;
   canvas.classList.toggle('tower-move',movingDefense);
   $('masteryOpen').disabled=false;
+  $('lureOpen').innerHTML=gameIcon('monster','ui','◇','bc-hud-lure-icon')+' ล่อมอนด้วยวัตถุดิบ';
+  decorateHud();
   syncClock();
 }
 function syncClock() {
@@ -1802,6 +1870,7 @@ document.body.addEventListener('click', e => {
   if(b.dataset.buy)recruit(b.dataset.buy);
   else if(b.id==='forgeOpen'){S.modal='blacksmith';renderUi();}
   else if(b.hasAttribute('data-open-guide')){S.modal='guide';renderUi();}
+  else if(b.hasAttribute('data-open-update-news')){openWaterfallGuide('intro');}
   else if(b.hasAttribute('data-open-waterfall-guide')){openWaterfallGuide('guide');}
   else if(b.hasAttribute('data-open-patch-notes')){S.modal='patchNotes';renderUi();}
   else if(b.hasAttribute('data-open-relic-collection')){closeMobileDrawer();S.archiveTab='first';S.archiveBossId=null;S.modal='relicCollection';renderUi();}
@@ -2127,7 +2196,9 @@ function drawBuildRing(g){ // preview the ACTUAL enlarged enclosure, not a stale
  g.restore();
 }
 let skillFx = null, floaters = null, edgeLayer = null, edgeBounds = null;
-let mythicCinematic = null;
+let mythicCinematic = null,wukongCinematic=null,arthurCinematic=null;
+function cinematicForBoss(id){return id==='sunWukong'?wukongCinematic:id==='kingArthur'?arthurCinematic:mythicCinematic}
+function startPendingMythicCinematic(){return cinematicForBoss(S.mythic.pending?.bossId)?.start()||false;}
 const placementTintCache=new WeakMap();
 function placementGhost(g,art,p,good){
  if(!art?.img)return;
@@ -2300,7 +2371,8 @@ function updateWorldLabels(viewport){
   const type=b.dataset.world,towerIdx=b.dataset.worldTower,cartIdx=b.dataset.worldMagicCart;
   const target=type?staticTargets[type]:cartIdx!==undefined?{p:S.magicCarts[Number(cartIdx)],y:72,name:'🔮 รถยิงเวทย์ #'+(Number(cartIdx)+1)}:
    {p:S.towers[Number(towerIdx)],y:90,name:'🏹 ป้อมธนู #'+(Number(towerIdx)+1)+' · Lv '+S.towers[Number(towerIdx)].level};
-  if(b.textContent!==target.name)b.textContent=target.name;
+  const label=target.name.replace(/^[\p{Extended_Pictographic}⚒]\uFE0F?\s*/u,'');
+  if(b.textContent!==label)b.textContent=label;
   const p=projectRuntimePoint(target.p.x,target.p.y,runtimeWalkHeight(target.p.x,target.p.y)??0);
   const x=rect.left-wrap.left+p.x*scaleX,y=rect.top-wrap.top+(p.y-target.y)*scaleY;
   const visible=x>55&&x<wrap.width-55&&y>30&&y<wrap.height-20;
@@ -2384,16 +2456,21 @@ setRuntimeActorUpdater(({ player }) => {
   const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;
   setRuntimePlayerControl(true); moveCamera(dt); player.x = cam.x; player.y = cam.y;
   tick(dt); combatFX.update(dt * S.speed);
-  setRuntimeActors([...S.units.filter(u=>!dragonTrial||dragonTrial.fighterIds.has(u.id)).map(u => u.actor ??= unitActor(u)), ...S.monsters.filter(m => !m.dead).map(m => m.actor), ...S.towers.map(t => t.actor),...S.magicCarts.map(t=>t.actor), hallActor, ...combatFX.getRuntimeActors()]);
+  setRuntimeActors([...S.units.filter(u=>!dragonTrial||dragonTrial.fighterIds.has(u.id)).map(u => u.actor ??= unitActor(u)), ...S.monsters.filter(m => !m.dead).map(m => m.actor),...(dragonTrial?.staffActor&&!dragonTrial.staffActor.dead?[dragonTrial.staffActor]:[]),...(dragonTrial?.cloneActors||[]).filter(actor=>!actor.dead), ...S.towers.map(t => t.actor),...S.magicCarts.map(t=>t.actor), hallActor, ...combatFX.getRuntimeActors()]);
   // One layout snapshot for all overlays avoids repeated forced reflow at high mob counts.
   const viewport={rect:canvas.getBoundingClientRect(),parent:worldLabels.parentElement.getBoundingClientRect()};
-  mythicCinematic?.update(dt);
+  mythicCinematic?.update(dt);wukongCinematic?.update(dt);arthurCinematic?.update(dt);
   skillFx?.update(dt); skillFx?.draw(viewport); floaters?.update(dt); floaters?.draw(viewport);
   drawEdgeArrows(viewport);updateWorldLabels(viewport);syncClock();
   if(uiDirty&&now-lastUiPaint>=120)renderUi();
 });
 skillFx = createSkillFx(canvas); floaters = createFloaters(canvas);
-mythicCinematic = createMythicCinematic(canvas,skillFx,CENTER,{onBattle:beginDragonTrial,onStop:endDragonTrial});
+mythicCinematic = createMythicCinematic(canvas,skillFx,CENTER,{onBattle:(position,frames)=>beginMythicTrial(position,frames,'ancientDragon'),onStop:endDragonTrial});
+const wukongBattleEntry={x:CENTER.x-220,y:CENTER.y+220};
+wukongCinematic=createWukongCinematic({onBattle:()=>beginMythicTrial(wukongBattleEntry,{walk:wukongWalkFrames,hit:wukongHitFrames,combined:wukongCombinedStrikeFrames,combinedLeft:wukongCombinedStrikeFramesLeft},'sunWukong'),onStop:endDragonTrial});
+// Use the established left-side approach instead of spawning inside the hall footprint.
+const arthurBattleEntry={...wukongBattleEntry};
+arthurCinematic=createArthurCinematic({onBattle:()=>beginMythicTrial(arthurBattleEntry,{walk:arthurWalkFrames,attack:arthurAttackFrames},'kingArthur'),onStop:endDragonTrial});
 const resumed = load();
 if (!resumed) { recruit('guard', true); recruit('archer', true); }
 renderUi();
@@ -2414,22 +2491,24 @@ for(const fence of S.fences)installFence(fence);
 restoreHomeWorld();
 mythicPanel=document.createElement('div');mythicPanel.className='panel bc-modal';mythicPanel.hidden=true;mythicPanel.setAttribute('role','dialog');mythicPanel.setAttribute('aria-modal','true');document.body.append(mythicPanel);
 function renderMythicPanel(){
- const pending=S.mythic.pending,chosen=new Set(S.mythic.selected),relic=MYTHIC_RELICS.dragonHeart,units=S.units.map(u=>`<label style="display:flex;gap:9px;align-items:center;padding:9px;border:1px solid #52634b;border-radius:8px"><input type="checkbox" data-mythic-unit="${u.id}" ${chosen.has(u.id)?'checked':''}><span>${CLASSES[u.cls]?.icon||'🐰'} ${u.name} · ${CLASSES[u.cls]?.name||u.cls} Lv${u.level}</span></label>`).join('');
- mythicPanel.innerHTML=`<header class="bc-modal-header"><div><span>🐲</span><span><h2>Mythic Invasion</h2><small>${pending?'ลางร้ายปรากฏแล้ว · เตรียมทีมก่อนรับคำท้า':'Mythic Archive และรางวัลสะสม'}</small></span></div><button data-mythic-close>✕</button></header><div class="bc-modal-body"><section class="bc-guide-card"><h3>${pending?'Ancient Dragon · ประตู'+({west:'ตะวันตก',east:'ตะวันออก',south:'ใต้'}[pending.gate]):'ยังไม่มี Mythic Omen'}</h3><p>ศึกนี้ลงได้สูงสุด 7 ตัวและคลาสละ 1 ตัว ป้อม/รถยิงเวทย์ใช้ Armory และ Mastery ได้ แต่กระต่ายจะไม่ใช้ Skill Core</p></section><section class="bc-guide-card"><h3>จัดกองทัพ ${chosen.size}/7</h3><div style="display:grid;gap:7px">${units||'<p>ยังไม่มีกระต่าย</p>'}</div></section><section class="bc-guide-card"><h3>Mythic Archive</h3><p>Option Stone ${S.mythic.optionStones} · Re-option Stone ${S.mythic.reoptionStones} · Essence ${S.mythic.essence}</p><p>${S.mythic.relics.dragonHeart?'❤️ '+relic.name+' · '+relic.bonus:'ยังไม่มี Legendary Relic · ชนะมีโอกาสดรอป 20%'}</p></section>${pending?'<button data-mythic-start style="width:100%;min-height:48px">⚔️ รับคำท้าและเริ่ม Invasion</button><button data-mythic-decline style="width:100%;margin-top:8px">ปฏิเสธ Omen</button>':'<p style="opacity:.8">มีโอกาส 15% หลังผ่านคืนปกติ ตั้งแต่ Warren Lv5</p>'}</div>`;
+ const pending=S.mythic.pending,boss=MYTHIC_BOSSES[pending?.bossId]||MYTHIC_BOSSES.ancientDragon,chosen=new Set(S.mythic.selected),relic=MYTHIC_RELICS[boss.relic],units=S.units.map(u=>`<label style="display:flex;gap:9px;align-items:center;padding:9px;border:1px solid #52634b;border-radius:8px"><input type="checkbox" data-mythic-unit="${u.id}" ${chosen.has(u.id)?'checked':''}><span>${CLASSES[u.cls]?.icon||'🐰'} ${u.name} · ${CLASSES[u.cls]?.name||u.cls} Lv${u.level}</span></label>`).join('');
+ const bossIcon={ancientDragon:'🐲',sunWukong:'🐒',kingArthur:'⚔️'}[boss.id]||'✦';
+ mythicPanel.innerHTML=`<header class="bc-modal-header"><div><span>${bossIcon}</span><span><h2>Mythic Invasion</h2><small>${pending?'ลางร้ายปรากฏแล้ว · เตรียมทีมก่อนรับคำท้า':'Mythic Archive และรางวัลสะสม'}</small></span></div><button data-mythic-close>✕</button></header><div class="bc-modal-body"><section class="bc-guide-card"><h3>${pending?boss.name+' · ประตู'+({west:'ตะวันตก',east:'ตะวันออก',south:'ใต้'}[pending.gate]):'ยังไม่มี Mythic Omen'}</h3><p>ศึกนี้ลงได้สูงสุด 7 ตัวและคลาสละ 1 ตัว ป้อม/รถยิงเวทย์ใช้ Armory และ Mastery ได้ แต่กระต่ายจะไม่ใช้ Skill Core</p></section><section class="bc-guide-card"><h3>จัดกองทัพ ${chosen.size}/7</h3><div style="display:grid;gap:7px">${units||'<p>ยังไม่มีกระต่าย</p>'}</div></section><section class="bc-guide-card"><h3>Mythic Archive</h3><p>Option Stone ${S.mythic.optionStones} · Re-option Stone ${S.mythic.reoptionStones} · Essence ${S.mythic.essence}</p><p>${S.mythic.relics[boss.relic]?'✦ '+relic.name+' · '+relic.bonus:'ยังไม่มี Legendary Relic · ชนะมีโอกาสดรอป 20%'}</p></section>${pending?'<button data-mythic-start style="width:100%;min-height:48px">⚔️ รับคำท้าและเริ่ม Invasion</button><button data-mythic-decline style="width:100%;margin-top:8px">ปฏิเสธ Omen</button>':'<p style="opacity:.8">มีโอกาส 15% หลังผ่านคืนปกติ · สุ่ม World Boss ที่เปิดใช้งานในอัตราเท่ากัน</p>'}</div>`;
  mythicPanel.querySelector('[data-mythic-close]').onclick=()=>{mythicPanel.hidden=true;$('modalScrim').hidden=true;};
  mythicPanel.querySelectorAll('[data-mythic-unit]').forEach(x=>x.onchange=()=>{let ids=[...mythicPanel.querySelectorAll('[data-mythic-unit]:checked')].map(x=>+x.dataset.mythicUnit);const valid=validMythicSquad(S.units,ids);if(valid.length!==ids.length){toast('Mythic Squad เลือกได้คลาสละ 1 ตัวเท่านั้น');x.checked=false;}S.mythic.selected=valid.map(u=>u.id);save();renderMythicPanel();});
  mythicPanel.querySelector('[data-mythic-decline]')?.addEventListener('click',()=>{S.mythic.pending=null;S.mythic.selected=[];save();renderMythicPanel();toast('ปฏิเสธ Mythic Omen แล้ว');});
- mythicPanel.querySelector('[data-mythic-start]')?.addEventListener('click',()=>{const team=validMythicSquad(S.units,S.mythic.selected);if(!team.length)return toast('เลือกกระต่ายอย่างน้อย 1 ตัว');mythicPanel.hidden=true;$('modalScrim').hidden=true;if(!mythicCinematic.start()){mythicPanel.hidden=false;$('modalScrim').hidden=false;toast('กำลังโหลดเฟรมมังกร ลองอีกครั้ง');}});
+ mythicPanel.querySelector('[data-mythic-start]')?.addEventListener('click',()=>{const team=validMythicSquad(S.units,S.mythic.selected);if(!team.length)return toast('เลือกกระต่ายอย่างน้อย 1 ตัว');mythicPanel.hidden=true;$('modalScrim').hidden=true;if(!startPendingMythicCinematic()){mythicPanel.hidden=false;$('modalScrim').hidden=false;toast('กำลังโหลดเฟรมบอส ลองอีกครั้ง');}});
 }
-showMythicRewardModal=(won,reward)=>{
- const item=reward.relic?'<img src="./assets/relics/dragon-heart.svg" alt="Dragon Heart" width="64" height="64" style="image-rendering:pixelated;vertical-align:middle"> '+(reward.duplicate?'Dragon Heart ซ้ำ · แปลงเป็น Essence +1':'✦ NEW! Dragon Heart · Max HP +1%'):
+showMythicRewardModal=(won,reward,bossId='ancientDragon')=>{const boss=MYTHIC_BOSSES[bossId]||MYTHIC_BOSSES.ancientDragon;
+ const relic=MYTHIC_RELICS[boss.relic],icon=relicIconPath(boss.relic);
+ const item=reward.relic?`${icon?`<img src="${icon}" alt="${relic.name}" width="64" height="64" style="image-rendering:pixelated;vertical-align:middle"> `:''}${reward.duplicate?relic.name+' ซ้ำ · แปลงเป็น Essence +1':'✦ NEW! '+relic.name+' · '+relic.bonus}`:
    won?'รอบนี้ยังไม่พบ Legendary Relic · โอกาสดรอป 20%':'Legendary Relic ดรอปเฉพาะเมื่อพิชิตบอส';
- mythicPanel.innerHTML=`<header class="bc-modal-header"><div><span>${won?'🏆':'⚔️'}</span><span><h2>${won?'กำจัด Ancient Dragon สำเร็จ!':'กองทัพพ่ายแพ้'}</h2><small>Mythic Invasion Result</small></span></div><button data-reward-close>✕</button></header>
- <div class="bc-modal-body"><section class="bc-guide-card"><h3>${won?'Victory Rewards':'Participation Rewards'}</h3><p>🔮 Option Stone × ${reward.optionStone}</p><p>♻️ Re-option Stone × ${reward.reoptionStone}</p><p>${item}</p>${won?'<p>🏆 พิชิต Ancient Dragon สะสม '+(S.mythic.defeats.ancientDragon||0)+' ครั้ง</p>':''}</section>
+ mythicPanel.innerHTML=`<header class="bc-modal-header"><div><span>${won?'🏆':'⚔️'}</span><span><h2>${won?'กำจัด '+boss.name+' สำเร็จ!':'กองทัพพ่ายแพ้'}</h2><small>Mythic Invasion Result</small></span></div><button data-reward-close>✕</button></header>
+ <div class="bc-modal-body"><section class="bc-guide-card"><h3>${won?'Victory Rewards':'Participation Rewards'}</h3><p>🔮 Option Stone × ${reward.optionStone}</p><p>♻️ Re-option Stone × ${reward.reoptionStone}</p><p>${item}</p>${won?'<p>🏆 พิชิต '+boss.name+' สะสม '+(S.mythic.defeats[bossId]||0)+' ครั้ง</p>':''}</section>
  <div style="display:flex;gap:9px;flex-wrap:wrap"><button type="button" data-reward-open-archive class="bc-primary" style="flex:1;min-height:46px">✧ ดู Relic Collection</button><button type="button" data-reward-close style="flex:1;min-height:46px">กลับหมู่บ้าน</button></div></div>`;
  mythicPanel.hidden=false;$('modalScrim').hidden=false;
  mythicPanel.querySelectorAll('[data-reward-close]').forEach(b=>b.onclick=()=>{mythicPanel.hidden=true;renderUi();});
- mythicPanel.querySelector('[data-reward-open-archive]').onclick=()=>{mythicPanel.hidden=true;S.archiveTab='first';S.archiveBossId='ancientDragon';S.modal='relicCollection';renderUi();};
+ mythicPanel.querySelector('[data-reward-open-archive]').onclick=()=>{mythicPanel.hidden=true;S.archiveTab='first';S.archiveBossId=bossId;S.modal='relicCollection';renderUi();};
 };
 $('modalScrim').addEventListener('click',()=>{mythicPanel.hidden=true;renderUi();});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!mythicPanel.hidden){mythicPanel.hidden=true;$('modalScrim').hidden=true;}});
@@ -2441,9 +2520,18 @@ wallButton.addEventListener('focus',()=>{S.wallPreview=true;});
 wallButton.addEventListener('blur',()=>{S.wallPreview=false;});
 { const l = $('loading'); if (l) l.hidden = true; }
 banner(resumed ? `กลับมาแล้ว · วันที่ ${S.day}` : 'วันที่ 1', resumed ? `บ้าน Lv ${S.warren} · เวฟ ${S.warren}-${S.wave}` : 'กระต่ายฟาร์มเองรอบหมู่บ้าน · คลิกป้อมเพื่อจัดทหารประจำป้อม');
-if(shouldShowWaterfallIntro()&&!S.mythic.pending)openWaterfallGuide('intro');
-if(S.mythic.pending)setTimeout(()=>{S.modal=null;renderUi();if(!mythicCinematic.start())setTimeout(()=>mythicCinematic.start(),800);},900);
+if(!IS_CINEMATIC_PREVIEW&&shouldShowWaterfallIntro()&&!S.mythic.pending)openWaterfallGuide('intro');
+if(!IS_CINEMATIC_PREVIEW&&S.mythic.pending)setTimeout(()=>{S.modal=null;renderUi();if(!startPendingMythicCinematic())setTimeout(startPendingMythicCinematic,800);},900);
+function startMythicTestBoss(bossId){
+ if(!MYTHIC_BOSSES[bossId]||dragonTrial||mythicCinematic?.active||wukongCinematic?.active||arthurCinematic?.active)return false;
+ S.mythic={...S.mythic,pending:{bossId,day:S.day,gate:'west'},selected:defaultMythicSquad(S.units)};
+ S.modal=null;renderUi();return startPendingMythicCinematic();
+}
+const mythicTestBoss=$('mythicTestBoss'),mythicTestSummon=$('mythicTestSummon');
+if(mythicTestBoss)mythicTestBoss.innerHTML=Object.values(MYTHIC_BOSSES).map(boss=>`<option value="${boss.id}">${boss.name} · ${boss.nameTh}</option>`).join('');
+mythicTestSummon?.addEventListener('click',()=>{const started=startMythicTestBoss(mythicTestBoss.value);mythicTestSummon.disabled=started;mythicTestSummon.textContent=started?'✓ อัญเชิญแล้ว':'⚠ เรียกไม่ได้ตอนนี้';setTimeout(()=>{mythicTestSummon.disabled=false;mythicTestSummon.textContent='⚔ อัญเชิญบอส'},1400);});
 window.__warren = S; window.__warrenDev = { recruit:(cls)=>recruit(cls,true),spawnMonster:(...args)=>spawnMonster(...args),
+  startMythicTestBoss,mythicBosses:MYTHIC_BOSSES,
   masteryOnHit:(u,m)=>castMasteryOnBasicHit(u,m),
   castCore:(u,m,skillId)=>{const skill=classActiveCores(S,u?.cls).find(x=>x.id===skillId);return Boolean(u&&m&&skill&&castEquippedCore(u,m,skill));},
   placeHome,moveHome,demolishHome,undoHome,checkHome,setHomeOpen,rebuildHomeWorld,waitHomeGround:()=>homeGroundRefresh,buyHomePlot,previewHomeWall,expandHomeWall,paintHomeTerrain,commitHomeTerrain,createHomeWaterfall,restoreRecoveryHome,

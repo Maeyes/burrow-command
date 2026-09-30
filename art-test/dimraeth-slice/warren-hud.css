@@ -1,0 +1,107 @@
+/* Forest village HUD. Keep existing layout and mobile drawer behavior. */
+:root{--hud-brass:#a8894f;--hud-edge:#453726;--hud-light:#f0d69b}
+#top,#help,#shopbox,#side,#mythicTestControls{
+ background:linear-gradient(115deg,rgba(53,48,33,.97),rgba(22,36,28,.97) 52%,rgba(15,25,21,.97));
+ border:2px solid var(--hud-brass);border-radius:5px;
+ box-shadow:inset 0 0 0 2px #171b13,inset 0 0 0 3px #66583a,0 3px 0 #151710,0 7px 18px #0009;
+ backdrop-filter:none;
+}
+#top{padding:11px 17px;gap:18px}
+#top b{font-variant-numeric:tabular-nums;text-shadow:0 2px #111b12}
+#top .res{gap:8px}
+#top .res>span{background:linear-gradient(#101a14,#243025);border:1px solid #76643e;border-radius:4px;padding:5px 9px;box-shadow:inset 0 2px 5px #0008;min-width:58px;gap:6px}
+#top .res b{font-size:17px;color:#ffe4a1}
+#clock>div,#hall>div{border:1px solid #796b40;background:#0d1914;box-shadow:inset 0 2px 3px #0009;box-sizing:border-box}
+#clockbar,#burrow{border-radius:0;box-shadow:inset 0 1px #fff7,inset 0 -2px #0004}
+#hall small{color:#ead4a2;font-weight:700}
+.bc-hud-icon,.bc-hud-action:before{display:inline-block;width:30px;height:30px;flex:none;vertical-align:middle;background-image:url(./assets/ui/hud-icons-12.png);background-size:400% 300%;background-position:var(--hud-position,0% 0%);background-repeat:no-repeat;image-rendering:pixelated}
+.bc-hud-action:before{content:'';width:27px;height:27px;margin-right:7px}
+#side .bc-hud-action{display:flex;align-items:center;text-align:left;line-height:1.45;min-height:40px}
+#help button,#side>div.row>button,#side .bc-quick,#shop .buy,#mobileDock button{
+ background:linear-gradient(#364b38,#243629 50%,#1a2a20);border:1px solid #7f8054;border-radius:4px;
+ box-shadow:inset 0 1px #bec69b38,inset 0 -2px #08170f99,0 2px #101b12;
+ color:#f6e9c8;text-shadow:0 1px #10180f;
+}
+#help button:hover,#side button:hover:not(:disabled),#shop .buy:hover:not(:disabled){background:linear-gradient(#526044,#344b33);border-color:#e3c77e}
+#help button:active,#side button:active:not(:disabled),#shop .buy:active:not(:disabled){box-shadow:inset 0 2px 5px #0009;transform:translateY(1px)}
+#side button:disabled,#shop button:disabled{opacity:.55;filter:saturate(.45)}
+#side>h3,#recruitDetails>summary{color:#f0d69b;letter-spacing:.035em;padding:7px 5px;border-bottom:1px solid #9d855655;text-shadow:0 2px #151d13}
+#side .bc-quick{min-height:43px;font-size:12px}
+#side .bc-quick .bc-hud-icon{width:32px;height:32px}
+#shop .buy{min-height:40px;padding:5px 8px}
+#shop .buy em{color:#f8db89;border-left:1px solid #68734b;padding-left:7px;font-variant-numeric:tabular-nums}
+#shop .buy .bc-class-icon{width:28px;height:28px}
+#recruitSummary,#relicLauncherCount{background:#101f16;border:1px solid #837448;border-radius:4px;padding:2px 7px;color:#ffe1a1;font-weight:700}
+#relicLauncher button{background:linear-gradient(110deg,#51472a,#243a2a);border:2px solid #ad925b;border-radius:4px;box-shadow:inset 0 0 0 1px #1b2718,0 3px #101a11}
+#help button{display:flex;align-items:center;gap:4px}
+#mythicTestControls{border-color:#706749;font-size:10px}
+#mythicTestSummon{background:linear-gradient(#79382a,#4a201a);box-shadow:inset 0 1px #d1a36966,0 2px #1d1710}
+#side #skip{background:linear-gradient(#364c66,#202e48);border-color:#8f9caf;color:#e9efff}
+#side #reset{background:#302320;border-color:#6b5144;font-size:10px}
+#side button:focus-visible,#shop button:focus-visible,#help button:focus-visible,#relicLauncher button:focus-visible{outline:2px solid #ffe5a1;outline-offset:3px}
+@media(min-width:761px){#side{width:270px;padding:11px;max-height:58vh}#shopbox{width:255px;padding:9px}#help{padding:6px}#top{max-width:calc(100vw - 540px);box-sizing:border-box}#clock{width:150px}#hall{width:155px}}
+@media(min-width:761px) and (max-width:1150px){#top{gap:8px;max-width:none;padding:9px 12px;top:8px}#clock{width:120px}#hall{width:125px}#top .res>span{min-width:40px;padding:4px}#top .res b{font-size:14px}#help{top:88px}#mythicTestControls{top:138px}}
+@media(max-width:760px){#top{padding:8px 10px;gap:5px 8px}#top .res>span{padding:3px 5px;min-width:0}#top .res b{font-size:13px}.bc-hud-icon{width:24px;height:24px}#side{border-radius:12px 12px 0 0}#shop .buy{min-height:44px}#mobileDock{background:linear-gradient(#3c4430,#172a20);border-top:2px solid #b39558;box-shadow:0 -3px #101b13}#mobileDock button{border-radius:4px}}
+@media(prefers-reduced-motion:reduce){#help button:active,#side button:active,#shop .buy:active{transform:none}}
+
+/* Reference direction: walnut frames, warm parchment, jewel-like menu slots. */
+#top,#help,#shopbox,#side{background:repeating-linear-gradient(0deg,#ffffff03 0 1px,transparent 1px 7px),linear-gradient(110deg,#59402b,#30251d 52%,#241e18);border-color:#bf9552;box-shadow:inset 0 0 0 2px #24170e,inset 0 0 0 3px #8c643b,0 3px 0 #1a120b,0 7px 18px #0009}
+#side:before,#shopbox:before{content:'';position:absolute;pointer-events:none;inset:5px;border:1px solid #e9c78338;border-radius:2px}
+#top .res>span{background:linear-gradient(#2c2116,#473221);border-color:#a17b42}
+#side>h3,#recruitDetails>summary{color:#ffe4ae;border-bottom-color:#be955d88}
+#help button,#side .bc-quick{background:linear-gradient(#634b30,#3d2a1e);border-color:#ad8650;color:#ffe9be}
+#side .bc-quick-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:3px 0 7px}
+#side .bc-quick{display:flex;flex-direction:column;justify-content:center;text-align:center;gap:4px;min-height:78px;padding:6px 3px;font-size:10px;line-height:1.3;white-space:normal}
+#side .bc-quick .bc-hud-icon{width:42px;height:42px;filter:drop-shadow(0 2px 1px #0009)}
+#side>div.row>button,#shop .buy{background:linear-gradient(115deg,#fff0cd,#e7cea0);border-color:#b18e53;color:#3d2a1b;text-shadow:none;box-shadow:inset 0 1px #fff8,inset 0 -2px #b18b4344,0 2px #17120d}
+#shop .buy small{color:#77613d}#shop .buy em{color:#724511;border-color:#b99d68}
+#side>div.row>button:hover:not(:disabled),#shop .buy:hover:not(:disabled){background:linear-gradient(#fff8de,#f2d99f);border-color:#ffe3a0}
+#side #upgrade:not(:disabled){background:linear-gradient(#f6d486,#bd8b3c);border-color:#ffe1a0;color:#402912}
+#side #skip{background:linear-gradient(#384d77,#1a2b49);border-color:#b49a65;color:#fff1c5}
+#wallStatus{color:#dfcfac;background:#241e17;border-color:#796040}
+#relicLauncher button{background:linear-gradient(115deg,#74552c,#39291e);border-color:#c6a15e}
+#mobileDock{background:linear-gradient(#57412c,#291f17);border-top-color:#c6a15e}
+#mobileDock button{background:linear-gradient(#695030,#3b2b1c);border-color:#b18b50;color:#ffe8b9}
+@media(max-width:760px){#side .bc-quick-actions{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Softer silhouettes across the HUD and matching in-world signs. */
+#top,#help,#shopbox,#side,#mythicTestControls{border-radius:14px}
+#side:before,#shopbox:before{border-radius:9px}
+#help button,#side .bc-quick,#side>div.row>button,#shop .buy,#mobileDock button,#relicLauncher button{border-radius:10px}
+#relicLauncherCount,#recruitSummary,#top .res>span{border-radius:8px}
+.bc-modal{border-radius:20px}.bc-modal-header{background:linear-gradient(115deg,#59432b,#302d23);border-bottom-color:#997a47}
+.bc-modal-header .bc-hud-icon.bc-header-icon{width:43px;height:43px;filter:drop-shadow(0 2px 2px #0007)}
+.bc-world-label{border-radius:12px;background:linear-gradient(#59482f,#30291d);border-color:#c0a06b;box-shadow:inset 0 1px #ffeab22b,0 2px 0 #21180d,0 4px 8px #0008;color:#fff1cf;padding:4px 9px;gap:5px}
+.bc-world-label:before{content:'';width:19px;height:19px;flex:none;background-image:url(./assets/ui/hud-icons-12.png);background-size:400% 300%;background-repeat:no-repeat;image-rendering:pixelated;background-position:33.333333% 100%}
+.bc-world-label[data-world-magic-cart]:before{background-position:66.666667% 100%}
+.bc-world-label[data-world='hall']:before{background-position:66.666667% 0%}
+.bc-world-label[data-world='blacksmith']:before{background-position:0% 100%}
+.bc-world-label[data-world='resource']:before{background-position:33.333333% 0%}
+.bc-world-label[data-world='sell']:before{background-image:url(./assets/relics/relic-icons-10.png);background-size:500% 200%;background-position:100% 100%}
+.bc-world-label[data-world-tower],.bc-world-label[data-world-magic-cart]{background:linear-gradient(#3b4854,#252d38);border-color:#b6a375}
+.bc-world-label:hover:not(:disabled){background:linear-gradient(#78603c,#453920);border-color:#ffe2a0}
+@media(max-width:760px){#side{border-radius:18px 18px 0 0}.bc-world-label{border-radius:10px;padding:4px 6px}.bc-world-label:before{width:16px;height:16px}}
+
+.bc-core-large-icon.bc-core-grade{--grade:#8f9d91;border:2px solid var(--grade);box-sizing:border-box;border-radius:14px;background:radial-gradient(ellipse at top,#ffffff12,#12251c 75%);box-shadow:inset 0 0 0 3px #13251dcc,0 0 0 1px #09150e,0 2px 8px #0005;position:relative}
+.bc-core-grade:after{content:'';position:absolute;inset:5px;border:1px solid var(--grade);opacity:.45;border-radius:8px;pointer-events:none}
+.bc-core-grade.rarity-good{--grade:#4cbb6d}.bc-core-grade.rarity-rare{--grade:#5b9fdf}.bc-core-grade.rarity-epic{--grade:#bd79ea}.bc-core-grade.rarity-legend{--grade:#ffbd63}.bc-core-grade.rarity-mythic{--grade:#ff86ae}.bc-core-grade.rarity-whiteAscended{--grade:#fff2d0}
+
+/* Core workshop: clear item identity, selection and upgrade actions. */
+.bc-core-content{min-width:0}.bc-core-content h3{margin-top:0;line-height:1.5}
+.bc-core-card{padding:18px;border-radius:16px;background:linear-gradient(135deg,#2b4031,#203126);border-color:#778663;gap:16px}
+.bc-core-content>select,.bc-core-mod>select{width:100%;box-sizing:border-box;min-height:40px;padding:8px 34px 8px 10px;border:1px solid #a38b55;border-radius:9px;background:#15271e;color:#fff0cd;font:600 13px system-ui;cursor:pointer}
+.bc-core-content>select:focus-visible,.bc-core-mod>select:focus-visible{outline:2px solid #efd08a;outline-offset:2px}
+.bc-core-content select:disabled{opacity:.5;cursor:default}
+.bc-core-content>p{line-height:1.7;color:#d3dfc7;margin:12px 0}
+.bc-core-upgrade{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:12px 0;padding:10px;background:#15271c;border-radius:9px;border:1px solid #566645}
+.bc-core-upgrade>span{flex:1;min-width:140px;line-height:1.7;font-size:12px;color:#dfd7b3}
+.bc-core-upgrade>button{min-height:40px;padding:8px 16px;border-radius:9px;background:linear-gradient(#765c2f,#4d3b23);border-color:#ba9659;color:#fff0c4;font-weight:700}
+.bc-core-mod{border-style:solid;background:#192e22;border-color:#536c4f;border-radius:13px;padding:12px;gap:10px}
+.bc-mod-heading{display:flex;align-items:center;gap:10px}.bc-mod-heading>div:last-child{min-width:0;display:grid;gap:4px}.bc-mod-heading small{color:#d2ddc6}
+.bc-core-large-icon.bc-mod-art{width:48px;height:48px;min-height:48px;font-size:24px;border-radius:11px}.bc-mod-art img{width:34px;height:34px;object-fit:contain;image-rendering:pixelated}
+.bc-core-mod>small{line-height:1.65;min-height:44px;color:#bdcfb3}
+.bc-core-mod .bc-core-upgrade{margin:0}.bc-core-mod .bc-core-upgrade>span{width:100%;min-width:0}
+.bc-hud-lure-icon{width:26px;height:26px;vertical-align:middle;object-fit:contain;image-rendering:pixelated;margin-right:6px}
+#lureOpen{display:flex;align-items:center;justify-content:center}
+.bc-lure-option{border-radius:14px;background:linear-gradient(120deg,#2b4030,#1c3023);padding:16px}.bc-lure-option button{border-radius:10px;min-height:42px}
+@media(max-width:760px){.bc-core-card{padding:12px;gap:10px}.bc-core-upgrade>button{width:100%}.bc-core-mod>small{min-height:0}}
