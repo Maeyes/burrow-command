@@ -1,1 +1,0 @@
-var e=`/Program%20Files/Git/burrow-command/assets/sheet-mB3NHw5D.png`;export{e as default};
