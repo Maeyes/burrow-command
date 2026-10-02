@@ -1419,6 +1419,7 @@ function renderUi() {
     // Combat rewards may update the HUD while the player is reading or scrolling a modal.
     // Preserve BOTH its main scroll and nested recipe list instead of replacing the nodes at scroll=0.
     const scrolls=scrollSelectors.map(sel=>[sel,panel.querySelector(sel)?.scrollTop??0]);
+    const railLeft=panel.querySelector('.bc-class-rail')?.scrollLeft??0; // mobile: horizontal class tabs
     const craftTop=type==='hero'&&S.armoryPreserveCraftPosition
       ?panel.querySelector('[data-forge-craft]')?.getBoundingClientRect().top:null;
     const coreRecyclingOpen=type==='skillCore'&&panel.querySelector('.bc-core-recycling')?.open;
@@ -1427,6 +1428,7 @@ function renderUi() {
       panel.innerHTML=render();
       if(coreRecyclingOpen)panel.querySelector('.bc-core-recycling')?.setAttribute('open','');
       for(const [sel,top] of scrolls){const el=panel.querySelector(sel);if(el)el.scrollTop=top;}
+      const rail=panel.querySelector('.bc-class-rail');if(rail)rail.scrollLeft=railLeft;
       if(type==='hero'&&S.armoryPreserveCraftPosition){
         // The report now sits BELOW the craft controls. Keep the Craft button
         // at the same on-screen position after adding the summary/results.
