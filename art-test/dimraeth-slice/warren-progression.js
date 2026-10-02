@@ -1,3 +1,4 @@
+import {optionTotals,normalizeOptions} from './warren-gear-options.js';
 // Burrow Command progression. Main-game item, loot, rarity, refine and mastery data are authoritative.
 import { MONSTERS_V2 } from '../../src/simulation/monsterDataV2.ts';
 import { rollLoot } from '../../src/simulation/loot.ts';
@@ -95,7 +96,8 @@ export function migrateSave(raw){
  const goldRefund=raw.v===1?Object.values(raw.tier||{}).reduce((n,v)=>n+[0,20,65,155][Math.max(0,Math.min(3,Number(v)||0))],0):0;
  const gear=(raw.gear||[]).filter(p=>p&&typeof p.id==='string'&&EQUIPMENT_MASTER_V2[p.templateId]).map(p=>({
   id:p.id,templateId:p.templateId,rarity:p.rarity||'normal',
-  enhance:Math.max(0,Math.min(120,Math.floor(p.enhance||0))),refine:Math.max(0,Math.min(15,Math.floor(p.refine||0))),locked:!!p.locked
+  enhance:Math.max(0,Math.min(120,Math.floor(p.enhance||0))),refine:Math.max(0,Math.min(15,Math.floor(p.refine||0))),locked:!!p.locked,
+  options:normalizeOptions(p.options,p.rarity||'normal')
  }));
  const claimed=new Set();
  for(const cls of CLASS_IDS){
@@ -404,11 +406,12 @@ export function autoEquipBuild(s,cls){
  return n;
 }
 export function buildCombatBonus(s,cls,_buildId,bunnyLevel=1){
- const b=buildFor(s,cls),out={atk:0,maxHp:0,def:0,critBonus:0},bonus={atk:0,def:0,hp:0};
- if(!b)return out;
+ const b=buildFor(s,cls),out={atk:0,maxHp:0,def:0,critBonus:0},bonus={atk:0,def:0,hp:0},worn=[];
+ if(!b)return {...out,aspd:0,lifesteal:0,splash:0,atkPct:0,hpPct:0};
  for(const slot of GEAR_SLOTS){
   const p=s.gear.find(i=>i.id===b.gear[slot]);if(!p)continue;
   const t=EQUIPMENT_MASTER_V2[p.templateId];if(bunnyLevel<minLevelForTier(t.tier))continue;
+  worn.push(p);
   const mult=EQUIPMENT_RARITY_STAT_MULTIPLIER[p.rarity]??1,v=classProgress(s,cls,slot),cat=progressionCategory(t.slot);
   out.atk+=(t.baseCombat.atk||0)*mult+(t.baseCombat.matk||0)*mult+(cat==='offensive'?v.enhance*2:0);
   out.maxHp+=(t.baseCombat.maxHp||0)*mult;
@@ -417,7 +420,10 @@ export function buildCombatBonus(s,cls,_buildId,bunnyLevel=1){
   if(cat==='offensive')bonus.atk+=v.refine*.005;
   else if(cat==='defensive'){bonus.def+=v.refine*.005;bonus.hp+=v.refine*.005;}
  }
- return {atk:out.atk*.22*(1+bonus.atk),maxHp:out.maxHp*.45*(1+bonus.hp),def:out.def*.4*(1+bonus.def),critBonus:out.critBonus};
+ const o=optionTotals(worn);
+ // atkPct/hpPct scale the bunny's whole ATK/HP (applied in statsOf); DEF% scales gear DEF here.
+ return {atk:out.atk*.22*(1+bonus.atk),maxHp:out.maxHp*.45*(1+bonus.hp),def:out.def*.4*(1+bonus.def)*(1+o.defPct),critBonus:out.critBonus+o.crit,
+  atkPct:o.atkPct,hpPct:o.hpPct,aspd:o.aspd,lifesteal:o.lifesteal,splash:o.splash};
 }
 export function availableRecipes(s,cls){return Object.values(EQUIPMENT_MASTER_V2).filter(t=>gearSlot(t.id)&&t.tier<=unlockedTier(s.warren)&&
  (gearSlot(t.id)!=='weapon'||t.weaponFamily===CLASS_FAMILIES[cls]));}

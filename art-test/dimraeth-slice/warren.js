@@ -69,6 +69,11 @@ import {createHomeController} from './warren-home-controller.js';
 import {homeBonuses} from './warren-home-bonuses.js';
 import {equipPlan} from './warren-equip-plan.js';
 import {nextGoal} from './warren-next-goal.js';
+import {addOption,reoption,toggleOptionLock,formatOption} from './warren-gear-options.js';
+import {renderCraftRevealHtml} from './warren-craft-reveal.js';
+import {classFrame,drawSparkles,bestRarity} from './warren-class-colors.js';
+import {createTutorial,TUTORIAL_KEY} from './warren-tutorial.js';
+let tutorial=null;
 import {snapshotNight,summarizeNight,renderNightSummaryHtml} from './warren-night-summary.js';
 import {HOME_PLOTS,HOME_SIDES,HOME_SIDE_NAMES,HOME_PLOT_COST,HOME_WALL_COST,fullyOwnedSide,homePerimeterBlueprint,homeWallLayoutId,homeOwnedCell,plotForCell,homeWallIntegrity,reconcileHomeWall,HOME_EXPANSION_STAGES,HOME_NORTH_FINAL,homeAtNorthernCliff} from './warren-home-land.js';
 import {HOME_TERRAIN_BRUSHES,applyHomeTerrainBrush,normalizeHomeTerrain,validateHomeTerrainBatch,quoteHomeTerrain,deriveHomeRivers,makeHomeWaterfall,applyHomeTerrainToArrays,applyHomeNorthernCliff,isNorthCliffCrest,migrateLegacyNorthCliffSources,deriveHomeNorthCurtains,quoteNewHomeNorthCurtains} from './warren-home-terrain.js';
@@ -479,7 +484,8 @@ function upgradeTower(t){
 let unitSeq = 0;
 function statsOf(cls,level=1,buildId=cls+'-1') {
   const c=CLASSES[cls], gear=buildCombatBonus(S,cls,buildId,level);
-  return {maxHp:Math.round((c.hp+(level-1)*12+gear.maxHp)*mythicHpMultiplier(S.mythic)),atk:Math.round((c.atk+(level-1)*.9+gear.atk)*mythicAtkMultiplier(S.mythic)*10)/10,def:Math.round(gear.def),critBonus:gear.critBonus||0,luk:Math.floor(level/4)};
+  return {maxHp:Math.round((c.hp+(level-1)*12+gear.maxHp)*mythicHpMultiplier(S.mythic)*(1+(gear.hpPct||0))),atk:Math.round((c.atk+(level-1)*.9+gear.atk)*mythicAtkMultiplier(S.mythic)*(1+(gear.atkPct||0))*10)/10,def:Math.round(gear.def),critBonus:gear.critBonus||0,luk:Math.floor(level/4),
+   aspd:gear.aspd||0,lifesteal:gear.lifesteal||0,optSplash:gear.splash||0};
 }
 function refreshArmy() {
   for(const u of S.units){const oldMax=u.maxHp||1,oldHp=u.hp;Object.assign(u,statsOf(u.cls,u.level,u.buildId));u.hp=u.down?0:Math.min(u.maxHp,Math.max(1,Math.round(oldHp/oldMax*u.maxHp)));}
@@ -519,7 +525,18 @@ function heroImage(u) {
   else if (now < u.atkUntil && hero.animations['atk_' + fam]) { set = hero.animations['atk_' + fam][u.dir]; const t = 1 - (u.atkUntil - now) / 375; img = set.frames[Math.min(set.frames.length - 1, Math.floor(t * set.frames.length))]; }
   else if (now < (u.hurtUntil ?? 0)) { set = hero.animations.hurt[u.dir]; img = set.frames[Math.floor((1 - (u.hurtUntil - now) / 360) * set.frames.length) % set.frames.length]; }
   else { set = hero.animations[u.moving ? 'run' : 'idle'][u.dir]; img = set.frames[Math.floor(now / (u.moving ? 80 : 140) + u.id * 3) % set.frames.length]; }
+  img = classFrame(img, u.cls, u.level);
   return { img: set.flipX ? mirrored(img) : img, footY: set.footY };
+}
+// Best equipped rarity per class (refreshed twice a second; gear only changes via menus).
+let classRarityAt=0,classRarity={};
+function classGearRarity(cls){
+  const now=performance.now();
+  if(now-classRarityAt>500){
+    classRarityAt=now;classRarity={};const byId=new Map(S.gear.map(p=>[p.id,p.rarity]));
+    for(const k of Object.keys(CLASSES))classRarity[k]=bestRarity(Object.values(buildFor(S,k)?.gear||{}).map(id=>byId.get(id)).filter(Boolean));
+  }
+  return classRarity[cls]||'normal';
 }
 function unitActor(u) {
   return {
@@ -528,6 +545,7 @@ function unitActor(u) {
     getImage() { const v = heroImage(u); this.oy = v.footY; return v.img; },
     drawOverlay(g, { x, y }) {
       const w = 30, q = u.hp / u.maxHp;
+      if (!u.down) drawSparkles(g, x, y, classGearRarity(u.cls), u.id, performance.now());
       if (!u.down) { g.fillStyle = 'rgba(10,12,12,.8)'; g.fillRect(x - w / 2, y - 62, w, 4); g.fillStyle = '#7ee38a'; g.fillRect(x - w / 2 + 1, y - 61, (w - 2) * q, 2); }
       g.font = '11px system-ui'; g.textAlign = 'center'; g.fillStyle = u.down ? '#ff8a8a' : '#fff4cf';
       g.fillText(u.down ? '💤' : CLASSES[u.cls].icon + ' Lv'+u.level, x, y - 66);
@@ -762,7 +780,7 @@ function castMovementCore(u,target,c){
 }
 function strike(u, target) {
   const c=CLASSES[u.cls],now=performance.now();
-  u.cd=c.cd*((u.coreValkyrieUntil||0)>S.time?.8:1);u.atkUntil=now+375;u.dir=facingTo(target.x-u.x,target.y-u.y);
+  u.cd=c.cd*((u.coreValkyrieUntil||0)>S.time?.8:1)*(1-(u.aspd||0));u.atkUntil=now+375;u.dir=facingTo(target.x-u.x,target.y-u.y);
   combatSFX.playAttack({volume:.25});
   skillFx?.play(BASIC_ATTACK_FX[c.fam]||'arcBolt',{from:{x:u.x,y:u.y},to:{x:target.x,y:target.y}});
   later(['bow','staff'].includes(c.fam)?.26:.18,()=>{
@@ -775,6 +793,7 @@ function strike(u, target) {
       const critical=allowCrit&&rollWarrenCrit(u.luk||0,u.critBonus||0);
       const dmg=Math.max(1,Math.round(u.atk*ratio*((u.coreValkyrieUntil||0)>S.time?1.15:1)*(critical?BASE_CRIT_DAMAGE:1)*(.9+Math.random()*.2)));
       m.hp-=dmg;m.aggro=u;
+      if(u.lifesteal>0&&u.hp<u.maxHp){const heal=Math.min(u.maxHp-u.hp,Math.max(1,Math.round(dmg*u.lifesteal)));u.hp+=heal;}
       const feedback=hitFeedback(dmg,{kind,critical,coreName});
       floaters?.text(m.x,m.y,feedback.text,{color:feedback.color,size:feedback.size,lift:feedback.lift});
       combatFX.playHitSpark(m.x,m.y,{visualScale:m.actor.visualScale});
@@ -790,6 +809,8 @@ function strike(u, target) {
       if(m.dead)continue;
       deal(m);
     }
+    // Option "ดาเมจกระจาย": a light splash around the main target for classes without native AoE.
+    if(u.optSplash>0)for(const m of S.monsters)if(!m.dead&&!hits.includes(m)&&dist(m,target)<60)deal(m,u.optSplash,{allowCrit:false});
     if(proc){
       const follow=proc.kind==='double'?target:
         S.monsters.find(m=>!m.dead&&m!==target&&dist(m,target)<(proc.range||Math.min(210,c.range)));
@@ -1181,6 +1202,7 @@ addEventListener('keydown', e => {
   }
   if(e.code==='Escape'&&(S.movingTower>=0||S.movingMagicCart>=0)){S.movingTower=-1;S.movingMagicCart=-1;S.towerMoveHover=null;renderUi();return;}
   if(e.code==='Escape'&&S.itemDetailId){S.itemDetailId=null;S.itemProtect=false;renderUi();return;}
+  if(e.code==='Escape'&&!$('craftRevealPanel')?.hidden){e.preventDefault();closeCraftReveal();return;}
   if(e.code==='Escape'&&S.modal==='waterfallGuide'){e.preventDefault();closeWaterfallGuide();return;}
   if(e.code==='Escape'&&S.modal){S.modal=null;renderUi();return;}
   if(e.code==='Escape'&&mobileDrawer){closeMobileDrawer();syncMobileControls();return;}
@@ -1223,11 +1245,16 @@ function completeArmoryCraft(order){
  S.batchReport=result;
  S.batchResults=[...result.retained,...result.review].map(p=>p.id);
  S.batchClass=order.cls;S.batchFilter='all';S.batchSelection=[];S.batchConfirm=false;S.batchExpanded=false;S.armoryPreserveCraftPosition=true;
- S.armoryTab='craft';S.armorySlot=gearSlot(order.recipeId);S.itemDetailId=null;
+ S.armoryMoreOpen=true;S.armoryTab='craft';S.armorySlot=gearSlot(order.recipeId);S.itemDetailId=null;
  S.armoryNotice='คราฟต์ '+result.made.length+' ชิ้น · เก็บ '+result.retained.length+' · รอพิจารณา '+result.review.length+
   ' · ย่อย '+result.dismantled.length+' · Stone Fragments +'+result.fragments;
- combatSFX.playLevelUp?.({volume:.3});save();renderUi();toast(S.armoryNotice);return true;
+ combatSFX.playLevelUp?.({volume:.3});save();renderUi();showCraftReveal(result);return true;
 }
+function showCraftReveal(result){
+ const el=$('craftRevealPanel');if(!el)return;
+ el.innerHTML=renderCraftRevealHtml(result,CLASSES);el.hidden=false;el.classList.remove('skip');
+}
+function closeCraftReveal(){const el=$('craftRevealPanel');if(el){el.hidden=true;el.innerHTML='';}}
 
 // ---------- UI ----------
 const $ = id => document.getElementById(id);
@@ -1284,7 +1311,7 @@ function openMobileView(type){
   closeMobileDrawer();
   if(type==='skills'){S.modal='bunnyMenu';}
   else if(type==='hero'||type==='craft'){
-   S.armoryTab=type==='craft'?'craft':'inventory';S.modal='hero';
+   S.armoryMoreOpen=true;S.armoryTab=type==='craft'?'craft':'inventory';S.modal='hero';
   }else if(type==='sell'){S.sellConfirm=false;S.modal='sell';}
  }
  renderUi();
@@ -1435,6 +1462,9 @@ function syncNextGoal(left){
   if(el.textContent!==text)el.textContent=text;
   if(el.dataset.tone!==(goal?.tone||''))el.dataset.tone=goal?.tone||'';
   el.hidden=!goal;
+  tutorial?.sync({blocked:S.over||!!dragonTrial||!!mythicCinematic?.active||!!wukongCinematic?.active||!!arthurCinematic?.active||S.homeOpen||S.modal==='waterfallGuide',
+   units:S.units.length,mats:matCount(),wallCost:next?.cost||0,wallLevel:S.wallLevel,towers:S.towers.length,day:S.day,modal:S.modal,speed:S.speed,gear:S.gear.length,equipped:equippedGearIds(S).size,garrisons:S.towers.filter(t=>t.garrison).length,
+   enhanced:Object.values(S.progress||{}).some(c=>Object.values(c).some(p=>p.enhance>0||p.refine>0))?1:0});
 }
 function syncClock() {
   const total = S.night ? NIGHT_S : DAY_S, left = Math.max(0, Math.ceil(total - S.clock));
@@ -1485,6 +1515,7 @@ document.body.addEventListener('click', e => {
   if(b.dataset.buy)recruit(b.dataset.buy);
   else if(b.id==='forgeOpen'){S.modal='blacksmith';renderUi();}
   else if(b.hasAttribute('data-open-guide')){S.modal='guide';renderUi();}
+  else if(b.hasAttribute('data-open-tutorial')){S.modal=null;tutorial?.restart();if(mobileDrawer)closeMobileDrawer();renderUi();}
   else if(b.hasAttribute('data-open-update-news')){openWaterfallGuide('intro');}
   else if(b.hasAttribute('data-open-waterfall-guide')){openWaterfallGuide('guide');}
   else if(b.hasAttribute('data-open-patch-notes')){S.modal='patchNotes';renderUi();}
@@ -1518,11 +1549,11 @@ document.body.addEventListener('click', e => {
   else if(b.hasAttribute('data-hall-heal'))useHallHeal();
   else if(b.hasAttribute('data-hall-upgrade'))upgradeWarren();
   else if(b.hasAttribute('data-hall-fortify'))upgradeFortification();
-  else if(b.hasAttribute('data-open-crafting')){S.armoryTab='craft';S.modal='hero';renderUi();}
-  else if(b.id==='heroOpen'){S.modal='hero';renderUi();}
+  else if(b.hasAttribute('data-open-crafting')){S.armoryMoreOpen=true;S.armoryTab='craft';S.modal='hero';renderUi();}
+  else if(b.id==='heroOpen'){S.armoryMoreOpen=false;S.modal='hero';renderUi();}
   else if(b.id==='lureOpen'&&!S.night){S.modal='lure';renderUi();}
   else if(b.dataset.lure){void useLure(b.dataset.lure);}
-  else if(b.id==='inventoryOpen'){S.armoryTab='inventory';S.modal='hero';renderUi();}
+  else if(b.id==='inventoryOpen'){S.armoryMoreOpen=true;S.armoryTab='inventory';S.modal='hero';renderUi();}
   else if(b.id==='masteryOpen'||b.hasAttribute('data-open-mastery-menu')){S.modal='mastery';renderUi();}
   else if(b.id==='skillCoreOpen'||b.hasAttribute('data-open-core-menu')){S.modal='skillCore';renderUi();}
   else if(b.dataset.coreClass){S.coreClass=b.dataset.coreClass;renderUi();}
@@ -1550,7 +1581,7 @@ document.body.addEventListener('click', e => {
   else if(b.hasAttribute('data-modal-close')){if(S.modal==='waterfallGuide')closeWaterfallGuide();else{S.modal=null;S.itemDetailId=null;renderUi();}}
   else if(b.hasAttribute('data-item-close')){S.itemDetailId=null;S.itemProtect=false;renderUi();}
   else if(b.dataset.heroUnit){const u=S.units.find(x=>x.id===+b.dataset.heroUnit);if(u){selectArmoryClass(u.cls);S.heroUnitId=u.id;S.modal='hero';renderUi();}}
-  else if(b.dataset.openInventory){S.armoryTab='inventory';S.modal='hero';S.itemDetailId=null;renderUi();}
+  else if(b.dataset.openInventory){S.armoryMoreOpen=true;S.armoryTab='inventory';S.modal='hero';S.itemDetailId=null;renderUi();}
   else if(b.dataset.inventoryFilter){S.inventoryFilter=b.dataset.inventoryFilter;renderUi();}
   else if(b.dataset.openItem){if(openItemDetail(b.dataset.openItem))renderUi();}
   else if(b.dataset.forgeClass){if(selectArmoryClass(b.dataset.forgeClass)){
@@ -1570,9 +1601,10 @@ document.body.addEventListener('click', e => {
   else if(b.hasAttribute('data-tower-upgrade')&&!S.night){if(upgradeTower(S.towers[S.selectedTower]))toast('เพิ่มความทนทานป้อมแล้ว');}
   else if(b.dataset.armorySlot){
     S.armorySlot=b.dataset.armorySlot;S.armoryRecipe=null;S.itemDetailId=null;S.armoryInventorySelection=[];
-    S.armoryTab='craft';S.batchReport=null;renderUi();
+    // Picking a slot only switches the detail card; an already-open pane stays on its tab, nothing new pops open.
+    S.batchReport=null;renderUi();
   }
-  else if(b.dataset.armoryTab){S.armoryTab=b.dataset.armoryTab;S.itemDetailId=null;renderUi();}
+  else if(b.dataset.armoryTab){const same=S.armoryMoreOpen&&S.armoryTab===b.dataset.armoryTab&&!S.itemDetailId;S.armoryMoreOpen=!same;S.armoryTab=b.dataset.armoryTab;S.itemDetailId=null;renderUi();}
   else if(b.dataset.armoryRecipe){S.armoryRecipe=b.dataset.armoryRecipe;renderUi();}
   else if(b.hasAttribute('data-armory-show-results')){
     const panel=$('heroPanel'),body=panel.querySelector('.bc-modal-body'),results=panel.querySelector('.bc-armory-results');
@@ -1653,6 +1685,8 @@ document.body.addEventListener('click', e => {
     refreshArmy();save();renderUi();toast(n?'จัดอุปกรณ์ให้บิลด์แล้ว':'ยังไม่มีอุปกรณ์ที่เหมาะสม');
   }
   else if(b.dataset.batchQty){S.batchQty=Number(b.dataset.batchQty);renderUi();}
+  else if(b.hasAttribute('data-craft-reveal-close')){closeCraftReveal();}
+  else if(b.hasAttribute('data-craft-reveal-skip')){$('craftRevealPanel')?.classList.add('skip');}
   else if(b.dataset.forgeCraft&&!S.night){
     const id=b.dataset.forgeCraft,qty=S.batchQty||1,cls=S.forgeClass,settings={...S.autoDismantle[cls]};
     if(!availableRecipes(S,cls).some(r=>r.id===id&&gearSlot(id)===(S.armorySlot||'weapon'))||!canCraft(S,id))
@@ -1679,6 +1713,17 @@ document.body.addEventListener('click', e => {
     for(const cls of Object.keys(S.builds))for(const build of S.builds[cls])for(const slot of GEAR_SLOTS)
       if(build.gear[slot]===id)build.gear[slot]=null;
     refreshArmy();save();renderUi();toast('ถอดอุปกรณ์แล้ว');
+  }
+  else if(b.dataset.optionAdd&&!S.night){
+    const opt=addOption(S,b.dataset.optionAdd);
+    if(opt){refreshArmy();save();renderUi();toast('🔮 ได้ออปชัน '+formatOption(opt));}else toast('Option Stone / Gold ไม่พอ หรือช่องเต็มแล้ว');
+  }
+  else if(b.dataset.optionReroll&&!S.night){
+    const opts=reoption(S,b.dataset.optionReroll);
+    if(opts){refreshArmy();save();renderUi();toast('♻️ สุ่มใหม่: '+opts.filter(o=>!o.locked).map(formatOption).join(' · '));}else toast('Re-option Stone / Gold ไม่พอ หรือล็อกครบทุกช่อง');
+  }
+  else if(b.dataset.optionLock!==undefined&&!S.night){
+    if(toggleOptionLock(S,b.dataset.optionItem,Number(b.dataset.optionLock))){save();renderUi();}
   }
   else if(b.dataset.itemEnhance&&!S.night){
     const upgraded=enhanceGear(S,b.dataset.itemEnhance);
@@ -1735,7 +1780,7 @@ document.body.addEventListener('click', e => {
   else if (b.id === 'skip' && !S.night) S.clock = DAY_S - .1;
   else if (b.id === 'upgrade') upgradeWarren();
   else if (b.id === 'fortify') upgradeFortification();
-  else if (b.id === 'reset' && confirm('เริ่มหมู่บ้านใหม่? เซฟเดิมจะหายทั้งหมด')) { try { localStorage.removeItem(SAVE_KEY);localStorage.removeItem(PRIOR_SAVE_KEY);localStorage.removeItem(LEGACY_SAVE_KEY); } catch {} S.resetting = true; location.reload(); }
+  else if (b.id === 'reset' && confirm('เริ่มหมู่บ้านใหม่? เซฟเดิมจะหายทั้งหมด')) { try { localStorage.removeItem(SAVE_KEY);localStorage.removeItem(PRIOR_SAVE_KEY);localStorage.removeItem(LEGACY_SAVE_KEY);localStorage.removeItem(TUTORIAL_KEY); } catch {} S.resetting = true; location.reload(); }
 });
 
 document.body.addEventListener('toggle',e=>{
@@ -2115,7 +2160,10 @@ const arthurBattleEntry={...wukongBattleEntry};
 arthurCinematic=createArthurCinematic({onBattle:()=>beginMythicTrial(arthurBattleEntry,{walk:arthurWalkFrames,attack:arthurAttackFrames},'kingArthur'),onStop:endDragonTrial});
 const resumed = load();
 houseBonusCache=null; // the save may bring houses that change village bonuses
-if (!resumed) { recruit('guard', true); recruit('archer', true); }
+// New villages start with a 500 Gold + 500 material kit so the first steps (hire, wall, tower) are doable right away.
+const STARTER_GOLD=500,STARTER_MATS=500;
+if (!resumed) { recruit('guard', true); recruit('archer', true); S.gold=STARTER_GOLD; addInventory(S.inventory,{livingMoss:STARTER_MATS}); save(); }
+tutorial=createTutorial({isNewVillage:!resumed});
 renderUi();
 setRuntimeZoomRange(mobileLayout.matches ? .26 : .45, 1.3); // portrait can pinch farther out to see the whole village
 // Loading screen: the engine writes stage messages into #loading; turn them into bar progress.

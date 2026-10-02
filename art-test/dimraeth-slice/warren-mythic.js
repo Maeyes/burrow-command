@@ -42,5 +42,6 @@ export function settleMythic(state,{won,rng=Math.random,relicEnabled=false}={}){
 }
 export const mythicHpMultiplier=state=>normalizeMythic(state).relics.dragonHeart?1.01:1;
 // Shared encounter attack scaling for every current and future mythic boss.
-export const mythicBossAttack=warren=>(20+warren*5)*2;
+// v0.9.4: world-boss ATK cut 30% (was ×2, now ×1.4).
+export const mythicBossAttack=warren=>Math.round((20+warren*5)*1.4);
 export const mythicAtkMultiplier=state=>{const relics=normalizeMythic(state).relics;return 1+(relics.jinguBang?.01:0)+(relics.excalibur?.01:0)};

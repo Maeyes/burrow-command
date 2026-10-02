@@ -7,7 +7,7 @@ import {CLASS_IDS,defaultBuilds,defaultProgress,defaultMastery,defaultAutoDisman
 const classes=Object.fromEntries(CLASS_IDS.map(cls=>[cls,{icon:'🐰',name:cls}]));
 const state=()=>({warren:1,gold:9999,inventory:{tier1Blueprint:50,copperOre:500,livingMoss:500,brutalSpore:500},
  gear:[],nextGearId:0,builds:defaultBuilds(),progress:defaultProgress(),mastery:defaultMastery(),
- autoDismantle:defaultAutoDismantleSettings(),armoryInventorySelection:[],forgeClass:'archer',armorySlot:'weapon',armoryTab:'craft',batchQty:10,
+ autoDismantle:defaultAutoDismantleSettings(),armoryInventorySelection:[],forgeClass:'archer',armorySlot:'weapon',armoryTab:'craft',armoryMoreOpen:true,batchQty:10,
  units:[],towers:[],batchResults:[],batchFilter:'all',batchSelection:[],night:false});
 describe('single-screen Class Armory',()=>{
  it('chooses class, slot, recipe, quantity and automatic salvage rules before crafting',()=>{
@@ -109,5 +109,13 @@ describe('single-screen Class Armory',()=>{
   expect(armoryIds()).toEqual([]); // Rarity filter still applies after excluding equipped pieces.
   s.armoryInventoryRarity='all';s.inventoryFilter='equipment';
   expect(new Set(storedIds())).toEqual(new Set([archerArmor.id,guardArmor.id]));
+ });
+});
+describe('armory action panes',()=>{
+ it('panes are closed until a button is pressed',()=>{
+  const s=state();s.armoryMoreOpen=false;
+  const html=renderArmoryHtml(s,classes);
+  expect(html).toContain('data-armory-tab="options"');
+  expect(html).not.toContain('data-forge-craft');
  });
 });

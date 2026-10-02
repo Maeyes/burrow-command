@@ -41,6 +41,88 @@
   .bc-next-goal{position:absolute;left:50%;top:calc(100% + 4px);transform:translateX(-50%);width:max-content;max-width:min(560px,calc(100vw - 24px));padding:5px 12px;border-radius:0 0 10px 10px;font-size:12px;font-weight:700;line-height:1.3;white-space:normal;text-align:center;color:#fff3c9;background:rgba(38,32,18,.92);border:1px solid #b39558;box-shadow:0 3px 10px #0007;pointer-events:none}
   .bc-next-goal[data-tone="warn"]{color:#fff;background:rgba(122,52,20,.95);border-color:#ffb35c;animation:bc-goal-pulse 1s ease-in-out infinite alternate}
   .bc-next-goal[data-tone="night"]{color:#dfe6ff;background:rgba(24,28,58,.94);border-color:#7d8fe0}
+  #tutorialCard.bc-tutorial{z-index:70}
+  .bc-option-card{grid-column:1/-1}
+  .bc-option-card .bc-option-have{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:#d8c48a;margin:4px 0}
+  .bc-option-lines{display:grid;gap:4px;margin:6px 0}
+  .bc-option-line{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:6px;padding:4px 6px;border-radius:6px;background:rgba(120,80,200,.16);border:1px solid rgba(190,150,255,.35);font-size:12px}
+  .bc-option-line b{color:#cfa8ff}.bc-option-line.empty{opacity:.55;border-style:dashed}
+  .bc-option-line.locked{background:rgba(232,194,106,.18);border-color:#e8c26a}
+  .bc-option-line button{min-height:26px;padding:2px 7px}
+  .bc-option-line span small{opacity:.7;margin-left:2px}
+  .bc-opt-plain{color:#e8e2d0}.bc-opt-blue{color:#7fc4ff}.bc-opt-purple{color:#d38cff}
+  .bc-opt-gold{color:#ffd65c;text-shadow:0 0 6px rgba(255,214,92,.55)}
+  .bc-option-line:has(.bc-opt-gold){border-color:#e8c26a}
+  .bc-opt-legend{display:block;margin-top:4px}
+  .bc-armory-layout{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start}
+  .bc-class-rail{display:flex;flex-direction:column;flex-wrap:nowrap;gap:5px;margin:0;position:sticky;top:0}
+  .bc-class-rail button{justify-content:flex-start;width:104px;min-height:38px;padding:4px 8px;font-size:12px}
+  .bc-armory-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+  .bc-armory-main{display:grid;grid-template-columns:86px minmax(0,1fr);gap:10px;align-items:stretch}
+  .bc-armory-main>.bc-armory-slots{display:grid;grid-template-rows:repeat(3,1fr);grid-template-columns:none;gap:8px;margin:0}
+  .bc-armory-main .bc-armory-slot{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:3px;width:auto;min-height:0;padding:6px 4px}
+  .bc-armory-main .bc-armory-slot .bc-gear-icon,.bc-armory-main .bc-armory-slot .bc-armory-empty-icon{width:50px;height:50px}
+  .bc-slot-name{font-size:10.5px!important;color:#cbb37a!important}
+  .bc-armory-main>.bc-armory-current{display:flex;flex-direction:column;align-items:stretch;gap:10px;text-align:left;min-height:0;padding:12px 14px}
+  .bc-armory-main>.bc-armory-current>div{flex:none}
+  .bc-current-head{display:flex!important;flex-direction:row!important;align-items:center;gap:12px}
+  .bc-current-head>.bc-gear-icon,.bc-current-head>.bc-armory-empty-icon{width:58px;height:58px;flex-shrink:0}
+  .bc-current-head>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .bc-current-head b{font-size:15px;color:#ffdf9d}.bc-current-head small{color:#bad1b6;font-size:11px}
+  .bc-current-stats{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+  .bc-current-stats>div{background:rgba(0,0,0,.18);border-radius:7px;padding:5px 8px}
+  .bc-current-stats small{display:block;color:#bfb48a;font-size:10.5px}.bc-current-stats b{font-size:15px;color:#fff3c9}
+  .bc-current-options{display:grid!important;gap:5px}
+  .bc-current-opt{display:grid;grid-template-columns:16px minmax(0,1fr) 70px;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;border:1px solid rgba(190,150,255,.28);font-size:12px}
+  .bc-current-opt>small{color:#a99e7c}.bc-current-opt span small{opacity:.7;margin-left:2px}
+  .bc-current-opt.empty{border-style:dashed;opacity:.55}
+  .bc-opt-bar{height:5px;border-radius:3px;background:linear-gradient(90deg,var(--bar) var(--pct),rgba(255,255,255,.1) var(--pct))}
+  .bc-bar-gold{--bar:#ffd65c}.bc-bar-purple{--bar:#d38cff}.bc-bar-blue{--bar:#7fc4ff}.bc-bar-plain{--bar:#a9a38c}
+  .bc-opt-none{margin:0;color:#a99e7c;font-size:11.5px}
+  .bc-armory-col>.bc-armory-toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0}
+  .bc-armory-col>.bc-armory-toolbar button.active{border-color:#e8c26a;background:#4a4128}
+  @media (max-width:760px){.bc-armory-layout{grid-template-columns:minmax(0,1fr)}.bc-class-rail{flex-direction:row;overflow-x:auto;position:static}.bc-class-rail button{width:auto;flex:0 0 auto}.bc-current-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.bc-armory-col>.bc-armory-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .bc-reveal-modal{width:min(640px,calc(100vw - 24px))!important;height:auto!important;max-height:90vh;z-index:60!important}
+  .bc-reveal-body{display:flex;flex-direction:column;gap:12px}
+  .bc-reveal-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+  .bc-reveal-card{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:9px;border:1px solid #5d6a45;background:rgba(0,0,0,.2);text-align:center;font-size:11px;
+   opacity:0;transform:rotateY(90deg) scale(.85);animation:bc-reveal-in .32s ease-out var(--d) forwards}
+  .bc-reveal-modal.skip .bc-reveal-card{animation-delay:0s;animation-duration:.01s}
+  .bc-reveal-card .bc-gear-icon{width:52px;height:52px}
+  .bc-reveal-card.rarity-epic{box-shadow:0 0 12px rgba(211,140,255,.45)}
+  .bc-reveal-card.rarity-legend{box-shadow:0 0 14px rgba(255,214,92,.6);border-color:#e8c26a}
+  .bc-reveal-card.rarity-mythic,.bc-reveal-card.rarity-whiteAscended{box-shadow:0 0 16px rgba(255,107,107,.65);border-color:#ff8b8b}
+  .bc-reveal-card.dismantled{filter:grayscale(.85);opacity:.55}
+  .bc-reveal-card.dismantled .bc-gear-icon{position:relative}
+  .bc-reveal-tag{font-size:10px;padding:1px 6px;border-radius:5px}
+  .bc-reveal-tag.kept{background:#2f5a35;color:#bff0c4}.bc-reveal-tag.review{background:#5a4a20;color:#ffe2a0}.bc-reveal-tag.gone{background:#5a2a2a;color:#ffb8b0}
+  .bc-reveal-card small{color:#cbb37a;font-size:9.5px}
+  .bc-reveal-summary{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+  .bc-reveal-note{margin:0;text-align:center;color:#cbb37a;font-size:12px}
+  .bc-reveal-actions{display:flex;gap:8px;justify-content:center}
+  @keyframes bc-reveal-in{to{opacity:1;transform:none}}
+  .bc-reveal-card.dismantled{animation-name:bc-reveal-in-dim}
+  @keyframes bc-reveal-in-dim{to{opacity:.55;transform:none}}
+  @media (max-width:760px){.bc-reveal-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media (prefers-reduced-motion:reduce){.bc-reveal-card{animation-duration:.01s;animation-delay:0s}}
+  .bc-option-actions{display:flex;gap:6px;flex-wrap:wrap}.bc-option-actions button{flex:1 1 140px}
+  .bc-tutorial{left:50%;bottom:14px;transform:translateX(-50%);width:min(340px,calc(100vw - 24px));padding:12px 14px;z-index:70;color:#fff3c9;background:rgba(38,32,18,.96);border:2px solid #e8c26a;box-shadow:0 6px 22px #000a;font-size:13px;line-height:1.45}
+  .bc-tutorial p{margin:6px 0 8px}
+  .bc-tut-head{display:flex;justify-content:space-between;gap:8px;font-size:14px}.bc-tut-head small{color:#cbb37a}
+  .bc-tut-dots{display:flex;gap:5px;margin-bottom:8px}.bc-tut-dots i{width:8px;height:8px;border-radius:50%;background:#5a4c2c}.bc-tut-dots i.done{background:#b39558}.bc-tut-dots i.on{background:#ffd76a;box-shadow:0 0 6px #ffd76a}
+  .bc-tut-actions{display:flex;justify-content:space-between;gap:8px}.bc-tut-actions button{min-height:32px;padding:5px 12px}.bc-tut-actions button.ghost{opacity:.7}
+  .bc-tut-actions [data-tut="close"]{background:transparent;border-color:transparent;color:#cbb37a;text-decoration:underline}
+  .bc-tut-target{outline:3px solid #ffd76a!important;outline-offset:2px;border-radius:8px;animation:bc-tut-pulse .9s ease-in-out infinite alternate;position:relative;z-index:44}
+  #top .res.bc-tut-target,#clock.bc-tut-target,#top .bc-tut-target{position:static}
+  @keyframes bc-tut-pulse{from{box-shadow:0 0 0 0 #ffd76a00}to{box-shadow:0 0 16px 4px #ffd76acc}}
+  .bc-tutorial{transition:left .25s ease,top .25s ease}
+  .bc-tutorial[data-side]:not([data-side=""])::after{content:'';position:absolute;width:0;height:0;border:10px solid transparent}
+  .bc-tutorial[data-side="left"]::after{left:100%;top:var(--arrow-y);margin-top:-10px;border-left-color:#e8c26a}
+  .bc-tutorial[data-side="right"]::after{right:100%;top:var(--arrow-y);margin-top:-10px;border-right-color:#e8c26a}
+  .bc-tutorial[data-side="top"]::after{top:100%;left:var(--arrow-x);margin-left:-10px;border-top-color:#e8c26a}
+  .bc-tutorial[data-side="bottom"]::after{bottom:100%;left:var(--arrow-x);margin-left:-10px;border-bottom-color:#e8c26a}
+  @media (max-width:760px){.bc-tutorial{bottom:84px;font-size:12px;padding:10px 12px;width:min(320px,calc(100vw - 16px))}}
+  @media (prefers-reduced-motion:reduce){.bc-tut-target{animation:none}}
   @keyframes bc-goal-pulse{to{box-shadow:0 0 14px #ff9b4a}}
   @media (max-width:760px){.bc-next-goal{font-size:10.5px;padding:4px 8px}}
   @media (prefers-reduced-motion:reduce){.bc-next-goal{animation:none}}
@@ -415,7 +497,7 @@
 
   /* Single-screen Class Armory: recipe, inventory, upgrade and result live in one scrollable surface. */
   #inventoryOpen,#forgeOpen{display:none!important}
-  #heroPanel{width:min(1000px,calc(100vw - 24px));height:min(92vh,900px)}
+  #heroPanel{width:min(760px,calc(100vw - 24px));height:auto;max-height:min(92vh,900px)}
   .bc-armory-body{padding:17px;scroll-behavior:smooth}
   .bc-armory-roster{margin:5px 0 12px;border:1px solid #435b44;background:#1d2c20;border-radius:9px;padding:7px 12px}
   .bc-armory-roster>summary{cursor:pointer;color:#cedcb4;font-size:12px}
@@ -915,7 +997,7 @@
   <div id="nextGoal" class="bc-next-goal" role="status" aria-live="polite" hidden></div>
 </div>
 <section id="nightSummary" class="bc-night-summary panel" role="status" aria-label="สรุปผลคืนที่ผ่านมา" hidden></section>
-<div id="help" class="panel bc-help-launcher" aria-label="คู่มือและข่าวสาร"><button type="button" data-open-guide><i class="bc-hud-icon" style="--hud-position:100% 0%" aria-hidden="true"></i> คู่มือ</button><button type="button" id="patchNotesOpen" data-open-patch-notes>📜 v0.8.3</button></div>
+<div id="help" class="panel bc-help-launcher" aria-label="คู่มือและข่าวสาร"><button type="button" data-open-guide><i class="bc-hud-icon" style="--hud-position:100% 0%" aria-hidden="true"></i> คู่มือ</button><button type="button" data-open-tutorial>🎓 สอนเล่น</button><button type="button" id="patchNotesOpen" data-open-patch-notes>📜 v0.8.3</button></div>
 <div id="relicLauncher"><button type="button" data-open-relic-collection aria-label="เปิด Relic Collection ใต้แผนที่"><span class="bc-relic-atlas bc-relic-launcher-icon" aria-hidden="true"></span> Relic Collection <small id="relicLauncherCount">0/9</small></button></div>
 <div id="shopbox" class="panel"><div class="mobile-drawer-head"><b>🐰 จ้างกระต่าย</b><button type="button" data-mobile-close aria-label="ปิดหน้าจ้างกระต่าย">✕</button></div><details id="recruitDetails" open><summary>จ้างกระต่าย <small id="recruitSummary">0/7</small></summary><div id="shop" aria-label="รายชื่อกระต่ายที่จ้างได้"></div></details></div>
 <div id="side" class="panel">
@@ -925,7 +1007,7 @@
     <button type="button" data-world="hall">🏠 โพรง</button><button type="button" data-world="blacksmith">⚒ โรงตีเหล็ก</button>
     <button type="button" data-world="resource">📦 โรงผลิต</button><button type="button" data-world="sell">🛒 Quick Sell</button>
     <button type="button" id="mobileHomeOpen">🔨 Home Builder</button>
-    <button type="button" data-open-guide><i class="bc-hud-icon" style="--hud-position:100% 0%" aria-hidden="true"></i> คู่มือ</button><button type="button" data-open-patch-notes>📜 Patch Notes</button>
+    <button type="button" data-open-guide><i class="bc-hud-icon" style="--hud-position:100% 0%" aria-hidden="true"></i> คู่มือ</button><button type="button" data-open-tutorial>🎓 สอนเล่น</button><button type="button" data-open-patch-notes>📜 Patch Notes</button>
     <button type="button" data-open-relic-collection>✧ Relic Collection</button>
   </div>
   <h3>จัดการหมู่บ้าน</h3>
@@ -983,6 +1065,7 @@
 <div id="guidePanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="คู่มือ Burrow Command"></div>
 <section id="relicCollectionPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="Mythic Archive — Relic Collection"></section>
 <div id="waterfallGuidePanel" class="panel bc-modal bc-waterfall-guide-modal" hidden role="dialog" aria-modal="true" aria-labelledby="waterfallGuideTitle" aria-describedby="waterfallGuideDescription"></div>
+<div id="craftRevealPanel" class="panel bc-modal bc-reveal-modal" hidden role="dialog" aria-modal="true" aria-label="ผลคราฟต์"></div>
 <div id="patchNotesPanel" class="panel bc-modal" hidden role="dialog" aria-modal="true" aria-label="Patch Notes"></div>
 <div id="banner"></div><div id="toast"></div>
 <div id="over" hidden><h2></h2><p></p><button id="again">เล่นอีกครั้ง</button></div>

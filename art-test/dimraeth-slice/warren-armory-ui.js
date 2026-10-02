@@ -3,19 +3,21 @@ import {hudIcon} from './warren-hud.js';
 import {esc,itemLabel,gameIcon,renderItemDetailHtml,armoryGearIcon} from './warren-ui.js';
 import {dismantleFragments} from '../../src/simulation/equipmentV2.ts';
 import {renderBatchHtml} from './warren-extra-ui.js';
+import {itemOptions,optionSlots,optionMax,optionGrade,OPTION_DEFS} from './warren-gear-options.js';
 import {craftStatSummary,renderCraftPreview} from './warren-craft-preview.js';
 import {CLASS_IDS,CLASS_FAMILIES,GEAR_SLOTS,AUTO_DISMANTLE_RARITIES,
  availableRecipes,buildFor,canCraft,equippedGearIds,gearSlot,gearScore,
- EQUIPMENT_MASTER_V2,unlockedTier,classProgress,fieldClassCap}
+ EQUIPMENT_MASTER_V2,EQUIPMENT_RARITY_STAT_MULTIPLIER,unlockedTier,classProgress,fieldClassCap}
  from './warren-progression.js';
 
 const SLOTS={weapon:'⚔ Weapon',armor:'🛡 Armor',accessory:'💍 Accessory'};
+const SLOT_SHORT={weapon:'อาวุธ',armor:'เกราะ',accessory:'เครื่องประดับ'};
 const RARITY_NAMES={normal:'Normal',good:'Good',rare:'Rare',epic:'Epic',legend:'Legend',mythic:'Mythic',whiteAscended:'White Ascended'};
 const label=x=>RARITY_NAMES[x]||x;
 const img=(id,kind='equipment')=>gameIcon(id,kind,'◈','bc-recipe-icon');
 const fmt=n=>Number(n||0).toLocaleString();
 function classTabs(s,classes){
- return '<nav class="bc-class-tabs" aria-label="เลือกคลาส">'+CLASS_IDS.map(cls=>
+ return '<nav class="bc-class-tabs bc-class-rail" aria-label="เลือกคลาส">'+CLASS_IDS.map(cls=>
   '<button data-forge-class="'+cls+'" class="'+(s.forgeClass===cls?'active':'')+'">'+
   gameIcon(CLASS_FAMILIES[cls],'family',classes[cls].icon,'bc-class-icon')+
   '<span>'+esc(classes[cls].name)+'</span></button>').join('')+'</nav>';
@@ -89,47 +91,71 @@ function inventoryPanel(s,classes){
    (s.night?' disabled':'')+'> 🔒 ล็อก</label></article>').join('')||
    '<p class="bc-empty">ไม่มีอุปกรณ์ที่ตรงกับคลาส ช่อง และ Rarity นี้</p>')+'</div></section>';
 }
+const STAT_LABELS={atk:'ATK',matk:'MATK',maxHp:'HP',def:'DEF',crit:'CRIT'};
+// Equipped piece at a glance: its item stats (rarity applied) and option lines with roll grade.
+function currentPieceDetail(p,progress){
+ const t=EQUIPMENT_MASTER_V2[p.templateId],mult=EQUIPMENT_RARITY_STAT_MULTIPLIER[p.rarity]??1;
+ const boxes=Object.entries(t.baseCombat||{}).filter(([,v])=>v).slice(0,2).map(([k,v])=>[STAT_LABELS[k]||esc(k),'+'+Math.round(v*mult),''])
+  .concat([['Enhance','+'+progress.enhance,'bc-enhance-text'],['Refine','+'+progress.refine,'bc-refine-text']]);
+ const stats='<div class="bc-current-stats">'+boxes.map(([k,v,c])=>'<div><small>'+k+'</small><b class="'+c+'">'+v+'</b></div>').join('')+'</div>';
+ const slots=optionSlots(p),opts=itemOptions(p);
+ if(!slots)return stats+'<p class="bc-opt-none">เกรด Rare ขึ้นไปถึงมีช่องออปชัน</p>';
+ const rows=Array.from({length:slots},(_,i)=>{const o=opts[i];
+  if(!o)return '<div class="bc-current-opt empty"><small>'+(i+1)+'</small><span>ช่องว่าง</span><i></i></div>';
+  const max=optionMax(o,p.rarity),grade=optionGrade(o,p.rarity),pct=Math.min(100,Math.round(o.value/max*100));
+  return '<div class="bc-current-opt"><small>'+(i+1)+'</small><span class="bc-opt-'+grade+'">'+esc(OPTION_DEFS[o.id]?.name||o.id)+' <b>+'+o.value+'</b><small>/'+max+(OPTION_DEFS[o.id]?.unit||'')+'</small>'+(o.locked?' 🔒':'')+'</span>'+
+   '<i class="bc-opt-bar bc-bar-'+grade+'" style="--pct:'+pct+'%"></i></div>';
+ }).join('');
+ return stats+'<div class="bc-current-options">'+rows+'</div>';
+}
 export function renderArmoryHtml(s,classes){
  const cls=s.forgeClass||'guard',slot=s.armorySlot||'weapon',units=s.units.filter(u=>u.cls===cls),
   currentId=buildFor(s,cls)?.gear[slot],piece=s.gear.find(p=>p.id===currentId),progress=classProgress(s,cls,slot);
  const towerCount=s.towers.filter(t=>t.garrison?.cls===cls).length,tab=s.armoryTab||'craft';
+ // Action panes stay closed until a button is pressed (press the open one again to close it);
+ // anything that targets them (item detail, craft results, a deep link) opens them.
+ const open=!!(s.armoryMoreOpen||s.itemDetailId||(s.batchReport&&s.batchClass===cls));
  const slots=GEAR_SLOTS.map(key=>{
   const id=buildFor(s,cls)?.gear[key],p=s.gear.find(x=>x.id===id),v=classProgress(s,cls,key);
-  return '<button data-armory-slot="'+key+'" class="bc-armory-slot '+(key===slot?'active':'')+'">'+SLOTS[key]+
-   '<span>'+(p?'T'+EQUIPMENT_MASTER_V2[p.templateId].tier+' '+label(p.rarity)+' '+esc(EQUIPMENT_MASTER_V2[p.templateId].name):'ช่องว่าง')+'</span>'+
-   '<small><span class="bc-enhance-text">E +'+v.enhance+'</span> · <span class="bc-refine-text">R +'+v.refine+'</span></small></button>';
+  return '<button data-armory-slot="'+key+'" class="bc-armory-slot '+(key===slot?'active':'')+'" title="'+SLOTS[key]+'">'+
+   (p?armoryGearIcon(p,v):'<span class="bc-armory-empty-icon">＋</span>')+
+   '<span class="bc-slot-name">'+SLOT_SHORT[key]+'</span></button>';
  }).join('');
  let view='';
  if(tab==='inventory')view=inventoryPanel(s,classes);
- else if(tab==='upgrade')view=piece?'<section class="bc-armory-work">'+
-  renderItemDetailHtml(s,piece.id,classes,{embedded:true})+'</section>':
+ else if(tab==='upgrade'||tab==='options')view=piece?'<section class="bc-armory-work">'+
+  renderItemDetailHtml(s,piece.id,classes,{embedded:true,only:tab})+
+  (tab==='upgrade'?'<div class="bc-inline-actions"><button id="enhanceAll" '+(s.night?'disabled':'')+'>Enhance All Max (ทุกช่อง)</button></div>':'')+'</section>':
   '<p class="bc-empty">ช่องนี้ยังว่าง เลือกจากคลังหรือคราฟต์ก่อน</p>';
  else view=craftPanel(s,classes);
  const detail=s.itemDetailId&&s.gear.some(p=>p.id===s.itemDetailId)?
   '<section class="bc-armory-detail"><h3>รายละเอียด / เลือกสวมใส่</h3>'+renderItemDetailHtml(s,s.itemDetailId,classes,{embedded:true})+'</section>':'';
  const results=s.batchReport&&s.batchClass===cls?renderBatchHtml(s,classes,true):'';
+ const acts=[['craft','⚒ คราฟต์'],['inventory','🎒 เปลี่ยนชิ้น'],['upgrade','⬆ อัปเกรด'],['options','🔮 ออปชัน']].map(([key,name])=>{
+  const on=open&&tab===key;
+  return '<button data-armory-tab="'+key+'" class="'+(on?'active':'')+'" aria-expanded="'+on+'">'+name+'</button>';
+ }).join('');
+ const t=piece&&EQUIPMENT_MASTER_V2[piece.templateId];
+ const card='<section class="bc-armory-current">'+
+  '<div class="bc-current-head">'+(piece?armoryGearIcon(piece,progress):'<span class="bc-armory-empty-icon">＋</span>')+
+  '<div><b>'+(piece?'T'+t.tier+' '+esc(t.name):'ยังไม่ได้ใส่ '+SLOTS[slot])+'</b>'+
+  '<small>'+(piece?'<span class="bc-rarity rarity-'+esc(piece.rarity)+'">'+label(piece.rarity)+'</span> · ':'')+SLOT_SHORT[slot]+'</small></div></div>'+
+  (piece?currentPieceDetail(piece,progress):'<p class="bc-empty">กด ⚒ คราฟต์ หรือ 🎒 เปลี่ยนชิ้น ด้านล่าง</p>')+
+  '</section>';
  return '<header class="bc-modal-header"><div>'+hudIcon(5)+
-  '<span><h2>Class Armory · '+esc(classes[cls].name)+'</h2><small>เลือกคลาส → ช่อง → คราฟต์ / คลัง / อัปเกรด → เปรียบเทียบและเลือกใส่</small></span></div>'+
+  '<span><h2>Class Armory · '+esc(classes[cls].name)+'</h2><small>ภาคพื้นดิน '+units.length+'/'+fieldClassCap(s.warren)+
+  (['archer','mage'].includes(cls)?' · ประจำป้อม '+towerCount:'')+'</small></span></div>'+
   '<button class="modal-close" data-modal-close aria-label="ปิด">✕</button></header>'+
-  '<div class="bc-modal-body bc-armory-body">'+classTabs(s,classes)+
-  '<div class="bc-armory-summary"><b>'+esc(classes[cls].name)+'</b>'+
+  '<div class="bc-modal-body bc-armory-body bc-armory-layout">'+classTabs(s,classes)+
+  '<div class="bc-armory-col">'+
   (s.mythic?.collectionRewardClaimed?'<span class="bc-collector-title"><span class="bc-collector-frame">'+gameIcon(CLASS_FAMILIES[cls],'family',classes[cls].icon,'bc-class-icon')+'</span> Mythic Collector</span>':'')+
-  '<span>ภาคพื้นดิน '+units.length+'/'+fieldClassCap(s.warren)+
-  (['archer','mage'].includes(cls)?' · ประจำป้อม '+towerCount+' ตัว':'')+'</span></div>'+
+  '<div class="bc-armory-main"><nav class="bc-armory-slots" aria-label="เลือกช่องอุปกรณ์">'+slots+'</nav>'+card+'</div>'+
+  '<div class="bc-inline-actions bc-armory-toolbar">'+acts+'</div>'+
+  (s.armoryNotice?'<p role="status" class="bc-armory-notice">'+esc(s.armoryNotice)+'</p>':'')+
+  (open?'<div class="bc-armory-pane">'+detail+view+results+'</div>':'')+
   '<details class="bc-armory-roster"><summary>สมาชิกคลาสนี้ · '+units.length+' ตัว</summary>'+
   units.map(u=>'<div class="bc-armory-member">'+gameIcon(CLASS_FAMILIES[cls],'family',classes[cls].icon,'bc-class-icon')+
    '<b>'+esc(u.name)+'</b> Lv '+u.level+' · EXP '+u.exp+
    ' <button data-rename="'+u.id+'">✎ เปลี่ยนชื่อ</button></div>').join('')+'</details>'+
-  '<nav class="bc-armory-slots" aria-label="เลือกช่องอุปกรณ์">'+slots+'</nav>'+
-  '<div class="bc-armory-current">'+(piece?armoryGearIcon(piece,progress):'<span class="bc-armory-empty-icon">＋</span>')+
-  '<div><b>'+(piece?'T'+EQUIPMENT_MASTER_V2[piece.templateId].tier+' '+label(piece.rarity)+' '+esc(EQUIPMENT_MASTER_V2[piece.templateId].name):'ยังไม่ได้ใส่ '+SLOTS[slot])+'</b>'+
-  '<small><span class="bc-enhance-text">Enhance +'+progress.enhance+'</span> · <span class="bc-refine-text">Refine +'+progress.refine+'</span> (ติดช่อง Armory ไม่ติดไอเทม)</small></div>'+
-  '<button data-armory-tab="upgrade" '+(!piece?'disabled':'')+'>อัปเกรดช่อง</button></div>'+
-  (s.armoryNotice?'<p role="status" class="bc-armory-notice">'+esc(s.armoryNotice)+'</p>':'')+
-  '<div class="bc-inline-actions bc-armory-toolbar">'+
-  [['craft','⚒ คราฟต์ของใหม่'],['inventory','🎒 เลือกจากคลัง'],['upgrade','⬆ อัปเกรด']].map(([key,name])=>
-   '<button data-armory-tab="'+key+'" class="'+(tab===key?'active':'')+'">'+name+'</button>').join('')+
-  '<button id="enhanceAll" '+(s.night?'disabled':'')+'>Enhance All Max</button>'+
-  '<button data-open-mastery="'+cls+'">✦ Mastery</button></div>'+
-  detail+view+results+'</div>';
+  '</div></div>';
 }

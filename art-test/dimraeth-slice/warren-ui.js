@@ -1,3 +1,4 @@
+import {renderOptionCard} from './warren-gear-options.js';
 // Burrow Command: four focused RPG windows instead of one giant forge panel.
 // All graphics reuse the MAIN GAME icon manifest and the loaded Blessed Bunny sprite.
 import { iconFor } from '../iso-arena-draft/iconFor.js';
@@ -127,7 +128,7 @@ export function renderRefineCard(s,p,{owner,refine,refineReq,prot,protectedAttem
   ${fb}
   <button class="bc-refine-go" data-item-refine="${p.id}" ${s.night||!refineReady?'disabled':''}>${refineReady?`✦ Refine → +${next}`:missing.length?'ขาด '+missing.join(' · '):'Refine ได้ตอนกลางวัน'}</button></section>`;
 }
-export function renderItemDetailHtml(s,itemId,classes){
+export function renderItemDetailHtml(s,itemId,classes,{only=null}={}){
  const p=s.gear.find(i=>i.id===itemId);if(!p)return '';
  const t=EQUIPMENT_MASTER_V2[p.templateId],slot=gearSlot(p.templateId),eq=[];
  for(const cls of CLASS_IDS)for(const b of s.builds[cls]||[])for(const sl of GEAR_SLOTS)if(b.gear[sl]===p.id)eq.push({cls,b,sl});
@@ -141,6 +142,12 @@ export function renderItemDetailHtml(s,itemId,classes){
  const costReady=req&&s.gold>=req.gold&&qty(s,req.stoneId)>=req.stoneQty;
  const refineReady=refineReq&&s.gold>=refineReq.gold&&qty(s,'astraliteStone')>=refineReq.astralite&&(!protectedAttempt||!prot||qty(s,prot.id)>=prot.qty);
  const stats=Object.entries(t.baseCombat).filter(([,v])=>v).map(([k,v])=>`<div><small>${statNames[k]||esc(k)}</small><b>+${Math.round(v*(EQUIPMENT_RARITY_STAT_MULTIPLIER[p.rarity]||1))}</b></div>`).join('');
+ // Armory action panes show just one part of the detail.
+ if(only==='upgrade')return `<div class="bc-upgrade-grid"><section class="bc-upgrade-card bc-enhance-card"><h3>⚒ ENHANCE <strong>+${enhance}</strong></h3>
+   <p>เพิ่มค่าสถานะของช่อง Armory ประจำคลาส · สูงสุด +120 ไม่ติดเลเวลบ้าน</p>
+   <div class="bc-upgrade-material">${req?`${gameIcon(req.stoneId,'item')}${esc(itemLabel(req.stoneId))} ${qty(s,req.stoneId)}/${req.stoneQty} · ${req.gold}G`:'ถึงเพดานแล้ว'}</div>
+   <button data-item-enhance="${p.id}" ${s.night||!costReady?'disabled':''}>Enhance → +${enhance+1}</button></section>${renderRefineCard(s,p,{owner,refine,refineReq,prot,protectedAttempt,refineReady})}</div>`;
+ if(only==='options')return `<div class="bc-upgrade-grid">${renderOptionCard(s,p,esc)}</div>`;
  return `<header class="bc-modal-header"><div>${gameIcon('gear','ui','◈','bc-header-icon')}<span><h2>T${t.tier} ${esc(t.name)}</h2><small>${RARITY_NAMES[p.rarity]} · ${SLOT_NAMES[slot]}</small></span></div><button class="modal-close" data-item-close aria-label="ปิดรายละเอียด">✕</button></header>
  <div class="bc-modal-body bc-item-detail">
   <div class="bc-item-preview">${armoryGearIcon(p,owner?classProgress(s,owner.cls,owner.sl):null,{large:true})}
@@ -156,6 +163,7 @@ export function renderItemDetailHtml(s,itemId,classes){
    <p>เพิ่มค่าสถานะของช่อง Armory ประจำคลาส · สูงสุด +120 ไม่ติดเลเวลบ้าน</p>
    <div class="bc-upgrade-material">${req?`${gameIcon(req.stoneId,'item')}${esc(itemLabel(req.stoneId))} ${qty(s,req.stoneId)}/${req.stoneQty} · ${req.gold}G`:'ถึงเพดานแล้ว'}</div>
    <button data-item-enhance="${p.id}" ${s.night||!costReady?'disabled':''}>Enhance → +${enhance+1}</button></section>
-   ${renderRefineCard(s,p,{owner,refine,refineReq,prot,protectedAttempt,refineReady})}</div>
+   ${renderRefineCard(s,p,{owner,refine,refineReq,prot,protectedAttempt,refineReady})}
+   ${renderOptionCard(s,p,esc)}</div>
  </div>`;
 }

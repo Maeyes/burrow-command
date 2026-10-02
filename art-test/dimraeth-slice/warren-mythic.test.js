@@ -1,7 +1,7 @@
 import {describe,it,expect} from 'vitest';
 import {defaultMythic,rollMythicOmen,validMythicSquad,settleMythic,mythicHpMultiplier,mythicAtkMultiplier,mythicBossAttack} from './warren-mythic.js';
 describe('mythic invasion',()=>{
- it('doubles shared boss attack at early and high village levels',()=>{expect(mythicBossAttack(1)).toBe(50);expect(mythicBossAttack(20)).toBe(240);});
+ it('boss attack is 30% below the old doubled curve',()=>{expect(mythicBossAttack(1)).toBe(35);expect(mythicBossAttack(20)).toBe(168);});
  it('unlocks omens at Warren 5 and picks an allowed gate',()=>{expect(rollMythicOmen(defaultMythic(),{won:true,day:7,warren:4,rng:()=>0} ).pending).toBeNull();expect(rollMythicOmen(defaultMythic(),{won:true,day:7,warren:5,rng:()=>0}).pending).toMatchObject({bossId:'ancientDragon',gate:'west'});});
  it('keeps the omen at 15% total and splits a successful roll across live bosses',()=>{const rolls=[0,.8,0];expect(rollMythicOmen(defaultMythic(),{won:true,day:8,warren:5,rng:()=>rolls.shift()} ).pending).toMatchObject({bossId:'kingArthur',gate:'west'});});
  it('keeps at most one rabbit from each class',()=>{const u=[{id:1,cls:'guard'},{id:2,cls:'guard'},{id:3,cls:'mage'}];expect(validMythicSquad(u,[1,2,3]).map(x=>x.id)).toEqual([1,3]);});
