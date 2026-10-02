@@ -81,7 +81,7 @@
   .bc-opt-none{margin:0;color:#a99e7c;font-size:11.5px}
   .bc-armory-col>.bc-armory-toolbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:0}
   .bc-armory-col>.bc-armory-toolbar button.active{border-color:#e8c26a;background:#4a4128}
-  @media (max-width:760px){.bc-armory-layout{grid-template-columns:minmax(0,1fr)}.bc-class-rail{flex-direction:row;overflow-x:auto;position:static}.bc-class-rail button{width:auto;flex:0 0 auto}.bc-current-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.bc-armory-col>.bc-armory-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:760px){.bc-armory-layout{display:flex;flex-direction:column;gap:10px}.bc-class-rail{flex-direction:row;flex-wrap:nowrap!important;overflow-x:auto;position:static;flex:0 0 auto;width:100%;max-width:100%;min-width:0;box-sizing:border-box;margin:0;padding-bottom:4px;scrollbar-width:thin}.bc-class-rail button{width:auto;flex:0 0 auto}.bc-current-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.bc-armory-col>.bc-armory-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}}
   .bc-reveal-modal{width:min(640px,calc(100vw - 24px))!important;height:auto!important;max-height:90vh;z-index:60!important}
   .bc-reveal-body{display:flex;flex-direction:column;gap:12px}
   .bc-reveal-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
@@ -986,8 +986,8 @@
     .bc-relic-detail{padding:12px}.bc-relic-preview .bc-relic-icon.large{width:90px;height:90px}
   }
   @media(max-width:380px){.bc-relic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-</style>
-  <script type="module" crossorigin src="/burrow-command/assets/warren-DK5vPwx5.js"></script>
+</style>
+  <script type="module" crossorigin src="/burrow-command/assets/warren-C-8LWeb_.js"></script>
   <link rel="stylesheet" crossorigin href="/burrow-command/assets/warren-BI6qrppq.css">
 </head>
 <body>
@@ -1073,6 +1073,6 @@
 <div id="over" hidden><h2></h2><p></p><button id="again">เล่นอีกครั้ง</button></div>
 <div id="loadingScreen" class="bc-loading" role="progressbar" aria-label="กำลังโหลด Burrow Command" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
  <div class="bc-loading-stage"><div class="bc-loading-track"><i class="bc-loading-rest"></i><i class="bc-loading-runner"></i><div id="loading">กำลังสร้างหมู่บ้าน…</div></div></div>
-</div>
+</div>
 </body>
 </html>
