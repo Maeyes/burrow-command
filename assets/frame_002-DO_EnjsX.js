@@ -1,0 +1,1 @@
+var e=`/Program%20Files/Git/burrow-command/assets/frame_002-B7gWl97v.png`;export{e as default};

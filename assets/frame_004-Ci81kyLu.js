@@ -1,1 +1,0 @@
-var e=`/burrow-command/assets/frame_004-BNrNRa_t.png`;export{e as default};

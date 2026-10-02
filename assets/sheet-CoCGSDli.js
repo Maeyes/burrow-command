@@ -1,1 +1,0 @@
-var e=`/burrow-command/assets/sheet-DPi-0rnr.png`;export{e as default};
