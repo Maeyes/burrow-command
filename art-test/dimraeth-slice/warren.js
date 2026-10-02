@@ -72,6 +72,7 @@ import {nextGoal} from './warren-next-goal.js';
 import {addOption,reoption,toggleOptionLock,formatOption} from './warren-gear-options.js';
 import {renderCraftRevealHtml} from './warren-craft-reveal.js';
 import {classFrame,drawSparkles,bestRarity} from './warren-class-colors.js';
+import {grantStarterKit} from './warren-starter-kit.js';
 import {createTutorial,TUTORIAL_KEY} from './warren-tutorial.js';
 let tutorial=null;
 import {snapshotNight,summarizeNight,renderNightSummaryHtml} from './warren-night-summary.js';
@@ -2163,7 +2164,7 @@ const resumed = load();
 houseBonusCache=null; // the save may bring houses that change village bonuses
 // New villages start with a 500 Gold + 500 material kit so the first steps (hire, wall, tower) are doable right away.
 const STARTER_GOLD=500,STARTER_MATS=500;
-if (!resumed) { recruit('guard', true); recruit('archer', true); S.gold=STARTER_GOLD; addInventory(S.inventory,{livingMoss:STARTER_MATS}); save(); }
+if (!resumed) { recruit('guard', true); recruit('archer', true); S.gold=STARTER_GOLD; addInventory(S.inventory,{livingMoss:STARTER_MATS}); grantStarterKit(S); refreshArmy(); save(); }
 tutorial=createTutorial({isNewVillage:!resumed,onCloseModal:()=>{if(S.modal){S.modal=null;renderUi();}}});
 renderUi();
 setRuntimeZoomRange(mobileLayout.matches ? .26 : .45, 1.3); // portrait can pinch farther out to see the whole village
