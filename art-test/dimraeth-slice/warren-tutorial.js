@@ -13,7 +13,7 @@ export const TUTORIAL_STEPS=[
  {id:'farm',title:'กระต่ายฟาร์มเอง',text:'ไม่ต้องบังคับ กระต่ายจะออกล่าเอง ดู Gold กับวัตถุดิบด้านบนเพิ่มขึ้น เมื่อวัตถุดิบครบ ${wallCost} ชิ้นจะไปขั้นต่อไป',target:['#top .res'],done:s=>s.wallLevel>0||s.mats>=s.wallCost},
  {id:'wall',title:'สร้างรั้วรอบหมู่บ้าน',text:'รั้วกันมอนไม่ให้วิ่งเข้าโพรงตรง ๆ มอนจะบุกจากประตูใต้/ตะวันออก/ตะวันตก',target:['#fenceBuild'],mobile:DOCK('village'),done:s=>s.wallLevel>0},
  {id:'tower',title:'สร้างป้อมธนู',text:'กดปุ่มป้อม แล้วคลิกพื้นในหมู่บ้านเพื่อวาง (เงาสีเขียว = วางได้) ใกล้ประตูจะดีที่สุด',target:['#build'],mobile:DOCK('village'),done:s=>s.towers>0},
- {id:'garrison',title:'จ้างทหารประจำป้อม',text:'ป้อมว่างจะไม่ยิง! คลิกป้ายป้อมบนแผนที่ แล้วเลือกนักธนูหรือนักเวทประจำป้อม',target:['[data-tower-hire]','[data-world-tower]'],done:s=>s.garrisons>0},
+ {id:'garrison',title:'จ้างทหารประจำป้อม',text:'ป้อมว่างจะไม่ยิง! คลิกป้ายป้อมบนแผนที่ แล้วเลือกนักธนูหรือนักเวทประจำป้อม',target:['[data-tower-hire]','[data-world-tower]'],done:s=>s.garrisons>0,closeAfter:true},
  {id:'craft',title:'คราฟต์อุปกรณ์',text:'เปิด Class Armory → กดปุ่ม “⚒ คราฟต์” ใต้การ์ด เลือกสูตร แล้วกดคราฟต์ ใช้วัตถุดิบจากมอน (×10 คราฟต์ทีละหลายชิ้นได้)<br>ถ้าปุ่มเป็นสีเทา ดูกล่อง “วัตถุดิบที่ต้องใช้” ว่าขาดอะไร แล้วรอกระต่ายฟาร์มเพิ่ม หรือกดข้ามขั้นนี้ไปก่อนแล้วกลับมาทีหลังได้',target:['[data-forge-craft]','[data-armory-tab="craft"]','#heroOpen'],mobile:DOCK('craft'),done:s=>s.gear>0},
  {id:'equip',title:'ใส่อุปกรณ์',text:'ของที่คราฟต์อยู่ในคลัง กด “🎒 เปลี่ยนชิ้น” แล้วเลือกชิ้นที่ดีที่สุดใส่ ของแชร์กันทั้งคลาส ใส่ครั้งเดียวทุกตัวในคลาสได้หมด',target:['[data-armory-tab="inventory"]','#heroOpen'],mobile:DOCK('craft'),done:s=>s.equipped>0},
  {id:'enhance',title:'Enhance และ Refine',text:'กด “⬆ อัปเกรด” ใช้ Gold/วัตถุดิบตีบวกช่องอุปกรณ์ ค่าบวกติดที่ช่อง ไม่หายเมื่อเปลี่ยนของ ปุ่ม “Enhance All Max” ตีทุกช่องให้สุดในกดเดียว',target:['#enhanceAll','[data-armory-tab="upgrade"]','#heroOpen'],mobile:DOCK('craft'),done:s=>s.enhanced>0},
@@ -23,7 +23,7 @@ export const TUTORIAL_STEPS=[
  {id:'mastery',title:'Class Mastery',text:'ความชำนาญอาวุธของแต่ละคลาส ปลดสกิลอาวุธเมื่อถึง Milestone ลองเปิดดู',target:['#masteryOpen'],mobile:DOCK('skills'),done:s=>s.modal==='mastery'||s.modal==='bunnyMenu'},
  {id:'core',title:'Skill Core',text:'ชุดสกิลพิเศษของกระต่ายภาคพื้นดิน ปลดชุดแรกเมื่อบ้าน Lv10 เก็บไว้เป็นเป้าระยะยาว',target:['#skillCoreOpen'],mobile:DOCK('skills')},
  {id:'sell',title:'Quick Sell หาเงินเร็ว',text:'วัตถุดิบเหลือเยอะ? กดรถเข็นขายของบนแผนที่ ตั้งจำนวนสำรองไว้ แล้วขายส่วนเกินเป็น Gold',target:['[data-world="sell"]'],mobile:DOCK('sell'),done:s=>s.modal==='sell'},
- {id:'hall',title:'โพรงกระต่าย: Heal',text:'คลิกโพรงเพื่อใช้ Heal ฟื้นเลือดกระต่ายได้กลางวัน 1 ครั้ง และกลางคืน 1 ครั้ง ช่วยได้มากตอนคืนบอส',target:['[data-hall-heal]','[data-world="hall"]'],done:s=>s.modal==='hall'},
+ {id:'hall',title:'โพรงกระต่าย: Auto Heal',text:'โพรงฮีลกระต่ายให้อัตโนมัติเมื่อตัวไหน HP ต่ำกว่า 50% ได้กลางวัน 1 ครั้ง และกลางคืน 1 ครั้ง ไม่ต้องกดเอง คลิกโพรงเพื่อดูสถานะหรืออัปเกรดบ้าน',target:['[data-world="hall"]']},
  {id:'buildings',title:'โรงตีเหล็ก & โรงผลิต',text:'โรงตีเหล็กเพิ่มโอกาสได้ของเกรดสูง โรงผลิตเพิ่ม Gold/วัตถุดิบจากมอน อัปได้เมื่อบ้านเลเวลสูงขึ้น',target:['#forgeOpen'],mobile:DOCK('village')},
  {id:'lure',title:'ล่อมอนพิเศษ',text:'วันละครั้ง ใช้วัตถุดิบล่อมอนพิเศษที่ดรอปของดีกว่ามาให้กระต่ายล่า',target:['#lureOpen'],mobile:DOCK('village')},
  {id:'home',title:'Home Builder',text:'ตกแต่งหมู่บ้าน วางทางเดิน ซื้อที่ดิน ขยายกำแพง บ้านแต่ละแบบให้โบนัส เช่น วัตถุดิบ +3% หรือ EXP +10%',target:['#homeOpen'],mobile:DOCK('village')},
@@ -42,7 +42,7 @@ export function loadTutorial(isNewVillage){
  return {step:0,off:!isNewVillage}; // returning players are not ambushed by a tutorial; they can open it from 🎓
 }
 
-export function createTutorial({isNewVillage,isMobile=()=>matchMedia('(max-width:760px)').matches}){
+export function createTutorial({isNewVillage,isMobile=()=>matchMedia('(max-width:760px)').matches,onCloseModal=null}){
  const state=loadTutorial(isNewVillage);
  const persist=()=>{try{localStorage.setItem(TUTORIAL_KEY,JSON.stringify(state));}catch{}};
  const card=document.createElement('section');
@@ -67,6 +67,14 @@ export function createTutorial({isNewVillage,isMobile=()=>matchMedia('(max-width
   if(isMobile()&&step.mobile)return document.querySelector(step.mobile);
   if(els[0]?.closest('#side.is-collapsed'))return document.getElementById('sideToggle');
   return els[0]||null;
+ }
+ // A pop-up window covering the screen: anything outside it can't be clicked, so point at its close button instead.
+ const openModal=()=>[...document.querySelectorAll('.bc-modal:not([hidden])')].filter(m=>m.getClientRects().length).pop()||null;
+ const CLOSE_BTN='[data-craft-reveal-close],[data-item-close],[data-modal-close],.modal-close';
+ function resolveTarget(step){
+  const t=pickTarget(step),m=openModal();
+  if(m&&(!t||!m.contains(t)))return {el:m.querySelector(CLOSE_BTN),behind:true};
+  return {el:t,behind:false};
  }
  // Bring the target on screen once per step: expand panels and scroll it into view.
  function reveal(step,target){
@@ -94,22 +102,23 @@ export function createTutorial({isNewVillage,isMobile=()=>matchMedia('(max-width
   card.style.setProperty('--arrow-x',ax+'px');card.style.setProperty('--arrow-y',ay+'px');
  }
  function sync(s){
-  if(!state.off&&!s.blocked){const next=tutorialStep(state.step,s);if(next!==state.step){state.step=next;persist();}}
+  if(!state.off&&!s.blocked){const next=tutorialStep(state.step,s);if(next!==state.step){const done=TUTORIAL_STEPS[state.step];state.step=next;persist();if(done?.closeAfter)onCloseModal?.();}}
   if(state.step>=TUTORIAL_STEPS.length&&!state.off){state.off=true;persist();}
   const step=TUTORIAL_STEPS[state.step];
   if(state.off||s.blocked||!step){card.hidden=true;unmark();shownKey='';focusedStep='';return;}
-  const key=step.id+'|'+s.wallCost;
+  const behind=step.target?resolveTarget(step).behind:false;
+  const key=step.id+'|'+s.wallCost+'|'+behind;
   if(key!==shownKey){
    shownKey=key;
    const n=TUTORIAL_STEPS.length,last=state.step===n-1;
-   card.innerHTML=`<div class="bc-tut-head"><b>🎓 ${step.title}</b><small>${state.step+1}/${n}</small></div><p>${step.text.replace('${wallCost}',s.wallCost)}</p>`+
+   card.innerHTML=`<div class="bc-tut-head"><b>🎓 ${step.title}</b><small>${state.step+1}/${n}</small></div><p>${step.text.replace('${wallCost}',s.wallCost)}</p>`+(behind?'<p class="bc-tut-behind">↩ ปิดหน้าต่างนี้ก่อน (ปุ่ม ✕ ที่กระพริบ) แล้วไปต่อ</p>':'')+
     `<div class="bc-tut-dots">${TUTORIAL_STEPS.map((_,i)=>`<i class="${i<state.step?'done':i===state.step?'on':''}"></i>`).join('')}</div>`+
     `<div class="bc-tut-actions"><button type="button" data-tut="close">ข้ามการสอน</button><button type="button" data-tut="next" class="${step.done?'ghost':''}">${last?'เริ่มเล่นเลย!':step.done?'ข้ามขั้นนี้':'ถัดไป ▶'}</button></div>`;
    if(last)card.querySelector('[data-tut="close"]').remove();
   }
   card.hidden=false;
   if(focusedStep!==step.id&&step.target){focusedStep=step.id;reveal(step);}
-  const target=step.target?pickTarget(step):null;
+  const res=step.target?resolveTarget(step):{el:null,behind:false},target=res.el;
   if(target!==marked){unmark();if(target){target.classList.add('bc-tut-target');marked=target;if(!target.closest('#worldLabels'))target.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'});}}
   place(target);
  }

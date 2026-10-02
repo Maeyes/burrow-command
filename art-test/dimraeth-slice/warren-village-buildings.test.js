@@ -97,3 +97,16 @@ describe('Village building functions',()=>{
   s.night=false;s.day=4;expect(castWarrenHeal(s,600).amount).toBe(120);
  });
 });
+import {shouldAutoHeal} from './warren-village-buildings.js';
+describe('auto heal',()=>{
+ const u=(hp,extra={})=>({hp,maxHp:100,down:false,...extra});
+ it('fires once a standing bunny is at or below half HP',()=>{
+  expect(shouldAutoHeal({day:3,night:false,dayHealDay:0,units:[u(80),u(50)]})).toBe(true);
+  expect(shouldAutoHeal({day:3,night:false,dayHealDay:0,units:[u(80),u(51)]})).toBe(false);
+ });
+ it('ignores downed bunnies and an already used phase',()=>{
+  expect(shouldAutoHeal({day:3,night:false,dayHealDay:0,units:[u(0,{down:true}),u(90)]})).toBe(false);
+  expect(shouldAutoHeal({day:3,night:true,nightHealDay:3,units:[u(10)]})).toBe(false);
+  expect(shouldAutoHeal({day:3,night:true,nightHealDay:2,dayHealDay:3,units:[u(10)]})).toBe(true);
+ });
+});

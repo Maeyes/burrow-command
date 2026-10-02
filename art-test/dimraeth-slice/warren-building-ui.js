@@ -9,8 +9,8 @@ export function renderHallBuildingHtml(s,maxHall,healAmount){
  const wounded=s.units.some(u=>!u.down&&u.hp>0&&u.hp<u.maxHp);
  return head('🏠','โพรงกระต่าย · Lv '+s.warren,'ศูนย์กลางหมู่บ้าน · ป้องกันและรักษากระต่าย')+
  '<div class="bc-modal-body bc-building-body"><div class="bc-building-stat"><b>HP '+Math.ceil(s.burrow)+' / '+maxHall+'</b><span>สกิล Heal +'+healAmount+' HP ต่อกระต่าย</span></div>'+
- '<section><h3>✚ Heal ทั้งกองทัพ</h3><p>ฮีลกระต่ายภาคพื้นดินทุกตัวในคราวเดียว ครั้งละ 20% ของ Max HP บ้าน ใช้ได้ 1 ครั้งกลางวัน และ 1 ครั้งกลางคืน ไม่ชุบชีวิต</p>'+
- '<button data-hall-heal '+(healUsed||!wounded?'disabled':'')+'>'+(healUsed?'ใช้ Heal ช่วงนี้แล้ว':!wounded?'กระต่ายทุกตัว HP เต็ม':'✚ ใช้ Heal · +'+healAmount+' HP')+'</button></section>'+
+ '<section><h3>✚ Auto Heal ทั้งกองทัพ</h3><p>โพรงฮีลให้อัตโนมัติเมื่อกระต่ายตัวไหน HP ต่ำกว่า 50% ฮีลทุกตัวครั้งละ 20% ของ Max HP บ้าน · 1 ครั้งกลางวัน และ 1 ครั้งกลางคืน · ไม่ชุบชีวิต</p>'+
+ '<p class="bc-heal-status">'+(healUsed?'✓ ใช้ Heal ช่วงนี้แล้ว · พร้อมอีกครั้ง'+(s.night?'ตอนเช้า':'ตอนค่ำ'):'● พร้อมฮีลอัตโนมัติ · +'+healAmount+' HP')+'</p></section>'+
  '<section><h3>⬆ อัปเกรดโพรง</h3><p>ผ่านบอสเวฟ 5 ของเลเวลนี้ก่อน จึงอัปเป็นเลเวลถัดไปได้</p>'+
  '<button data-hall-upgrade '+(s.night||s.warren>=PHASE1_MAX_LEVEL||!s.cleared||mats<up.mats?'disabled':'')+'>'+(s.warren>=PHASE1_MAX_LEVEL?'บ้านถึงเพดาน Phase 1 แล้ว':'บ้าน Lv '+(s.warren+1)+' · '+up.mats+' วัตถุดิบ')+'</button></section>'+
  '<section><h3>🧱 เสริมฐาน</h3><p>เพิ่ม HP สูงสุด +35 โดยไม่ต้องผ่านบอส</p>'+

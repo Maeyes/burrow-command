@@ -22,3 +22,5 @@ dist-warren/
 art-test/arthur-review/
 artifacts/burrow-assets/
 art-test/dimraeth-slice/maps/test*.json
+
+.claude/settings.local.json

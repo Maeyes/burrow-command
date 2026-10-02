@@ -50,7 +50,7 @@ import {PHASE1_MAX_LEVEL,NIGHT_INVASION_DIRECTIONS,stageForWarren,warrenStageDif
 import {renderLureHtml} from './warren-lure-ui.js';
 import {NPC_COMMON_PRICES,quoteQuickSell,commitQuickSell} from './warren-quick-sell.js';
 import {renderQuickSellHtml} from './warren-quick-sell-ui.js';
-import {FORGE_COST,RESOURCE_COST,applyMonsterResourceBonus,castWarrenHeal,BUILDING_LEVEL_MAX,buildingLevelCap} from './warren-village-buildings.js';
+import {FORGE_COST,RESOURCE_COST,applyMonsterResourceBonus,castWarrenHeal,shouldAutoHeal,BUILDING_LEVEL_MAX,buildingLevelCap} from './warren-village-buildings.js';
 import {renderHallBuildingHtml,renderBlacksmithBuildingHtml,renderResourceBuildingHtml} from './warren-building-ui.js';
 import {MAGIC_CART_COST,MAGIC_CART_GATES,MAGIC_CART_HP,MAGIC_CART_RANGE,MAGIC_CART_UPGRADE,magicCartCap} from './warren-magic-cart.js';
 import {defaultClassSkills,applyBurrowSkillCommand,classSkillQuote,classActiveCores} from './warren-class-cores.js';
@@ -419,11 +419,11 @@ function upgradeResourceBuilding(){
  const cost=RESOURCE_COST[S.resourceLevel];if(S.night||!cost||S.resourceLevel>=buildingLevelCap(S.warren)||S.gold<cost)return false;
  S.gold-=cost;S.resourceLevel++;save();renderUi();toast('โรงผลิตทรัพยากร Lv '+S.resourceLevel+' · ผลิต Gold และวัตถุดิบต่อวินาทีมากขึ้น');return true;
 }
-function useHallHeal(){
- const result=castWarrenHeal(S,hallMax());if(!result){toast('ใช้ Heal ในช่วงนี้ไปแล้ว · ใช้ได้ครั้งละ 1 ครั้งกลางวันและกลางคืน');return false;}
+function useHallHeal(auto=false){
+ const result=castWarrenHeal(S,hallMax());if(!result){if(!auto)toast('ใช้ Heal ในช่วงนี้ไปแล้ว · ใช้ได้ครั้งละ 1 ครั้งกลางวันและกลางคืน');return false;}
  for(const {unit,amount} of result.healed){floaters?.text(unit.x,unit.y,'+'+amount,{color:'#84efa9',size:14,lift:45});skillFx?.burst(unit.x,unit.y,{color:'#80eea3',count:8,up:35});}
  skillFx?.pillar(CENTER.x,CENTER.y,{color:'#89f2a5'});
- save();renderUi();toast('Heal ทั้งกองทัพ +'+result.amount+' HP · รักษา '+result.healed.length+' ตัว');return true;
+ save();renderUi();toast((auto?'✚ Auto Heal':'Heal ทั้งกองทัพ')+' +'+result.amount+' HP · รักษา '+result.healed.length+' ตัว');return true;
 }
 function createTower(x, y, hp = TOWER.hp, level=1, garrison=null) {
   const lv=Math.max(1,Math.min(5,level)),maxHp=TOWER_HP[lv-1];
@@ -1138,6 +1138,7 @@ function load() {
 addEventListener('beforeunload', () => { if (!S.night && !S.resetting) save(); }); // leaving by day keeps the day's shopping; leaving at night replays from dawn
 
 function tick(dt) {
+  if(!S.over&&shouldAutoHeal(S))useHallHeal(true);
   if(dragonTrial){
    const m=dragonTrial.m;
    // Safety net: a finished trial must always close, even if its cinematic is no longer running.
@@ -2163,7 +2164,7 @@ houseBonusCache=null; // the save may bring houses that change village bonuses
 // New villages start with a 500 Gold + 500 material kit so the first steps (hire, wall, tower) are doable right away.
 const STARTER_GOLD=500,STARTER_MATS=500;
 if (!resumed) { recruit('guard', true); recruit('archer', true); S.gold=STARTER_GOLD; addInventory(S.inventory,{livingMoss:STARTER_MATS}); save(); }
-tutorial=createTutorial({isNewVillage:!resumed});
+tutorial=createTutorial({isNewVillage:!resumed,onCloseModal:()=>{if(S.modal){S.modal=null;renderUi();}}});
 renderUi();
 setRuntimeZoomRange(mobileLayout.matches ? .26 : .45, 1.3); // portrait can pinch farther out to see the whole village
 // Loading screen: the engine writes stage messages into #loading; turn them into bar progress.

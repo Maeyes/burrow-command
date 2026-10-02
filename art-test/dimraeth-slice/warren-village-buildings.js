@@ -37,6 +37,12 @@ export function applyMonsterResourceBonus(s,loot,eligibleMaterials,extra={}){
  s.resourceMatBank=matTotal;
  return {gold:extraGold,materials:extraMaterials};
 }
+// Auto Heal fires the phase's single heal on its own once any standing bunny drops to this share of Max HP.
+export const AUTO_HEAL_AT=.5;
+export function shouldAutoHeal(s,phaseDay=s.day){
+ if(s[s.night?'nightHealDay':'dayHealDay']===phaseDay)return false;
+ return s.units.some(u=>!u.down&&u.hp>0&&u.maxHp>0&&u.hp/u.maxHp<=AUTO_HEAL_AT);
+}
 export function castWarrenHeal(s,maxHall,phaseDay=s.day){
  const key=s.night?'nightHealDay':'dayHealDay';
  if(s[key]===phaseDay)return null;
