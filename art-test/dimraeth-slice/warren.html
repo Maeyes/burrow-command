@@ -122,6 +122,14 @@
   .bc-tutorial[data-side="right"]::after{right:100%;top:var(--arrow-y);margin-top:-10px;border-right-color:#e8c26a}
   .bc-tutorial[data-side="top"]::after{top:100%;left:var(--arrow-x);margin-left:-10px;border-top-color:#e8c26a}
   .bc-tutorial[data-side="bottom"]::after{bottom:100%;left:var(--arrow-x);margin-left:-10px;border-bottom-color:#e8c26a}
+  /* Mobile: the thin gold ring vanished on the gold/cream buttons, so use a bright ring with a dark edge plus a bouncing arrow. */
+  @media (max-width:760px){
+    .bc-tut-target{outline:4px solid #fff27a!important;outline-offset:1px;animation:bc-tut-pulse-m .7s ease-in-out infinite alternate}
+    .bc-tut-target::after{content:'▼';position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);color:#fff27a;font-size:20px;line-height:1;text-shadow:0 0 3px #000,0 2px 4px #000;pointer-events:none;z-index:45;animation:bc-tut-bounce .6s ease-in-out infinite alternate}
+    #top .bc-tut-target::after,#clock.bc-tut-target::after{content:none}
+  }
+  @keyframes bc-tut-pulse-m{from{box-shadow:0 0 0 2px #1a1206,0 0 6px 2px #fff27a66}to{box-shadow:0 0 0 2px #1a1206,0 0 20px 8px #fff27aee}}
+  @keyframes bc-tut-bounce{to{transform:translate(-50%,-6px)}}
   @media (max-width:760px){.bc-tutorial{bottom:84px;font-size:12px;padding:10px 12px;width:min(320px,calc(100vw - 16px))}}
   @media (prefers-reduced-motion:reduce){.bc-tut-target{animation:none}}
   @keyframes bc-goal-pulse{to{box-shadow:0 0 14px #ff9b4a}}
@@ -987,7 +995,7 @@
   }
   @media(max-width:380px){.bc-relic-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
-  <script type="module" crossorigin src="/burrow-command/assets/warren-kYWdE7Dx.js"></script>
+  <script type="module" crossorigin src="/burrow-command/assets/warren-B2D0fdcu.js"></script>
   <link rel="stylesheet" crossorigin href="/burrow-command/assets/warren-BI6qrppq.css">
 </head>
 <body>
