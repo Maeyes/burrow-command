@@ -86,7 +86,7 @@ export function createTutorial({isNewVillage,isMobile=()=>matchMedia('(max-width
  }
  // Park the card right next to the target with an arrow pointing at it.
  function place(target){
-  const vw=innerWidth,vh=innerHeight,cw=card.offsetWidth,ch=card.offsetHeight,gap=14;
+  const vw=innerWidth,vh=innerHeight,cw=card.offsetWidth,ch=card.offsetHeight,gap=isMobile()?34:14;
   if(!target){card.dataset.side='';card.style.left='50%';card.style.top='';card.style.bottom='';card.style.transform='';return;}
   const r=target.getBoundingClientRect();let side,x,y;
   if(isMobile()){side=r.top>ch+gap+8?'top':'bottom';}

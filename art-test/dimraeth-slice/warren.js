@@ -372,6 +372,15 @@ function upgradeMagicCart(cart){
  skillFx?.pillar(cart.x,cart.y,{color:'#c999ff'});save();renderUi();return true;
 }
 function canMagicCartSpot(x,y,index=-1){return defenseSpot(x,y,'magicCart',index).ok;}
+// Touch screens have no hover, so placement starts with a ghost already parked on a valid spot.
+function suggestDefenseSpot(kind,index=-1){
+ for(let r=150;r<=700;r+=40)for(let i=0;i<16;i++){
+  const a=Math.PI*.5+i*Math.PI/8,x=CENTER.x+Math.cos(a)*r,y=CENTER.y+Math.sin(a)*r;
+  if(defenseSpot(x,y,kind,index).ok)return {x,y};
+ }
+ return null;
+}
+const touchPlacement=matchMedia('(pointer:coarse)');
 function relocateMagicCart(index,x,y){
  const cart=S.magicCarts[index];if(S.night||!cart||!canMagicCartSpot(x,y,index))return false;
  cart.x=x;cart.y=y;cart.actor.x=x-8;cart.actor.y=y-8;S.movingMagicCart=-1;S.towerMoveHover=null;
@@ -379,7 +388,7 @@ function relocateMagicCart(index,x,y){
 }
 function beginMagicCartMove(){
  if(S.night||S.selectedMagicCart<0||!S.magicCarts[S.selectedMagicCart])return false;
- S.movingMagicCart=S.selectedMagicCart;S.movingTower=-1;S.building=false;S.modal=null;renderUi();
+ S.movingMagicCart=S.selectedMagicCart;S.movingTower=-1;{const c=S.magicCarts[S.selectedMagicCart];S.towerMoveHover=c?{x:c.x,y:c.y}:null;}S.building=false;S.modal=null;renderUi();
  toast('เลือกพื้นว่างภายในแนวกำแพง · ห้ามทับวัตถุหรือประตู · Esc ยกเลิก');return true;
 }
 function updateMagicCarts(dt){
@@ -409,7 +418,7 @@ function relocateTower(index,x,y){
 }
 function beginTowerMove(){
  if(S.night||S.selectedTower<0||!S.towers[S.selectedTower])return false;
- S.movingTower=S.selectedTower;S.movingMagicCart=-1;S.building=false;S.modal=null;renderUi();
+ S.movingTower=S.selectedTower;S.movingMagicCart=-1;{const t=S.towers[S.selectedTower];S.towerMoveHover=t?{x:t.x,y:t.y}:null;}S.building=false;S.modal=null;renderUi();
  toast('เลือกพื้นว่างภายในแนวกำแพง · ห้ามทับวัตถุหรือประตู · Esc ยกเลิก');return true;
 }
 function upgradeForgeBuilding(){
@@ -1778,8 +1787,8 @@ document.body.addEventListener('click', e => {
   }
   else if(b.id==='fenceBuild'&&!S.night)upgradePerimeter();
   else if(b.dataset.gateSide&&!S.night)selectGate(b.dataset.gateSide);
-  else if (b.id === 'build'&&!S.night) { S.building = S.building==='tower'?false:'tower'; if(S.building&&mobileDrawer)closeMobileDrawer(); if (S.building) toast('คลิกพื้นในวงสีเหลืองเพื่อวางป้อม'); renderUi(); }
-  else if (b.id === 'buildMagicCart'&&!S.night) { S.building = S.building==='magicCart'?false:'magicCart'; if(S.building&&mobileDrawer)closeMobileDrawer(); if(S.building)toast('คลิกพื้นในวงสีเหลืองเพื่อวางรถยิงเวทย์');renderUi(); }
+  else if (b.id === 'build'&&!S.night) { S.building = S.building==='tower'?false:'tower'; if(S.building&&mobileDrawer)closeMobileDrawer(); if (S.building){S.towerMoveHover=suggestDefenseSpot('tower');toast(touchPlacement.matches?'แตะพื้นเพื่อย้ายป้อมสีเขียว · แตะป้อมอีกครั้งเพื่อวาง':'คลิกพื้นในวงสีเหลืองเพื่อวางป้อม');} renderUi(); }
+  else if (b.id === 'buildMagicCart'&&!S.night) { S.building = S.building==='magicCart'?false:'magicCart'; if(S.building&&mobileDrawer)closeMobileDrawer(); if(S.building){S.towerMoveHover=suggestDefenseSpot('magicCart');toast(touchPlacement.matches?'แตะพื้นเพื่อย้ายรถสีเขียว · แตะรถอีกครั้งเพื่อวาง':'คลิกพื้นในวงสีเหลืองเพื่อวางรถยิงเวทย์');}renderUi(); }
   else if (b.id === 'speed') { S.speed = S.speed === 1 ? 2 : 1; b.textContent = `⏩ x${S.speed}`; }
   else if (b.id === 'skip' && !S.night) S.clock = DAY_S - .1;
   else if (b.id === 'upgrade') upgradeWarren();
@@ -2077,11 +2086,13 @@ function updateWorldLabels(viewport){
 }
 
 setRuntimePlayerVisual(() => ({ image: null }));
-canvas.addEventListener('pointermove',e=>{if(S.building||S.movingTower>=0||S.movingMagicCart>=0||S.homeOpen){const hit=runtimePointerHit(e);if(S.homeOpen)S.homeHover=hit&&hit.idx>=0?{x:hit.x,y:hit.y}:null;else S.towerMoveHover=hit&&hit.idx>=0?{x:hit.x,y:hit.y}:null;}});
+canvas.addEventListener('pointermove',e=>{if(e.pointerType!=='mouse'&&!S.homeOpen)return;if(S.building||S.movingTower>=0||S.movingMagicCart>=0||S.homeOpen){const hit=runtimePointerHit(e);if(S.homeOpen)S.homeHover=hit&&hit.idx>=0?{x:hit.x,y:hit.y}:null;else S.towerMoveHover=hit&&hit.idx>=0?{x:hit.x,y:hit.y}:null;}});
 canvas.addEventListener('pointerleave',()=>{S.towerMoveHover=null;S.homeHover=null;});
 const onWorldTap=(hit,e) => {
   if (S.over || S.modal || S.itemDetailId || !hit || hit.idx < 0) return;
   if(S.homeOpen){if(!S.night){if(S.homeAction==='move'&&S.homeMovingId)moveHome(S.homeMovingId,hit.x,hit.y);else if(S.homeAction==='recover'&&S.homeStoredId)restoreRecoveryHome(hit.x,hit.y);else if(S.homeAction==='terrain')paintHomeTerrain(hit.x,hit.y);else if(S.homeAction==='waterfall')createHomeWaterfall(hit.x,hit.y);else{const found=homeObjectAt(hit.x,hit.y);if(found){S.homeSelectedId=S.homeSelectedId===found.id?null:found.id;S.homePane='decor';renderUi();}else{S.homeSelectedId=null;placeHome(hit.x,hit.y);}}}return;}
+  // Touch: first tap moves the ghost, tapping the ghost again confirms.
+  if(touchPlacement.matches&&!S.night&&(S.building||S.movingTower>=0||S.movingMagicCart>=0)&&(!S.towerMoveHover||dist(hit,S.towerMoveHover)>56)){S.towerMoveHover={x:hit.x,y:hit.y};renderUi();return;}
   if(S.movingTower>=0){relocateTower(S.movingTower,hit.x,hit.y);return;}
   if(S.movingMagicCart>=0){relocateMagicCart(S.movingMagicCart,hit.x,hit.y);return;}
   if(S.building==='tower'&&!S.night){placeTower(hit.x,hit.y);return;}
