@@ -1,0 +1,1 @@
+var e={frames:12,cell:160,source:`placeholder (tools inline PIL) - replace with fx-lab/mesh-bake.html export`};export{e as default};

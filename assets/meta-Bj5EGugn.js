@@ -1,0 +1,1 @@
+var e={frames:9,cell:128,source:`phantomBlades.png`,mode:`spinOut`,tool:`fx_animate.py`};export{e as default};

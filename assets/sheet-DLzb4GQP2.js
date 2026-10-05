@@ -1,0 +1,1 @@
+var e=`/burrow-command/assets/sheet-BPR7uVqF.png`;export{e as default};
